@@ -58,6 +58,6 @@ typings/
 .env
 
 # Compiled files
-application/dist/
-application/test/**/*.js
-application/source/**/*.js
+dist/
+test/**/*.js
+source/**/*.js
