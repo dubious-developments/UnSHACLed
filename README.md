@@ -1,6 +1,9 @@
 # UnSHACLed web application
 
-[![Build Status](https://travis-ci.org/dubious-developments/UnSHACLed.svg?branch=master)](https://travis-ci.org/dubious-developments/UnSHACLed)
+Operating system | Status
+---------------- | ------
+Linux and Mac OS X | [![Build Status](https://travis-ci.org/dubious-developments/UnSHACLed.svg?branch=master)](https://travis-ci.org/dubious-developments/UnSHACLed)
+Windows | [![Build status](https://ci.appveyor.com/api/projects/status/9jhin9m8rocfm0p4?svg=true)](https://ci.appveyor.com/project/jonathanvdc/unshacled)
 
 Hi there! UnSHACLed is a visual editor for SHACL, still in its early stages.
 
