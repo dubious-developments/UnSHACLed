@@ -18,7 +18,7 @@ install:
   - npm install -g gulp
 
 # Build scripts. These run after installation.
-build:
+build_script:
   # Compile sources.
   - gulp lint build build-test
 
