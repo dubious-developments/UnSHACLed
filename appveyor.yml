@@ -25,4 +25,4 @@ build_script:
 # Post-install test scripts.
 test_script:
   # run tests
-  - npm test
+  - gulp test
