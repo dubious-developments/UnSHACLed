@@ -1,3 +1,5 @@
 # UnSHACLed
 
-Open the `application` folder to see the web application's source code.
+Hi there! UnSHACLed is a visual editor for SHACL, still in its early stages.
+
+The `application` folder contains web application's source code.
