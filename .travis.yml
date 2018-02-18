@@ -3,6 +3,8 @@ node_js:
   - stable
 
 before_install:
+  # Install gulp.
+  - sudo npm install -g gulp
   # Install npm dependencies.
   - npm install
 
