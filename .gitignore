@@ -57,3 +57,7 @@ typings/
 # dotenv environment variables file
 .env
 
+# Compiled files
+dist/
+test/**/*.js
+source/**/*.js
