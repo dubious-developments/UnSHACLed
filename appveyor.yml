@@ -1,0 +1,28 @@
+# Based on the appveyor.yml example at
+# https://www.appveyor.com/docs/lang/nodejs-iojs/
+
+# Test against the latest version of this Node.js version
+environment:
+  nodejs_version: "6"
+
+# Install scripts. These runs after repo cloning.
+install:
+  # Get the latest stable version of Node.js or io.js
+  - ps: Install-Product node $env:nodejs_version
+  # Output useful info for debugging.
+  - node --version
+  - npm --version
+  # Install modules.
+  - npm install
+  # Install gulp.
+  - npm install -g gulp
+
+# Build scripts. These run after installation.
+build:
+  # Compile sources.
+  - gulp lint build build-test
+
+# Post-install test scripts.
+test_script:
+  # run tests
+  - npm test
