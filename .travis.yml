@@ -1,3 +1,15 @@
 language: node_js
 node_js:
-- stable
+  - stable
+
+before_install:
+  # Install npm dependencies.
+  - npm install
+
+install:
+  # Compile sources.
+  - gulp lint build
+
+script:
+  # Run the tests.
+  - gulp test
