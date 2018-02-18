@@ -10,7 +10,7 @@ before_install:
 
 install:
   # Compile sources.
-  - gulp lint build
+  - gulp lint build build-test
 
 script:
   # Run the tests.
