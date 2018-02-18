@@ -2,6 +2,11 @@ language: node_js
 node_js:
   - stable
 
+# Test on both Linux and Mac OS X
+os:
+  - linux
+  - osx
+
 before_install:
   # Install gulp.
   - npm install -g gulp
