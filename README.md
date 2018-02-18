@@ -1,5 +1,7 @@
 # UnSHACLed web application
 
+[![Build Status](https://travis-ci.org/dubious-developments/UnSHACLed.svg?branch=master)](https://travis-ci.org/dubious-developments/UnSHACLed)
+
 Hi there! UnSHACLed is a visual editor for SHACL, still in its early stages.
 
 ## Building UnSHACLed
