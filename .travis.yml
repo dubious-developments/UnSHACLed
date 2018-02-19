@@ -19,21 +19,19 @@ addons:
 jdk:
   - oraclejdk8
 
-before_install:
+install:
   # Install gulp.
   - npm install -g gulp
   # Install npm dependencies.
   - npm install
 
-install:
-  # Compile sources.
-  - gulp lint build build-test
-
 script:
-  # Run the tests.
-  - gulp test
   # Run SonarCloud, but only on Linux.
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sonar-scanner; fi
+  # Run the tests.
+  - gulp test
+  # Compile sources.
+  - gulp lint build build-test
 
 cache:
   directories:
