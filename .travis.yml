@@ -7,6 +7,18 @@ os:
   - linux
   - osx
 
+dist: trusty
+sudo: required
+
+addons:
+  sonarcloud:
+    organization: dubious-developments
+    token:
+      secure: $SONARCLOUD_KEY
+
+jdk:
+  - oraclejdk8
+
 before_install:
   # Install gulp.
   - npm install -g gulp
@@ -20,3 +32,13 @@ install:
 script:
   # Run the tests.
   - gulp test
+  # Run SonarCloud, but only on Linux.
+  - if [ $TRAVIS_OS_NAME -eq linux ]; sonar-scanner; fi
+
+cache:
+  directories:
+    - '$HOME/.sonar/cache'
+
+env:
+  global:
+    secure: iBp9wdVR5548N1je98RyDdaoAYrXA3+eNDZonGwdQx2Tl2TfNOJ96Updkttx5O55IttNbJVZ1YwGXjfcL+y/1hvbrOJwzoXzVIxhzUCX4FIC6B0xiJ2jTiWYn9r/eVvMbeNhc2FyS2eQKrP7snvi87xsI458mTdfJ0wx7Ly3nZtlp6R0aQj3e2C2IS/mrplgCBXeiz2ehApJLKC2RvNh9D42AGbwZXzoJwpgyj3dJRlx45WzB+xQI0N0VfawoYo5KZfXYNMLVXDUnUlK3pzNaeOBq+wnIsH4qlbd6eNOauZa54d0u7EZvEwfUI4+LC23w8tpkiGWET/feyVRqDUxcZU0weh0nf7Vv9f/16QWQhF5FYB8t696YX5gE3E74LoI/ugnKOxsLKwCzJxGMi93ifNVRkZy2oO/cXIvHfnaZHFD5zhWioeLhUvGZgQ7MUYEuN0DD6VsrV85oknBEYTdJpPW7fcMLEhW4JscrWf7mUDkI1e8mqH0Kw1YwZf2LaXzZ4SMxtbr4NEd3DQZ72uaPxupt8VvGWeO7X5zXGZw804wj/5Xu17GHKv1zXvlGCY1TvdVKuJ95Zokb6KyJBwdp+Kgb5r59naC94l+94gpVtWJr9ZhgJN8xTentFFTepxBn7M3lbxEcj7Og0rJIVmOlFcy6aTN2fYKMDY8r9VKUJw=
