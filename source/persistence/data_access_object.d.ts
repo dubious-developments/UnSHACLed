@@ -1,5 +1,7 @@
-interface DataAccessObject {
+interface DataAccessObjectInterface {
     insert: () => void;
     find: () => void;
-    list
+    listAll: () => void;
+    delete: () => void;
+    update: () => void;
 }
