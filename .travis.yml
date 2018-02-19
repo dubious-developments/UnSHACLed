@@ -33,7 +33,7 @@ script:
   # Run the tests.
   - gulp test
   # Run SonarCloud, but only on Linux.
-  - if [ $TRAVIS_OS_NAME -eq linux ]; sonar-scanner; fi
+  - if [ $TRAVIS_OS_NAME -eq linux ]; then sonar-scanner; fi
 
 cache:
   directories:
