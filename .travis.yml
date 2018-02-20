@@ -27,11 +27,11 @@ install:
 
 script:
   # Run the tests.
-  - gulp test
-  # Compile sources.
-  - gulp lint build build-test
+  - xvfb-run gulp test
   # Run SonarCloud, but only on Linux.
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sonar-scanner; fi
+  # Compile sources.
+  - gulp lint build
 
 cache:
   directories:
