@@ -27,13 +27,13 @@ install:
   - npm install
 
 script:
+  # Compile sources.
+  - gulp lint build
   # Run the tests.
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then XVFB_RUN=xvfb-run; fi
   - $XVFB_RUN gulp test
   # Run SonarCloud, but only on Linux.
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sonar-scanner -X; fi
-  # Compile sources.
-  - gulp lint build
 
 cache:
   directories:
