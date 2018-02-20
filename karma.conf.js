@@ -57,7 +57,12 @@ module.exports = function(config) {
                 // Chromium, which will cause the test suite to erroneously fail for users that
                 // have only Chromium installed. This is related to
                 // https://github.com/litixsoft/karma-detect-browsers/issues/22
-                let undesirables = ['PhantomJS', 'Chrome'];
+                //
+                // During CI builds, we'll just make sure Chrome's actually installed if
+                // karma-detect-browser advertises it.
+                let undesirables = process.env.CI == "true"
+                    ? ['PhantomJS']
+                    : ['PhantomJS', 'Chrome'];
 
                 // Remove undesirables if another browser has been detected.
                 for (let i = 0; i < undesirables.length; i++) {
