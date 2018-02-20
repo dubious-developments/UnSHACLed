@@ -13,9 +13,8 @@ var gulp        = require("gulp"),
     sourcemaps  = require("gulp-sourcemaps"),
     uglify      = require("gulp-uglify"),
     runSequence = require("run-sequence"),
-    mocha       = require("gulp-mocha"),
-    istanbul    = require("gulp-istanbul"),
-    browserSync = require('browser-sync').create();
+    browserSync = require('browser-sync').create(),
+    KarmaServer = require('karma').Server;
     
 //******************************************************************************
 //* LINT
@@ -57,18 +56,11 @@ gulp.task("build-test", function() {
 //******************************************************************************
 //* TEST
 //******************************************************************************
-gulp.task("istanbul:hook", function() {
-    return gulp.src(['source/**/*.js'])
-        // Covering files
-        .pipe(istanbul())
-        // Force `require` to return covered files
-        .pipe(istanbul.hookRequire());
-});
-
-gulp.task("test", ["istanbul:hook"], function() {
-    return gulp.src('test/**/*.test.js')
-        .pipe(mocha({ui: 'bdd'}))
-        .pipe(istanbul.writeReports());
+gulp.task("test", function(done) {
+    new KarmaServer({
+        configFile: __dirname + '/karma.conf.js',
+        singleRun: true
+    }, done).start();
 });
 
 //******************************************************************************

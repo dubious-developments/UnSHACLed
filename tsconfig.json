@@ -1,8 +1,8 @@
 {
     "compilerOptions": {
         "target": "es5",
-        "lib": ["es6", "dom"],
-        "types": ["mocha"],
+        "lib": ["es6", "dom",],
+        "types": ["jasmine"],
         "sourceMap": true,
         "module": "commonjs",
         "moduleResolution": "node",
