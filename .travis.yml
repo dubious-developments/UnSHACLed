@@ -26,12 +26,12 @@ install:
   - npm install
 
 script:
-  # Run SonarCloud, but only on Linux.
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sonar-scanner; fi
   # Run the tests.
   - gulp test
   # Compile sources.
   - gulp lint build build-test
+  # Run SonarCloud, but only on Linux.
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sonar-scanner; fi
 
 cache:
   directories:
