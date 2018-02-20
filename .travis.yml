@@ -15,6 +15,7 @@ addons:
     organization: dubious-developments
     token:
       secure: $SONARCLOUD_KEY
+  firefox: "latest"
 
 jdk:
   - oraclejdk8
