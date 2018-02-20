@@ -7,6 +7,8 @@ environment:
 
 # Install scripts. These runs after repo cloning.
 install:
+  # Install Chrome for testing purposes.
+  - choco install googlechrome
   # Get the latest stable version of Node.js or io.js
   - ps: Install-Product node $env:nodejs_version
   # Output useful info for debugging.
