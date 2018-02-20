@@ -48,9 +48,9 @@ module.exports = function(config) {
                 // Add IE Emulation
                 var result = availableBrowser;
 
-                if (availableBrowser.indexOf('IE') > -1) {
-                    result.push('IE9');
-                }
+                // if (availableBrowser.indexOf('IE') > -1) {
+                //     result.push('IE9');
+                // }
 
                 // A list of browsers we'd rather not use if we have at least one alternative.
                 // This list includes Chrome because karma-detect-browser confuses Chrome and
