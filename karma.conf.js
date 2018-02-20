@@ -18,7 +18,7 @@ module.exports = function(config) {
         }
         }
     },
-    reporters: ["dots","karma-typescript"],
+    reporters: ["coverage", "dots", "karma-typescript"],
     browsers: ["Firefox"],
     singleRun: true });
 };
