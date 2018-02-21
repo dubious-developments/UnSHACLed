@@ -1,4 +1,3 @@
-import { expect } from "chai";
 import Greeter from "../source/entities/greeter";
 
 describe("Greeter Class", () => {
@@ -6,7 +5,7 @@ describe("Greeter Class", () => {
     it("Should set msg when an instance is created", () => {
         let expected = "world!";
         let greater = new Greeter(expected);
-        expect(greater.greeting).eql(expected);
+        expect(greater.greeting).toEqual(expected);
     });
 
     it("Should greet", () => {
@@ -14,7 +13,7 @@ describe("Greeter Class", () => {
         let greater = new Greeter(greet);
         let actual = greater.greet();
         let expected = `Hello, ${greet}`;
-        expect(actual).eql(expected);
+        expect(actual).toEqual(expected);
     });
 
 });
