@@ -1,7 +1,6 @@
 interface DataAccessObjectInterface {
-    insert: () => void;
-    find: () => void;
-    listAll: () => void;
-    delete: () => void;
-    update: () => void;
+    insert: (uri: string) => void;
+    find: (uri: string) => void;
+    delete: (uri: string) => void;
+    update: (uri: string) => void;
 }
