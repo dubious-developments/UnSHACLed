@@ -8,7 +8,7 @@ export class Model {
     /**
      * The task processor for the model.
     */
-   public tasks: TaskProcessor<ModelData, ModelTaskMetadata>;
+    public tasks: TaskProcessor<ModelData, ModelTaskMetadata>;
 
     /**
      * Creates an empty model.
