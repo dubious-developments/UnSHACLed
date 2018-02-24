@@ -17,7 +17,7 @@ describe("ModelTaskMetadata Class", () => {
 
 describe("Model Class", () => {
     it("can be created", () => {
-        new Model()
+        new Model().registerObserver((changeBuf) => []);
     });
 
     it("should notify observers", () => {
