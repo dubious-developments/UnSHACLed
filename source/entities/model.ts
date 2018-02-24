@@ -20,9 +20,12 @@ export class Model {
     private observers: ModelObserver[];
 
     /**
-     * Creates an empty model.
+     * Creates a model.
      */
-    public constructor(data: ModelData) {
+    public constructor(data?: ModelData) {
+        if (!data) {
+            data = new ModelData();
+        }
         this.tasks = new TaskProcessor<ModelData, ModelTaskMetadata>(
             data,
             new FifoTaskQueue<ModelData, ModelTaskMetadata>(),
@@ -88,36 +91,6 @@ export class ModelData {
         let result = this.changeBuffer;
         this.changeBuffer = new Collections.Set<ModelComponent>();
         return result;
-    }
-}
-
-/**
- * Describes the data graph component of the model.
-*/
-export class ModelDataGraph {
-    /**
-     * Creates an empty model data graph that uses a function
-     * to signal changes to the graph.
-     */
-    public constructor(
-        private dataGraph: any,
-        private signalWrite: () => void) {
-    }
-
-    /**
-     * Gets the RDF graph wrapped by this object.
-     */
-    public get graph(): any {
-        return this.dataGraph;
-    }
-
-    /**
-     * Sets the RDF graph wrapped by this object.
-     */
-    public set graph(v: any) {
-        this.dataGraph = v;
-        // The model has changed. Let the rest of the world know.
-        this.signalWrite();
     }
 }
 
