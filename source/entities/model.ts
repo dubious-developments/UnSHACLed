@@ -1,11 +1,11 @@
 import * as Collections from "typescript-collections";
-import { TaskProcessor, ProcessorTask } from "./taskProcessor";
+import { TaskProcessor, ProcessorTask, FifoTaskQueue } from "./taskProcessor";
 
 /**
  * A model observer: a function that takes a change set as input
  * and produces a list of tasks to process as output.
  */
-type ModelObserver = (changeSet: Collections.Set<ModelComponent>)
+type ModelObserver = (changeBuffer: Collections.Set<ModelComponent>)
     => Array<ProcessorTask<ModelData, ModelTaskMetadata>>;
 
 /**
@@ -22,9 +22,12 @@ export class Model {
     /**
      * Creates an empty model.
      */
-    public constructor(initialDataGraph: ModelDataGraph) {
+    public constructor(data: ModelData) {
         this.tasks = new TaskProcessor<ModelData, ModelTaskMetadata>(
-            new ModelData(initialDataGraph));
+            data,
+            new FifoTaskQueue<ModelData, ModelTaskMetadata>(),
+            (task) => task,
+            (task) => this.notifyObservers(data.drainChangeBuffer()));
         this.observers = [];
     }
 
@@ -34,22 +37,57 @@ export class Model {
     public registerObserver(observer: ModelObserver) {
         this.observers.push(observer);
     }
+
+    private notifyObservers(changeBuffer: Collections.Set<ModelComponent>): void {
+        this.observers.forEach(element => {
+            element(changeBuffer).forEach(newTask => {
+                this.tasks.schedule(newTask);
+            });
+        });
+    }
 }
 
 /**
  * Contains a mutable view of a model.
 */
 export class ModelData {
+    private changeBuffer: Collections.Set<ModelComponent>;
+
     /**
-     * The data graph that is at the core of this model.
+     * A dictionary that contains all of the model's components.
      */
-    public readonly dataGraph: ModelDataGraph;
+    private components: Collections.Dictionary<ModelComponent, any>;
 
     /**
      * Creates an empty model.
-    */
-    public constructor(initialDataGraph: ModelDataGraph) {
-        this.dataGraph = new ModelDataGraph(initialDataGraph, () => { });
+     */
+    public constructor() {
+        this.changeBuffer = new Collections.Set<ModelComponent>();
+        this.components = new Collections.Dictionary<ModelComponent, any>();
+    }
+
+    /**
+     * Gets a particular component of this model.
+     */
+    public getComponent<T>(component: ModelComponent): T {
+        return this.components[component];
+    }
+
+    /**
+     * Sets a particular component of this model.
+     */
+    public setComponent<T>(component: ModelComponent, value: T): void {
+        this.components[component] = value;
+        this.changeBuffer.add(component);
+    }
+
+    /**
+     * Drains the model's change buffer.
+     */
+    public drainChangeBuffer(): Collections.Set<ModelComponent> {
+        let result = this.changeBuffer;
+        this.changeBuffer = new Collections.Set<ModelComponent>();
+        return result;
     }
 }
 

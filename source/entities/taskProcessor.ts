@@ -1,22 +1,44 @@
 import * as Collections from "typescript-collections";
 
+type TaskStartedCallback<TData, TTaskMetadata> =
+    (task: ProcessorTask<TData, TTaskMetadata>) => any;
+
+type TaskCompletedCallback =
+    (taskInfo: any) => void;
+
 /**
  * An object that executes tasks on a piece of data.
 */
 export class TaskProcessor<TData, TTaskMetadata> {
     private tasks: TaskQueue<TData, TTaskMetadata>;
     private data: TData;
+    private onTaskStarted: TaskStartedCallback<TData, TTaskMetadata>;
+    private onTaskCompleted: TaskCompletedCallback;
 
     /**
      * Creates a task processor that manages a particular piece of data
      * and uses a particular task queue.
     */
-    public constructor(data: TData, tasks?: TaskQueue<TData, TTaskMetadata>) {
+    public constructor(
+        data: TData,
+        tasks?: TaskQueue<TData, TTaskMetadata>,
+        onTaskStarted?: TaskStartedCallback<TData, TTaskMetadata>,
+        onTaskCompleted?: TaskCompletedCallback) {
         this.data = data;
         if (tasks) {
             this.tasks = tasks;
         } else {
             this.tasks = new FifoTaskQueue<TData, TTaskMetadata>();
+        }
+        if (onTaskStarted) {
+            this.onTaskStarted = onTaskStarted;
+        } else {
+            this.onTaskStarted = (task) => { };
+        }
+        if (onTaskCompleted) {
+            this.onTaskCompleted = onTaskCompleted;
+        } else {
+            this.onTaskCompleted = (info) => { };
         }
     }
 
@@ -32,7 +54,9 @@ export class TaskProcessor<TData, TTaskMetadata> {
      */
     public processTask(): void {
         let task = this.tasks.dequeue();
+        let info = this.onTaskStarted(task);
         task.execute(this.data);
+        this.onTaskCompleted(info);
     }
 
     /**
