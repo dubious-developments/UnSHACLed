@@ -33,12 +33,12 @@ export class TaskProcessor<TData, TTaskMetadata> {
         if (onTaskStarted) {
             this.onTaskStarted = onTaskStarted;
         } else {
-            this.onTaskStarted = (task) => { };
+            this.onTaskStarted = (task) => undefined;
         }
         if (onTaskCompleted) {
             this.onTaskCompleted = onTaskCompleted;
         } else {
-            this.onTaskCompleted = (info) => { };
+            this.onTaskCompleted = (info) => undefined;
         }
     }
 

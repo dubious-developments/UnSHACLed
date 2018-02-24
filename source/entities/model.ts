@@ -10,14 +10,14 @@ type ModelObserver = (changeBuffer: Collections.Set<ModelComponent>)
 
 /**
  * Models the data handled by the UnSHACLed application.
-*/
+ */
 export class Model {
-    private observers: ModelObserver[];
-
     /**
      * The task processor for the model.
      */
     public readonly tasks: TaskProcessor<ModelData, ModelTaskMetadata>;
+
+    private observers: ModelObserver[];
 
     /**
      * Creates an empty model.
@@ -123,14 +123,14 @@ export class ModelDataGraph {
 
 /**
  * An enumeration of components in the model.
-*/
+ */
 export enum ModelComponent {
     DataGraph,
 }
 
 /**
  * Metadata for tasks that are executed on the model.
-*/
+ */
 export class ModelTaskMetadata {
     public constructor(
         public readSet: Collections.Set<ModelComponent>,
