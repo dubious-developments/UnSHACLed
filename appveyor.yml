@@ -9,7 +9,7 @@ environment:
 install:
   # Install Chrome and Opera for testing purposes.
   # Firefox should already be installed.
-  - choco install googlechrome
+  - choco install --ignore-checksum googlechrome
   - choco install opera
   # Get the latest stable version of Node.js or io.js
   - ps: Install-Product node $env:nodejs_version
