@@ -20,6 +20,7 @@
   "devDependencies": {
     "@types/jasmine": "^2.8.6",
     "@types/jquery": "^2.0.33",
+    "@types/node": "^9.4.6",
     "browser-sync": "^2.17.3",
     "browserify": "^14.0.0",
     "gulp": "^3.9.1",

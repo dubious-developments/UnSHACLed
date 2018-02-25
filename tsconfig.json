@@ -2,7 +2,7 @@
     "compilerOptions": {
         "target": "es5",
         "lib": ["es6", "dom"],
-        "types": ["jasmine"],
+        "types": ["jasmine", "node"],
         "sourceMap": true,
         "module": "commonjs",
         "moduleResolution": "node",
