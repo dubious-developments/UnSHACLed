@@ -81,3 +81,4 @@ src/**/*.js# See https://help.github.com/ignore-files/ for more about ignoring f
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+src/**/*.js

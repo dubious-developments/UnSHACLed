@@ -24,7 +24,7 @@ gulp.task("lint", function() {
     var config =  { formatter: "verbose", emitError: (process.env.CI) ? true : false };
     
     return gulp.src([
-        "source/**/**.ts",
+        "src/**/**.ts",
         "test/**/**.test.ts"
     ])
     .pipe(tslint(config))
@@ -39,10 +39,10 @@ var tsTestProject = tsc.createProject("tsconfig.json");
 
 gulp.task("build-test", function() {
     return gulp.src([
-            "source/**/**.ts",
+            "src/**/**.ts",
             "test/**/**.test.ts",
             "typings/main.d.ts/",
-            "source/interfaces/interfaces.d.ts"],
+            "src/interfaces/interfaces.d.ts"],
             { base: "." }
         )
         .pipe(tsTestProject())
@@ -69,7 +69,7 @@ gulp.task("test", function(done) {
 gulp.task("build", function() {
   
     var libraryName = "unshacled";
-    var mainTsFilePath = "source/main.ts";
+    var mainTsFilePath = "src/App.tsx";
     var outputFolder   = "dist/";
     var outputFileName = libraryName + ".min.js";
 
@@ -100,7 +100,7 @@ gulp.task("watch", ["default"], function () {
         server: "."
     });
     
-    gulp.watch([ "source/**/**.ts", "test/**/*.ts"], ["default"]);
+    gulp.watch([ "src/**/**.ts", "test/**/*.ts"], ["default"]);
     gulp.watch("dist/*.js").on('change', browserSync.reload); 
 });
 

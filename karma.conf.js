@@ -2,7 +2,7 @@ module.exports = function(config) {
     config.set({
         frameworks: ["jasmine", "karma-typescript", "detectBrowsers"],
         files: [
-            { pattern: "source/**/*.ts" },
+            { pattern: "src/**/*.ts" },
             { pattern: "test/**/*.ts" }
         ],
 
