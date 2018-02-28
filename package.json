@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "gulp-run": "^1.7.1",
     "jquery": "^3.1.1",
     "material-ui": "^0.20.0",
     "react": "^16.2.0",
@@ -14,7 +15,7 @@
   "scripts": {
     "start": "react-scripts-ts start",
     "build": "react-scripts-ts build",
-    "test": "react-scripts-ts test --env=jsdom",
+    "test": "gulp test",
     "eject": "react-scripts-ts eject"
   },
   "devDependencies": {
