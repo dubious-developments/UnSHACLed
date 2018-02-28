@@ -4,7 +4,7 @@ import Divider from 'material-ui/Divider';
 import Subheader from 'material-ui/Subheader';
 import Add from 'material-ui/svg-icons/content/add';
 
-const ListExampleSimple = () => (
+const Sidebar = () => (
     <div>
         <List>
             <Subheader>SHACL</Subheader>
@@ -27,4 +27,4 @@ const ListExampleSimple = () => (
     </div>
 );
 
-export default ListExampleSimple;
+export default Sidebar;

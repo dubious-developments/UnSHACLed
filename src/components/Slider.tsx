@@ -2,7 +2,7 @@ import * as React from 'react';
 import '../style/App.css';
 import Slider from 'material-ui/Slider';
 
-class Sidebar extends React.Component {
+class SliderClass extends React.Component {
     render() {
         return (
             <div>
@@ -13,4 +13,4 @@ class Sidebar extends React.Component {
     }
 }
 
-export default Sidebar;
+export default SliderClass;
