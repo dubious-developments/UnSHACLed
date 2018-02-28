@@ -26,6 +26,7 @@ gulp.task("lint", function() {
     
     return gulp.src([
         "src/**/**.ts",
+        "src/**/**.tsx",
         "test/**/**.test.ts"
     ])
     .pipe(tslint(config))
@@ -41,6 +42,7 @@ var tsTestProject = tsc.createProject("tsconfig.json");
 gulp.task("build-test", function() {
     return gulp.src([
             "src/**/**.ts",
+            "src/**/**.tsx",
             "test/**/**.test.ts",
             "typings/main.d.ts/",
             "src/interfaces/interfaces.d.ts"],
