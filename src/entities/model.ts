@@ -73,14 +73,14 @@ export class ModelData {
      * Gets a particular component of this model.
      */
     public getComponent<T>(component: ModelComponent): T {
-        return this.components[component];
+        return this.components.getValue(component);
     }
 
     /**
      * Sets a particular component of this model.
      */
     public setComponent<T>(component: ModelComponent, value: T): void {
-        this.components[component] = value;
+        this.components.setValue(component, value);
         this.changeBuffer.add(component);
     }
 

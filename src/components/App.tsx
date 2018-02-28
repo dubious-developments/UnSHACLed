@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import '../style/App.css';
 import AppBar from 'material-ui/AppBar';
 import Slider from './Slider';
@@ -9,7 +9,7 @@ import RaisedButton from 'material-ui/RaisedButton';
 // hotfix for navbar
 const styles = {
     appBar: {
-        flexWrap: 'wrap',
+        flexWrap: "wrap",
     },
     floatRight: {
         float: "right",
@@ -37,7 +37,7 @@ class App extends React.Component<any, any> {
         <div>
             <AppBar
                 title="UnSHACLed"
-                style={styles.appBar}
+                style={{flexWrap: "wrap"}}
                 iconClassNameRight="muidocs-icon-navigation-expand-more"
                 onLeftIconButtonClick={this.handleToggle}
             >
