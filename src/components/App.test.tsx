@@ -9,5 +9,6 @@ it('renders without crashing', () => {
   ReactDOM.render(
     <MuiThemeProvider muiTheme={muiTheme}>
       <App />
-    </MuiThemeProvider>, div);
+    </MuiThemeProvider>,
+    div);
 });
