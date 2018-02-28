@@ -1,20 +1,20 @@
 import * as React from 'react';
 import '../style/App.css';
 import AppBar from 'material-ui/AppBar';
-import Tabs from 'material-ui/Tabs';
-import Tab from 'material-ui/Tabs/Tab';
+import RaisedButton from 'material-ui/RaisedButton';
 
 // hotfix for navbar
 const styles = {
     appBar: {
         flexWrap: 'wrap',
     },
-    tabs: {
-        width: '50%',
+    floatRight: {
+        float: "right",
     },
 };
 
 class App extends React.Component {
+    allowedExtensions = ".n3,.ttl,.rdf";
   render() {
     return (
         <div>
@@ -23,17 +23,23 @@ class App extends React.Component {
                 style={styles.appBar}
                 iconClassNameRight="muidocs-icon-navigation-expand-more"
             >
-                <Tabs style={styles.tabs}>
-                    <Tab label="import Project"/>
-                    <Tab label="save Project"/>
-                    <Tab label="import Graph"/>
-                    <Tab label="save Graph"/>
-                </Tabs>
+                <div style={styles.floatRight}>
+                    <RaisedButton primary={true} label="import Project"/>
+                    <RaisedButton primary={true} label="save Project"/>
+                    <RaisedButton primary={true} label="import Graph" onClick={this.uploadFileButton} />
+                    <input type="file" id="importGraph" style={{"display" : "none"}} accept={this.allowedExtensions} />
+                    <RaisedButton primary={true} label="save Graph"/>
+                </div>
             </AppBar>
 
         </div>
     );
   }
+
+    uploadFileButton() {
+        var input = document.getElementById("importGraph");
+        input.click();
+    }
 }
 
 export default App;
