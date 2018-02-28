@@ -1,4 +1,5 @@
 import {Parser} from "./parser";
+import {Uri} from "./uri";
 
 export class FileDAO implements DataAccessObjectInterface {
     // works on the granularity of entire graphs!
