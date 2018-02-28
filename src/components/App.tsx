@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import '../style/App.css';
 import AppBar from 'material-ui/AppBar';
 import Slider from './Slider';
