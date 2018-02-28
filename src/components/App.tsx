@@ -17,18 +17,18 @@ const styles = {
     },
 };
 
-class App extends React.Component {
+class App extends React.Component{
 
     constructor(props: string) {
         super(props);
         this.state = {open: true};
     }
 
-/*    handleToggle(): void {
+    handleToggle(): void {
         this.setState(prevState => ({
             open: !prevState.open
         }));
-    }*/
+    }
 
   render() {
     return (
@@ -37,7 +37,6 @@ class App extends React.Component {
                 title="UnSHACLed"
                 style={styles.appBar}
                 iconClassNameRight="muidocs-icon-navigation-expand-more"
-
             >
                 <Drawer
                     width={220}
