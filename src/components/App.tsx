@@ -6,18 +6,21 @@ import Tab from 'material-ui/Tabs/Tab';
 import Slider from './Slider';
 import Drawer from 'material-ui/Drawer';
 import SideBar from './Sidebar';
+import RaisedButton from 'material-ui/RaisedButton';
 
 // hotfix for navbar
 const styles = {
     appBar: {
         flexWrap: 'wrap',
     },
-    tabs: {
-        width: '50%',
+    floatRight: {
+        float: "right",
     },
 };
 
 class App extends React.Component<any, any> {
+
+    allowedExtensions = ".n3,.ttl,.rdf";
 
     constructor(props: string) {
         super(props);
@@ -57,6 +60,13 @@ class App extends React.Component<any, any> {
                     <Tab label="save Graph"/>
                 </Tabs>
 
+                <div style={styles.floatRight}>
+                    <RaisedButton primary={true} label="import Project"/>
+                    <RaisedButton primary={true} label="save Project"/>
+                    <RaisedButton primary={true} label="import Graph" onClick={this.uploadFileButton} />
+                    <input type="file" id="importGraph" style={{"display" : "none"}} accept={this.allowedExtensions} />
+                    <RaisedButton primary={true} label="save Graph"/>
+                </div>
             </AppBar>
 
             <div className="footer">
@@ -65,6 +75,11 @@ class App extends React.Component<any, any> {
         </div>
     );
   }
+
+    uploadFileButton() {
+        var input = document.getElementById("importGraph");
+        input.click();
+    }
 }
 
 export default App;
