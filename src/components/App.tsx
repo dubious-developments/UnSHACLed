@@ -17,11 +17,12 @@ const styles = {
     },
 };
 
-class App extends React.Component {
+class App extends React.Component<any, any> {
 
     constructor(props: string) {
         super(props);
         this.state = {open: false};
+        this.handleToggle = this.handleToggle.bind(this);
     }
 
     handleToggle(): void {
@@ -42,9 +43,10 @@ class App extends React.Component {
                 <Drawer
                     width={220}
                     docked={false}
-                    open={true}
+                    open={this.state.open}
+                    onRequestChange={(open) => this.setState({open})}
                 >
-                    <AppBar/>
+                    <AppBar onLeftIconButtonClick={this.handleToggle}/>
                     <SideBar/>
                 </Drawer>
 
