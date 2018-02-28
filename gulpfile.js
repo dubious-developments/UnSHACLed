@@ -14,8 +14,9 @@ var gulp        = require("gulp"),
     uglify      = require("gulp-uglify"),
     runSequence = require("run-sequence"),
     browserSync = require('browser-sync').create(),
-    KarmaServer = require('karma').Server;
-    
+    KarmaServer = require('karma').Server,
+    run         = require('gulp-run');
+
 //******************************************************************************
 //* LINT
 //******************************************************************************
@@ -25,6 +26,7 @@ gulp.task("lint", function() {
     
     return gulp.src([
         "src/**/**.ts",
+        "src/**/**.tsx",
         "test/**/**.test.ts"
     ])
     .pipe(tslint(config))
@@ -40,6 +42,7 @@ var tsTestProject = tsc.createProject("tsconfig.json");
 gulp.task("build-test", function() {
     return gulp.src([
             "src/**/**.ts",
+            "src/**/**.tsx",
             "test/**/**.test.ts",
             "typings/main.d.ts/",
             "src/interfaces/interfaces.d.ts"],
@@ -67,28 +70,7 @@ gulp.task("test", function(done) {
 //* BUILD DEV
 //******************************************************************************
 gulp.task("build", function() {
-  
-    var libraryName = "unshacled";
-    var mainTsFilePath = "src/components/App.tsx";
-    var outputFolder   = "dist/";
-    var outputFileName = libraryName + ".min.js";
-
-    var bundler = browserify({
-        debug: true,
-        standalone : libraryName
-    });
-    
-    return bundler
-        .add(mainTsFilePath)
-        .plugin(tsify, { noImplicitAny: true })
-        .bundle()
-        .on('error', function (error) { console.error(error.toString()); })
-        .pipe(source(outputFileName))
-        .pipe(buffer())
-        .pipe(sourcemaps.init({ loadMaps: true }))        
-        .pipe(uglify())
-        .pipe(sourcemaps.write("."))
-        .pipe(gulp.dest(outputFolder));
+    return run('react-scripts-ts build').exec();
 });
 
 //******************************************************************************
