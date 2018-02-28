@@ -17,11 +17,11 @@ const styles = {
     },
 };
 
-class App extends React.Component{
+class App extends React.Component {
 
     constructor(props: string) {
         super(props);
-        this.state = {open: true};
+        this.state = {open: false};
     }
 
     handleToggle(): void {
@@ -37,6 +37,7 @@ class App extends React.Component{
                 title="UnSHACLed"
                 style={styles.appBar}
                 iconClassNameRight="muidocs-icon-navigation-expand-more"
+                onLeftIconButtonClick={this.handleToggle}
             >
                 <Drawer
                     width={220}
