@@ -5,6 +5,7 @@ import Slider from './Slider';
 import Drawer from 'material-ui/Drawer';
 import SideBar from './Sidebar';
 import RaisedButton from 'material-ui/RaisedButton';
+import Login from './Login';
 
 // hotfix for navbar
 const styles = {
@@ -22,7 +23,10 @@ class App extends React.Component<any, any> {
 
     constructor(props: string) {
         super(props);
-        this.state = {open: false};
+        this.state = {
+            open: false,
+            loggedIn: false
+        };
         this.handleToggle = this.handleToggle.bind(this);
     }
 
@@ -32,40 +36,51 @@ class App extends React.Component<any, any> {
         }));
     }
 
-  render() {
-    return (
-        <div>
-            <AppBar
-                title="UnSHACLed"
-                style={styles.appBar}
-                iconClassNameRight="muidocs-icon-navigation-expand-more"
-                onLeftIconButtonClick={this.handleToggle}
-            >
-                <Drawer
-                    width={220}
-                    docked={false}
-                    open={this.state.open}
-                    onRequestChange={(open) => this.setState({open})}
-                >
-                    <AppBar onLeftIconButtonClick={this.handleToggle}/>
-                    <SideBar/>
-                </Drawer>
+    render() {
+        if (!this.state.loggedIn) {
+            return(
+                <Login/>
+            );
+        } else {
+            return (
+                <div>
+                    <AppBar
+                        title="UnSHACLed"
+                        style={styles.appBar}
+                        iconClassNameRight="muidocs-icon-navigation-expand-more"
+                        onLeftIconButtonClick={this.handleToggle}
+                    >
+                        <Drawer
+                            width={220}
+                            docked={false}
+                            open={this.state.open}
+                            onRequestChange={(open) => this.setState({open})}
+                        >
+                            <AppBar onLeftIconButtonClick={this.handleToggle}/>
+                            <SideBar/>
+                        </Drawer>
 
-                <div style={styles.floatRight}>
-                    <RaisedButton primary={true} label="import Project"/>
-                    <RaisedButton primary={true} label="save Project"/>
-                    <RaisedButton primary={true} label="import Graph" onClick={this.uploadFileButton} />
-                    <input type="file" id="importGraph" style={{"display" : "none"}} accept={this.allowedExtensions} />
-                    <RaisedButton primary={true} label="save Graph"/>
+                        <div style={styles.floatRight}>
+                            <RaisedButton primary={true} label="import Project"/>
+                            <RaisedButton primary={true} label="save Project"/>
+                            <RaisedButton primary={true} label="import Graph" onClick={this.uploadFileButton}/>
+                            <input
+                                type="file"
+                                id="importGraph"
+                                style={{"display" : "none"}}
+                                accept={this.allowedExtensions}
+                            />
+                            <RaisedButton primary={true} label="save Graph"/>
+                        </div>
+                    </AppBar>
+
+                    <div className="footer">
+                        <Slider/>
+                    </div>
                 </div>
-            </AppBar>
-
-            <div className="footer">
-                <Slider/>
-            </div>
-        </div>
-    );
-  }
+            );
+        }
+    }
 
     uploadFileButton() {
         var input = document.getElementById("importGraph");
