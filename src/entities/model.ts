@@ -37,7 +37,7 @@ export class Model {
     /**
      * Registers an observer with the model.
      */
-    public registerObserver(observer: ModelObserver) {
+    public registerObserver(observer: ModelObserver): void {
         this.observers.push(observer);
     }
 
