@@ -1,6 +1,6 @@
-import { ModelTaskMetadata, ModelComponent, Model, ModelData } from "../source/entities/model";
+import { ModelTaskMetadata, ModelComponent, Model, ModelData } from "../src/entities/model";
 import { Set } from "typescript-collections";
-import { ProcessorTask } from "../source/entities/taskProcessor";
+import { ProcessorTask } from "../src/entities/taskProcessor";
 
 let graphReadSet = new Set<ModelComponent>();
 graphReadSet.add(ModelComponent.DataGraph);

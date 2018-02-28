@@ -1,4 +1,4 @@
-import * as TaskProcessor from "../source/entities/taskProcessor";
+import * as TaskProcessor from "../src/entities/taskProcessor";
 
 class NumberBox {
     public constructor(public num: number) {
