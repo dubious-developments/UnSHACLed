@@ -3,6 +3,7 @@ import '../style/App.css';
 import AppBar from 'material-ui/AppBar';
 import Tabs from 'material-ui/Tabs';
 import Tab from 'material-ui/Tabs/Tab';
+import Slider from './Slider';
 
 // hotfix for navbar
 const styles = {
@@ -29,8 +30,11 @@ class App extends React.Component {
                     <Tab label="import Graph"/>
                     <Tab label="save Graph"/>
                 </Tabs>
-            </AppBar>
 
+            </AppBar>
+            <div className="footer">
+                <Slider/>
+            </div>
         </div>
     );
   }
