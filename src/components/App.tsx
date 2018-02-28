@@ -1,8 +1,6 @@
 import * as React from 'react';
 import '../style/App.css';
 import AppBar from 'material-ui/AppBar';
-import Tabs from 'material-ui/Tabs';
-import Tab from 'material-ui/Tabs/Tab';
 import Slider from './Slider';
 import Drawer from 'material-ui/Drawer';
 import SideBar from './Sidebar';
@@ -52,13 +50,6 @@ class App extends React.Component<any, any> {
                     <AppBar onLeftIconButtonClick={this.handleToggle}/>
                     <SideBar/>
                 </Drawer>
-
-                <Tabs style={styles.tabs}>
-                    <Tab label="import Project"/>
-                    <Tab label="save Project"/>
-                    <Tab label="import Graph"/>
-                    <Tab label="save Graph"/>
-                </Tabs>
 
                 <div style={styles.floatRight}>
                     <RaisedButton primary={true} label="import Project"/>
