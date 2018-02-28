@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
     "outDir": "build/dist",
+    "baseUrl": ".",
     "module": "esnext",
     "target": "es5",
-	"types": ["jasmine", "node"],
+	  "types": ["jasmine", "node"],
     "lib": ["es6", "dom"],
     "sourceMap": true,
     "allowJs": true,
@@ -15,7 +16,7 @@
     "noImplicitAny": false,
     "strictNullChecks": false,
     "suppressImplicitAnyIndexErrors": false,
-    "noUnusedLocals": true
+    "noUnusedLocals": false
   },
   "exclude": [
     "node_modules",

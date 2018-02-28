@@ -69,7 +69,7 @@ gulp.task("test", function(done) {
 gulp.task("build", function() {
   
     var libraryName = "unshacled";
-    var mainTsFilePath = "src/App.tsx";
+    var mainTsFilePath = "src/components/App.tsx";
     var outputFolder   = "dist/";
     var outputFileName = libraryName + ".min.js";
 
