@@ -85,3 +85,6 @@ src/**/*.js
 
 #idea folder
 .idea/*
+
+# npm package lock
+package-lock.json
