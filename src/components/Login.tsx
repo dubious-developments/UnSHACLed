@@ -1,6 +1,8 @@
 import * as React from 'react';
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
+import { withRouter } from 'react-router-dom';
+import Auth from "../Auth";
 
 class Login extends React.Component<any, any> {
 
@@ -15,6 +17,7 @@ class Login extends React.Component<any, any> {
     render() {
         return(
             <div>
+                <label>Log in page</label>
                 <TextField
                     hintText="Username: "
                     floatingLabelText="Username"
@@ -28,14 +31,15 @@ class Login extends React.Component<any, any> {
                     onChange={(event, newValue) => this.setState({password:newValue})}
                 />
                 <br/>
-                <RaisedButton label="Submit" primary={true} onClick={(event) => this.handleClick(event)}/>
+                <RaisedButton label="Log in" primary={true} onClick={(event) => this.handleClick(event)} />
             </div>
         );
     }
 
     handleClick(event: any) {
-        return;
+        Auth.login();
+        this.props.history.push("/");
     }
 }
 
-export default Login;
+export default withRouter(Login);

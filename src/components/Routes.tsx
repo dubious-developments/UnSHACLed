@@ -8,7 +8,7 @@ class Routes extends React.Component<any, any> {
         return (
             <div>
                 <Switch>
-                    <Route path="/" component={App}/>
+                    <Route exact={true} path="/" component={App}/>
                     <Route path="/login" component={Login}/>
                 </Switch>
             </div>

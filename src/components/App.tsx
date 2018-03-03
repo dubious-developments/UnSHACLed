@@ -5,7 +5,9 @@ import Slider from './Slider';
 import Drawer from 'material-ui/Drawer';
 import SideBar from './Sidebar';
 import RaisedButton from 'material-ui/RaisedButton';
-import Login from './Login';
+import { Redirect } from 'react-router';
+import Auth from "../Auth";
+import { withRouter } from 'react-router-dom';
 
 // hotfix for navbar
 const styles = {
@@ -25,7 +27,6 @@ class App extends React.Component<any, any> {
         super(props);
         this.state = {
             open: false,
-            loggedIn: false
         };
         this.handleToggle = this.handleToggle.bind(this);
     }
@@ -37,10 +38,8 @@ class App extends React.Component<any, any> {
     }
 
   render() {
-      if (!this.state.loggedIn) {
-          return(
-              <Login/>
-          );
+      if (! Auth.isLoggedIn()) {
+          return <Redirect to={"/login"} />;
       } else {
           return (
               <div>
@@ -71,6 +70,11 @@ class App extends React.Component<any, any> {
                               accept={this.allowedExtensions}
                           />
                           <RaisedButton primary={true} label="save Graph"/>
+                          <RaisedButton
+                              secondary={true}
+                              label="log out"
+                              onClick={(event) => this.logoutButton(event)}
+                          />
                       </div>
                   </AppBar>
 
@@ -82,10 +86,15 @@ class App extends React.Component<any, any> {
       }
     }
 
+    logoutButton(event: any) {
+        Auth.logout();
+        this.props.history.push("/login");
+    }
+
     uploadFileButton() {
         var input = document.getElementById("importGraph");
         input.click();
     }
 }
 
-export default App;
+export default withRouter(App);
