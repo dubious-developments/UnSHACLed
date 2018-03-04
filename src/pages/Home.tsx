@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Segment, Container, Image, Header, Grid, Button } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
+import Navbar from '../components/navbarHome';
 
 class Home extends React.Component {
 
@@ -17,7 +18,7 @@ class Home extends React.Component {
                     {/*
                      Navigation Bar
                      */}
-
+                    <Navbar/>
                     {/*
                      Main Container
                      */}
