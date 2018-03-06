@@ -1,6 +1,6 @@
-import {Parser} from "../source/persistence/parser";
-import {Uri} from "../source/persistence/uri";
-import {Writer} from "../source/persistence/writer";
+import {Parser} from "../src/persistence/parser";
+import {Uri} from "../src/persistence/uri";
+import {Writer} from "../src/persistence/writer";
 
 describe( "Parser Class", () => {
     it("Should parse a Turtle file and return a correct RDF graph.", () => {
