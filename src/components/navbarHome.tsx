@@ -20,7 +20,13 @@ class Navbar extends React.Component {
                         > About
                         </Link>
                     </Menu.Item>
-                    <Menu.Item as="a">Contact</Menu.Item>
+                    <Menu.Item as="a">
+                        <Link
+                            to="/contact"
+                            style={{color: 'white'}}
+                        > Contact
+                        </Link>
+                    </Menu.Item>
                     <Menu.Item
                         as="a"
                         href="https://github.com/dubious-developments/UnSHACLed"
