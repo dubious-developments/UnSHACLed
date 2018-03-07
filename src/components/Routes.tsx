@@ -2,6 +2,7 @@ import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 import Login from "../pages/Login";
 import Home from "../pages/Home";
+import Work from "../pages/Work";
 
 class Routes extends React.Component<any, any> {
     render() {
@@ -9,7 +10,8 @@ class Routes extends React.Component<any, any> {
             <div>
                 <Switch>
                     <Route exact={true} path="/" component={Home}/>
-                    <Route path="/login" component={Login}/>
+                    <Route exact={true} path="/login" component={Login}/>
+                    <Route exact={true} path="/user" component={Work}/>
                 </Switch>
             </div>
         );
