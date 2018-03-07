@@ -11,7 +11,7 @@ class Home extends React.Component {
                 <Segment
                     inverted={true}
                     textAlign="center"
-                    style={{ minHeight: 835}}
+                    style={{height: '100vh'}}
                     vertical={true}
                 >
                     {/*

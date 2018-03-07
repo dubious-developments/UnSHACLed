@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Navbar from '../components/navbarWork';
 import SideBar from '../components/Sidebar';
-import {Segment, Sidebar } from 'semantic-ui-react';
+import { Grid } from 'semantic-ui-react';
 
 class Workspace extends React.Component<any, any> {
 
@@ -12,16 +12,22 @@ class Workspace extends React.Component<any, any> {
 
     render() {
         return (
-            <div className="workPage">
-                <Sidebar.Pushable as={Segment} style={{ minHeight: 835}}>
-                   <SideBar/>
-                    <Navbar/>
-                    <Sidebar.Pusher>
-                        <h1> Application Content </h1>
-                    </Sidebar.Pusher>
-                </Sidebar.Pushable>
-            </div>
+            <Grid style={{height: '100vh'}}>
+                <Grid.Row style={{height: '10%'}}>
+                    <Grid.Column>
+                        <Navbar/>
+                    </Grid.Column>
+                </Grid.Row>
 
+                <Grid.Row style={{height: '90%'}}>
+                    <Grid.Column width={2}>
+                        <SideBar/>
+                    </Grid.Column>
+                    <Grid.Column>
+                        <p> Graphs here</p>
+                    </Grid.Column>
+                </Grid.Row>
+            </Grid>
         )
             ;
     }

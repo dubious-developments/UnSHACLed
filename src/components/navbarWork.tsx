@@ -54,7 +54,7 @@ class Navbar extends React.Component<any, any> {
                                 />
                             }
                         />
-                        <Menu.Item>v0.1.1</Menu.Item>
+                        <Menu.Item>v0.1</Menu.Item>
                         <Menu.Item onClick={(event) => this.logoutButton(event)}> Logout </Menu.Item>
                     </Menu.Menu>
 

@@ -25,7 +25,7 @@ class Navbar extends React.Component {
 
                         }
                     />
-                    <Menu.Item>v0.1.1</Menu.Item>
+                    <Menu.Item>v0.1</Menu.Item>
                 </Container>
             </Menu>
         );

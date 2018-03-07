@@ -12,7 +12,7 @@ class Login extends React.Component<any, any> {
                 <Segment
                     inverted={true}
                     textAlign="center"
-                    style={{ minHeight: 835}}
+                    style={{height: '100vh'}}
                     vertical={true}
                 >
                     <Navbar/>
