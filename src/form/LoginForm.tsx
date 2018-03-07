@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Form, Button, Grid, Image, Header, Segment, Input, Divider } from 'semantic-ui-react';
+import { withRouter } from 'react-router-dom';
 import Auth from '../Auth';
 
 class LoginForm extends React.Component<any, any> {
@@ -103,4 +104,4 @@ class LoginForm extends React.Component<any, any> {
         this.props.history.push("/user");
     }
 }
-export default LoginForm;
+export default withRouter(LoginForm);

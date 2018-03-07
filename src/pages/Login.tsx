@@ -16,7 +16,7 @@ class Login extends React.Component<any, any> {
                     vertical={true}
                 >
                     <Navbar/>
-                    <LoginForm history={this.props.history}/>
+                    <LoginForm/>
                 </Segment>
             </div>
         )
