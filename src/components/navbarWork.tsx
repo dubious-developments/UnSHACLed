@@ -1,24 +1,20 @@
 import * as React from 'react';
-import { Menu, Image, Icon } from 'semantic-ui-react';
+import { Menu, Icon } from 'semantic-ui-react';
 
 class Navbar extends React.Component<any, any> {
 
     render() {
-        const logo = require('../img/shacl_logo_trans.png');
+
         return (
             <div>
                 <Menu
                     inverted={true}
                     size="large"
                     icon={true}
+                    style={{
+                        height: '4.85em'
+                    }}
                 >
-                    <Menu.Item>
-                        <Icon
-                            name="angle double right"
-                            size="large"
-                        />
-                    </Menu.Item>
-                    <Menu.Item><Image src={logo} size="mini"/></Menu.Item>
                     <Menu.Menu
                         position="right"
                     >
@@ -39,6 +35,7 @@ class Navbar extends React.Component<any, any> {
                             }
                         />
                     </Menu.Menu>
+
                 </Menu>
             </div>
         );

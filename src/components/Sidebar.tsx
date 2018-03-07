@@ -1,25 +1,26 @@
 import * as React from 'react';
-import { Sidebar, Menu, Input, Icon } from 'semantic-ui-react';
+import { Sidebar, Menu, Input, Icon, Image } from 'semantic-ui-react';
 
 class SideBar extends React.Component {
 
     render() {
+        const logo = require('../img/shacl_logo_trans.png');
         return (
-            <div>
                 <Sidebar
                     as={Menu}
-                    animation="overlay"
+                    animation='uncover'
                     width="thin"
                     visible={true}
                     icon={true}
                     vertical={true}
                     inverted={true}
                     size="huge"
+                    inline={true}
                 >
-                    <Menu.Item>
-                        <Icon name="angle double left"/>
+                    <Menu.Item
+                    >
+                        <Image src={logo} size="mini" centered={true}/>
                     </Menu.Item>
-
                     <Menu.Item>
                         <Input
                             icon={
@@ -56,9 +57,8 @@ class SideBar extends React.Component {
                             <Menu.Item as="a" content="Person"/>
                         </Menu.Menu>
                     </Menu.Item>
-
                 </Sidebar>
-            </div>
+
         );
     }
 }
