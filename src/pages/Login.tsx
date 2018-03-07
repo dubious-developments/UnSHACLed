@@ -3,7 +3,7 @@ import LoginForm from '../form/LoginForm';
 import { Segment } from 'semantic-ui-react';
 import Navbar from '../components/navbarHome';
 
-class Login extends React.Component {
+class Login extends React.Component<any, any> {
 
     render() {
         return (
@@ -16,7 +16,7 @@ class Login extends React.Component {
                     vertical={true}
                 >
                     <Navbar/>
-                    <LoginForm/>
+                    <LoginForm history={this.props.history}/>
                 </Segment>
             </div>
         )

@@ -1,8 +1,17 @@
 import * as React from 'react';
 import { Form, Button, Grid, Image, Header, Segment, Input, Divider } from 'semantic-ui-react';
-import { Link } from 'react-router-dom';
+import Auth from '../Auth';
 
-class LoginForm extends React.Component {
+class LoginForm extends React.Component<any, any> {
+
+    constructor(props: string) {
+        super(props);
+        this.state = {
+            username: "",
+            password: ""
+        };
+    }
+
     render() {
         const logo = require('../img/shacl_logo_trans.png');
         return (
@@ -41,6 +50,7 @@ class LoginForm extends React.Component {
                                         fluid={true}
                                         label="Username"
                                         labelPosition="left"
+                                        onChange={(event, newValue) => this.setState({username:newValue})}
                                     />
                                 </Form.Field>
 
@@ -54,6 +64,7 @@ class LoginForm extends React.Component {
                                         label="Password"
                                         labelPosition="left"
                                         type="password"
+                                        onChange={(event, newValue) => this.setState({password:newValue})}
                                     />
                                 </Form.Field>
 
@@ -62,11 +73,8 @@ class LoginForm extends React.Component {
                                     fluid={true}
                                     inverted={true}
                                     size="large"
-                                > <Link
-                                    to="/"
-                                    style={{color: 'white'}}
+                                    onClick={(event) => this.handleClick(event)}
                                 > Login
-                                </Link>
                                 </Button>
 
                                 <Divider
@@ -88,6 +96,11 @@ class LoginForm extends React.Component {
             </div>
         )
             ;
+    }
+
+    handleClick(event: any) {
+        Auth.login();
+        this.props.history.push("/user");
     }
 }
 export default LoginForm;
