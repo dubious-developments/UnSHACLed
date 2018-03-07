@@ -14,7 +14,6 @@ class Navbar extends React.Component {
                     <Menu.Item><Image src={logo} size="mini"/></Menu.Item>
                     <Menu.Item as="a">About</Menu.Item>
                     <Menu.Item as="a">Contact</Menu.Item>
-                    <Menu.Item>v0.1.1</Menu.Item>
                     <Menu.Item
                         as="a"
                         href="https://github.com/dubious-developments/UnSHACLed"
@@ -26,6 +25,7 @@ class Navbar extends React.Component {
 
                         }
                     />
+                    <Menu.Item>v0.1.1</Menu.Item>
                 </Container>
             </Menu>
         );
