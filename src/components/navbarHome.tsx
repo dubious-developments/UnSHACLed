@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Menu, Container, Image, Icon } from 'semantic-ui-react';
+import {Link} from 'react-router-dom';
 
 class Navbar extends React.Component {
 
@@ -12,7 +13,13 @@ class Navbar extends React.Component {
             >
                 <Container>
                     <Menu.Item><Image src={logo} size="mini"/></Menu.Item>
-                    <Menu.Item as="a">About</Menu.Item>
+                    <Menu.Item as="a">
+                        <Link
+                            to="/about"
+                            style={{color: 'white'}}
+                        > About
+                        </Link>
+                    </Menu.Item>
                     <Menu.Item as="a">Contact</Menu.Item>
                     <Menu.Item
                         as="a"

@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { Container, Image, Header, Grid, Button } from 'semantic-ui-react';
-import { Link } from 'react-router-dom';
+import {Container, Image, Header, Grid, Button} from 'semantic-ui-react';
+import {Link} from 'react-router-dom';
 
 class HomeContainer extends React.Component {
 
@@ -65,9 +65,16 @@ class HomeContainer extends React.Component {
                     </Grid.Column>
                     <Grid.Column style={{maxWidth: 250}}>
                         <Button
+                            animated="fade"
                             inverted={true}
                             size="huge"
-                        > Sign Up
+                        >
+                            <Button.Content visible={true}>
+                            Sign-up
+                            </Button.Content>
+                            <Button.Content hidden={true}>
+                             Coming soon!
+                            </Button.Content>
                         </Button>
                     </Grid.Column>
 

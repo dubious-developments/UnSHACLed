@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Form, Button, Grid, Image, Header, Segment, Input, Divider } from 'semantic-ui-react';
-import { withRouter } from 'react-router-dom';
+import {withRouter} from 'react-router-dom';
 import Auth from '../Auth';
 
 class LoginForm extends React.Component<any, any> {
@@ -51,7 +51,7 @@ class LoginForm extends React.Component<any, any> {
                                         fluid={true}
                                         label="Username"
                                         labelPosition="left"
-                                        onChange={(event, newValue) => this.setState({username:newValue})}
+                                        onChange={(event, newValue) => this.setState({username: newValue})}
                                     />
                                 </Form.Field>
 
@@ -65,7 +65,7 @@ class LoginForm extends React.Component<any, any> {
                                         label="Password"
                                         labelPosition="left"
                                         type="password"
-                                        onChange={(event, newValue) => this.setState({password:newValue})}
+                                        onChange={(event, newValue) => this.setState({password: newValue})}
                                     />
                                 </Form.Field>
 
@@ -84,10 +84,17 @@ class LoginForm extends React.Component<any, any> {
                                 >Or
                                 </Divider>
                                 <Button
+                                    animated="fade"
                                     fluid={true}
                                     inverted={true}
                                     size="large"
-                                >Sign up
+                                >
+                                    <Button.Content visible={true}>
+                                    Sign-up
+                                    </Button.Content>
+                                    <Button.Content hidden={true}>
+                                        Coming soon!
+                                    </Button.Content>
                                 </Button>
 
                             </Segment>
