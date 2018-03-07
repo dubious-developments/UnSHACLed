@@ -7,6 +7,16 @@ class Navbar extends React.Component<any, any> {
 
     allowedExtensions = ".n3,.ttl,.rdf";
 
+    logoutButton(event: any) {
+        Auth.logout();
+        this.props.history.push("/login");
+    }
+
+    uploadFileButton() {
+        var input = document.getElementById("importGraph");
+        input.click();
+    }
+
     render() {
 
         return (
@@ -24,7 +34,15 @@ class Navbar extends React.Component<any, any> {
                     >
                         <Menu.Item as="a">Import Project</Menu.Item>
                         <Menu.Item as="a">Save Project</Menu.Item>
-                        <Menu.Item as="a">Import Graph</Menu.Item>
+                        <Menu.Item as="a" onClick={this.uploadFileButton}>
+                            Import Graph
+                            <input
+                                type="file"
+                                id="importGraph"
+                                style={{"display" : "none"}}
+                                accept={this.allowedExtensions}
+                            />
+                        </Menu.Item>
                         <Menu.Item as="a">Save Graph</Menu.Item>
                         <Menu.Item
                             as="a"
@@ -44,11 +62,5 @@ class Navbar extends React.Component<any, any> {
             </div>
         );
     }
-
-    logoutButton(event: any) {
-        Auth.logout();
-        this.props.history.push("/login");
-    }
-
 }
 export default withRouter(Navbar);
