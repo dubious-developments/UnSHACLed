@@ -6,8 +6,7 @@ class Contact extends React.Component<any, any> {
 
     render() {
         return (
-            <div className="loginPage">
-
+            <div>
                 <Segment
                     inverted={true}
                     textAlign="center"
@@ -15,8 +14,8 @@ class Contact extends React.Component<any, any> {
                     vertical={true}
                 >
                     <Navbar/>
-                    <Container text={true} style={{ marginTop: '7em' }}>
-                        <Header as='h1'  color="teal" > Contact </Header>
+                    <Container text={true} style={{marginTop: '7em'}}>
+                        <Header as='h1' color="teal"> Contact </Header>
                         <h1> TODO </h1>
                     </Container>
                 </Segment>

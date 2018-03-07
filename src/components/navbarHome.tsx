@@ -1,8 +1,13 @@
 import * as React from 'react';
 import { Menu, Container, Image, Icon } from 'semantic-ui-react';
 import {Link} from 'react-router-dom';
+import {withRouter} from 'react-router-dom';
 
-class Navbar extends React.Component {
+class Navbar extends React.Component<any, any> {
+
+    handleClick(event: any) {
+        this.props.history.push("/");
+    }
 
     render() {
         const logo = require('../img/shacl_logo_trans.png');
@@ -12,7 +17,9 @@ class Navbar extends React.Component {
                 size="large"
             >
                 <Container>
-                    <Menu.Item><Image src={logo} size="mini"/></Menu.Item>
+                    <Menu.Item as="a" onClick={(event) => this.handleClick(event)}>
+                        <Image src={logo} size="mini"/>
+                    </Menu.Item>
                     <Menu.Item as="a">
                         <Link
                             to="/about"
@@ -44,4 +51,4 @@ class Navbar extends React.Component {
         );
     }
 }
-export default Navbar;
+export default withRouter(Navbar);

@@ -6,8 +6,7 @@ class About extends React.Component<any, any> {
 
     render() {
         return (
-            <div className="loginPage">
-
+            <div>
                 <Segment
                     inverted={true}
                     textAlign="center"
@@ -15,8 +14,8 @@ class About extends React.Component<any, any> {
                     vertical={true}
                 >
                     <Navbar/>
-                    <Container text={true} style={{ marginTop: '7em' }}>
-                        <Header as='h1'  color="teal" >About UnSHACLed</Header>
+                    <Container text={true} style={{marginTop: '7em'}}>
+                        <Header as='h1' color="teal">About UnSHACLed</Header>
                         <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi lobortis vehicula ante.
                             Proin sapien ante, bibendum eu porttitor nec, elementum cursus diam.
                             Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.
@@ -26,7 +25,6 @@ class About extends React.Component<any, any> {
                             Aliquam tincidunt vel purus quis aliquet.
                             Maecenas ac mi magna.
                         </p>
-
                     </Container>
                 </Segment>
             </div>
