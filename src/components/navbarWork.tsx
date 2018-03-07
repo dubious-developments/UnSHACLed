@@ -1,7 +1,11 @@
 import * as React from 'react';
 import { Menu, Icon } from 'semantic-ui-react';
+import Auth from "../Auth";
+import { withRouter } from 'react-router-dom';
 
 class Navbar extends React.Component<any, any> {
+
+    allowedExtensions = ".n3,.ttl,.rdf";
 
     render() {
 
@@ -33,11 +37,18 @@ class Navbar extends React.Component<any, any> {
                             }
                         />
                         <Menu.Item>v0.1.1</Menu.Item>
+                        <Menu.Item onClick={(event) => this.logoutButton(event)}> Logout </Menu.Item>
                     </Menu.Menu>
 
                 </Menu>
             </div>
         );
     }
+
+    logoutButton(event: any) {
+        Auth.logout();
+        this.props.history.push("/login");
+    }
+
 }
-export default Navbar;
+export default withRouter(Navbar);
