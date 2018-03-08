@@ -37,7 +37,6 @@ class SideBar extends React.Component<any, any> {
             return collection;
         } else {
             return collection.filter(value => {
-                console.log("value: ", value, " query: ", query);
                 return value.indexOf(query) !== -1;
             });
         }
@@ -55,7 +54,6 @@ class SideBar extends React.Component<any, any> {
 
         for (var i = 0; i < res.length; i++) {
             var key = kind + i;
-            console.log(key);
             items.push(<Menu.Item as="a" content={res[i]} key={key}/>);
         }
 
@@ -67,7 +65,6 @@ class SideBar extends React.Component<any, any> {
     }
 
     handleChange(event: any) {
-        console.log('handle: ', event.target.value);
         this.setState({
            value: event.target.value
         });
@@ -96,7 +93,10 @@ class SideBar extends React.Component<any, any> {
                             type="text"
                             value={this.state.value}
                             placeholder="Search"
+                            inverted={true}
+                            icon="search"
                         />
+
                     </Menu.Item>
 
                     <Menu.Item >
