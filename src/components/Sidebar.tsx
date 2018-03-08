@@ -1,30 +1,65 @@
 import * as React from 'react';
-import { List, ListItem } from 'material-ui/List';
-import Divider from 'material-ui/Divider';
-import Subheader from 'material-ui/Subheader';
-import Add from 'material-ui/svg-icons/content/add';
+import { Sidebar, Menu, Input, Icon, Image } from 'semantic-ui-react';
 
-const Sidebar = () => (
-    <div>
-        <List>
-            <Subheader>SHACL</Subheader>
-            <ListItem primaryText="Shape" rightIcon={<Add />}/>
-            <ListItem primaryText="Node Shape" rightIcon={<Add />} />
-            <ListItem primaryText="Property Shape" rightIcon={<Add />} />
-        </List>
-        <Divider />
-        <List>
-            <Subheader>General</Subheader>
-            <ListItem primaryText="Arrow" rightIcon={<Add />}/>
-            <ListItem primaryText="Rectangle" rightIcon={<Add />} />
-        </List>
-        <Divider />
-        <List>
-            <Subheader>Template</Subheader>
-            <ListItem primaryText="Building" rightIcon={<Add />}/>
-            <ListItem primaryText="Person" rightIcon={<Add />} />
-        </List>
-    </div>
-);
+class SideBar extends React.Component {
 
-export default Sidebar;
+    render() {
+        const logo = require('../img/shacl_logo_trans.png');
+        return (
+                <Sidebar
+                    as={Menu}
+                    animation='uncover'
+                    width="thin"
+                    visible={true}
+                    icon={true}
+                    vertical={true}
+                    inverted={true}
+                    size="huge"
+                    inline={true}
+                >
+                    <Menu.Item
+                    >
+                        <Image src={logo} size="mini" centered={true}/>
+                    </Menu.Item>
+                    <Menu.Item>
+                        <Input
+                            icon={
+                                <Icon
+                                    name="search"
+                                    inverted={true}
+                                />}
+                            placeholder="Search..."
+                            transparent={true}
+                        />
+                    </Menu.Item>
+
+                    <Menu.Item >
+                        SHACL
+                        <Menu.Menu>
+                            <Menu.Item as="a" content="Shape"/>
+                            <Menu.Item as="a" content="Node Shape"/>
+                            <Menu.Item as="a" content="Property Shape"/>
+                        </Menu.Menu>
+                    </Menu.Item>
+
+                    <Menu.Item>
+                        General
+                        <Menu.Menu>
+                            <Menu.Item as="a" content="Arrow"/>
+                            <Menu.Item as="a" content="Rectangle"/>
+                        </Menu.Menu>
+                    </Menu.Item>
+
+                    <Menu.Item>
+                        Template
+                        <Menu.Menu>
+                            <Menu.Item as="a" content="Building"/>
+                            <Menu.Item as="a" content="Person"/>
+                        </Menu.Menu>
+                    </Menu.Item>
+                </Sidebar>
+
+        );
+    }
+}
+export default SideBar;
