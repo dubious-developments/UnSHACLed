@@ -1,5 +1,5 @@
 interface DataAccessObjectInterface {
-    insert(uri: string);
-    find(uri: string);
-    update(uri: string);
+    insert(file: Blob);
+    find(file: Blob);
+    update(file: Blob);
 }

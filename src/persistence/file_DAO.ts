@@ -1,25 +1,66 @@
 import {Parser} from "./parser";
+import {Writer} from "./writer";
+import {Graph} from "./graph";
+import {Model, ModelComponent, ModelData, ModelTaskMetadata} from "../entities/model";
+import {ProcessorTask} from "../entities/taskProcessor";
 
+/**
+ * Provides basic DAO functionality at the file granularity level.
+ */
 export class FileDAO implements DataAccessObjectInterface {
-    // works at the granularity of entire graphs!
-    // will need the RDF API to actually implement this stuff
-    // (the output of this will have to pass through the modulator),
-    // as well as basic file IO
+    private model: Model;
+    private io: IOFacilitator;
+
+    /**
+     * Create a new FileDAO
+     */
+    public constructor() {
+        this.io = new IOFacilitator();
+    }
+
+    /**
+     * Create a new file.
+     * @param {Blob} file
+     */
+    public insert(file: Blob) {
+        this.model.tasks.schedule(new PullTask(this.io));
+    }
+
+    /**
+     * Load an existing file.
+     * @param {Blob} file
+     */
+    public find(file: Blob) {
+        this.model.tasks.schedule(new PushTask(this.io, file));
+    }
+
+    /**
+     * Save an existing file.
+     * @param {Blob} file
+     */
+    public update(file: Blob) {
+        this.insert(file);
+    }
+}
+
+/**
+ * Provides basic input/output functionality w.r.t. files.
+ */
+class IOFacilitator {
     private parser: Parser;
+    private writer: Writer;
+
     public constructor() {
         this.parser = new Parser();
-    }
-    public insert(file: any) {
-        return;
-    }
-    public find(file: any) {
-        return this.readFromFile(file);
-    }
-    public update(file: any) {
-        return;
+        this.writer = new Writer();
     }
 
-    private readFromFile(file: any) {
+    /**
+     * Read from an existing file.
+     * @param {Blob} file
+     * @returns {Graph}
+     */
+    public readFromFile(file: Blob) {
         let reader = new FileReader();
         reader.readAsText(file);
         reader.onload = onLoadFunction;
@@ -36,10 +77,40 @@ export class FileDAO implements DataAccessObjectInterface {
             parser.prepare();
         }
 
-        return store;
+        return new Graph(store, file);
     }
 
-    private writeToFile(file: any) {
+    /**
+     * Write to a file (not necessarily extant).
+     * @param {Graph} graph
+     */
+    public writeToFile(graph: Graph) {
+        let FileSaver = require("file-saver");
+        let content = this.writer.write(graph.getStore());
 
+        let file = new File([content], graph.getFile(), graph.getFile().type);
+        FileSaver.saveAs(file);
+    }
+}
+
+/**
+ * A ProcessorTask that loads a graph structure into the Model.
+ */
+class PushTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
+    public constructor(io: IOFacilitator, file: Blob) {
+        super(function(data: ModelData) {
+            data.setComponent(ModelComponent.DataGraph, io.readFromFile(file));
+        },    null);
+    }
+}
+
+/**
+ * A ProcessorTask that requests a graph structure from the Model.
+ */
+class PullTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
+    public constructor(io: IOFacilitator) {
+        super(function(data: ModelData) {
+            io.writeToFile(data.getComponent(ModelComponent.DataGraph));
+        },    null);
     }
 }
