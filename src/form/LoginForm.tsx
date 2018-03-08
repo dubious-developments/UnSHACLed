@@ -108,7 +108,11 @@ class LoginForm extends React.Component<any, any> {
 
     handleClick(event: any) {
         Auth.login();
-        this.props.history.push("/user");
+        if (this.state.username === "" || this.state.password === "") {
+            console.log("invalid");
+        } else {
+            this.props.history.push("/user");
+        }
     }
 }
 export default withRouter(LoginForm);

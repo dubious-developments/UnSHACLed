@@ -53,14 +53,15 @@ class SideBar extends React.Component {
                     <Menu.Item>
                         <Image src={logo} size="mini" centered={true}/>
                     </Menu.Item>
-                    
+
                     <Menu.Item>
                         <Input
                             icon={
                                 <Icon
                                     name="search"
                                     inverted={true}
-                                />}
+                                />
+                            }
                             placeholder="Search..."
                             transparent={true}
                         />
