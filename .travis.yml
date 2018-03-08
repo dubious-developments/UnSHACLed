@@ -43,6 +43,7 @@ script:
   # Grab the server deployment script from the UnSHACLed waterfall repository and deploy.
   - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_BRANCH" == "master" ] && [ ! -z "$DEPLOY_USER" ]; then
       wget https://raw.githubusercontent.com/dubious-developments/UnSHACLed-waterfall/master/deploy-to-server.sh &&
+      chmod +x deploy-to-server.sh &&
       ./deploy-to-server.sh $encrypted_077ce6e5a149_key $encrypted_077ce6e5a149_iv 8800 nightly UnSHACLed-nightly;
     fi
 
