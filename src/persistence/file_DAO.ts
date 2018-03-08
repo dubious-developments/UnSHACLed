@@ -1,8 +1,7 @@
 import {Parser} from "./parser";
-import {Uri} from "./uri";
 
 export class FileDAO implements DataAccessObjectInterface {
-    // works on the granularity of entire graphs!
+    // works at the granularity of entire graphs!
     // will need the RDF API to actually implement this stuff
     // (the output of this will have to pass through the modulator),
     // as well as basic file IO
@@ -10,17 +9,37 @@ export class FileDAO implements DataAccessObjectInterface {
     public constructor() {
         this.parser = new Parser();
     }
-    public insert(uri: string) {
+    public insert(file: any) {
         return;
     }
-    public find(uri: string) {
-        this.parser.parse(new Uri(uri));
+    public find(file: any) {
+        return this.readFromFile(file);
+    }
+    public update(file: any) {
         return;
     }
-    public delete(uri: string) {
-        return;
+
+    private readFromFile(file: any) {
+        let reader = new FileReader();
+        reader.readAsText(file);
+        reader.onload = onLoadFunction;
+        reader.onloadend = onLoadEndFunction;
+
+        let parser = this.parser;
+        let store = null;
+        function onLoadFunction(evt: any) {
+            parser.parse(evt.target.result);
+        }
+
+        function onLoadEndFunction(evt: any) {
+            store = parser.getStore();
+            parser.prepare();
+        }
+
+        return store;
     }
-    public update(uri: string) {
-        return;
+
+    private writeToFile(file: any) {
+
     }
 }

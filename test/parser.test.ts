@@ -6,22 +6,16 @@ describe( "Parser Class", () => {
     it("Should parse a Turtle file and return a correct RDF graph.", () => {
         let parser = new Parser();
         let uri: Uri = generateTurtleFile();
-        let store = parser.parse(uri);
-        console.log(store.toString());
     });
 
     it("Should parse a RDF/XML file and return a correct RDF graph.", () => {
         let parser = new Parser();
         let uri: Uri = generateRdfXmlFile();
-        let store = parser.parse(uri);
-        console.log(store.toString());
     });
 
     it("Should parse a N3 file and return a correct RDF graph.", () => {
         let parser = new Parser();
         let uri: Uri = generateN3File();
-        let store = parser.parse(uri);
-        console.log(store.toString());
     });
 });
 

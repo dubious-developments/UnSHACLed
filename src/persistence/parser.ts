@@ -1,34 +1,35 @@
-import {Uri} from "./uri";
-
 export class Parser {
-    // contains mappings from extension to internet media type
-    private formats: { [ext: string]: string; };
+
+    private store: any;
+
     public constructor() {
-        let ext: string;
-        this.formats = {};
-        this.formats[ext = "n3"] = "text/n3";
-        this.formats[ext = "rdf"] = "application/rdf+xml";
-        this.formats[ext = "ttl"] = "text/turtle";
+        this.prepare();
     }
 
     /**
-     * Parse a file with the given URI using the rdflib library; return a graph structure upon success.
-     * @param {Uri} uri
+     * Parse a string in some RDF format (supported types are Turtle, TriG, N-Triples, N-Quads).
+     * Return a graph structure (set of parsed RDF triples).
      */
-    public parse(uri: Uri) {
-        let $rdf = require("rdflib");
-        let splitUri: string[] = uri.getUriAsString().split(".");
-        let ext: string = splitUri[splitUri.length.valueOf() - 1];
-        let body = "<s> <p> <o> .";
-        let mimeType: string = this.formats[ext];
-        let store = $rdf.graph();
+    public parse(content: string) {
+        let N3 = require("n3");
+        let parser = N3.Parser();
+        let store = this.store;
+        parser.parse(content,
+                     function(error: any, triple: any, prefixes: any) {
+                        if (triple) {
+                            store.addTriple(triple.subject, triple.predicate, triple.object);
+                        } else {
+                            store.addPrefixes(prefixes);
+                        }
+            });
+    }
 
-        try {
-            $rdf.parse(body, store, uri.getUriAsString(), mimeType);
-            return store;
-        } catch (err) {
-            console.log(err);
-        }
-        return null;
+    public prepare() {
+        let N3 = require("n3");
+        this.store = N3.Store();
+    }
+
+    public getStore() {
+        return this.store;
     }
 }
