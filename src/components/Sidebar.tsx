@@ -1,20 +1,46 @@
 import * as React from 'react';
-import { Sidebar, Menu, Input, Icon, Image } from 'semantic-ui-react';
+import { Sidebar, Menu, Image, Input } from 'semantic-ui-react';
 
-class SideBar extends React.Component {
+class SideBar extends React.Component<any, any> {
 
     static SHACLMenuItems = ["Shape", "Node Shape", "Property Shape"];
     static GeneralMenuItems = ["Arrow", "Rectangle"];
     static TemplateMenuItems = ["Building", "Person"];
 
-    static menuMapping = new Map([
-        ["SHACL", SideBar.SHACLMenuItems],
-        ["General", SideBar.GeneralMenuItems],
-        ["Template", SideBar.TemplateMenuItems]]
-    );
-
     constructor(props: string) {
         super(props);
+
+        this.state = {
+            value: ''
+        };
+
+        this.handleChange = this.handleChange.bind(this);
+        this.getMenuItemsFiltered = this.getMenuItemsFiltered.bind(this);
+        this.DynamicMenu = this.DynamicMenu.bind(this);
+    }
+
+    getMenuItemsFiltered(kind: string, query: string) {
+        // determine kind of submenu
+        var collection;
+        if (kind === "SHACL") {
+            collection = SideBar.SHACLMenuItems;
+        } else if (kind === "General") {
+            collection = SideBar.GeneralMenuItems;
+        } else if (kind === "Template") {
+            collection = SideBar.TemplateMenuItems;
+        } else {
+            console.log("error unknow kind of submenu");
+        }
+
+        // filter if necessary
+        if (query === "") {
+            return collection;
+        } else {
+            return collection.filter(value => {
+                console.log("value: ", value, " query: ", query);
+                return value.indexOf(query) !== -1;
+            });
+        }
     }
 
     /*
@@ -22,12 +48,15 @@ class SideBar extends React.Component {
      * In the props must specify the menu type
      */
     DynamicMenu(props: any) {
-        var type = props.kind;
+        var kind = props.kind;
+        var query = this.state.value;
         var items = [];
-        for (var i = 0; i < SideBar.menuMapping.get(type).length; i++) {
-            var key = type + i;
+        var res = this.getMenuItemsFiltered(kind, query);
+
+        for (var i = 0; i < res.length; i++) {
+            var key = kind + i;
             console.log(key);
-            items.push(<Menu.Item as="a" content={SideBar.menuMapping.get(type)[i]} key={key}/>);
+            items.push(<Menu.Item as="a" content={res[i]} key={key}/>);
         }
 
         return (
@@ -35,6 +64,13 @@ class SideBar extends React.Component {
                 {items}
             </Menu.Menu>
         );
+    }
+
+    handleChange(event: any) {
+        console.log('handle: ', event.target.value);
+        this.setState({
+           value: event.target.value
+        });
     }
 
     render() {
@@ -56,14 +92,10 @@ class SideBar extends React.Component {
 
                     <Menu.Item>
                         <Input
-                            icon={
-                                <Icon
-                                    name="search"
-                                    inverted={true}
-                                />
-                            }
-                            placeholder="Search..."
-                            transparent={true}
+                            onChange={this.handleChange}
+                            type="text"
+                            value={this.state.value}
+                            placeholder="Search"
                         />
                     </Menu.Item>
 
