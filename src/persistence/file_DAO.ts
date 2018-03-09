@@ -77,7 +77,7 @@ class IOFacilitator {
             parser.prepare();
         }
 
-        return new Graph(store, file);
+        // return new Graph(store, file);
     }
 
     /**
@@ -86,10 +86,9 @@ class IOFacilitator {
      */
     public writeToFile(graph: Graph) {
         let FileSaver = require("file-saver");
-        let content = this.writer.write(graph.getStore());
-
-        let file = new File([content], graph.getFile(), graph.getFile().type);
-        FileSaver.saveAs(file);
+        // let content = this.writer.write(graph.getStore());
+        // let file = new File([content], graph.getFile(), graph.getFile().type);
+        // FileSaver.saveAs(file);
     }
 }
 

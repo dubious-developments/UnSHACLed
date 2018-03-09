@@ -8,6 +8,4 @@ export class Graph {
     public addStore(filename: string, store: any) {
         this.map[filename] = store;
     }
-
-
 }
