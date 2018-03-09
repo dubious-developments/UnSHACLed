@@ -47,6 +47,15 @@ script:
       ./deploy-to-server.sh $encrypted_077ce6e5a149_key $encrypted_077ce6e5a149_iv 8800 nightly UnSHACLed-nightly;
     fi
 
+# Deploy to GitHub pages.
+deploy:
+  provider: script
+  script: bash ./ci/deploy-to-gh-pages.sh c5aae2d71953a457cc29b6c57267239102a886fc release-candidate
+  skip_cleanup: true
+  on:
+    branch: master
+    condition: "$TRAVIS_OS_NAME" = "linux"
+
 cache:
   directories:
     - '$HOME/.sonar/cache'
