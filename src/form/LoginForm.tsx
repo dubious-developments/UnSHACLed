@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Form, Button, Grid, Image, Header, Segment, Input, Divider } from 'semantic-ui-react';
 import {withRouter} from 'react-router-dom';
-import Auth from '../Auth';
+import Auth from '../services/Auth';
 
 class LoginForm extends React.Component<any, any> {
 
