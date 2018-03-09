@@ -1,17 +1,13 @@
 export class Graph {
-    private store: any;
-    private file: Blob;
+    private map: {};
 
-    public constructor(store: any, file: any) {
-        this.store = store;
-        this.file = file;
+    public constructor() {
+        this.map = {};
     }
 
-    public getStore() {
-        return this.store;
+    public addStore(filename: string, store: any) {
+        this.map[filename] = store;
     }
 
-    public getFile() {
-        return this.file;
-    }
+
 }

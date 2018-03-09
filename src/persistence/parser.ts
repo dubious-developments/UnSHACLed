@@ -7,7 +7,7 @@ export class Parser {
     }
 
     /**
-     * Parse a string in some RDF format (supported types are Turtle, TriG, N-Triples, N-Quads).
+     * Parse a string in some RDF format (supported types are Turtle, RDF/XML, N3).
      * Return a graph structure (set of parsed RDF triples).
      */
     public parse(content: string) {
