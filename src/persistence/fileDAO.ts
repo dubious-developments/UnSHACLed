@@ -79,7 +79,7 @@ class IOFacilitator {
         // every time a portion is loaded, demodulate this portion of content
         // and aggregate the result (this happens internally).
         function onLoadFunction(evt: any) {
-            modem.demodulate(evt.target.result);
+            modem.demodulate(evt.target.result, module.getFile().type);
         }
 
         // when we are finished loading, retrieve the aggregated result
@@ -100,7 +100,7 @@ class IOFacilitator {
     public writeToFile(module: FileModule, data: any) {
         let FileSaver = require("file-saver");
         // retrieve the modulated content (i.e. in textual format)
-        let content = this.modems.getValue(module.getType()).modulate(data);
+        let content = this.modems.getValue(module.getType()).modulate(data, module.getFile().type);
         // write to file
         let file = new File([content], module.getFilename());
         FileSaver.saveAs(file);
