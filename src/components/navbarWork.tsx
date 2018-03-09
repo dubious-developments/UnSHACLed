@@ -59,7 +59,7 @@ class Navbar extends React.Component<any, any> {
                             href="https://github.com/dubious-developments/UnSHACLed/wiki/Release-notes"
                         >
                         v0.1
-                        </Menu.Item>                        
+                        </Menu.Item>
                         <Menu.Item onClick={(event) => this.logoutButton(event)}> Logout </Menu.Item>
                     </Menu.Menu>
 

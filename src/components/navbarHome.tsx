@@ -45,7 +45,12 @@ class Navbar extends React.Component<any, any> {
 
                         }
                     />
-                    <Menu.Item>v0.1</Menu.Item>
+                    <Menu.Item
+                        as="a"
+                        href="https://github.com/dubious-developments/UnSHACLed/wiki/Release-notes"
+                    >
+                        v0.1
+                    </Menu.Item>
                 </Container>
             </Menu>
         );
