@@ -1,6 +1,18 @@
+import {ModelComponent} from "../entities/model";
+
 export class DataGraphModem implements Modem {
 
+    private label: ModelComponent;
+
     private data: any;
+
+    public constructor() {
+        this.label = ModelComponent.DataGraph;
+    }
+
+    public getLabel() {
+        return this.label;
+    }
 
     public modulate(data: any) {
         return "";

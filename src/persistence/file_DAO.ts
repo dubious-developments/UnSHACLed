@@ -1,7 +1,7 @@
-import {DataGraphModem} from "./data_graph_modem";
+import * as Collections from "typescript-collections";
 import {Model, ModelComponent, ModelData, ModelTaskMetadata} from "../entities/model";
 import {ProcessorTask} from "../entities/taskProcessor";
-import {Component} from "./graph_component";
+import {Component} from "./component";
 
 /**
  * Provides basic DAO functionality at the file granularity level.
@@ -14,7 +14,7 @@ export class FileDAO implements DataAccessObject {
      * Create a new FileDAO
      */
     public constructor() {
-        this.io = new IOFacilitator(new DataGraphModem());
+        this.io = new IOFacilitator();
     }
 
     /**
@@ -25,7 +25,7 @@ export class FileDAO implements DataAccessObject {
         this.model.tasks.schedule(new SaveTask(this.io, module));
     }
 
-    /**T
+    /**
      * Load an existing file.
      * @param module
      */
@@ -49,14 +49,18 @@ export class FileDAO implements DataAccessObject {
  * Requires a particular modem to modulate between file format and internal representation.
  */
 class IOFacilitator {
-    private modem: Modem;
+    private modems: Collections.Dictionary<ModelComponent, Modem>;
 
     /**
      * Create a new IOFacilitator.
      * @param {Modem} modem
      */
-    public constructor(modem: Modem) {
-        this.modem = modem;
+    public constructor() {
+        this.modems = new Collections.Dictionary<ModelComponent, Modem>();
+    }
+
+    public registerModem(modem: Modem) {
+        this.modems.setValue(modem.getLabel(), modem);
     }
 
     /**
@@ -70,7 +74,7 @@ class IOFacilitator {
         reader.onload = onLoadFunction;
         reader.onloadend = onLoadEndFunction;
 
-        let modem = this.modem;
+        let modem = this.modems.getValue(module.getType());
         let data = null;
         // every time a portion is loaded, demodulate this portion of content
         // and aggregate the result (this happens internally).
@@ -96,7 +100,7 @@ class IOFacilitator {
     public writeToFile(module: FileModule, data: any) {
         let FileSaver = require("file-saver");
         // retrieve the modulated content (i.e. in textual format)
-        let content = this.modem.modulate(data);
+        let content = this.modems.getValue(module.getType()).modulate(data);
         // write to file
         let file = new File([content], module.getFilename());
         FileSaver.saveAs(file);
@@ -187,8 +191,8 @@ class SaveTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
      */
     public constructor(io: IOFacilitator, module: FileModule) {
         super(function(data: ModelData) {
-            let component = data.getComponent(module.getType());
-            io.writeToFile(module, component);
+            let component: Component = data.getComponent(module.getType());
+            io.writeToFile(module, component.getPart(module.getFilename()));
         },    null);
     }
 }
