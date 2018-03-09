@@ -50,7 +50,7 @@ script:
 # Deploy to GitHub pages.
 deploy:
   provider: script
-  script: bash ./ci/deploy-to-gh-pages.sh c5aae2d71953a457cc29b6c57267239102a886fc release-candidate
+  script: bash ./ci/deploy-to-gh-pages.sh 16o0or82s949np2434po29779sr3o231o4r319n5 release-candidate
   skip_cleanup: true
   on:
     branch: master

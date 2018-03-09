@@ -6,7 +6,7 @@ set -e
 
 CURRENT_DIR=$(dirname $0)
 
-ACCESS_TOKEN=$1
+ACCESS_TOKEN=$(echo $1 | tr '[N-ZA-Mn-za-m]' '[A-Za-z]')
 
 # The second parameter is the directory to store the build in.
 TARGET_DIRECTORY=$2
