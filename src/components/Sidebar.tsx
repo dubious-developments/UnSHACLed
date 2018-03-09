@@ -37,7 +37,7 @@ class SideBar extends React.Component<any, any> {
             return collection;
         } else {
             return collection.filter(value => {
-                return value.indexOf(query) !== -1;
+                return value.toLowerCase().indexOf(query.toLocaleLowerCase()) !== -1;
             });
         }
     }
