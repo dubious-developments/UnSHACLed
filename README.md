@@ -13,7 +13,7 @@ Operating system | Status
 Linux and Mac OS X | [![Build Status](https://travis-ci.org/dubious-developments/UnSHACLed.svg?branch=master)](https://travis-ci.org/dubious-developments/UnSHACLed)
 Windows | [![Build status](https://ci.appveyor.com/api/projects/status/9jhin9m8rocfm0p4/branch/master?svg=true)](https://ci.appveyor.com/project/jonathanvdc/unshacled)
 
-SonarCloud dashboard can be found [here](https://sonarcloud.io/dashboard?id=org.dubious-developments.unshacled).
+SonarCloud dashboard can be found [here](https://sonarcloud.io/dashboard?id=org.dubious-developments.unshacled). For some reason, SonarCloud won't show an accurate test coverage report. You can find an accurate report [here](http://193.190.127.184:8800/coverage/index.html).
 
 ## Building UnSHACLed
 
