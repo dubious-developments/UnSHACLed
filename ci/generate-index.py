@@ -18,6 +18,7 @@ def index_directories():
         if os.path.exists(top_level_dir + '/index.html'):
             unshacled_dirs.append((build_name.readline().strip(), top_level_dir))
 
+    unshacled_dirs.sort(key=lambda tuple: tuple[0])
     return unshacled_dirs
 
 def generate_index(name_directory_tuples):
@@ -26,7 +27,7 @@ def generate_index(name_directory_tuples):
     list_elements = []
     for name, directory in name_directory_tuples:
         list_elements.append(
-            (' ' * 8) +
+            (' ' * 12) +
             """<li><a href="%s">%s</a></li>""" % (directory + '/index.html', name))
 
     return \
@@ -40,13 +41,15 @@ def generate_index(name_directory_tuples):
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 </head>
 <body>
-    <h1>UnSHACLed builds</h1>
+    <div class="container">
+        <h1>UnSHACLed builds</h1>
 
-    What follows is a list of all UnSHACLed builds hosted here. Click a hyperlink to try out a particular build.
+        What follows is a list of all UnSHACLed builds hosted here. Click a hyperlink to try out a particular build.
 
-    <ul>
+        <ul>
 %s
-    </ul>
+        </ul>
+    </div>
 </body>
 </html>""" % '\n'.join(list_elements)
 
