@@ -1,5 +1,5 @@
-interface DataAccessObjectInterface {
-    insert(file: Blob);
-    find(file: Blob);
-    update(file: Blob);
+interface DataAccessObject {
+    insert(module: any);
+    find(module: any);
+    update(module: any);
 }
