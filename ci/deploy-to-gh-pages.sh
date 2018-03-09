@@ -16,7 +16,7 @@ NAME=$3
 # The fourth parameter is the build's version.
 VERSION=$4
 
-pushd "$CURRENT_DIR"
+pushd "$CURRENT_DIR/.."
 
 # Clone the GitHub pages repository.
 git clone https://github.com/dubious-developments/dubious-developments.github.io
