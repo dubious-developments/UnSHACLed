@@ -50,11 +50,11 @@ script:
 # Deploy to GitHub pages.
 deploy:
   provider: script
-  script: bash ./ci/deploy-to-gh-pages.sh 16o0or82s949np2434po29779sr3o231o4r319n5 release-candidate
+  script: bash ./ci/deploy-to-gh-pages.sh $GH_PAGES_ACCESS_TOKEN release-candidate
   skip_cleanup: true
   on:
-    branch: master
-    condition: $TRAVIS_OS_NAME = linux
+    # branch: master
+    condition: $TRAVIS_OS_NAME = linux && ! -z $GH_PAGES_ACCESS_TOKEN
 
 cache:
   directories:
