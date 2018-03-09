@@ -53,7 +53,7 @@ deploy:
   script: bash ./ci/deploy-to-gh-pages.sh $GH_PAGES_ACCESS_TOKEN release-candidate
   skip_cleanup: true
   on:
-    # branch: master
+    branch: deploy-all-the-things
     condition: $TRAVIS_OS_NAME = linux && ! -z $GH_PAGES_ACCESS_TOKEN
 
 cache:
