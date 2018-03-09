@@ -50,7 +50,7 @@ script:
   # keep them from interfering with each other (we don't want a pull request to overwrite
   # the latest release candidate and vice-versa).
   - if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$TRAVIS_REPO_SLUG" == "dubious-developments/UnSHACLed" ] && [ ! -z "$GH_PAGES_ACCESS_TOKEN" ]; then
-      if [ "$TRAVIS_BRANCH" == "master" ]; then
+      if [ -z "$TRAVIS_PULL_REQUEST_SLUG" ]; then
         ./ci/deploy-to-gh-pages.sh
         "$GH_PAGES_ACCESS_TOKEN"
         "release-candidate"
@@ -60,7 +60,7 @@ script:
         ./ci/deploy-to-gh-pages.sh
         "$GH_PAGES_ACCESS_TOKEN"
         "pull-request-$TRAVIS_PULL_REQUEST"
-        "Pull request $TRAVIS_PULL_REQUEST (from )"
+        "Pull request $TRAVIS_PULL_REQUEST (from $TRAVIS_PULL_REQUEST_SLUG)"
         "UnSHACLed build $TRAVIS_BUILD_NUMBER (development; pull request $TRAVIS_PULL_REQUEST)";
       fi;
     fi
