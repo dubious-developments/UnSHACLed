@@ -34,6 +34,9 @@ echo "$VERSION" > "dubious-developments.github.io/$TARGET_DIRECTORY/version"
 
 pushd dubious-developments.github.io
 
+# Regenerate the index.
+python3 ../ci/generate-index.py > index.html
+
 # Add the changes.
 git add .
 
