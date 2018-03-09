@@ -1,6 +1,7 @@
 import * as React from 'react';
 import Navbar from '../components/navbarWork';
 import SideBar from '../components/Sidebar';
+import MxGraph from '../components/MxGraph';
 import { Grid } from 'semantic-ui-react';
 
 class Workspace extends React.Component<any, any> {
@@ -24,7 +25,7 @@ class Workspace extends React.Component<any, any> {
                         <SideBar/>
                     </Grid.Column>
                     <Grid.Column>
-                        <p> Graphs here</p>
+                        <MxGraph/>
                     </Grid.Column>
                 </Grid.Row>
             </Grid>
