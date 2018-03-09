@@ -47,14 +47,11 @@ script:
       ./deploy-to-server.sh $encrypted_077ce6e5a149_key $encrypted_077ce6e5a149_iv 8800 nightly UnSHACLed-nightly;
     fi
 
-# Deploy to GitHub pages.
-deploy:
-  provider: script
-  script: bash ./ci/deploy-to-gh-pages.sh $GH_PAGES_ACCESS_TOKEN release-candidate
-  skip_cleanup: true
-  on:
-    branch: deploy-all-the-things
-    condition: $TRAVIS_OS_NAME = linux && ! -z $GH_PAGES_ACCESS_TOKEN
+after_script:
+  # Deploy to GitHub pages.
+  - if [ "$TRAVIS_OS_NAME" = "linux" ] && [ ! -z "$GH_PAGES_ACCESS_TOKEN" ]; then
+      ./ci/deploy-to-gh-pages.sh $GH_PAGES_ACCESS_TOKEN release-candidate "Release candidate" "UnSHACLed build $TRAVIS_BUILD_NUMBER"
+    fi
 
 cache:
   directories:
