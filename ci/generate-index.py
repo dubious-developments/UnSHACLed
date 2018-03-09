@@ -27,7 +27,7 @@ def generate_index(name_directory_tuples):
     for name, directory in name_directory_tuples:
         list_elements.append(
             (' ' * 8) +
-            """<li><a href="%s">%s</a></li>""" % (name, directory + '/index.html'))
+            """<li><a href="%s">%s</a></li>""" % (directory + '/index.html', name))
 
     return \
 """<!DOCTYPE html>
