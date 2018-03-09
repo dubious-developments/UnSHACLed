@@ -32,8 +32,8 @@ install:
   - npm install
 
 script:
-  # Compile sources.
-  - gulp lint build
+  # Compile sources. Assume that the project will be hosted locally.
+  - PUBLIC_URL="." gulp lint build
   # Run the tests.
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then XVFB_RUN=xvfb-run; fi
   - $XVFB_RUN gulp test
