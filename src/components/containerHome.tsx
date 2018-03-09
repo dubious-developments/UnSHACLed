@@ -51,17 +51,18 @@ class HomeContainer extends React.Component {
 
                 >
                     <Grid.Column style={{maxWidth: 250}}>
-                        <Button
-                            inverted={true}
-                            color="teal"
-                            size="huge"
-                        >
-                            <Link
-                                to="/login"
-                                style={{color: 'white'}}
-                            > Login
-                            </Link>
-                        </Button>
+                        <Link
+                            to="/login"
+                            style={{color: 'white'}}
+                        > 
+                            <Button
+                                inverted={true}
+                                color="teal"
+                                size="huge"
+                            >
+                            Login
+                            </Button>
+                        </Link>
                     </Grid.Column>
                     <Grid.Column style={{maxWidth: 250}}>
                         <Button
