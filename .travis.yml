@@ -50,7 +50,7 @@ script:
 after_script:
   # Deploy to GitHub pages.
   - if [ "$TRAVIS_OS_NAME" = "linux" ] && [ ! -z "$GH_PAGES_ACCESS_TOKEN" ]; then
-      ./ci/deploy-to-gh-pages.sh $GH_PAGES_ACCESS_TOKEN release-candidate "Release candidate" "UnSHACLed build $TRAVIS_BUILD_NUMBER"
+      ./ci/deploy-to-gh-pages.sh $GH_PAGES_ACCESS_TOKEN release-candidate "Release candidate" "UnSHACLed build $TRAVIS_BUILD_NUMBER";
     fi
 
 cache:
