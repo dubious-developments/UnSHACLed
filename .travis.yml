@@ -20,6 +20,9 @@ addons:
 jdk:
   - oraclejdk8
 
+python:
+  - "3.6"
+
 install:
   # Build sshpass 1.06 from source. We need it to deploy a nightly
   # build of UnSHACLed to the server.
