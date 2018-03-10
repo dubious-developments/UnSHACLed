@@ -16,6 +16,10 @@ addons:
     token:
       secure: $SONARCLOUD_KEY
   firefox: "latest"
+  apt:
+    packages:
+      # Install pip3 so we can install PyGitHub.
+      - python3-pip
 
 jdk:
   - oraclejdk8
@@ -26,10 +30,7 @@ install:
   - wget https://netix.dl.sourceforge.net/project/sshpass/sshpass/1.06/sshpass-1.06.tar.gz
   - tar -xvzf sshpass-1.06.tar.gz
   - pushd sshpass-1.06; ./configure && sudo make install; popd
-  # Install pip3 so we can install PyGitHub.
-  - sudo apt-get install python3-pip
-  # Install PyGitHub, which we may need for posting a comment on pull
-  # requests.
+  # Install PyGitHub, which we need for adding comments to pull requests.
   - sudo pip3 install pygithub
   # Install gulp.
   - npm install -g gulp
