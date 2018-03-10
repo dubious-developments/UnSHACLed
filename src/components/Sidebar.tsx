@@ -83,7 +83,7 @@ class SideBar extends React.Component<any, any> {
                     inverted={true}
                     size="huge"
                 >
-                    <Menu.Item>
+                    <Menu.Item style={{height: '5em'}}>
                         <Image src={logo} size="mini" centered={true}/>
                     </Menu.Item>
 

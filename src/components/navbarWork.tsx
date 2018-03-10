@@ -26,7 +26,7 @@ class Navbar extends React.Component<any, any> {
                     size="large"
                     icon={true}
                     style={{
-                        height: '4.85em',
+                        height: '5.6em',
                         borderRadius: 0,
                     }}
                 >
