@@ -31,7 +31,7 @@ install:
   - tar -xvzf sshpass-1.06.tar.gz
   - pushd sshpass-1.06; ./configure && sudo make install; popd
   # Install PyGitHub, which we need for adding comments to pull requests.
-  - sudo pip3 install pygithub
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo pip3 install pygithub; fi
   # Install gulp.
   - npm install -g gulp
   # Install npm dependencies.
