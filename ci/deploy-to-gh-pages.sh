@@ -50,7 +50,7 @@ git push https://dubious-spongebot:$ACCESS_TOKEN@github.com/dubious-developments
 
 # Add a comment to the pull request if this is the first time
 # we're deploying it to GitHub pages.
-python3 ../ci/comment-pr-deployed.py "$ACCESS_TOKEN" "$TARGET_DIRECTORY";
+python3 ../ci/comment-pr-deployed.py "$ACCESS_TOKEN" "$TARGET_DIRECTORY"
 
 popd
 
