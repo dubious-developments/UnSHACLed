@@ -7,7 +7,7 @@ class MxGraph extends React.Component<any, any> {
     }
 
     componentDidMount() {
-        window.addEventListener('load', this.handleLoad);
+        this.handleLoad();
     }
 
     handleLoad() {
