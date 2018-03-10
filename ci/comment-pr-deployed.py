@@ -23,21 +23,21 @@ def parse_deploy_directory_name(deploy_directory_name):
 def has_commented_on_pull_request(pull_request):
     """Tells if Dubious Spongebot has commented on a pull request."""
     for comment in pull_request.get_issue_comments():
-        if comment.user.name == 'dubious-spongebot':
+        if comment.user.login == 'dubious-spongebot':
             return True
     return False
 
 def create_pull_request_deployed_comment(pull_request, deploy_directory_name):
     """Adds an issue comment to a pull request that links to the deployed build."""
     pull_request.create_issue_comment(
-"""Oh hi there!
+"""Oh hi there @%s!
 
-I've built and deployed your awesome pull request. You can try it out [here](https://dubious-developments.github.io/%s/index.html).
+I built and deployed your awesome pull request. 🎉🎆🎉 You can try it out [right here](https://dubious-developments.github.io/%s/index.html).
 
-Thanks for contributing! Keep up the good work!
+Thanks for contributing! Keep up the good work and have a wonderful day!
 
 > **Note:** it may take a little while before GitHub pages gets updated. Try again in a minute if your deployed build doesn't show up right away."""
-        % deploy_directory_name)
+        % (pull_request.user.login, deploy_directory_name))
 
 
 def comment_pull_request_deployed(argv):
