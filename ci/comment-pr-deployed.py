@@ -15,7 +15,7 @@ def parse_deploy_directory_name(deploy_directory_name):
     if deploy_directory_name.startswith(prefix):
         try:
             return int(deploy_directory_name[len(prefix):])
-        except:
+        except ValueError:
             return None
     else:
         return None

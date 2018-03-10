@@ -12,7 +12,7 @@ def index_directories():
     for top_level_dir in os.listdir():
         try:
             build_name = open(top_level_dir + '/build-name', mode='r')
-        except:
+        except OSError:
             continue
 
         if os.path.exists(top_level_dir + '/index.html'):
