@@ -26,6 +26,9 @@ install:
   - wget https://netix.dl.sourceforge.net/project/sshpass/sshpass/1.06/sshpass-1.06.tar.gz
   - tar -xvzf sshpass-1.06.tar.gz
   - pushd sshpass-1.06; ./configure && sudo make install; popd
+  # Install PyGitHub, which we may need for posting a comment on pull
+  # requests.
+  - pip3 install pygithub
   # Install gulp.
   - npm install -g gulp
   # Install npm dependencies.

@@ -48,6 +48,10 @@ git -c user.name='Dubious Spongebot' \
 # Push the changes.
 git push https://dubious-spongebot:$ACCESS_TOKEN@github.com/dubious-developments/dubious-developments.github.io master &2> /dev/null
 
+# Add a comment to the pull request if this is the first time
+# we're deploying it to GitHub pages.
+python3 ../ci/comment-pr-deployed.py "$ACCESS_TOKEN" "$TARGET_DIRECTORY";
+
 popd
 
 popd
