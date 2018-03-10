@@ -10,6 +10,7 @@ You can try out UnSHACLed's [latest release](http://193.190.127.184) or its [lat
 
 Operating system | Status
 ---------------- | ------
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/5cde9768428f421b94abbb9b36962959)](https://app.codacy.com/app/jonathanvdc/UnSHACLed?utm_source=github.com&utm_medium=referral&utm_content=dubious-developments/UnSHACLed&utm_campaign=badger)
 Linux and Mac OS X | [![Build Status](https://travis-ci.org/dubious-developments/UnSHACLed.svg?branch=master)](https://travis-ci.org/dubious-developments/UnSHACLed)
 Windows | [![Build status](https://ci.appveyor.com/api/projects/status/9jhin9m8rocfm0p4/branch/master?svg=true)](https://ci.appveyor.com/project/jonathanvdc/unshacled)
 
