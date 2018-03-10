@@ -45,8 +45,15 @@ class MxGraph extends React.Component<any, any> {
     }
 
     render() {
+        const grid = require('../img/grid.gif');
         return (
-            <div id="graphContainer"/>
+            <div 
+                id="graphContainer"
+                style={{
+                    backgroundImage: `url(${ grid })`,
+                    cursor: 'default',
+                }}
+            />
         );
     }
 }
