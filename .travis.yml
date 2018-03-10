@@ -20,18 +20,17 @@ addons:
 jdk:
   - oraclejdk8
 
-python:
-  - "3.6"
-
 install:
   # Build sshpass 1.06 from source. We need it to deploy a nightly
   # build of UnSHACLed to the server.
   - wget https://netix.dl.sourceforge.net/project/sshpass/sshpass/1.06/sshpass-1.06.tar.gz
   - tar -xvzf sshpass-1.06.tar.gz
   - pushd sshpass-1.06; ./configure && sudo make install; popd
+  # Install pip3 so we can install PyGitHub.
+  - sudo apt-get install python3-pip
   # Install PyGitHub, which we may need for posting a comment on pull
   # requests.
-  - pip3 install pygithub
+  - sudo pip3 install pygithub
   # Install gulp.
   - npm install -g gulp
   # Install npm dependencies.
