@@ -1,8 +1,12 @@
 import * as React from 'react';
-import { Sidebar, Menu, Image, Input } from 'semantic-ui-react';
+import { Sidebar, Menu, Image, Input, Dropdown } from 'semantic-ui-react';
 
 class SideBar extends React.Component<any, any> {
 
+    static sidebarOptions =  [
+        { key: 1, text: 'Add Components', value: 1 },
+        { key: 1, text: 'Project structure', value: 1 }
+        ];
     static SHACLMenuItems = ["Shape", "Node Shape", "Property Shape"];
     static GeneralMenuItems = ["Arrow", "Rectangle"];
     static TemplateMenuItems = ["Building", "Person"];
@@ -85,6 +89,10 @@ class SideBar extends React.Component<any, any> {
                 >
                     <Menu.Item style={{height: '5em'}}>
                         <Image src={logo} size="mini" centered={true}/>
+                    </Menu.Item>
+
+                    <Menu.Item>
+                        <Dropdown defaultValue={0} options={SideBar.sidebarOptions} fluid={true}/>
                     </Menu.Item>
 
                     <Menu.Item>
