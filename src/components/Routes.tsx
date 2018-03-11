@@ -5,6 +5,7 @@ import Home from "../pages/Home";
 import Work from "../pages/Work";
 import About from "../pages/About";
 import Contact from "../pages/Contact";
+import NotFound from "../pages/NotFound";
 
 class Routes extends React.Component<any, any> {
     render() {
@@ -16,6 +17,7 @@ class Routes extends React.Component<any, any> {
                     <Route exact={true} path="/user" component={Work}/>
                     <Route exact={true} path="/about" component={About}/>
                     <Route exact={true} path="/contact" component={Contact}/>
+                    <Route component={NotFound} />
                 </Switch>
             </div>
         );

@@ -20,19 +20,19 @@ class Navbar extends React.Component<any, any> {
                     <Menu.Item as="a" onClick={(event) => this.handleClick(event)}>
                         <Image src={logo} size="mini"/>
                     </Menu.Item>
-                    <Menu.Item>
-                        <Link
-                            to="/about"
-                            style={{color: 'white'}}
-                        > About
-                        </Link>
+                    <Menu.Item
+                        as={Link}
+                        to="/about"
+                        style={{color: 'white'}}
+                    >
+                        About
                     </Menu.Item>
-                    <Menu.Item>
-                        <Link
-                            to="/contact"
-                            style={{color: 'white'}}
-                        > Contact
-                        </Link>
+                    <Menu.Item
+                        as={Link}
+                        to="/contact"
+                        style={{color: 'white'}}
+                    >
+                        Contact
                     </Menu.Item>
                     <Menu.Item
                         as="a"
@@ -45,7 +45,12 @@ class Navbar extends React.Component<any, any> {
 
                         }
                     />
-                    <Menu.Item>v0.1</Menu.Item>
+                    <Menu.Item
+                        as="a"
+                        href="https://github.com/dubious-developments/UnSHACLed/wiki/Release-notes"
+                    >
+                        v0.1
+                    </Menu.Item>
                 </Container>
             </Menu>
         );

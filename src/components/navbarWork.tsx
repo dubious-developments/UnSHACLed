@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Menu, Icon } from 'semantic-ui-react';
-import Auth from "../Auth";
+import Auth from "../services/Auth";
 import { withRouter } from 'react-router-dom';
 
 class Navbar extends React.Component<any, any> {
@@ -26,7 +26,8 @@ class Navbar extends React.Component<any, any> {
                     size="large"
                     icon={true}
                     style={{
-                        height: '4.85em'
+                        height: '5.6em',
+                        borderRadius: 0,
                     }}
                 >
                     <Menu.Menu
@@ -54,7 +55,12 @@ class Navbar extends React.Component<any, any> {
                                 />
                             }
                         />
-                        <Menu.Item>v0.1</Menu.Item>
+                        <Menu.Item
+                            as="a"
+                            href="https://github.com/dubious-developments/UnSHACLed/wiki/Release-notes"
+                        >
+                        v0.1
+                        </Menu.Item>
                         <Menu.Item onClick={(event) => this.logoutButton(event)}> Logout </Menu.Item>
                     </Menu.Menu>
 
