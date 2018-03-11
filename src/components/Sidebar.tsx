@@ -90,17 +90,18 @@ class SideBar extends React.Component<any, any> {
                 as={Menu}
                 animation='uncover'
                 visible={true}
-                icon={true}
                 vertical={true}
                 inverted={true}
+                borderless={true}
                 size="huge"
                 style={{
-                    width: '9.3em'
+                    width: '12em'
                 }}
             >
                 <Menu.Item style={{height: '5em'}}>
                     <Image src={logo} size="mini" centered={true}/>
                 </Menu.Item>
+
                 <Menu.Item>
                     <Dropdown
                         defaultValue={1}
@@ -109,6 +110,7 @@ class SideBar extends React.Component<any, any> {
                         direction="left"
                         onChange={this.handleDropDown}
                         as="h5"
+                        pointing="top right"
                     />
                 </Menu.Item>
                 {this.state.content === 1 ? (
@@ -118,7 +120,7 @@ class SideBar extends React.Component<any, any> {
                                 onChange={this.handleChange}
                                 type="text"
                                 value={this.state.value}
-                                placeholder="Search"
+                                placeholder="Search . . ."
                                 inverted={true}
                                 transparent={true}
                                 icon="search"
