@@ -75,6 +75,7 @@ class SideBar extends React.Component<any, any> {
             value: event.target.value
         });
     }
+
     handleDropDown(event: any, data: any) {
         this.setState({
             content: data.value
@@ -110,34 +111,39 @@ class SideBar extends React.Component<any, any> {
                         onChange={this.handleDropDown}
                     />
                 </Menu.Item>
-                {this.state.content === 1 &&
-                <div>
-                    <Menu.Item>
-                        <Input
-                            onChange={this.handleChange}
-                            type="text"
-                            value={this.state.value}
-                            placeholder="Search"
-                            inverted={true}
-                            icon="search"
-                        />
-                    </Menu.Item>
+                {this.state.content === 1 ? (
+                    <div>
+                        <Menu.Item>
+                            <Input
+                                onChange={this.handleChange}
+                                type="text"
+                                value={this.state.value}
+                                placeholder="Search"
+                                inverted={true}
+                                icon="search"
+                            />
+                        </Menu.Item>
 
-                    <Menu.Item>
-                        SHACL
-                        <this.DynamicMenu kind="SHACL"/>
-                    </Menu.Item>
+                        <Menu.Item>
+                            SHACL
+                            <this.DynamicMenu kind="SHACL"/>
+                        </Menu.Item>
 
-                    <Menu.Item>
-                        General
-                        <this.DynamicMenu kind="General"/>
-                    </Menu.Item>
+                        <Menu.Item>
+                            General
+                            <this.DynamicMenu kind="General"/>
+                        </Menu.Item>
 
+                        <Menu.Item>
+                            Template
+                            <this.DynamicMenu kind="Template"/>
+                        </Menu.Item>
+                    </div>
+                ) : (
                     <Menu.Item>
-                        Template
-                        <this.DynamicMenu kind="Template"/>
+                        <h1>Project structure </h1>
                     </Menu.Item>
-                </div>
+                )
                 }
             </Sidebar>
 
