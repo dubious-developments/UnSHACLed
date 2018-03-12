@@ -5,6 +5,7 @@ import * as Collections from "typescript-collections";
 import {Model, ModelComponent, ModelData, ModelTaskMetadata} from "../entities/model";
 import {ProcessorTask} from "../entities/taskProcessor";
 import {Component} from "./component";
+import {DataGraphModem} from "./dataGraphModem";
 
 /**
  * Provides basic DAO functionality at the file granularity level.
@@ -16,8 +17,12 @@ export class FileDAO implements DataAccessObject {
     /**
      * Create a new FileDAO
      */
-    public constructor() {
+    public constructor(model: Model) {
+        this.model = model;
         this.io = new IOFacilitator();
+
+        // register modems
+        this.io.registerModem(new DataGraphModem());
     }
 
     /**
@@ -26,6 +31,7 @@ export class FileDAO implements DataAccessObject {
      */
     public insert(module: any) {
         this.model.tasks.schedule(new SaveTask(this.io, module));
+        this.model.tasks.processTask();
     }
 
     /**
@@ -33,7 +39,11 @@ export class FileDAO implements DataAccessObject {
      * @param module
      */
     public find(module: any) {
-        this.model.tasks.schedule(new LoadTask(this.io, module));
+        let model = this.model;
+        this.io.readFromFile(module, function(result: any) {
+            model.tasks.schedule(new LoadTask(result, module));
+            model.tasks.processTask();
+        });
     }
 
     /**
@@ -70,15 +80,15 @@ class IOFacilitator {
      * Read from an existing file.
      * @returns {Graph}
      * @param module
+     * @param save
      */
-    public readFromFile(module: FileModule) {
+    public readFromFile(module: FileModule, save: (result: any) => void) {
         let reader = new FileReader();
         reader.readAsText(module.getFile());
         reader.onload = onLoadFunction;
         reader.onloadend = onLoadEndFunction;
 
         let modem = this.modems.getValue(module.getType());
-        let data = null;
         // every time a portion is loaded, demodulate this portion of content
         // and aggregate the result (this happens internally).
         function onLoadFunction(evt: any) {
@@ -88,11 +98,9 @@ class IOFacilitator {
         // when we are finished loading, retrieve the aggregated result
         // and clean the modem.
         function onLoadEndFunction(evt: any) {
-            data = modem.getData();
+            save(modem.getData());
             modem.clean();
         }
-
-        return data;
     }
 
     /**
@@ -114,7 +122,7 @@ class IOFacilitator {
  * A single persistence directive.
  * Contains all the necessary information to carry out a persistence operation.
  */
-class FileModule implements Module {
+export class FileModule implements Module {
     private type: ModelComponent;
     private filename: string;
     private file: Blob;
@@ -165,16 +173,16 @@ class LoadTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
      * Create a new LoadTask.
      * Contains a function that will execute on the model.
      * This function saves information to the model, which was read from file.
-     * @param {IOFacilitator} io
+     * @param result
      * @param {FileModule} module
      */
-    public constructor(io: IOFacilitator, module: FileModule) {
+    public constructor(result: any, module: FileModule) {
         super(function(data: ModelData) {
             let component: Component = data.getComponent(module.getType());
-            if (component == null) {
+            if (component == null || component === undefined) {
                 component = new Component();
             }
-            component.setPart(module.getFilename(), io.readFromFile(module));
+            component.setPart(module.getFilename(), result);
             data.setComponent(module.getType(), component);
         },    null);
     }
@@ -195,7 +203,9 @@ class SaveTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
     public constructor(io: IOFacilitator, module: FileModule) {
         super(function(data: ModelData) {
             let component: Component = data.getComponent(module.getType());
-            io.writeToFile(module, component.getPart(module.getFilename()));
+            if (component != null && component !== undefined) {
+                io.writeToFile(module, component.getPart(module.getFilename()));
+            }
         },    null);
     }
 }

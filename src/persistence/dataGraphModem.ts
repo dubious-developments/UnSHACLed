@@ -11,8 +11,7 @@ export class DataGraphModem implements Modem {
     private mimeTypes: Collections.Set<string>;
 
     public constructor() {
-        let N3 = require("n3");
-        this.graph = N3.Store();
+        this.clean();
 
         this.label = ModelComponent.DataGraph;
         this.mimeTypes = new Collections.Set<string>();
@@ -55,6 +54,7 @@ export class DataGraphModem implements Modem {
     }
 
     public clean() {
-        this.graph.removeTriples(this.graph.getTriples());
+        let N3 = require("n3");
+        this.graph = N3.Store();
     }
 }

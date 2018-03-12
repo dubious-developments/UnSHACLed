@@ -1,13 +1,17 @@
 import * as Collections from "typescript-collections";
 
 export class Component {
-    private map: Collections.Dictionary<string, any>;
+    private parts: Collections.Dictionary<string, any>;
+
+    public constructor() {
+        this.parts = new Collections.Dictionary<string, any>();
+    }
 
     public getPart(key: string) {
-        return this.map.getValue(key);
+        return this.parts.getValue(key);
     }
 
     public setPart(key: string, value: any) {
-        this.map.setValue(key, value);
+        this.parts.setValue(key, value);
     }
 }

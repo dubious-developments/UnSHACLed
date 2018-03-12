@@ -33,6 +33,9 @@ describe("DataGraphModem Class", () => {
             let modem = new DataGraphModem();
             expect(() => modem.demodulate(generateTurtle(), "application/rdf+xml"))
                 .toThrow(Error("Incorrect MimeType application/rdf+xml!"));
+
+            expect(() => modem.modulate(null, "application/rdf+xml"))
+               .toThrow(Error("Incorrect MimeType application/rdf+xml!"));
         });
 });
 
