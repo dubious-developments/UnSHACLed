@@ -11,6 +11,7 @@
     "react-dom": "^16.2.0",
     "react-router-dom": "^4.2.2",
     "react-scripts-ts": "2.13.0",
+    "react-treebeard": "^2.1.0",
     "semantic-ui-css": "^2.3.0",
     "semantic-ui-react": "^0.78.3",
     "tsify": "^3.0.1",
