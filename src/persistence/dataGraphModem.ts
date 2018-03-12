@@ -11,13 +11,14 @@ export class DataGraphModem implements Modem {
     private mimeTypes: Collections.Set<string>;
 
     public constructor() {
-        let rdf = require("shacl-js/rdflib-graph");
-        this.graph = new rdf.RDFLibGraph(null);
+        let N3 = require("n3");
+        this.graph = N3.Store();
 
         this.label = ModelComponent.DataGraph;
         this.mimeTypes = new Collections.Set<string>();
-        this.mimeTypes.add("text/n3");
-        this.mimeTypes.add("application/rdf+xml");
+        this.mimeTypes.add("application/n-quads");
+        this.mimeTypes.add("application/n-triples");
+        this.mimeTypes.add("application/trig");
         this.mimeTypes.add("text/turtle");
     }
 
@@ -27,27 +28,31 @@ export class DataGraphModem implements Modem {
 
     public modulate(data: any, mime: string) {
         if (this.mimeTypes.contains(mime)) {
-            // get an RDFLibGraphIterator that is able to iterate over the entire store
-            let iterator = data.find(undefined, undefined, undefined);
-            let content = [];
-            let el;
-            while (el = iterator.next()) {
-                content.push(el.subject + " " + el.predicate + " " + el.object);
-            }
-
-            return content.join("");
+            return "";
         }
 
         throw new Error("Incorrect MimeType " + mime + "!");
     }
 
     /**
-     * Parse a string from some RDF format (supported types are Turtle, RDF/XML, N3).
+     * Parse a string from some RDF format.
      * Return a graph structure (set of parsed RDF triples).
      */
     public demodulate(content: string, mime: string) {
         if (this.mimeTypes.contains(mime)) {
-            this.graph.loadGraph(content, null, mime, null, null);
+            let N3 = require("n3");
+            let parser = N3.Parser({ format: mime });
+            let graph = this.graph;
+            parser.parse(content,
+                         function(error: any, triple: any, prefixes: any) {
+                             if (triple) {
+                                 graph.addTriple(triple.subject, triple.predicate, triple.object);
+                             } else {
+                                 graph.addPrefixes(prefixes);
+                             }
+            });
+
+            return this.graph;
         }
 
         throw new Error("Incorrect MimeType " + mime + "!");
