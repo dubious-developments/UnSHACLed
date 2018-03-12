@@ -1,3 +1,5 @@
+/// <reference path="./modem.d.ts"/>
+
 import * as Collections from "typescript-collections";
 import {ModelComponent} from "../entities/model";
 
@@ -9,8 +11,8 @@ export class DataGraphModem implements Modem {
     private mimeTypes: Collections.Set<string>;
 
     public constructor() {
-        let SHACL = require("../../conformance/shacl");
-        this.graph = new SHACL.RDFLibGraph();
+        let rdf = require("shacl-js/rdflib-graph");
+        this.graph = new rdf.RDFLibGraph(null);
 
         this.label = ModelComponent.DataGraph;
         this.mimeTypes = new Collections.Set<string>();
@@ -24,7 +26,19 @@ export class DataGraphModem implements Modem {
     }
 
     public modulate(data: any, mime: string) {
-        return "";
+        if (this.mimeTypes.contains(mime)) {
+            // get an RDFLibGraphIterator that is able to iterate over the entire store
+            let iterator = data.find(undefined, undefined, undefined);
+            let content = [];
+            let el;
+            while (el = iterator.next()) {
+                content.push(el.subject + " " + el.predicate + " " + el.object);
+            }
+
+            return content.join("");
+        }
+
+        throw new Error("Incorrect MimeType " + mime + "!");
     }
 
     /**
@@ -36,7 +50,7 @@ export class DataGraphModem implements Modem {
             this.graph.loadGraph(content, null, mime, null, null);
         }
 
-        throw new Error("Incorrect MimeType!");
+        throw new Error("Incorrect MimeType " + mime + "!");
     }
 
     public getData() {

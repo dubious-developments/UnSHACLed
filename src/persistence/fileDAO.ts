@@ -1,3 +1,6 @@
+/// <reference path="./dataAccessObject.d.ts"/>
+/// <reference path="./modem.d.ts"/>
+
 import * as Collections from "typescript-collections";
 import {Model, ModelComponent, ModelData, ModelTaskMetadata} from "../entities/model";
 import {ProcessorTask} from "../entities/taskProcessor";
@@ -111,7 +114,7 @@ class IOFacilitator {
  * A single persistence directive.
  * Contains all the necessary information to carry out a persistence operation.
  */
-class FileModule {
+class FileModule implements Module {
     private type: ModelComponent;
     private filename: string;
     private file: Blob;

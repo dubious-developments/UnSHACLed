@@ -1,5 +1,9 @@
 interface DataAccessObject {
-    insert(module: any);
-    find(module: any);
-    update(module: any);
+    insert(module: Module);
+    find(module: Module);
+    update(module: Module);
+}
+
+interface Module {
+
 }
