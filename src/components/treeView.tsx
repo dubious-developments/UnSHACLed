@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {Treebeard} from 'react-treebeard';
+import customStyle from '../style/treeView';
 
 const data = {
     name: 'root',
@@ -41,6 +42,7 @@ class Tree extends React.Component<any, any> {
                 <Treebeard
                     data={data}
                     onToggle={this.onToggle}
+                    style={customStyle}
                 />
             </div>
         );
