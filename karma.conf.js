@@ -3,7 +3,7 @@ module.exports = function(config) {
         frameworks: ["jasmine", "karma-typescript", "detectBrowsers"],
         files: [
             { pattern: "src/**/*.ts" },
-            { pattern: "src/components/**/*.tsx" },
+            { pattern: "src/**/*.tsx" },
             { pattern: "test/**/*.ts" },
         ],
 
