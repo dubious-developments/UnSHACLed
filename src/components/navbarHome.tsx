@@ -37,6 +37,7 @@ class Navbar extends React.Component<any, any> {
                     <Menu.Item
                         as="a"
                         href="https://github.com/dubious-developments/UnSHACLed"
+                        target="_blank"
                         icon={
                             <Icon
                                 name="github"
@@ -48,6 +49,7 @@ class Navbar extends React.Component<any, any> {
                     <Menu.Item
                         as="a"
                         href="https://github.com/dubious-developments/UnSHACLed/wiki/Release-notes"
+                        target="_blank"
                     >
                         v0.1
                     </Menu.Item>

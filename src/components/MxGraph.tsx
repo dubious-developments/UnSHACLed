@@ -1,4 +1,5 @@
 import * as React from 'react';
+declare let mxClient, mxUtils, mxGraph, mxRubberband: any;
 
 class MxGraph extends React.Component<any, any> {
     constructor(props: string) {
