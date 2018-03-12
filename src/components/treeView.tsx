@@ -41,15 +41,23 @@ decorators.Toggle = ({style}) => {
 };
 
 const data = {
-    name: 'root',
+    name: 'my-project',
     children: [
         {
-            name: 'parent',
+            name: 'constraints',
             children: [
-                { name: 'child1' },
-                { name: 'child2' }
-            ]
+                { name: 'building.shacl' },
+                { name: 'person.shacl' }
+            ],
+        },
+        {
+            name: 'graph',
+            children: [
+                { name: 'graph1.mx' },
+                { name: 'graph2.mx' }
+            ],
         }
+
     ]
 };
 
