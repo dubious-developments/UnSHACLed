@@ -35,22 +35,14 @@ export class DataGraphModem implements Modem {
     }
 
     /**
-     * Parse a string from some RDF format.
+     * Synchronously parse a string from some RDF format.
      * Return a graph structure (set of parsed RDF triples).
      */
     public demodulate(content: string, mime: string) {
         if (this.mimeTypes.contains(mime)) {
             let N3 = require("n3");
             let parser = N3.Parser({ format: mime });
-            let graph = this.graph;
-            parser.parse(content,
-                         function(error: any, triple: any, prefixes: any) {
-                             if (triple) {
-                                 graph.addTriple(triple.subject, triple.predicate, triple.object);
-                             } else {
-                                 graph.addPrefixes(prefixes);
-                             }
-            });
+            this.graph.addTriples(parser.parse(content));
 
             return this.graph;
         }
@@ -63,6 +55,6 @@ export class DataGraphModem implements Modem {
     }
 
     public clean() {
-        this.graph.clear();
+        this.graph.removeTriples(this.graph.getTriples());
     }
 }
