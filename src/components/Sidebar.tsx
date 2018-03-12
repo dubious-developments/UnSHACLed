@@ -86,6 +86,7 @@ class SideBar extends React.Component<any, any> {
 
     render() {
         const logo = require('../img/shacl_logo_trans.png');
+        const defaultOption = 1;
         return (
             <Sidebar
                 as={Menu}
@@ -105,7 +106,7 @@ class SideBar extends React.Component<any, any> {
 
                 <Menu.Item>
                     <Dropdown
-                        defaultValue={1}
+                        defaultValue={defaultOption}
                         options={SideBar.sidebarOptions}
                         fluid={true}
                         direction="left"
@@ -114,7 +115,7 @@ class SideBar extends React.Component<any, any> {
                         pointing="top right"
                     />
                 </Menu.Item>
-                {this.state.content === 1 ? (
+                {this.state.content === defaultOption ? (
                     <div>
                         <Menu.Item>
                             <Input

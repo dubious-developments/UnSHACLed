@@ -4,7 +4,7 @@ export default {
     tree: {
         base: {
             listStyle: 'none',
-            backgroundColor: '#21252B',
+            backgroundColor: 'none',
             margin: 0,
             padding: 0,
             color: '#9DA5AB',
@@ -22,7 +22,7 @@ export default {
                 display: 'block'
             },
             activeLink: {
-                background: '#31363F'
+                background: '#none'
             },
             toggle: {
                 base: {
@@ -43,7 +43,7 @@ export default {
                 height: 14,
                 width: 14,
                 arrow: {
-                    fill: '#9DA5AB',
+                    fill: '#ffffff',
                     strokeWidth: 0
                 }
             },
