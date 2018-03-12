@@ -98,6 +98,8 @@ class IOFacilitator {
         // when we are finished loading, retrieve the aggregated result
         // and clean the modem.
         function onLoadEndFunction(evt: any) {
+            // as reading is asynchronous, we can only save the result
+            // at this point.
             save(modem.getData());
             modem.clean();
         }
