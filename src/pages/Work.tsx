@@ -29,8 +29,8 @@ class Workspace extends React.Component<any, any> {
                     </Grid.Column>
                 </Grid.Row>
             </Grid>
-        )
-            ;
+        );
     }
 }
+
 export default Workspace;
