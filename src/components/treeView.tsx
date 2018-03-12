@@ -1,6 +1,42 @@
 import * as React from 'react';
-import {Treebeard} from 'react-treebeard';
+import {Treebeard, decorators } from 'react-treebeard';
+import {Icon} from 'semantic-ui-react';
 import customStyle from '../style/treeView';
+
+decorators.Header = ({style, node}) => {
+    const iconStyle = {marginRight: '5px'};
+    return (
+        <div style={style.base}>
+            <div style={style.title}>
+                <Icon
+                    name="folder"
+                    size="large"
+                    inverted={true}
+                    style={iconStyle}
+                />
+                {node.name}
+            </div>
+        </div>
+    );
+};
+
+decorators.Toggle = ({style}) => {
+    const {height, width} = style;
+    const points = `0,0 0,${12} ${12},${7}`;
+
+    return (
+        <div style={style.base}>
+            <div style={style.wrapper}>
+                <svg height={height} width={width}>
+                    <polygon
+                        points={points}
+                        style={style.arrow}
+                    />
+                </svg>
+            </div>
+        </div>
+    );
+};
 
 const data = {
     name: 'root',
@@ -43,6 +79,7 @@ class Tree extends React.Component<any, any> {
                     data={data}
                     onToggle={this.onToggle}
                     style={customStyle}
+                    decorators={decorators}
                 />
             </div>
         );
