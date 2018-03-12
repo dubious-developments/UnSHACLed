@@ -5,11 +5,13 @@ import customStyle from '../style/treeView';
 
 decorators.Header = ({style, node}) => {
     const iconStyle = {marginRight: '5px'};
+    const iconName = node.children ? "folder outline" : "file outline";
+
     return (
         <div style={style.base}>
             <div style={style.title}>
                 <Icon
-                    name="folder"
+                    name={iconName}
                     size="large"
                     inverted={true}
                     style={iconStyle}
