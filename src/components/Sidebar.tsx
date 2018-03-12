@@ -1,8 +1,13 @@
 import * as React from 'react';
-import { Sidebar, Menu, Image, Input } from 'semantic-ui-react';
+import {Sidebar, Menu, Image, Input, Dropdown} from 'semantic-ui-react';
+import TreeView from './treeView';
 
 class SideBar extends React.Component<any, any> {
 
+    static sidebarOptions = [
+        {key: 1, text: 'Add Components', value: 1},
+        {key: 2, text: 'Project structure', value: 2}
+    ];
     static SHACLMenuItems = ["Shape", "Node Shape", "Property Shape"];
     static GeneralMenuItems = ["Arrow", "Rectangle"];
     static TemplateMenuItems = ["Building", "Person"];
@@ -11,10 +16,12 @@ class SideBar extends React.Component<any, any> {
         super(props);
 
         this.state = {
-            value: ''
+            value: '',
+            content: 1
         };
 
         this.handleChange = this.handleChange.bind(this);
+        this.handleDropDown = this.handleDropDown.bind(this);
         this.getMenuItemsFiltered = this.getMenuItemsFiltered.bind(this);
         this.DynamicMenu = this.DynamicMenu.bind(this);
     }
@@ -66,56 +73,87 @@ class SideBar extends React.Component<any, any> {
 
     handleChange(event: any) {
         this.setState({
-           value: event.target.value
+            value: event.target.value
         });
+    }
+
+    handleDropDown(event: any, data: any) {
+        this.setState({
+            content: data.value
+        });
+
     }
 
     render() {
         const logo = require('../img/shacl_logo_trans.png');
+        const defaultOption = 1;
         return (
-                <Sidebar
-                    as={Menu}
-                    animation='uncover'
-                    width="thin"
-                    visible={true}
-                    icon={true}
-                    vertical={true}
-                    inverted={true}
-                    size="huge"
-                >
-                    <Menu.Item style={{height: '5em'}}>
-                        <Image src={logo} size="mini" centered={true}/>
-                    </Menu.Item>
+            <Sidebar
+                as={Menu}
+                animation='uncover'
+                visible={true}
+                vertical={true}
+                inverted={true}
+                borderless={true}
+                size="huge"
+                style={{
+                    width: '12em'
+                }}
+            >
+                <Menu.Item style={{height: '5em'}}>
+                    <Image src={logo} size="mini" centered={true}/>
+                </Menu.Item>
 
+                <Menu.Item>
+                    <Dropdown
+                        defaultValue={defaultOption}
+                        options={SideBar.sidebarOptions}
+                        fluid={true}
+                        direction="left"
+                        onChange={this.handleDropDown}
+                        as="h5"
+                        pointing="top right"
+                    />
+                </Menu.Item>
+                {this.state.content === defaultOption ? (
+                    <div>
+                        <Menu.Item>
+                            <Input
+                                onChange={this.handleChange}
+                                type="text"
+                                value={this.state.value}
+                                placeholder="Search . . ."
+                                inverted={true}
+                                transparent={true}
+                                icon="search"
+                            />
+                        </Menu.Item>
+
+                        <Menu.Item>
+                            SHACL
+                            <this.DynamicMenu kind="SHACL"/>
+                        </Menu.Item>
+
+                        <Menu.Item>
+                            General
+                            <this.DynamicMenu kind="General"/>
+                        </Menu.Item>
+
+                        <Menu.Item>
+                            Template
+                            <this.DynamicMenu kind="Template"/>
+                        </Menu.Item>
+                    </div>
+                ) : (
                     <Menu.Item>
-                        <Input
-                            onChange={this.handleChange}
-                            type="text"
-                            value={this.state.value}
-                            placeholder="Search"
-                            inverted={true}
-                            icon="search"
-                        />
-
+                        <TreeView/>
                     </Menu.Item>
-
-                    <Menu.Item >
-                        SHACL
-                        <this.DynamicMenu kind="SHACL" />
-                    </Menu.Item>
-
-                    <Menu.Item>
-                        General
-                        <this.DynamicMenu kind="General" />
-                    </Menu.Item>
-
-                    <Menu.Item>
-                        Template
-                        <this.DynamicMenu kind="Template" />
-                    </Menu.Item>
-                </Sidebar>
+                )
+                }
+            </Sidebar>
 
         );
     }
 }
+
 export default SideBar;
