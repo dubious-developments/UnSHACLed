@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {Sidebar, Menu, Image, Input, Dropdown} from 'semantic-ui-react';
+import TreeView from './treeView';
 
 class SideBar extends React.Component<any, any> {
 
@@ -144,7 +145,7 @@ class SideBar extends React.Component<any, any> {
                     </div>
                 ) : (
                     <Menu.Item>
-                        <h1>Project structure </h1>
+                        <TreeView/>
                     </Menu.Item>
                 )
                 }
