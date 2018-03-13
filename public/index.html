@@ -21,14 +21,6 @@
     -->
     <title>UnSHACLed Editor</title>
 
-    <!-- Sets the basepath for the library if not in same directory -->
-	  <script>
-		  mxBasePath = '.';
-	  </script>
-
-	  <!-- Loads and initializes the library -->
-    <script src="mxClient.min.js"></script>
-
   </head>
   <body>
     <noscript>
@@ -45,5 +37,13 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
+    <!-- Sets the basepath for the library if not in same directory -->
+    <script type="text/javascript">
+        mxBasePath = '.';
+    </script>
+
+    <!-- Loads and initializes the library -->
+    <script type="text/javascript" src="mxClient.min.js"></script>
+
   </body>
 </html>
