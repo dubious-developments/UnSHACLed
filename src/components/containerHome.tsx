@@ -56,6 +56,7 @@ class HomeContainer extends React.Component {
                             style={{color: 'white'}}
                         > 
                             <Button
+                                id="firstLoginButton"
                                 inverted={true}
                                 color="teal"
                                 size="huge"
@@ -66,6 +67,7 @@ class HomeContainer extends React.Component {
                     </Grid.Column>
                     <Grid.Column style={{maxWidth: 250}}>
                         <Button
+                            id="firstSignUpButton"
                             animated="fade"
                             inverted={true}
                             size="huge"

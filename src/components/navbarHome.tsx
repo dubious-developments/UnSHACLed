@@ -21,6 +21,7 @@ class Navbar extends React.Component<any, any> {
                         <Image src={logo} size="mini"/>
                     </Menu.Item>
                     <Menu.Item
+                        id="AboutMenuItem"
                         as={Link}
                         to="/about"
                         style={{color: 'white'}}
@@ -28,6 +29,7 @@ class Navbar extends React.Component<any, any> {
                         About
                     </Menu.Item>
                     <Menu.Item
+                        id="ContactMenuItem"
                         as={Link}
                         to="/contact"
                         style={{color: 'white'}}
@@ -35,6 +37,7 @@ class Navbar extends React.Component<any, any> {
                         Contact
                     </Menu.Item>
                     <Menu.Item
+                        id="GithubMenuItem"
                         as="a"
                         href="https://github.com/dubious-developments/UnSHACLed"
                         target="_blank"
@@ -47,6 +50,7 @@ class Navbar extends React.Component<any, any> {
                         }
                     />
                     <Menu.Item
+                        id="ReleaseNotesMenuItem"
                         as="a"
                         href="https://github.com/dubious-developments/UnSHACLed/wiki/Release-notes"
                         target="_blank"

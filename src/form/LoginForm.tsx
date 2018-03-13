@@ -46,6 +46,7 @@ class LoginForm extends React.Component<any, any> {
 
                                 >
                                     <Input
+                                        id="userNameInput"
                                         size="large"
                                         required={true}
                                         fluid={true}
@@ -59,6 +60,7 @@ class LoginForm extends React.Component<any, any> {
                                     inline={true}
                                 >
                                     <Input
+                                        id="passWordInput"
                                         size="large"
                                         required={true}
                                         fluid={true}
@@ -70,6 +72,7 @@ class LoginForm extends React.Component<any, any> {
                                 </Form.Field>
 
                                 <Button
+                                    id="secondLoginButton"
                                     color="teal"
                                     fluid={true}
                                     inverted={true}
@@ -84,6 +87,7 @@ class LoginForm extends React.Component<any, any> {
                                 >Or
                                 </Divider>
                                 <Button
+                                    id="secondSignUpButton"
                                     animated="fade"
                                     fluid={true}
                                     inverted={true}
