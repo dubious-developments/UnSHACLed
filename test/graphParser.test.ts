@@ -4,7 +4,7 @@ import {Graph} from "../src/persistence/graph";
 describe("GraphParser Class", () => {
     it("should parse valid Turtle code and return a graph " +
         "containing the (expanded) triples described therein.",
-       () => {
+       (done) => {
             let parser = new GraphParser();
             parser.parse(generateTurtle(), "text/turtle", function(result: any) {
                 expect(result.countTriples()).toEqual(2);
@@ -21,11 +21,12 @@ describe("GraphParser Class", () => {
 
                 parser.clean();
                 expect(parser.getData().countTriples()).toEqual(0);
+                done();
             });
        });
 
     it("should translate a graph to a string containing valid Turtle code.",
-       () => {
+       (done) => {
             let parser = new GraphParser();
             let N3 = require("n3");
             let graph = new Graph(N3.Store());
@@ -38,6 +39,7 @@ describe("GraphParser Class", () => {
                 let trimmedResult = result.replace(/\s+/g, "");
                 let trimmedTarget = generateTurtle().replace(/\s+/g, "");
                 expect(trimmedResult).toEqual(trimmedTarget);
+                done();
             });
        });
 

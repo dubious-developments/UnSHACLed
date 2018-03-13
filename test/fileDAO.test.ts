@@ -15,13 +15,13 @@ describe("FileDAO Class", () => {
             let model = new Model();
             let parser = new GraphParser();
             let comp = new Component();
-            let done = false;
+            let busy = true;
             parser.parse(generateTurtle(), file.type, function(result: any) {
                 comp.setPart(filename, result);
                 model.tasks.schedule(new ProcessorTask<ModelData, ModelTaskMetadata>(
                     (data) => {
                         data.setComponent(ModelComponent.DataGraph, comp);
-                        done = true;
+                        busy = false;
                     },
                     null)
                 );
@@ -29,7 +29,7 @@ describe("FileDAO Class", () => {
 
                 // this is pretty horrible and there probably exists a better way of doing this,
                 // but at the moment I can't seem to think of one
-                while (!done) {}
+                while (busy) {}
 
                 // no idea how to automatically check whether the file was actually created,
                 // as this would require rummaging the user's file system
