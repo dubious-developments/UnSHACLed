@@ -5,6 +5,7 @@
 
 from __future__ import print_function
 import sys
+import random
 from github import Github
 
 def parse_deploy_directory_name(deploy_directory_name):
@@ -27,17 +28,37 @@ def has_commented_on_pull_request(pull_request):
             return True
     return False
 
+# Spongebot Squarepants' greetings.
+SALUTATIONS = [
+    """Oh hi there {0}!""",
+    """I did not hit her, it's not true! It's bullshit! I did not hit her! *I did naaaahht.* Oh hi {0}.""",
+    """Oh hi {0}. I didn't know it was you.""",
+    """Ha ha ha. What a story, {0}."""
+]
+
+# Things Spongebot Squarepants may say to bid you farewell.
+VALEDICTIONS = [
+    """Thanks for contributing! Keep up the good work and have a wonderful day!""",
+    """You're my favorite customer. Buh-bye.""",
+    """This is a beautiful pull request! You included all the code. Good thinking!""",
+    """You think about everything. Ha ha ha."""
+]
+
 def generate_pull_request_deployed_comment(pull_request, deploy_directory_name):
     """Generates the body of the comment that is posted when a pull request
        has been deployed to GitHub pages."""
-    return """Oh hi there @%s!
+    salutation = random.choice(SALUTATIONS).format('@' + pull_request.user.login)
+    valediction = random.choice(VALEDICTIONS)
 
-I built and deployed your awesome pull request. 🎉🎆🎉 You can try it out [right here](https://dubious-developments.github.io/%s/index.html).
+    message_format = """%s
 
-Thanks for contributing! Keep up the good work and have a wonderful day!
+I built and deployed your pull request. 🎉🎆🎉 You can try it out [right here](https://dubious-developments.github.io/%s/index.html).
 
-> **Note:** it may take a little while before GitHub pages gets updated. Try again in a minute if your deployed build doesn't show up right away.""" \
-        % (pull_request.user.login, deploy_directory_name)
+%s
+
+> **Note:** it may take a little while before GitHub pages gets updated. Try again in a minute if your deployed build doesn't show up right away."""
+
+    return message_format % (salutation, deploy_directory_name, valediction)
 
 def create_pull_request_deployed_comment(pull_request, deploy_directory_name):
     """Adds an issue comment to a pull request that links to the deployed build."""
