@@ -24,9 +24,11 @@ git clone https://github.com/dubious-developments/dubious-developments.github.io
 # Delete the old build, if any.
 rm -rf "dubious-developments.github.io/$TARGET_DIRECTORY"
 
-# Copy the build to the GitHub pages directory.
+# Copy the build and the coverage to the GitHub pages directory.
 mkdir "dubious-developments.github.io/$TARGET_DIRECTORY"
 cp -r build/* "dubious-developments.github.io/$TARGET_DIRECTORY"
+mkdir "dubious-developments.github.io/$TARGET_DIRECTORY/coverage"
+cp -r coverage/Firefox*/* "dubious-developments.github.io/$TARGET_DIRECTORY/coverage"
 
 # Create build name and version files.
 echo "$NAME" > "dubious-developments.github.io/$TARGET_DIRECTORY/build-name"
