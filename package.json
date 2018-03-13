@@ -46,7 +46,6 @@
     "karma-ie-launcher": "^1.0.0",
     "karma-jasmine": "^1.1.1",
     "karma-opera-launcher": "^1.0.0",
-    "karma-phantomjs-launcher": "^1.0.4",
     "karma-safari-launcher": "^1.0.0",
     "karma-safaritechpreview-launcher": "0.0.6",
     "karma-typescript": "^3.0.12",
