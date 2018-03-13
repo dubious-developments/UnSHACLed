@@ -4,6 +4,9 @@ module.exports = function(config) {
         files: [
             { pattern: "src/**/*.ts" },
             { pattern: "src/components/**/*.tsx" },
+            { pattern: "src/form/**/*.tsx" },
+            { pattern: "src/pages/**/*.tsx" },
+            { pattern: "src/services/**/*.tsx" },
             { pattern: "test/**/*.ts" },
         ],
 
