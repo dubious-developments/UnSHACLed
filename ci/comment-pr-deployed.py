@@ -52,7 +52,9 @@ def generate_pull_request_deployed_comment(pull_request, deploy_directory_name):
 
     message_format = """%s
 
-I built and deployed your pull request. 🎉🎆🎉 You can try it out [right here](https://dubious-developments.github.io/%s/index.html).
+I built and deployed your pull request. 🎉🎆🎉
+You can try it out [right here](https://dubious-developments.github.io/%s/index.html).
+If you're looking for the coverage report, that's [here](https://dubious-developments.github.io/%s/coverage/index.html).
 
 %s
 
