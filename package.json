@@ -2,6 +2,7 @@
   "name": "dp2",
   "version": "0.1.0",
   "private": true,
+  "homepage": "./",
   "dependencies": {
     "@types/react-router-dom": "^4.2.4",
     "gulp-run": "^1.7.1",
