@@ -16,6 +16,10 @@ addons:
     token:
       secure: $SONARCLOUD_KEY
   firefox: "latest"
+  apt:
+    packages:
+      # Install pip3 so we can install PyGitHub.
+      - python3-pip
 
 jdk:
   - oraclejdk8
@@ -26,14 +30,16 @@ install:
   - wget https://netix.dl.sourceforge.net/project/sshpass/sshpass/1.06/sshpass-1.06.tar.gz
   - tar -xvzf sshpass-1.06.tar.gz
   - pushd sshpass-1.06; ./configure && sudo make install; popd
+  # Install PyGitHub, which we need for adding comments to pull requests.
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo pip3 install pygithub; fi
   # Install gulp.
   - npm install -g gulp
   # Install npm dependencies.
   - npm install
 
 script:
-  # Compile sources.
-  - gulp lint build
+  # Compile sources. Assume that the project will be hosted locally.
+  - PUBLIC_URL="." gulp lint build
   # Run the tests.
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then XVFB_RUN=xvfb-run; fi
   - $XVFB_RUN gulp test
@@ -45,6 +51,25 @@ script:
       wget https://raw.githubusercontent.com/dubious-developments/UnSHACLed-waterfall/master/deploy-to-server.sh &&
       chmod +x deploy-to-server.sh &&
       ./deploy-to-server.sh $encrypted_077ce6e5a149_key $encrypted_077ce6e5a149_iv 8800 nightly UnSHACLed-nightly;
+    fi
+  # Deploy to GitHub pages. We'll treat pull requests and regular commits differently to
+  # keep them from interfering with each other (we don't want a pull request to overwrite
+  # the latest release candidate and vice-versa).
+  - GH_PAGES_ACCESS_TOKEN=$(echo 283q094q462s547s8p43pr518p0r7oq90rq90r9s | tr '[N-ZA-Mn-za-m]' '[A-Za-z]');
+    if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$TRAVIS_REPO_SLUG" == "dubious-developments/UnSHACLed" ]; then
+      if [ -z "$TRAVIS_PULL_REQUEST_SLUG" ]; then
+        ./ci/deploy-to-gh-pages.sh
+        "$GH_PAGES_ACCESS_TOKEN"
+        "release-candidate"
+        "Latest release candidate"
+        "UnSHACLed build $TRAVIS_BUILD_NUMBER (release candidate)";
+      else
+        ./ci/deploy-to-gh-pages.sh
+        "$GH_PAGES_ACCESS_TOKEN"
+        "pull-request-$TRAVIS_PULL_REQUEST"
+        "Pull request $TRAVIS_PULL_REQUEST (from $TRAVIS_PULL_REQUEST_SLUG)"
+        "UnSHACLed build $TRAVIS_BUILD_NUMBER (development; pull request $TRAVIS_PULL_REQUEST)";
+      fi;
     fi
 
 cache:

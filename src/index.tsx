@@ -1,16 +1,14 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { muiTheme } from './theme';
-import App from './components/App';
 import registerServiceWorker from './registerServiceWorker';
 import './index.css';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import { BrowserRouter } from 'react-router-dom';
+import Routes from "./components/Routes";
+import 'semantic-ui-css/semantic.min.css';
 
-const Main = () => (
-    <MuiThemeProvider muiTheme={muiTheme}>
-        <App />
-    </MuiThemeProvider>
-);
-
-ReactDOM.render(<Main />, document.getElementById('root'));
+ReactDOM.render(
+    <BrowserRouter>
+        <Routes />
+    </BrowserRouter>,
+    document.getElementById('root'));
 registerServiceWorker();
