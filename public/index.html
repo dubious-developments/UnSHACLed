@@ -19,7 +19,8 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <title>React App</title>
+    <title>UnSHACLed Editor</title>
+
   </head>
   <body>
     <noscript>
@@ -36,5 +37,13 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
+    <!-- Sets the basepath for the library if not in same directory -->
+    <script type="text/javascript">
+        mxBasePath = '.';
+    </script>
+
+    <!-- Loads and initializes the library -->
+    <script type="text/javascript" src="mxClient.min.js"></script>
+
   </body>
 </html>
