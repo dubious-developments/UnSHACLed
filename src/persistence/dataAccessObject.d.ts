@@ -4,5 +4,7 @@ interface DataAccessObject {
 }
 
 interface Module {
-
+    getType();
+    getName();
+    getTarget();
 }

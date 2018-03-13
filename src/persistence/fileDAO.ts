@@ -29,7 +29,7 @@ export class FileDAO implements DataAccessObject {
      * Create a new file.
      * @param module
      */
-    public insert(module: any) {
+    public insert(module: Module) {
         this.model.tasks.schedule(new SaveTask(this.io, module));
         this.model.tasks.processTask();
     }
@@ -38,7 +38,7 @@ export class FileDAO implements DataAccessObject {
      * Load an existing file.
      * @param module
      */
-    public find(module: any) {
+    public find(module: Module) {
         let self = this;
         this.io.readFromFile(module, function(result: any) {
             self.model.tasks.schedule(new LoadTask(result, module));
@@ -71,9 +71,9 @@ class IOFacilitator {
      * @param module
      * @param save
      */
-    public readFromFile(module: FileModule, save: (result: any) => void) {
+    public readFromFile(module: Module, save: (result: any) => void) {
         let reader = new FileReader();
-        reader.readAsText(module.getFile());
+        reader.readAsText(module.getTarget());
         reader.onload = onLoadFunction;
 
         let parser = this.parsers.getValue(module.getType());
@@ -81,7 +81,7 @@ class IOFacilitator {
         // every time a portion is loaded, parse this portion of content
         // and aggregate the result (this happens internally).
         function onLoadFunction(evt: any) {
-            parser.parse(evt.target.result, module.getFile().type, save);
+            parser.parse(evt.target.result, module.getTarget().type, save);
         }
     }
 
@@ -90,13 +90,13 @@ class IOFacilitator {
      * @param module
      * @param data
      */
-    public writeToFile(module: FileModule, data: any) {
+    public writeToFile(module: Module, data: any) {
         let FileSaver = require("file-saver");
         this.parsers.getValue(module.getType()).serialize(
-            data, module.getFile().type,
+            data, module.getTarget().type,
             function(result: string) {
                 // write to file
-                let file = new File([result], module.getFilename());
+                let file = new File([result], module.getName());
                 FileSaver.saveAs(file);
             });
     }
@@ -135,7 +135,7 @@ export class FileModule implements Module {
      * Return the filename.
      * @returns {string}
      */
-    getFilename(): string {
+    getName(): string {
         return this.filename;
     }
 
@@ -143,7 +143,7 @@ export class FileModule implements Module {
      * Return the Blob representing the file.
      * @returns {Blob}
      */
-    getFile(): Blob {
+    getTarget(): Blob {
         return this.file;
     }
 }
@@ -160,13 +160,13 @@ class LoadTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
      * @param result
      * @param {FileModule} module
      */
-    public constructor(result: any, module: FileModule) {
+    public constructor(result: any, module: Module) {
         super(function(data: ModelData) {
             let component: Component = data.getComponent(module.getType());
             if (component == null || component === undefined) {
                 component = new Component();
             }
-            component.setPart(module.getFilename(), result);
+            component.setPart(module.getName(), result);
             data.setComponent(module.getType(), component);
         },    null);
     }
@@ -184,11 +184,11 @@ class SaveTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
      * @param {IOFacilitator} io
      * @param {FileModule} module
      */
-    public constructor(io: IOFacilitator, module: FileModule) {
+    public constructor(io: IOFacilitator, module: Module) {
         super(function(data: ModelData) {
             let component: Component = data.getComponent(module.getType());
             if (component != null && component !== undefined) {
-                let part = component.getPart(module.getFilename());
+                let part = component.getPart(module.getName());
                 if (part != null && part !== undefined) {
                     io.writeToFile(module, part);
                 }
