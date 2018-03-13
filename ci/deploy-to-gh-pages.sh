@@ -27,6 +27,7 @@ rm -rf "dubious-developments.github.io/$TARGET_DIRECTORY"
 # Copy the build and the coverage to the GitHub pages directory.
 mkdir "dubious-developments.github.io/$TARGET_DIRECTORY"
 cp -r build/* "dubious-developments.github.io/$TARGET_DIRECTORY"
+mkdir "dubious-developments.github.io/$TARGET_DIRECTORY/coverage"
 cp -r coverage/Firefox*/* "dubious-developments.github.io/$TARGET_DIRECTORY/coverage"
 
 # Create build name and version files.
