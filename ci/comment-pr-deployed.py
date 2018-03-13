@@ -50,17 +50,17 @@ def generate_pull_request_deployed_comment(pull_request, deploy_directory_name):
     salutation = random.choice(SALUTATIONS).format('@' + pull_request.user.login)
     valediction = random.choice(VALEDICTIONS)
 
-    message_format = """%s
+    message_format = """{0}
 
 I built and deployed your pull request. 🎉🎆🎉
-You can try it out [right here](https://dubious-developments.github.io/%s/index.html).
-If you're looking for the coverage report, that's [here](https://dubious-developments.github.io/%s/coverage/index.html).
+You can try it out [here](https://dubious-developments.github.io/{1}/index.html).
+If you're looking for the coverage report, that's [right here](https://dubious-developments.github.io/{1}/coverage/index.html).
 
-%s
+{2}
 
 > **Note:** it may take a little while before GitHub pages gets updated. Try again in a minute if your deployed build doesn't show up right away."""
 
-    return message_format % (salutation, deploy_directory_name, valediction)
+    return message_format.format(salutation, deploy_directory_name, valediction)
 
 def create_pull_request_deployed_comment(pull_request, deploy_directory_name):
     """Adds an issue comment to a pull request that links to the deployed build."""
