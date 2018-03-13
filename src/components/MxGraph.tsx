@@ -26,6 +26,16 @@ class MxGraph extends React.Component<any, any> {
             // Enables rubberband selection
             // tslint:disable-next-line:no-unused-expression
             new mxRubberband(graph);
+
+            // Adds mouse wheel handling for zoom
+            mxEvent.addMouseWheelListener((evt, up) => {
+                if (up) {
+                    graph.zoomIn();
+                } else {
+                    graph.zoomOut();
+                }
+                mxEvent.consume(evt);
+            });
             
             // Gets the default parent for inserting new cells. This
             // is normally the first child of the root (ie. layer 0).
