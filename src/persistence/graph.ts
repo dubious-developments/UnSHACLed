@@ -11,6 +11,7 @@ export class Graph {
      */
     public constructor(store: any) {
         this.store = store;
+        this.prefixes = {};
     }
 
     /**
@@ -58,12 +59,14 @@ export class Graph {
     }
 
     /**
-     * Add multiple prefixes to this Graph.
+     * Add multiple presfixes to this Graph.
      * @param prefixes
      */
     public addPrefixes(prefixes: any) {
         this.store.addPrefixes(prefixes);
-        this.prefixes = prefixes;
+        Object.keys(this.prefixes).forEach(k => {
+            this.addPrefix(k, prefixes[k]);
+        });
     }
 
     /**
