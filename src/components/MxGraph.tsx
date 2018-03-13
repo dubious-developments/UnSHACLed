@@ -23,8 +23,18 @@ class MxGraph extends React.Component<any, any> {
 
             // Creates the graph inside the given container
             let graph = new mxGraph(container);
-            graph.panningHandler.ignoreCell = true;
+            graph.panningHandler.ignoreCell = false;
             graph.setPanning(true);
+
+            document.onkeydown = function(evt: KeyboardEvent) {
+                if (evt.altKey) {
+                    graph.panningHandler.ignoreCell = true;
+                }
+            };
+
+            document.onkeyup = function(evt: KeyboardEvent) {
+                graph.panningHandler.ignoreCell = false;
+            };
             
             /**
             * Specifies the size of the size for "tiles" to be used for a graph with
@@ -176,6 +186,16 @@ class MxGraph extends React.Component<any, any> {
                     mxEvent.consume(evt);
                 }
             });
+
+            graph.panningHandler.addListener(
+                mxEvent.PAN_START,
+                function() { graph.container.style.cursor = 'move'; }
+            );
+
+            graph.panningHandler.addListener(
+                mxEvent.PAN_END,
+                function() { graph.container.style.cursor = 'default'; }
+            );
             
             // Gets the default parent for inserting new cells. This
             // is normally the first child of the root (ie. layer 0).
