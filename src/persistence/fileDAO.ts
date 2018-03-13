@@ -1,11 +1,11 @@
 /// <reference path="./dataAccessObject.d.ts"/>
-/// <reference path="./modem.d.ts"/>
+/// <reference path="./parser.d.ts"/>
 
 import * as Collections from "typescript-collections";
 import {Model, ModelComponent, ModelData, ModelTaskMetadata} from "../entities/model";
 import {ProcessorTask} from "../entities/taskProcessor";
 import {Component} from "./component";
-import {DataGraphModem} from "./dataGraphModem";
+import {GraphParser} from "./graphParser";
 
 /**
  * Provides basic DAO functionality at the file granularity level.
@@ -22,7 +22,7 @@ export class FileDAO implements DataAccessObject {
         this.io = new IOFacilitator();
 
         // register modems
-        this.io.registerModem(new DataGraphModem());
+        this.io.registerModem(new GraphParser());
     }
 
     /**
@@ -62,18 +62,18 @@ export class FileDAO implements DataAccessObject {
  * Requires a particular modem to modulate between file format and internal representation.
  */
 class IOFacilitator {
-    private modems: Collections.Dictionary<ModelComponent, Modem>;
+    private modems: Collections.Dictionary<ModelComponent, Parser>;
 
     /**
      * Create a new IOFacilitator.
      * @param {Modem} modem
      */
     public constructor() {
-        this.modems = new Collections.Dictionary<ModelComponent, Modem>();
+        this.modems = new Collections.Dictionary<ModelComponent, Parser>();
     }
 
-    public registerModem(modem: Modem) {
-        this.modems.setValue(modem.getLabel(), modem);
+    public registerModem(parser: Parser) {
+        this.modems.setValue(parser.getLabel(), parser);
     }
 
     /**
@@ -92,7 +92,7 @@ class IOFacilitator {
         // every time a portion is loaded, demodulate this portion of content
         // and aggregate the result (this happens internally).
         function onLoadFunction(evt: any) {
-            modem.demodulate(evt.target.result, module.getFile().type);
+            modem.parse(evt.target.result, module.getFile().type);
         }
 
         // when we are finished loading, retrieve the aggregated result
@@ -113,7 +113,7 @@ class IOFacilitator {
     public writeToFile(module: FileModule, data: any) {
         let FileSaver = require("file-saver");
         // retrieve the modulated content (i.e. in textual format)
-        let content = this.modems.getValue(module.getType()).modulate(data, module.getFile().type);
+        let content = this.modems.getValue(module.getType()).serialize(data, module.getFile().type);
         // write to file
         let file = new File([content], module.getFilename());
         FileSaver.saveAs(file);

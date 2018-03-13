@@ -1,4 +1,4 @@
-/// <reference path="./modem.d.ts"/>
+/// <reference path="./parser.d.ts"/>
 
 import * as Collections from "typescript-collections";
 import {ModelComponent} from "../entities/model";
@@ -6,7 +6,7 @@ import {ModelComponent} from "../entities/model";
 /**
  * A Modem that takes care of (de)modulation for data graphs.
  */
-export class DataGraphModem implements Modem {
+export class GraphParser implements Parser {
 
     // sometime in the near future, this will probably
     // become a dedicated type with its own wrapper functions
@@ -44,7 +44,7 @@ export class DataGraphModem implements Modem {
      * @param {string} mime
      * @returns {string}
      */
-    public modulate(data: any, mime: string) {
+    public serialize(data: any, mime: string) {
         if (this.mimeTypes.contains(mime)) {
             return "";
         }
@@ -59,7 +59,7 @@ export class DataGraphModem implements Modem {
      * @param {string} mime
      * @returns {any}
      */
-    public demodulate(content: string, mime: string) {
+    public parse(content: string, mime: string) {
         if (this.mimeTypes.contains(mime)) {
             let N3 = require("n3");
             let parser = N3.Parser({ format: mime });

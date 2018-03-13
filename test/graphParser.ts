@@ -1,11 +1,11 @@
-import {DataGraphModem} from "../src/persistence/dataGraphModem";
+import {GraphParser} from "../src/persistence/graphParser";
 
 describe("DataGraphModem Class", () => {
     it("Should parse valid Turtle code and return a graph " +
         "containing the (expanded) triples described therein.",
        () => {
-            let modem = new DataGraphModem();
-            let graph = modem.demodulate(generateTurtle(), "text/turtle");
+            let modem = new GraphParser();
+            let graph = modem.parse(generateTurtle(), "text/turtle");
             expect(modem.getData()).toEqual(graph);
             expect(graph.countTriples()).toEqual(2);
 
@@ -30,11 +30,11 @@ describe("DataGraphModem Class", () => {
 
     it("Should throw an error when passed an unsupported MIME type.",
        () => {
-            let modem = new DataGraphModem();
-            expect(() => modem.demodulate(generateTurtle(), "application/rdf+xml"))
+            let modem = new GraphParser();
+            expect(() => modem.parse(generateTurtle(), "application/rdf+xml"))
                 .toThrow(Error("Incorrect MimeType application/rdf+xml!"));
 
-            expect(() => modem.modulate(null, "application/rdf+xml"))
+            expect(() => modem.serialize(null, "application/rdf+xml"))
                .toThrow(Error("Incorrect MimeType application/rdf+xml!"));
         });
 });

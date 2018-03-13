@@ -1,6 +1,6 @@
 import {Model, ModelComponent, ModelData, ModelTaskMetadata} from "../src/entities/model";
 import {FileDAO, FileModule} from "../src/persistence/fileDAO";
-import {DataGraphModem} from "../src/persistence/dataGraphModem";
+import {GraphParser} from "../src/persistence/graphParser";
 import {Component} from "../src/persistence/component";
 import {ProcessorTask} from "../src/entities/taskProcessor";
 
@@ -13,10 +13,10 @@ describe("FileDAO Class", () => {
             let module = new FileModule(label, filename, file);
 
             let model = new Model();
-            let modem = new DataGraphModem();
+            let modem = new GraphParser();
             let comp = new Component();
             let done = false;
-            comp.setPart(filename, modem.demodulate(generateTurtle(), file.type));
+            comp.setPart(filename, modem.parse(generateTurtle(), file.type));
             model.tasks.schedule(new ProcessorTask<ModelData, ModelTaskMetadata>(
                 (data) => {
                     data.setComponent(ModelComponent.DataGraph, comp);
