@@ -1,7 +1,6 @@
 interface Parser {
-    getLabel();
-    serialize(data: any, mime: string);
-    parse(content: string, mime: string);
+    serialize(data: any, mime: string, andThen: (result: any) => void);
+    parse(content: string, mime: string, andThen: (result: string) => void);
     getData();
     clean();
 }

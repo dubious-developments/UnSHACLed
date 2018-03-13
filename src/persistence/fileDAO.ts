@@ -21,8 +21,8 @@ export class FileDAO implements DataAccessObject {
         this.model = model;
         this.io = new IOFacilitator();
 
-        // register modems
-        this.io.registerModem(new GraphParser());
+        // register parsers
+        this.io.registerParser(ModelComponent.DataGraph, new GraphParser());
     }
 
     /**
@@ -39,41 +39,30 @@ export class FileDAO implements DataAccessObject {
      * @param module
      */
     public find(module: any) {
-        let model = this.model;
+        let self = this;
         this.io.readFromFile(module, function(result: any) {
-            model.tasks.schedule(new LoadTask(result, module));
-            model.tasks.processTask();
+            self.model.tasks.schedule(new LoadTask(result, module));
+            self.model.tasks.processTask();
         });
-    }
-
-    /**
-     * Save an existing file.
-     * @param module
-     */
-    public update(module: any) {
-        // updating actually just means downloading an updated copy
-        // i.e. creating a new file
-        this.insert(module);
     }
 }
 
 /**
  * Provides basic input/output functionality w.r.t. files.
- * Requires a particular modem to modulate between file format and internal representation.
+ * Requires a particular parser to modulate between file format and internal representation.
  */
 class IOFacilitator {
-    private modems: Collections.Dictionary<ModelComponent, Parser>;
+    private parsers: Collections.Dictionary<ModelComponent, Parser>;
 
     /**
      * Create a new IOFacilitator.
-     * @param {Modem} modem
      */
     public constructor() {
-        this.modems = new Collections.Dictionary<ModelComponent, Parser>();
+        this.parsers = new Collections.Dictionary<ModelComponent, Parser>();
     }
 
-    public registerModem(parser: Parser) {
-        this.modems.setValue(parser.getLabel(), parser);
+    public registerParser(label: ModelComponent, parser: Parser) {
+        this.parsers.setValue(label, parser);
     }
 
     /**
@@ -86,22 +75,13 @@ class IOFacilitator {
         let reader = new FileReader();
         reader.readAsText(module.getFile());
         reader.onload = onLoadFunction;
-        reader.onloadend = onLoadEndFunction;
 
-        let modem = this.modems.getValue(module.getType());
-        // every time a portion is loaded, demodulate this portion of content
+        let parser = this.parsers.getValue(module.getType());
+        parser.clean();
+        // every time a portion is loaded, parse this portion of content
         // and aggregate the result (this happens internally).
         function onLoadFunction(evt: any) {
-            modem.parse(evt.target.result, module.getFile().type);
-        }
-
-        // when we are finished loading, retrieve the aggregated result
-        // and clean the modem.
-        function onLoadEndFunction(evt: any) {
-            // as reading is asynchronous, we can only save the result
-            // at this point.
-            save(modem.getData());
-            modem.clean();
+            parser.parse(evt.target.result, module.getFile().type, save);
         }
     }
 
@@ -112,11 +92,13 @@ class IOFacilitator {
      */
     public writeToFile(module: FileModule, data: any) {
         let FileSaver = require("file-saver");
-        // retrieve the modulated content (i.e. in textual format)
-        let content = this.modems.getValue(module.getType()).serialize(data, module.getFile().type);
-        // write to file
-        let file = new File([content], module.getFilename());
-        FileSaver.saveAs(file);
+        this.parsers.getValue(module.getType()).serialize(
+            data, module.getFile().type,
+            function(result: string) {
+                // write to file
+                let file = new File([result], module.getFilename());
+                FileSaver.saveAs(file);
+            });
     }
 }
 
@@ -206,7 +188,10 @@ class SaveTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
         super(function(data: ModelData) {
             let component: Component = data.getComponent(module.getType());
             if (component != null && component !== undefined) {
-                io.writeToFile(module, component.getPart(module.getFilename()));
+                let part = component.getPart(module.getFilename());
+                if (part != null && part !== undefined) {
+                    io.writeToFile(module, part);
+                }
             }
         },    null);
     }

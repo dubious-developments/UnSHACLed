@@ -1,40 +1,47 @@
 import {GraphParser} from "../src/persistence/graphParser";
 
-describe("DataGraphModem Class", () => {
-    it("Should parse valid Turtle code and return a graph " +
+describe("GraphParser Class", () => {
+    it("should parse valid Turtle code and return a graph " +
         "containing the (expanded) triples described therein.",
        () => {
-            let modem = new GraphParser();
-            let graph = modem.parse(generateTurtle(), "text/turtle");
-            expect(modem.getData()).toEqual(graph);
-            expect(graph.countTriples()).toEqual(2);
+            let parser = new GraphParser();
+            parser.parse(generateTurtle(), "text/turtle", function(result: any) {
+                expect(result.countTriples()).toEqual(2);
 
-            let firstTriple = graph.getTriples()[0];
-            expect(firstTriple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
-            expect(firstTriple.predicate).toEqual("http://purl.org/dc/elements/1.1/publisher");
-            expect(firstTriple.object).toEqual('"Wikipedia"');
+                let firstTriple = result.getTriples()[0];
+                expect(firstTriple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
+                expect(firstTriple.predicate).toEqual("http://purl.org/dc/elements/1.1/title");
+                expect(firstTriple.object).toEqual('"Tony Benn"');
 
-            let secondTriple = graph.getTriples()[1];
-            expect(secondTriple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
-            expect(secondTriple.predicate).toEqual("http://purl.org/dc/elements/1.1/title");
-            expect(secondTriple.object).toEqual('"Tony Benn"');
+                let secondTriple = result.getTriples()[1];
+                expect(secondTriple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
+                expect(secondTriple.predicate).toEqual("http://purl.org/dc/elements/1.1/publisher");
+                expect(secondTriple.object).toEqual('"Wikipedia"');
 
-            modem.clean();
-            expect(modem.getData().countTriples()).toEqual(0);
+                parser.clean();
+                expect(parser.getData().countTriples()).toEqual(0);
+            });
        });
 
-    it("Should translate a graph to a string containing valid Turtle code.",
+    it("should translate a graph to a string containing valid Turtle code.",
        () => {
+            let parser = new GraphParser();
+            parser.parse(generateTurtle(), "text/turtle", function(graph: any) {
+                parser.serialize(graph, "text/turtle", function(result: any) {
+                    let trimmedResult = result.replace(/\s+/g, "");
+                    let trimmedTarget = generateTurtle().replace(/\s+/g, "");
+                    expect(trimmedResult).toEqual(trimmedTarget);
+                });
+            });
+       });
 
-        });
-
-    it("Should throw an error when passed an unsupported MIME type.",
+    it("should throw an error when passed an unsupported MIME type.",
        () => {
-            let modem = new GraphParser();
-            expect(() => modem.parse(generateTurtle(), "application/rdf+xml"))
+            let parser = new GraphParser();
+            expect(() => parser.parse(generateTurtle(), "application/rdf+xml", null))
                 .toThrow(Error("Incorrect MimeType application/rdf+xml!"));
 
-            expect(() => modem.serialize(null, "application/rdf+xml"))
+            expect(() => parser.serialize(null, "application/rdf+xml", null))
                .toThrow(Error("Incorrect MimeType application/rdf+xml!"));
         });
 });

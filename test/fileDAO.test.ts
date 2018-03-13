@@ -5,7 +5,7 @@ import {Component} from "../src/persistence/component";
 import {ProcessorTask} from "../src/entities/taskProcessor";
 
 describe("FileDAO Class", () => {
-    it("Should create a new file.",
+    it("should create a new file.",
        () => {
             let label = ModelComponent.DataGraph;
             let filename = "insert.ttl";
@@ -13,30 +13,32 @@ describe("FileDAO Class", () => {
             let module = new FileModule(label, filename, file);
 
             let model = new Model();
-            let modem = new GraphParser();
+            let parser = new GraphParser();
             let comp = new Component();
             let done = false;
-            comp.setPart(filename, modem.parse(generateTurtle(), file.type));
-            model.tasks.schedule(new ProcessorTask<ModelData, ModelTaskMetadata>(
-                (data) => {
-                    data.setComponent(ModelComponent.DataGraph, comp);
-                    done = true;
+            parser.parse(generateTurtle(), file.type, function(result: any) {
+                comp.setPart(filename, result);
+                model.tasks.schedule(new ProcessorTask<ModelData, ModelTaskMetadata>(
+                    (data) => {
+                        data.setComponent(ModelComponent.DataGraph, comp);
+                        done = true;
                     },
-                null)
-            );
-            model.tasks.processTask();
+                    null)
+                );
+                model.tasks.processTask();
 
-            // this is pretty horrible and there probably exists a better way of doing this,
-            // but at the moment I can't seem to think of one
-            while (!done) {}
+                // this is pretty horrible and there probably exists a better way of doing this,
+                // but at the moment I can't seem to think of one
+                while (!done) {}
 
-            // no idea how to automatically check whether the file was actually created,
-            // as this would require rummaging the user's file system
-            let dao = new FileDAO(model);
-            dao.insert(module);
+                // no idea how to automatically check whether the file was actually created,
+                // as this would require rummaging the user's file system
+                let dao = new FileDAO(model);
+                dao.insert(module);
+            });
         });
 
-    it("Should load an existing file.",
+    it("should load an existing file.",
        () => {
            let label = ModelComponent.DataGraph;
            let filename = "find.ttl";

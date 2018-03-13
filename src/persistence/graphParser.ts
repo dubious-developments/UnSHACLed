@@ -1,27 +1,23 @@
 /// <reference path="./parser.d.ts"/>
 
 import * as Collections from "typescript-collections";
-import {ModelComponent} from "../entities/model";
+import {Graph} from "./graph";
 
 /**
- * A Modem that takes care of (de)modulation for data graphs.
+ * A Parser that takes care of (de)modulation for data graphs.
  */
 export class GraphParser implements Parser {
 
-    // sometime in the near future, this will probably
-    // become a dedicated type with its own wrapper functions
-    private graph: any;
+    private graph: Graph;
 
-    private label: ModelComponent;
     private mimeTypes: Collections.Set<string>;
 
     /**
-     * Create a new DataGraphModem.
+     * Create a new GraphParser.
      */
     public constructor() {
         this.clean();
 
-        this.label = ModelComponent.DataGraph;
         this.mimeTypes = new Collections.Set<string>();
         this.mimeTypes.add("application/n-quads");
         this.mimeTypes.add("application/n-triples");
@@ -30,53 +26,57 @@ export class GraphParser implements Parser {
     }
 
     /**
-     * Retrieve the label for this DataGraphModem.
-     * @returns {ModelComponent}
-     */
-    public getLabel() {
-        return this.label;
-    }
-
-    /**
-     * Convert a graph of triples to a string containing
+     * Asynchronously serialize a graph of triples to a string containing
      * representational RDF code in some format.
      * @param data
      * @param {string} mime
+     * @param andThen
      * @returns {string}
      */
-    public serialize(data: any, mime: string) {
+    public serialize(data: any, mime: string, andThen: (result: string) => void) {
         if (this.mimeTypes.contains(mime)) {
-            return "";
-        }
+            let N3 = require("n3");
+            let writer = N3.Writer();
 
-        throw new Error("Incorrect MimeType " + mime + "!");
+            let graph: Graph = data;
+            writer.addPrefixes(graph.getPrefixes());
+            writer.addTriples(graph.getTriples());
+            writer.end(function (error: any, result: any) { andThen(result); });
+        } else {
+            throw new Error("Incorrect MimeType " + mime + "!");
+        }
     }
 
     /**
-     * Synchronously parse a string of RDF code in some format.
+     * Asynchronously parse a string of RDF code in some format.
      * Return a graph structure (set of parsed RDF triples).
      * @param {string} content
      * @param {string} mime
+     * @param andThen
      * @returns {any}
      */
-    public parse(content: string, mime: string) {
+    public parse(content: string, mime: string, andThen: (result: any) => void) {
         if (this.mimeTypes.contains(mime)) {
             let N3 = require("n3");
             let parser = N3.Parser({ format: mime });
-            // N3 library does not (or so it appears) allow us to
-            // parse prefixes synchronously, which does not have a
-            // direct impact on the graph (the triples are expanded anyway)
-            // but does hamper our ability to offer bijective persistence
-            this.graph.addTriples(parser.parse(content));
 
-            return this.graph;
+            let self = this;
+            parser.parse(content,
+                         function(error: any, triple: any, prefixes: any) {
+                             if (triple) {
+                                 self.graph.addTriple(triple.subject, triple.predicate, triple.object);
+                             } else {
+                                 self.graph.addPrefixes(prefixes);
+                                 andThen(self.graph);
+                             }
+                 });
+        } else {
+            throw new Error("Incorrect MimeType " + mime + "!");
         }
-
-        throw new Error("Incorrect MimeType " + mime + "!");
     }
 
     /**
-     * Retrieve the data contained by this Modem.
+     * Retrieve the data contained by this GraphParser.
      * @returns {any}
      */
     public getData() {
@@ -84,10 +84,10 @@ export class GraphParser implements Parser {
     }
 
     /**
-     * Clean whatever is contained by this Modem.
+     * Clean whatever is contained by this GraphParser.
      */
     public clean() {
         let N3 = require("n3");
-        this.graph = N3.Store();
+        this.graph = new Graph(N3.Store());
     }
 }
