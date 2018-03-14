@@ -8,6 +8,7 @@ import Contact from "../pages/Contact";
 import NotFound from "../pages/NotFound";
 
 class Routes extends React.Component<any, any> {
+
     render() {
         return (
             <div>
