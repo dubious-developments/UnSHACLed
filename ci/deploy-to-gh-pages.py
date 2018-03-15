@@ -43,7 +43,7 @@ def main(argv):
             branch_name = os.environ['TRAVIS_BRANCH']
             commit_hash = os.environ['TRAVIS_COMMIT']
             deploy_dir = '%s/%s' % (repo_owner, branch_name)
-            build_name = 'Branch %s' % branch_name
+            build_name = 'Branch \'%s\'' % branch_name
             build_version_comment = 'development; commit %s at %s' % (commit_hash, repo_slug)
         else:
             deploy_dir = '%s/pull-request-%s' % (repo_owner, pr_number)
