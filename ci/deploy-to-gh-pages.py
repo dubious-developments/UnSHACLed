@@ -26,7 +26,7 @@ def main(argv):
     pr_number = os.environ.get('TRAVIS_PULL_REQUEST')
     repo_owner, _ = repo_slug.split('/')
 
-    is_pr = pr_number.strip().lower() != 'false'
+    is_pr = pr_slug.strip() != ''
 
     if repo_owner == 'dubious-developments':
         if not is_pr:
