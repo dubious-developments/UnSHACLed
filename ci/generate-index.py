@@ -9,14 +9,24 @@ def index_directories():
        each as an UnSHACLed build by looking for 'index.html' and
        'build-name' files. Returns a list of (name, directory) tuples."""
     unshacled_dirs = []
-    for top_level_dir in os.listdir():
+
+    # Search both the top-level directories and their subdirectories.
+    top_level_dirs = os.listdir()
+    search_dirs = [(directory, None) for directory in top_level_dirs] + [
+        (directory + '/' + nested_dir, directory)
+            for directory in top_level_dirs
+                if os.path.isdir(directory)
+                for nested_dir in os.listdir(directory)]
+
+    for (directory, tag) in search_dirs:
         try:
-            build_name = open(top_level_dir + '/build-name', mode='r')
+            build_name = open(directory + '/build-name', mode='r')
         except OSError:
             continue
 
-        if os.path.exists(top_level_dir + '/index.html'):
-            unshacled_dirs.append((build_name.readline().strip(), top_level_dir))
+        if os.path.exists(directory + '/index.html'):
+            prefix = '' if tag is None else '%s: ' % tag
+            unshacled_dirs.append((prefix + build_name.readline().strip(), directory))
 
     unshacled_dirs.sort(key=lambda tuple: tuple[0])
     return unshacled_dirs
