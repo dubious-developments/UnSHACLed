@@ -26,8 +26,10 @@ def main(argv):
     pr_number = os.environ.get('TRAVIS_PULL_REQUEST')
     repo_owner, _ = repo_slug.split('/')
 
+    is_pr = pr_number != 'false'
+
     if repo_owner == 'dubious-developments':
-        if pr_slug is None:
+        if not is_pr:
             deploy_dir = 'release-candidate'
             build_name = 'Latest release candidate'
             build_version_comment = 'release candidate'
@@ -36,7 +38,7 @@ def main(argv):
             build_name = 'Pull request %s' % pr_number
             build_version_comment = 'development; pull request %s' % pr_number
     else:
-        if pr_slug is None:
+        if not is_pr:
             branch_name = os.environ['TRAVIS_BRANCH']
             commit_hash = os.environ['TRAVIS_COMMIT']
             deploy_dir = '%s/%s' % (repo_owner, branch_name)
