@@ -61,11 +61,11 @@ def main(argv):
         build_version
     ]
 
-    print('Running command: ' + ' '.join('"%s"' % arg if ' ' in arg else arg for arg in command), file=sys.stderr)
-
-    if not is_dry_run:
-        subprocess.call(command)
-    return 0
+    if is_dry_run:
+        print('Running command: ' + ' '.join('"%s"' % arg if ' ' in arg else arg for arg in command), file=sys.stderr)
+        return 0
+    else:
+        return subprocess.call(command)
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))

@@ -10,6 +10,7 @@ def parse_deploy_directory_name(deploy_directory_name):
        Returns None if the deploy directory name does not identify
        a pull request."""
     prefix = 'pull-request-'
+    deploy_directory_name = deploy_directory_name.split('/')[-1]
     if deploy_directory_name.startswith(prefix):
         try:
             return int(deploy_directory_name[len(prefix):])
