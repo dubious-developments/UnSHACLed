@@ -33,6 +33,19 @@ SALUTATIONS = [
     """Ha ha ha. What a story, {0}."""
 ]
 
+# Things Spongebot may post to indicate excitement.
+EXCITED_EMOJIS = [
+    '🎉',
+    '🎆',
+    '🎊',
+    '🥂',
+    '🦄',
+    '✨',
+    '🔥',
+    '😎',
+    '👌'
+]
+
 # Things Spongebot Squarepants may say to bid you farewell.
 VALEDICTIONS = [
     """Thanks for contributing! Keep up the good work and have a wonderful day!""",
@@ -40,6 +53,14 @@ VALEDICTIONS = [
     """This is a beautiful pull request! You included all the code. Good thinking!""",
     """You think about everything. Ha ha ha."""
 ]
+
+def generate_excitement():
+    """Randomly generates three emojis to express excitement."""
+    outer_index = random.randint(0, len(EXCITED_EMOJIS) - 1)
+    inner_index = random.randint(0, len(EXCITED_EMOJIS) - 2)
+    if inner_index >= outer_index:
+        inner_index += 1
+    return '{0}{1}{0}'.format(EXCITED_EMOJIS[outer_index], EXCITED_EMOJIS[inner_index])
 
 def generate_pull_request_deployed_comment(pull_request, deploy_directory_name):
     """Generates the body of the comment that is posted when a pull request
@@ -49,7 +70,7 @@ def generate_pull_request_deployed_comment(pull_request, deploy_directory_name):
 
     message_format = """{0}
 
-I built and deployed your pull request. 🎉🎆🎉
+I built and deployed your pull request. {3}
 You can try it out [here](https://dubious-developments.github.io/{1}/index.html).
 If you're looking for the coverage report, that's [right here](https://dubious-developments.github.io/{1}/coverage/index.html).
 
@@ -57,7 +78,7 @@ If you're looking for the coverage report, that's [right here](https://dubious-d
 
 > **Note:** it may take a little while before GitHub pages gets updated. Try again in a minute if your deployed build doesn't show up right away."""
 
-    return message_format.format(salutation, deploy_directory_name, valediction)
+    return message_format.format(salutation, deploy_directory_name, valediction, generate_excitement())
 
 def create_pull_request_deployed_comment(pull_request, deploy_directory_name):
     """Adds an issue comment to a pull request that links to the deployed build."""
