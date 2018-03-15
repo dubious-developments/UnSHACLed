@@ -28,6 +28,8 @@ def main(argv):
 
     is_pr = pr_slug.strip() != ''
 
+    print('pr_slug: %s; is_pr: %s' % (pr_slug, is_pr), file=sys.stderr)
+
     if repo_owner == 'dubious-developments':
         if not is_pr:
             deploy_dir = 'release-candidate'
