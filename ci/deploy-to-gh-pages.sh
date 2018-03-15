@@ -23,7 +23,7 @@ git clone https://github.com/dubious-developments/dubious-developments.github.io
 
 # Try to push until we succeed.
 i=0
-while [ i < 5 ] && ! ./ci/try-deploy-to-gh-pages.sh; do
+while (( i < 5 )) && ! ./ci/try-deploy-to-gh-pages.sh; do
     # Sleep for a while.
     sleep 10
     # Try again.
