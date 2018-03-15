@@ -25,7 +25,7 @@ git clone https://github.com/dubious-developments/dubious-developments.github.io
 rm -rf "dubious-developments.github.io/$TARGET_DIRECTORY"
 
 # Copy the build and the coverage to the GitHub pages directory.
-mkdir "dubious-developments.github.io/$TARGET_DIRECTORY"
+mkdir -p "dubious-developments.github.io/$TARGET_DIRECTORY"
 cp -r build/* "dubious-developments.github.io/$TARGET_DIRECTORY"
 mkdir "dubious-developments.github.io/$TARGET_DIRECTORY/coverage"
 cp -r coverage/Firefox*/* "dubious-developments.github.io/$TARGET_DIRECTORY/coverage"
