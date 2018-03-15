@@ -36,7 +36,7 @@ def main(argv):
             build_version_comment = 'release candidate'
         else:
             deploy_dir = 'pull-request-%s' % pr_number
-            build_name = 'Pull request %s (from %s)' % (pr_number, pr_origin)
+            build_name = 'Pull request %s (from %s-%s)' % (pr_number, pr_slug, pr_origin)
             build_version_comment = 'development; pull request %s' % pr_number
     else:
         if not is_pr:
@@ -47,7 +47,7 @@ def main(argv):
             build_version_comment = 'development; commit %s at %s' % (commit_hash, repo_slug)
         else:
             deploy_dir = '%s/pull-request-%s' % (repo_owner, pr_number)
-            build_name = 'Pull request %s (from %s)' % (pr_number, pr_origin)
+            build_name = 'Pull request %s (from %s-%s)' % (pr_number, pr_slug, pr_origin)
             build_version_comment = 'development; pull request %s at %s' % (pr_number, repo_slug)
 
     build_version = 'UnSHACLed build %s (%s)' % (build_number, build_version_comment)
