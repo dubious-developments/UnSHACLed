@@ -28,8 +28,6 @@ def main(argv):
 
     is_pr = pr_slug.strip() != ''
 
-    print('pr_slug: %s; is_pr: %s' % (pr_slug, is_pr), file=sys.stderr)
-
     if repo_owner == 'dubious-developments':
         if not is_pr:
             deploy_dir = 'release-candidate'
@@ -63,10 +61,10 @@ def main(argv):
         build_version
     ]
 
-    if is_dry_run:
-        print(' '.join('"%s"' % arg if ' ' in arg else arg for arg in command))
+    print('Running command: ' + ' '.join('"%s"' % arg if ' ' in arg else arg for arg in command), file=sys.stderr)
 
-    subprocess.call(command)
+    if not is_dry_run:
+        subprocess.call(command)
     return 0
 
 if __name__ == '__main__':
