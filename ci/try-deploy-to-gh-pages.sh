@@ -25,12 +25,6 @@ pushd dubious-developments.github.io
 python3 ../ci/generate-index.py > index.html
 echo "Generated index."
 
-# If there are no changes to the deployed build then just bail.
-if git diff --cached --exit-code; then
-    echo "No changes to the output on this push; exiting."
-    exit 0
-fi
-
 REPO_URL="https://dubious-spongebot:$ACCESS_TOKEN@github.com/dubious-developments/dubious-developments.github.io"
 
 # Commit the "changes", i.e., the new version.
