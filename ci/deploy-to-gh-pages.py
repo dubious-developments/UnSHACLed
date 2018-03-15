@@ -51,18 +51,18 @@ def main(argv):
 
     token = argv[1]
 
-    command = (
+    command = [
         os.path.realpath(__file__ + '/../deploy-to-gh-pages.sh'),
         token,
         deploy_dir,
         build_name,
         build_version
-    )
+    ]
 
     if is_dry_run:
         print(' '.join('"%s"' % arg if ' ' in arg else arg for arg in command))
 
-    subprocess.call(*command)
+    subprocess.call(command)
     return 0
 
 if __name__ == '__main__':
