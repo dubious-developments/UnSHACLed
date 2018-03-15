@@ -18,6 +18,8 @@ export VERSION=$4
 
 pushd "$CURRENT_DIR/.."
 
+export SHA=$(git rev-parse --verify HEAD)
+
 # Clone the GitHub pages repository.
 git clone https://github.com/dubious-developments/dubious-developments.github.io
 
