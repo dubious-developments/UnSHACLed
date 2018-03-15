@@ -25,6 +25,9 @@ pushd dubious-developments.github.io
 python3 ../ci/generate-index.py > index.html
 echo "Generated index."
 
+# Add files.
+git add .
+
 # If there are no changes to the deployed build then just bail.
 if git diff --cached --exit-code; then
     echo "No changes to the output on this push; exiting."
