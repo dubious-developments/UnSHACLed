@@ -29,7 +29,7 @@ echo "Generated index."
 git add .
 
 # If there are no changes to the deployed build then just bail.
-if git diff --cached --exit-code; then
+if git diff -s --cached --exit-code; then
     echo "No changes to the output on this push; exiting."
     exit 0
 fi
