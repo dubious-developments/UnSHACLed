@@ -53,6 +53,16 @@ class Navbar extends React.Component<any, any> {
         FileSaver.saveAs(blob, filename);
     }
 
+    uploadProjectButton() {
+        var input = document.getElementById("importProject");
+        input.click();
+    }
+
+    importProject(e: any) {
+        var file = (document.getElementById("importGraph") as HTMLInputElement).files[0];
+        console.log(file);
+    }
+
     render() {
 
         return (
@@ -69,7 +79,16 @@ class Navbar extends React.Component<any, any> {
                     <Menu.Menu
                         position="right"
                     >
-                        <Menu.Item as="a">Import Project</Menu.Item>
+                        <Menu.Item as="a" onClick={this.uploadProjectButton}>
+                            Import Project
+                            <input
+                                onChange={this.importProject}
+                                type="file"
+                                id="importProject"
+                                style={{"display" : "none"}}
+                                
+                            />
+                        </Menu.Item>
                         <Menu.Item as="a">Save Project</Menu.Item>
                         <Menu.Item as="a" onClick={this.uploadFileButton}>
                             Import Graph
