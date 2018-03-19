@@ -7,20 +7,20 @@ describe("GraphParser Class", () => {
        (done) => {
             let parser = new GraphParser();
             parser.parse(generateTurtle(), "text/turtle", function(result: any) {
-                expect(result.countTriples()).toEqual(2);
+                expect(result.getPersistentStore().countTriples()).toEqual(2);
 
-                let firstTriple = result.getTriples()[0];
+                let firstTriple = result.getPersistentStore().getTriples()[0];
                 expect(firstTriple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
                 expect(firstTriple.predicate).toEqual("http://purl.org/dc/elements/1.1/title");
                 expect(firstTriple.object).toEqual('"Tony Benn"');
 
-                let secondTriple = result.getTriples()[1];
+                let secondTriple = result.getPersistentStore().getTriples()[1];
                 expect(secondTriple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
                 expect(secondTriple.predicate).toEqual("http://purl.org/dc/elements/1.1/publisher");
                 expect(secondTriple.object).toEqual('"Wikipedia"');
 
                 parser.clean();
-                expect(parser.getData().countTriples()).toEqual(0);
+                expect(parser.getData().getPersistentStore().countTriples()).toEqual(0);
                 done();
             });
        });
@@ -28,8 +28,7 @@ describe("GraphParser Class", () => {
     it("should translate a graph to a string containing valid Turtle code.",
        (done) => {
             let parser = new GraphParser();
-            let N3 = require("n3");
-            let graph = new Graph(N3.Store());
+            let graph = new Graph();
             graph.addPrefix("dc", "http://purl.org/dc/elements/1.1/");
             graph.addTriple("http://en.wikipedia.org/wiki/Tony_Benn",
                             "http://purl.org/dc/elements/1.1/title", '"Tony Benn"');
