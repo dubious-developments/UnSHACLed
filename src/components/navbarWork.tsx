@@ -3,22 +3,66 @@ import { Menu, Icon } from 'semantic-ui-react';
 import Auth from "../services/Auth";
 import { withRouter } from 'react-router-dom';
 import {FileModule, FileDAO} from "../persistence/fileDAO";
-import {Model, ModelComponent} from "../entities/model";
-import FileSaver from 'file-saver';
+import {Model, ModelComponent, ModelData, ModelTaskMetadata} from "../entities/model";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
+import {ProcessorTask} from "../entities/taskProcessor";
+import {Component} from "../persistence/component";
+
+class LoadFileTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
+
+    /**
+     * Create a new load file task from Model
+     * Contains a function that will execute on the model.
+     * @param {mComponent} ModelComponent
+     */
+    public constructor(mComponent: ModelComponent) {
+        super(function(data: ModelData) {
+            let component: Component = data.getComponent(mComponent);
+            if (component) {
+                // TODO open popup to pick file
+                console.log("component: ", component.getPart("log_sample.ttl"));
+                // TODO how to get the current file?
+                // var module = new FileModule(ModelComponent.DataGraph, filename, file);
+                // TODO how to get the current type
+                var fileDAO: FileDAO = DataAccessProvider.getInstance().getFileDAO();
+                var blob = new Blob([], {type: "text/turtle"});
+                fileDAO.insert(new FileModule(ModelComponent.DataGraph, "log_sample.ttl", blob));
+            }
+        },    null);
+    }
+}
+
+class GetOpenedFilesTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
+
+    /**
+     * Get the loaded files in the model
+     * Contains a function that will execute on the model.
+     * @param {FileModule} module
+     */
+    public constructor(c: ModelComponent) {
+        super(function(data: ModelData) {
+            let component: Component = data.getComponent(c);
+            if (component) {
+                var promise = new Promise((resolve, reject) => {
+                    resolve(component.getAllKeys());
+                });
+                promise.then(
+                    (value) => {
+                        // TODO give callback to execute GUI code here
+                        console.log("fulfilled: ", value);
+                    }
+                );
+            }
+        },    null);
+    }
+}
 
 class Navbar extends React.Component<any, any> {
 
     allowedExtensions = ".n3,.ttl,.rdf";
 
-    // TODO
-    module: Module;
-
     constructor(props: string) {
         super(props);
-
-        this.importGraph = this.importGraph.bind(this);
-        this.saveGraph = this.saveGraph.bind(this);
     }
 
     logoutButton(event: any) {
@@ -39,22 +83,17 @@ class Navbar extends React.Component<any, any> {
     importGraph(e: any) {
         var file = (document.getElementById("importGraph") as HTMLInputElement).files[0];
         // TODO map extension on MIME type for common extensions
-        this.module = new FileModule(ModelComponent.DataGraph, file.name, file);
-        console.log(this.module);
-        // TODO improve this (implemnt DAO getter)
         var fileDAO = DataAccessProvider.getInstance().getFileDAO();
-        fileDAO.find(this.module);
+        fileDAO.find(new FileModule(ModelComponent.DataGraph, file.name, file));
     }
 
+    // TODO not only load datagraph
     saveGraph(e: any) {
-        var filename = "unshacled";
-        // TODO how to get the current file?
-        // var module = new FileModule(ModelComponent.DataGraph, filename, file);
-        // TODO how to get the current type
-        var blob = new Blob([this.module.getTarget()], {type: "TODO"});
         var model: Model = DataAccessProvider.getInstance().tmpModel;
-        console.log(model);
-        FileSaver.saveAs(blob, filename);
+        model.tasks.schedule(new GetOpenedFilesTask(ModelComponent.DataGraph));
+        model.tasks.processTask();
+        model.tasks.schedule(new LoadFileTask(ModelComponent.DataGraph));
+        model.tasks.processTask();
     }
 
     uploadProjectButton() {

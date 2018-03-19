@@ -3,7 +3,7 @@ import {FileDAO} from "./fileDAO";
 
 export class DataAccessProvider {
 
-    private static _instance: DataAccessProvider;
+    private static _instance: DataAccessProvider = new DataAccessProvider();
     private fileDAO: FileDAO;
 
     // tmp field
@@ -20,7 +20,7 @@ export class DataAccessProvider {
     }
 
     public static getInstance(): DataAccessProvider {
-        return this._instance || (this._instance = new this());
+        return this._instance;
     }
 
     public getFileDAO() {
