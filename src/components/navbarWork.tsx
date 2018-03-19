@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Menu, Icon } from 'semantic-ui-react';
+import { Menu, Icon, Popup, List} from 'semantic-ui-react';
 import Auth from "../services/Auth";
 import { withRouter } from 'react-router-dom';
 import {FileModule, FileDAO} from "../persistence/fileDAO";
@@ -15,18 +15,14 @@ class LoadFileTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
      * Contains a function that will execute on the model.
      * @param {mComponent} ModelComponent
      */
-    public constructor(mComponent: ModelComponent) {
+    public constructor(mComponent: ModelComponent, fileName: string) {
         super(function(data: ModelData) {
             let component: Component = data.getComponent(mComponent);
             if (component) {
-                // TODO open popup to pick file
-                console.log("component: ", component.getPart("log_sample.ttl"));
-                // TODO how to get the current file?
-                // var module = new FileModule(ModelComponent.DataGraph, filename, file);
-                // TODO how to get the current type
                 var fileDAO: FileDAO = DataAccessProvider.getInstance().getFileDAO();
+                // TODO how to get the current type
                 var blob = new Blob([], {type: "text/turtle"});
-                fileDAO.insert(new FileModule(ModelComponent.DataGraph, "log_sample.ttl", blob));
+                fileDAO.insert(new FileModule(ModelComponent.DataGraph, fileName, blob));
             }
         },    null);
     }
@@ -37,21 +33,18 @@ class GetOpenedFilesTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
     /**
      * Get the loaded files in the model
      * Contains a function that will execute on the model.
-     * @param {FileModule} module
+     * @param {c} ModelComponent
+     * @param {f} module
      */
-    public constructor(c: ModelComponent) {
+    public constructor(c: ModelComponent, navBar: Navbar) {
         super(function(data: ModelData) {
-            let component: Component = data.getComponent(c);
-            if (component) {
-                var promise = new Promise((resolve, reject) => {
-                    resolve(component.getAllKeys());
-                });
-                promise.then(
-                    (value) => {
-                        // TODO give callback to execute GUI code here
-                        console.log("fulfilled: ", value);
-                    }
-                );
+            if (navBar) {
+                let component: Component = data.getComponent(c);
+                if (component) {
+                    navBar.setLoadedFiles(component.getAllKeys());
+                }
+            } else {
+                console.log("error: navBar not defined");
             }
         },    null);
     }
@@ -60,9 +53,18 @@ class GetOpenedFilesTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
 class Navbar extends React.Component<any, any> {
 
     allowedExtensions = ".n3,.ttl,.rdf";
+    loadedFiles = [];
 
     constructor(props: string) {
         super(props);
+
+        this.setLoadedFiles = this.setLoadedFiles.bind(this);
+        this.OpenedFiles = this.OpenedFiles.bind(this);
+        this.saveGraph = this.saveGraph.bind(this);
+    }
+
+    public setLoadedFiles(files: any) {
+        this.loadedFiles = files;
     }
 
     logoutButton(event: any) {
@@ -90,10 +92,43 @@ class Navbar extends React.Component<any, any> {
     // TODO not only load datagraph
     saveGraph(e: any) {
         var model: Model = DataAccessProvider.getInstance().tmpModel;
-        model.tasks.schedule(new GetOpenedFilesTask(ModelComponent.DataGraph));
+        model.tasks.schedule(new GetOpenedFilesTask(ModelComponent.DataGraph, this));
         model.tasks.processTask();
-        model.tasks.schedule(new LoadFileTask(ModelComponent.DataGraph));
+    }
+
+    getFileFromPopup(fileName: string, e: any) {
+        var model: Model = DataAccessProvider.getInstance().tmpModel;
+        model.tasks.schedule(new LoadFileTask(ModelComponent.DataGraph, fileName));
         model.tasks.processTask();
+    }
+
+    /*
+    * Used for dynamically building the list of opened files in the editor
+    */
+    OpenedFiles(props: any) {
+        var items = [];
+
+        for (var i = 0; i < this.loadedFiles.length; i++) {
+            items.push(
+                <li key={this.loadedFiles[i]}>
+                    <button onClick={(e) => this.getFileFromPopup(this.loadedFiles[i], e)}>
+                        {this.loadedFiles[i]}
+                    </button>
+                </li>
+            );
+        }
+
+        if (items.length === 0) {
+            return <label>No files currently opened in the editor </label> ;
+        }
+
+        return (
+            <div>
+                <label>Files that are currently opened in the editor: </label>
+                <br />
+                <List items={items} />
+            </div>
+        );
     }
 
     uploadProjectButton() {
@@ -143,9 +178,15 @@ class Navbar extends React.Component<any, any> {
                                 accept={this.allowedExtensions}
                             />
                         </Menu.Item>
-                        <Menu.Item as="a" onClick={this.saveGraph}>
-                            Save Graph
-                        </Menu.Item>
+
+                            <Popup
+                                trigger={<Menu.Item as="a" onClick={this.saveGraph}>Save Graph</Menu.Item>}
+                                on="click"
+                                inverted={false}
+                            >
+                                <this.OpenedFiles />
+                            </Popup>
+
                         <Menu.Item
                             as="a"
                             href="https://github.com/dubious-developments/UnSHACLed"
