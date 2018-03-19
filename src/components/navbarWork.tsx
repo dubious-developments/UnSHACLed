@@ -5,6 +5,7 @@ import { withRouter } from 'react-router-dom';
 import {FileModule, FileDAO} from "../persistence/fileDAO";
 import {Model, ModelComponent} from "../entities/model";
 import FileSaver from 'file-saver';
+import {DataAccessProvider} from "../persistence/dataAccessProvider";
 
 class Navbar extends React.Component<any, any> {
 
@@ -37,10 +38,11 @@ class Navbar extends React.Component<any, any> {
 
     importGraph(e: any) {
         var file = (document.getElementById("importGraph") as HTMLInputElement).files[0];
+        // TODO map extension on MIME type for common extensions
         this.module = new FileModule(ModelComponent.DataGraph, file.name, file);
         console.log(this.module);
         // TODO improve this (implemnt DAO getter)
-        var fileDAO = new FileDAO(new Model());
+        var fileDAO = DataAccessProvider.getInstance().getFileDAO();
         fileDAO.find(this.module);
     }
 
@@ -50,6 +52,8 @@ class Navbar extends React.Component<any, any> {
         // var module = new FileModule(ModelComponent.DataGraph, filename, file);
         // TODO how to get the current type
         var blob = new Blob([this.module.getTarget()], {type: "TODO"});
+        var model: Model = DataAccessProvider.getInstance().tmpModel;
+        console.log(model);
         FileSaver.saveAs(blob, filename);
     }
 
@@ -86,7 +90,7 @@ class Navbar extends React.Component<any, any> {
                                 type="file"
                                 id="importProject"
                                 style={{"display" : "none"}}
-                                
+
                             />
                         </Menu.Item>
                         <Menu.Item as="a">Save Project</Menu.Item>
