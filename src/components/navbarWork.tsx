@@ -96,7 +96,9 @@ class Navbar extends React.Component<any, any> {
         model.tasks.processTask();
     }
 
-    getFileFromPopup(fileName: string, e: any) {
+    getFileFromPopup(e: any) {
+        var fileName = (e.target || e.srcElement).innerHTML;
+        console.log(fileName);
         var model: Model = DataAccessProvider.getInstance().tmpModel;
         model.tasks.schedule(new LoadFileTask(ModelComponent.DataGraph, fileName));
         model.tasks.processTask();
@@ -109,10 +111,11 @@ class Navbar extends React.Component<any, any> {
         var items = [];
 
         for (var i = 0; i < this.loadedFiles.length; i++) {
+            var cur = this.loadedFiles[i];
             items.push(
-                <li key={this.loadedFiles[i]}>
-                    <button onClick={(e) => this.getFileFromPopup(this.loadedFiles[i], e)}>
-                        {this.loadedFiles[i]}
+                <li key={cur}>
+                    <button onClick={this.getFileFromPopup}>
+                        {cur}
                     </button>
                 </li>
             );
