@@ -1417,8 +1417,8 @@ class Fetcher {
         kb.removeDocument(options.resource)
       }
 
-      let isImage = contentType.includes('image/') ||
-        contentType.includes('application/pdf')
+      let isImage = contentType.indexOf('image/') >= 0 ||
+        contentType.indexOf('application/pdf') >= 0
 
       if (contentType && isImage) {
         this.addType(kb.sym('http://purl.org/dc/terms/Image'), reqNode, kb,
@@ -1510,7 +1510,7 @@ class Fetcher {
 
     let contentType = headers.get('content-type')
 
-    if (!contentType || contentType.includes('application/octet-stream')) {
+    if (!contentType || contentType.indexOf('application/octet-stream') >= 0) {
       let guess = this.guessContentType(options.resource.uri)
 
       if (guess) {
@@ -1520,7 +1520,7 @@ class Fetcher {
 
     let protocol = Uri.protocol(options.resource.uri)
 
-    if (!contentType && ['file', 'chrome'].includes(protocol)) {
+    if (!contentType && ['file', 'chrome'].indexOf(protocol) >= 0) {
       return 'text/xml'
     }
 

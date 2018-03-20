@@ -12,7 +12,7 @@ class BlankNode extends Node {
         console.log('Bad blank id:', id)
         throw new Error('Bad id argument to new blank node: ' + id)
       }
-      if (id.includes('#')) {
+      if (id.indexOf('#') >= 0) {
         // Is a URI with hash fragment
         let fragments = id.split('#')
         id = fragments[fragments.length - 1]

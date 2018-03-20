@@ -23,11 +23,11 @@ class NamedNode extends Node {
       throw new Error('Missing IRI for NamedNode')
     }
 
-    if (!iri.includes(':')) {
+    if (iri.indexOf(':') < 0) {
       throw new Error('NamedNode IRI "' + iri + '" must be absolute.')
     }
 
-    if (iri.includes(' ')) {
+    if (iri.indexOf(' ') >= 0) {
       var message = 'Error: NamedNode IRI "' + iri + '" must not contain unencoded spaces.'
       throw new Error(message)
     }

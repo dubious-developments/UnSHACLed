@@ -21631,10 +21631,10 @@ var NamedNode = function (_Node) {
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(NamedNode).call(this));
 
     _this.termType = NamedNode.termType;
-    if (!iri.includes(':')) {
+    if (iri.indexOf(':') < 0) {
       throw new Error('NamedNode IRI "' + iri + '" must be absolute.');
     }
-    if (iri.includes(' ')) {
+    if (iri.indexOf(' ') >= 0) {
       var message = 'Error: NamedNode IRI "' + iri + '" must not contain unencoded spaces.';
       throw new Error(message);
     }
@@ -24499,7 +24499,7 @@ var Serializer = function () {
           var ch = str.slice(-1) || ' ';
           if (s2 === ',' || s2 === ';') {
             // no gap
-          } else if (s2 === '.' && !'0123456789.'.includes(ch)) {// no gap except after number
+          } else if (s2 === '.' && !'0123456789.'.indexOf(ch) >= 0) {// no gap except after number
             // no gap
           } else {
             str += ' '; // separate from previous token
@@ -25145,7 +25145,7 @@ var Serializer = function () {
     for (var ns in namespaceCounts) {
       if (!namespaceCounts.hasOwnProperty(ns)) continue;
       // Rel uris in xml ns is not strictly allowed in the XMLNS spec but needed in practice often
-      var ns2 = this.base && this.flags.includes('z') ? Util.uri.refTo(this.base, ns) : ns;
+      var ns2 = this.base && this.flags.indexOf('z') >= 0 ? Util.uri.refTo(this.base, ns) : ns;
       str += '\n xmlns:' + this.prefixes[ns] + '="' + escapeForXML(ns2) + '"';
     }
     str += '>';
