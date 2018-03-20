@@ -122,9 +122,30 @@ export enum ModelComponent {
  * Metadata for tasks that are executed on the model.
  */
 export class ModelTaskMetadata {
+    /**
+     * Creates metadata for a model task.
+     * @param readSet The set of all values from which the model task may read.
+     * It includes elements in the write set that are modified based on their
+     * previous value, as opposed to blindly overwritten.
+     * @param writeSet The set of all values to which the model task writes.
+     * @param priority The priority assigned to the model task.
+     */
     public constructor(
-        public readSet: Collections.Set<ModelComponent>,
-        public writeSet: Collections.Set<ModelComponent>) { }
+        private readonly readSet: Collections.Set<ModelComponent>,
+        private readonly writeSet: Collections.Set<ModelComponent>,
+        priority?: number) {
+        if (priority) {
+            this.priority = priority;
+        }
+        else {
+            this.priority = ModelTaskMetadata.defaultPriority;
+        }
+    }
+
+    /**
+     * Gets the default priority for model tasks.
+     */
+    public static readonly defaultPriority: number = 0;
 
     /**
      * Tells if this model task reads from a particular component.
@@ -141,4 +162,11 @@ export class ModelTaskMetadata {
     public writesTo(component: ModelComponent): boolean {
         return this.writeSet.contains(component);
     }
+
+    /**
+     * The priority assigned to this model task. Relatively high priorities
+     * hint that the scheduler should try to execute this task prior to other
+     * tasks with lower priorities.
+     */
+    public readonly priority: number;
 }
