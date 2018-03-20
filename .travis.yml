@@ -56,20 +56,8 @@ script:
   # keep them from interfering with each other (we don't want a pull request to overwrite
   # the latest release candidate and vice-versa).
   - GH_PAGES_ACCESS_TOKEN=$(echo 283q094q462s547s8p43pr518p0r7oq90rq90r9s | tr '[N-ZA-Mn-za-m]' '[A-Za-z]');
-    if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$TRAVIS_REPO_SLUG" == "dubious-developments/UnSHACLed" ]; then
-      if [ -z "$TRAVIS_PULL_REQUEST_SLUG" ]; then
-        ./ci/deploy-to-gh-pages.sh
-        "$GH_PAGES_ACCESS_TOKEN"
-        "release-candidate"
-        "Latest release candidate"
-        "UnSHACLed build $TRAVIS_BUILD_NUMBER (release candidate)";
-      else
-        ./ci/deploy-to-gh-pages.sh
-        "$GH_PAGES_ACCESS_TOKEN"
-        "pull-request-$TRAVIS_PULL_REQUEST"
-        "Pull request $TRAVIS_PULL_REQUEST (from $TRAVIS_PULL_REQUEST_SLUG)"
-        "UnSHACLed build $TRAVIS_BUILD_NUMBER (development; pull request $TRAVIS_PULL_REQUEST)";
-      fi;
+    if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+      python3 ci/deploy-to-gh-pages.py "$GH_PAGES_ACCESS_TOKEN";
     fi
 
 cache:
