@@ -123,6 +123,18 @@ export enum ModelComponent {
  */
 export class ModelTaskMetadata {
     /**
+     * Gets the default priority for model tasks.
+     */
+    public static readonly defaultPriority: number = 0;
+
+    /**
+     * The priority assigned to this model task. Relatively high priorities
+     * hint that the scheduler should try to execute this task prior to other
+     * tasks with lower priorities.
+     */
+    public readonly priority: number;
+
+    /**
      * Creates metadata for a model task.
      * @param readSet The set of all values from which the model task may read.
      * It includes elements in the write set that are modified based on their
@@ -136,16 +148,10 @@ export class ModelTaskMetadata {
         priority?: number) {
         if (priority) {
             this.priority = priority;
-        }
-        else {
+        } else {
             this.priority = ModelTaskMetadata.defaultPriority;
         }
     }
-
-    /**
-     * Gets the default priority for model tasks.
-     */
-    public static readonly defaultPriority: number = 0;
 
     /**
      * Tells if this model task reads from a particular component.
@@ -162,11 +168,4 @@ export class ModelTaskMetadata {
     public writesTo(component: ModelComponent): boolean {
         return this.writeSet.contains(component);
     }
-
-    /**
-     * The priority assigned to this model task. Relatively high priorities
-     * hint that the scheduler should try to execute this task prior to other
-     * tasks with lower priorities.
-     */
-    public readonly priority: number;
 }
