@@ -4,7 +4,7 @@ import * as Collections from "typescript-collections";
 import {Graph} from "./graph";
 
 /**
- * A Parser that takes care of (de)modulation for data graphs.
+ * A Parser that takes care of (de)serialization for graph structures.
  */
 export class GraphParser implements Parser {
 
