@@ -14,6 +14,16 @@ type ModelObserver = (changeBuffer: Collections.Set<ModelComponent>)
 export class Model {
     /**
      * The task processor for the model.
+     * 
+     * NOTE: don't try to run tasks on the Model immediately by calling
+     * `processTask`. There are two reasons for why this is a bad idea:
+     * 
+     *   * The UI should call `processTask` when it knows that
+     *     it has time to do some processing. Other components shouldn't.
+     * 
+     *   * More fundamentally, tasks are not processed in a LIFO order,
+     *     so the task you're trying to process using `processTask` may
+     *     not be the task you queued.
      */
     public readonly tasks: TaskProcessor<ModelData, ModelTaskMetadata>;
 
@@ -21,6 +31,13 @@ export class Model {
 
     /**
      * Creates a model.
+     * 
+     * NOTE: an application like UnSHACLed should contain only *one*
+     * Model instance. If you're in doubt about whether you should
+     * create a new Model instance or not, you probably shouldn't.
+     * Grab a Model from a singleton somewhere.
+     * 
+     * This constructor exists mostly for testing purposes.
      */
     public constructor(data?: ModelData) {
         if (!data) {
