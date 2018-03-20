@@ -60,6 +60,30 @@ export class TaskProcessor<TData, TTaskMetadata> {
     }
 
     /**
+     * Deschedules and executes tasks until the task schedule
+     * becomes empty..
+     */
+    public processAllTasks(): void {
+        while (!this.isScheduleEmpty) {
+            this.processTask();
+        }
+    }
+
+    /**
+     * Deschedules and executes tasks until a particular time in
+     * milliseconds has passed or the task schedule becomes empty.
+     * @param milliseconds The duration in milliseconds during which tasks may be executed.
+     */
+    public processTasksDuring(milliseconds: number): void {
+        let start = Date.now();
+        let current = start;
+        while (!this.isScheduleEmpty && current - start < milliseconds) {
+            this.processTask();
+            current = Date.now();
+        }
+    }
+
+    /**
      * Tells if the model's task schedule is empty.
     */
     public get isScheduleEmpty(): boolean {
