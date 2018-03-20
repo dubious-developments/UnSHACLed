@@ -13,6 +13,15 @@ describe("ModelTaskMetadata Class", () => {
         expect(graphTweakMetadata.readsFrom(ModelComponent.DataGraph)).toEqual(true);
         expect(graphTweakMetadata.writesTo(ModelComponent.DataGraph)).toEqual(true);
     });
+
+    it("remembers its priority", () => {
+       expect(new ModelTaskMetadata(graphReadSet, graphWriteSet, 1).priority).toEqual(1); 
+    });
+
+    it("has the right default priority", () => {
+        expect(new ModelTaskMetadata(graphReadSet, graphWriteSet).priority)
+            .toEqual(ModelTaskMetadata.defaultPriority); 
+     });
 });
 
 describe("Model Class", () => {
