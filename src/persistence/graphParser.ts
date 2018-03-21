@@ -4,7 +4,7 @@ import * as Collections from "typescript-collections";
 import {Graph} from "./graph";
 
 /**
- * A Parser that takes care of (de)modulation for data graphs.
+ * A Parser that takes care of (de)serialization for graph structures.
  */
 export class GraphParser implements Parser {
 
@@ -40,8 +40,10 @@ export class GraphParser implements Parser {
 
             let graph: Graph = data;
             writer.addPrefixes(graph.getPrefixes());
-            writer.addTriples(graph.getTriples());
-            writer.end(function (error: any, result: any) { andThen(result); });
+            writer.addTriples(graph.getPersistentStore().getTriples());
+            writer.end(function (error: any, result: any) {
+                andThen(result);
+            });
         } else {
             throw new Error("Incorrect MimeType " + mime + "!");
         }
@@ -66,7 +68,9 @@ export class GraphParser implements Parser {
                              if (triple) {
                                  self.graph.addTriple(triple.subject, triple.predicate, triple.object);
                              } else {
-                                 self.graph.addPrefixes(prefixes);
+                                 if (prefixes) {
+                                     self.graph.addPrefixes(prefixes);
+                                 }
                                  andThen(self.graph);
                              }
                  });
@@ -87,7 +91,6 @@ export class GraphParser implements Parser {
      * Clean whatever is contained by this GraphParser.
      */
     public clean() {
-        let N3 = require("n3");
-        this.graph = new Graph(N3.Store());
+        this.graph = new Graph();
     }
 }

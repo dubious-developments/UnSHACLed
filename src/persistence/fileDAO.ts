@@ -31,7 +31,7 @@ export class FileDAO implements DataAccessObject {
      */
     public insert(module: Module) {
         this.model.tasks.schedule(new SaveTask(this.io, module));
-        this.model.tasks.processTask();
+        this.model.tasks.processTask(); // TODO: Remove this when we have a scheduler!
     }
 
     /**
@@ -42,7 +42,7 @@ export class FileDAO implements DataAccessObject {
         let self = this;
         this.io.readFromFile(module, function(result: any) {
             self.model.tasks.schedule(new LoadTask(result, module));
-            self.model.tasks.processTask();
+            self.model.tasks.processTask(); // TODO: Remove this when we have a scheduler!
         });
     }
 }
@@ -163,7 +163,7 @@ class LoadTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
     public constructor(result: any, module: Module) {
         super(function(data: ModelData) {
             let component: Component = data.getComponent(module.getType());
-            if (component == null || component === undefined) {
+            if (!component) {
                 component = new Component();
             }
             component.setPart(module.getName(), result);
@@ -187,9 +187,9 @@ class SaveTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
     public constructor(io: IOFacilitator, module: Module) {
         super(function(data: ModelData) {
             let component: Component = data.getComponent(module.getType());
-            if (component != null && component !== undefined) {
+            if (component) {
                 let part = component.getPart(module.getName());
-                if (part != null && part !== undefined) {
+                if (part) {
                     io.writeToFile(module, part);
                 }
             }
