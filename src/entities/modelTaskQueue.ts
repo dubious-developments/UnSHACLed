@@ -77,6 +77,15 @@ class TaskInstruction {
     }
 
     /**
+     * Compares the priority of two task instructions.
+     * @param a A first task instruction.
+     * @param b A second task instruction.
+     */
+    public static compare(a: TaskInstruction, b: TaskInstruction): number {
+        return defaultCompare<number>(a.task.metadata.priority, b.task.metadata.priority);
+    }
+
+    /**
      * Tests if this instruction is eligible for execution.
      */
     public get isEligibleForExecution(): boolean {
@@ -95,14 +104,5 @@ class TaskInstruction {
             }
         });
         this.invertedDependencies.clear();
-    }
-
-    /**
-     * Compares the priority of two task instructions.
-     * @param a A first task instruction.
-     * @param b A second task instruction.
-     */
-    public static compare(a: TaskInstruction, b: TaskInstruction): number {
-        return defaultCompare<number>(a.task.metadata.priority, b.task.metadata.priority);
     }
 }
