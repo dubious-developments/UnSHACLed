@@ -2,55 +2,12 @@ import * as React from 'react';
 import { Menu, Icon, Popup, List} from 'semantic-ui-react';
 import Auth from "../services/Auth";
 import { withRouter } from 'react-router-dom';
-import {FileModule, FileDAO} from "../persistence/fileDAO";
-import {Model, ModelComponent, ModelData, ModelTaskMetadata} from "../entities/model";
-import {DataAccessProvider} from "../persistence/dataAccessProvider";
-import {ProcessorTask} from "../entities/taskProcessor";
-import {Component} from "../persistence/component";
+import { FileModule } from "../persistence/fileDAO";
+import { Model, ModelComponent } from "../entities/model";
+import { DataAccessProvider } from "../persistence/dataAccessProvider";
+import { LoadFileTask, GetOpenedFilesTask} from "../services/ModelTasks";
 
-class LoadFileTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
-
-    /**
-     * Create a new load file task from Model
-     * Contains a function that will execute on the model.
-     * @param {mComponent} ModelComponent
-     */
-    public constructor(mComponent: ModelComponent, fileName: string) {
-        super(function(data: ModelData) {
-            let component: Component = data.getComponent(mComponent);
-            if (component) {
-                var fileDAO: FileDAO = DataAccessProvider.getInstance().getFileDAO();
-                // TODO how to get the current type
-                var blob = new Blob([], {type: "text/turtle"});
-                fileDAO.insert(new FileModule(ModelComponent.DataGraph, fileName, blob));
-            }
-        },    null);
-    }
-}
-
-class GetOpenedFilesTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
-
-    /**
-     * Get the loaded files in the model
-     * Contains a function that will execute on the model.
-     * @param {c} ModelComponent
-     * @param {f} module
-     */
-    public constructor(c: ModelComponent, navBar: Navbar) {
-        super(function(data: ModelData) {
-            if (navBar) {
-                let component: Component = data.getComponent(c);
-                if (component) {
-                    navBar.setLoadedFiles(component.getAllKeys());
-                }
-            } else {
-                console.log("error: navBar not defined");
-            }
-        },    null);
-    }
-}
-
-class Navbar extends React.Component<any, any> {
+export class Navbar extends React.Component<any, any> {
 
     allowedExtensions = ".n3,.ttl,.rdf";
     loadedFiles = [];
