@@ -115,7 +115,7 @@ export class ModelData {
  * An enumeration of components in the model.
  */
 export enum ModelComponent {
-    DataGraph,
+    DataGraph, ShapesGraph, ValidationReport
 }
 
 /**
