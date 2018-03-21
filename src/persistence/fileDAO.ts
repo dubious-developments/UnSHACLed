@@ -2,10 +2,11 @@
 /// <reference path="./parser.d.ts"/>
 
 import * as Collections from "typescript-collections";
-import {Model, ModelComponent, ModelData, ModelTaskMetadata} from "../entities/model";
-import {ProcessorTask} from "../entities/taskProcessor";
-import {Component} from "./component";
-import {GraphParser} from "./graphParser";
+import { Model, ModelData } from "../entities/model";
+import { ModelTaskMetadata, ModelComponent } from "../entities/modelTaskMetadata";
+import { ProcessorTask } from "../entities/taskProcessor";
+import { Component } from "./component";
+import { GraphParser } from "./graphParser";
 
 /**
  * Provides basic DAO functionality at the file granularity level.

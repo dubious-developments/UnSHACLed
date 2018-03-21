@@ -1,8 +1,9 @@
-import {Model, ModelComponent, ModelData, ModelTaskMetadata} from "../src/entities/model";
-import {FileDAO, FileModule} from "../src/persistence/fileDAO";
-import {GraphParser} from "../src/persistence/graphParser";
-import {Component} from "../src/persistence/component";
-import {ProcessorTask} from "../src/entities/taskProcessor";
+import { Model, ModelData } from "../src/entities/model";
+import { ModelTaskMetadata, ModelComponent } from "../src/entities/modelTaskMetadata";
+import { FileDAO, FileModule } from "../src/persistence/fileDAO";
+import { GraphParser } from "../src/persistence/graphParser";
+import { Component } from "../src/persistence/component";
+import { ProcessorTask } from "../src/entities/taskProcessor";
 
 describe("FileDAO Class", () => {
     it("should create a new file.",

@@ -1,5 +1,4 @@
 import * as Collections from "typescript-collections";
-import { ProcessorTask } from "./taskProcessor";
 
 /**
  * An enumeration of components in the model.

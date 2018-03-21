@@ -1,4 +1,5 @@
-import { ModelTaskMetadata, ModelComponent, Model, ModelData } from "../src/entities/model";
+import { Model, ModelData } from "../src/entities/model";
+import { ModelTaskMetadata, ModelComponent } from "../src/entities/modelTaskMetadata";
 import { Set } from "typescript-collections";
 import { ProcessorTask } from "../src/entities/taskProcessor";
 
