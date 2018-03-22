@@ -19,13 +19,13 @@ describe("FileDAO Class", () => {
             let busy = true;
             parser.parse(generateTurtle(), file.type, function(result: any) {
                 comp.setPart(filename, result);
-                model.tasks.schedule(new ProcessorTask<ModelData, ModelTaskMetadata>(
-                    (data) => {
-                        data.setComponent(ModelComponent.DataGraph, comp);
-                        busy = false;
-                    },
-                    new ModelTaskMetadata([], [ModelComponent.DataGraph]))
-                );
+                model.tasks.schedule(
+                    new ProcessorTask<ModelData, ModelTaskMetadata>(
+                        (data) => {
+                            data.setComponent(ModelComponent.DataGraph, comp);
+                            busy = false;
+                        },
+                        new ModelTaskMetadata([], [ModelComponent.DataGraph])));
                 model.tasks.processTask();
 
                 // this is pretty horrible and there probably exists a better way of doing this,
