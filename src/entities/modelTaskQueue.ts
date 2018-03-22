@@ -21,11 +21,17 @@ export class ModelTaskQueue implements TaskQueue<ModelData, ModelTaskMetadata> {
     private eligibleInstructions: Collections.PriorityQueue<TaskInstruction>;
 
     /**
+     * A mapping of model components to the latest instruction that defines them.
+     */
+    private latestComponentStateMap: Collections.Dictionary<ModelComponent, TaskInstruction>;
+
+    /**
      * Creates a new model task queue.
      */
     public constructor() {
         this.eligibleInstructions = new Collections.PriorityQueue<TaskInstruction>(
             TaskInstruction.compare);
+        this.latestComponentStateMap = new Collections.Dictionary<ModelComponent, TaskInstruction>();
     }
 
     public enqueue(task: ProcessorTask<ModelData, ModelTaskMetadata>): void {
@@ -40,9 +46,38 @@ export class ModelTaskQueue implements TaskQueue<ModelData, ModelTaskMetadata> {
         // Pick the eligible instruction with the highest priority.
         let instr = this.eligibleInstructions.dequeue();
         // Complete that instruction (pre-emptively).
-        instr.complete(this.eligibleInstructions);
+        this.complete(instr);
         // Return the task associated with the instruction.
         return instr.task;
+    }
+
+    /**
+     * Completes an instruction.
+     * @param instruction The instruction to complete.
+     */
+    private complete(instruction: TaskInstruction): void {
+        // Remove the instruction from the dependency set of
+        // all other instructions.
+        instruction.invertedDependencies.forEach(dependentInstruction => {
+            dependentInstruction.dependencies.remove(instruction);
+
+            // Add instructions that become eligible for execution
+            // to the set of eligible instructions.
+            if (dependentInstruction.isEligibleForExecution) {
+                this.eligibleInstructions.add(dependentInstruction);
+            }
+        });
+
+        // Clear the instruction's inverted dependencies because
+        // they are no longer valid.
+        instruction.invertedDependencies.clear();
+
+        // Update the state map if applicable.
+        instruction.task.metadata.writeSet.forEach(component => {
+            if (this.latestComponentStateMap.getValue(component) === instruction) {
+                this.latestComponentStateMap.remove(component);
+            }
+        });
     }
 }
 
@@ -90,19 +125,5 @@ class TaskInstruction {
      */
     public get isEligibleForExecution(): boolean {
         return this.dependencies.isEmpty();
-    }
-
-    /**
-     * Completes this task.
-     * @param eligibleInstructions A mutable set of instructions that are ready for execution.
-     */
-    public complete(eligibleInstructions: Collections.PriorityQueue<TaskInstruction>): void {
-        this.invertedDependencies.forEach(element => {
-            element.dependencies.remove(this);
-            if (element.isEligibleForExecution) {
-                eligibleInstructions.add(element);
-            }
-        });
-        this.invertedDependencies.clear();
     }
 }
