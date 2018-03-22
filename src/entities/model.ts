@@ -1,7 +1,8 @@
 import * as Collections from "typescript-collections";
-import { TaskProcessor, ProcessorTask, FifoTaskQueue } from "./taskProcessor";
+import { TaskProcessor, ProcessorTask } from "./taskProcessor";
 import { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";
 import { ModelData } from "./modelData";
+import { ModelTaskQueue } from "./modelTaskQueue";
 export { ModelData } from "./modelData";
 
 /**
@@ -46,7 +47,7 @@ export class Model {
         let wellDefinedData = !data ? new ModelData() : data;
         this.tasks = new TaskProcessor<ModelData, ModelTaskMetadata>(
             wellDefinedData,
-            new FifoTaskQueue(),
+            new ModelTaskQueue(),
             (task) => task,
             (task) => this.notifyObservers(wellDefinedData.drainChangeBuffer()));
         this.observers = [];
