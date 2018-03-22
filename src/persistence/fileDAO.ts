@@ -31,7 +31,7 @@ export class FileDAO implements DataAccessObject {
      * @param module
      */
     public insert(module: Module) {
-        this.model.tasks.schedule(new SaveTask(this.io, module));
+        this.model.tasks.schedule(SaveTask.create(this.io, module));
         this.model.tasks.processTask();
     }
 
@@ -41,8 +41,8 @@ export class FileDAO implements DataAccessObject {
      */
     public find(module: Module) {
         let self = this;
-        this.io.readFromFile(module, function(result: any) {
-            self.model.tasks.schedule(new LoadTask(result, module));
+        this.io.readFromFile(module, function (result: any) {
+            self.model.tasks.schedule(LoadTask.create(result, module));
             self.model.tasks.processTask();
         });
     }
@@ -73,17 +73,23 @@ class IOFacilitator {
      * @param save
      */
     public readFromFile(module: Module, save: (result: any) => void) {
-        let reader = new FileReader();
-        reader.readAsText(module.getTarget());
-        reader.onload = onLoadFunction;
-
         let parser = this.parsers.getValue(module.getType());
-        parser.clean();
+        if (!parser) {
+            throw new Error("Cannot read unknown format '" + module.getType() + "'");
+        }
+
+        let wellDefinedParser = parser;
+        wellDefinedParser.clean();
+
         // every time a portion is loaded, parse this portion of content
         // and aggregate the result (this happens internally).
         function onLoadFunction(evt: any) {
-            parser.parse(evt.target.result, module.getTarget().type, save);
+            wellDefinedParser.parse(evt.target.result, module.getTarget().type, save);
         }
+
+        let reader = new FileReader();
+        reader.readAsText(module.getTarget());
+        reader.onload = onLoadFunction;
     }
 
     /**
@@ -93,9 +99,13 @@ class IOFacilitator {
      */
     public writeToFile(module: Module, data: any) {
         let FileSaver = require("file-saver");
-        this.parsers.getValue(module.getType()).serialize(
+        let parser = this.parsers.getValue(module.getType());
+        if (!parser) {
+            throw new Error("Cannot serialize to unknown format '" + module.getType() + "'");
+        }
+        parser.serialize(
             data, module.getTarget().type,
-            function(result: string) {
+            function (result: string) {
                 // write to file
                 let file = new File([result], module.getName());
                 FileSaver.saveAs(file);
@@ -152,8 +162,7 @@ export class FileModule implements Module {
 /**
  * A ProcessorTask that reads a file and adds its contents as a component to the Model.
  */
-class LoadTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
-
+class LoadTask {
     /**
      * Create a new LoadTask.
      * Contains a function that will execute on the model.
@@ -161,22 +170,25 @@ class LoadTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
      * @param result
      * @param {FileModule} module
      */
-    public constructor(result: any, module: Module) {
-        super(function(data: ModelData) {
-            let component: Component = data.getComponent(module.getType());
-            if (component == null || component === undefined) {
-                component = new Component();
-            }
-            component.setPart(module.getName(), result);
-            data.setComponent(module.getType(), component);
-        },    null);
+    public static create(result: any, module: Module): ProcessorTask<ModelData, ModelTaskMetadata> {
+        return new ProcessorTask<ModelData, ModelTaskMetadata>(
+            (data: ModelData) => {
+                let component = data.getOrCreateComponent<Component>(
+                    module.getType(),
+                    () => new Component());
+                component.setPart(module.getName(), result);
+                data.setComponent(module.getType(), component);
+            },
+            new ModelTaskMetadata(
+                [ModelComponent.DataGraph],
+                [ModelComponent.DataGraph]));
     }
 }
 
 /**
  * A ProcessorTask that retrieves a component from the Model and writes its contents to a file.
  */
-class SaveTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
+class SaveTask {
 
     /**
      * Create a new SaveTask.
@@ -185,15 +197,19 @@ class SaveTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
      * @param {IOFacilitator} io
      * @param {FileModule} module
      */
-    public constructor(io: IOFacilitator, module: Module) {
-        super(function(data: ModelData) {
-            let component: Component = data.getComponent(module.getType());
-            if (component != null && component !== undefined) {
-                let part = component.getPart(module.getName());
-                if (part != null && part !== undefined) {
-                    io.writeToFile(module, part);
+    public static create(io: IOFacilitator, module: Module): ProcessorTask<ModelData, ModelTaskMetadata> {
+        return new ProcessorTask<ModelData, ModelTaskMetadata>(
+            (data: ModelData) => {
+                let component = data.getComponent<Component>(module.getType());
+                if (component !== undefined) {
+                    let part = component.getPart(module.getName());
+                    if (part !== null && part !== undefined) {
+                        io.writeToFile(module, part);
+                    }
                 }
-            }
-        },    null);
+            },
+            new ModelTaskMetadata(
+                [ModelComponent.DataGraph],
+                []));
     }
 }

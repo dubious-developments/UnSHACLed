@@ -22,9 +22,28 @@ export class ModelData {
 
     /**
      * Gets a particular component of this model.
+     * @param component The component to retrieve.
      */
-    public getComponent<T>(component: ModelComponent): T {
+    public getComponent<T>(component: ModelComponent): T | undefined {
         return this.components.getValue(component);
+    }
+
+    /**
+     * Gets a particular component of this model. Creates said
+     * component if it doesn't exist already.
+     * @param component The component to retrieve or create.
+     * @param createComponent A function that creates the component
+     * if it doesn't exist already.
+     */
+    public getOrCreateComponent<T>(
+        component: ModelComponent,
+        createComponent: () => T): T {
+        let result = this.getComponent<T>(component);
+        if (result === undefined) {
+            result = createComponent();
+            this.setComponent<T>(component, result);
+        }
+        return result;
     }
 
     /**

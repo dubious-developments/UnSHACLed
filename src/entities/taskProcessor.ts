@@ -54,6 +54,9 @@ export class TaskProcessor<TData, TTaskMetadata> {
      */
     public processTask(): void {
         let task = this.tasks.dequeue();
+        if (task === undefined) {
+            return;
+        }
         let info = this.onTaskStarted(task);
         task.execute(this.data);
         this.onTaskCompleted(info);
@@ -102,7 +105,9 @@ export class ProcessorTask<TData, TTaskMetadata> {
      */
     public constructor(
         public execute: (proc: TData) => void,
-        public metadata: TTaskMetadata) { }
+        public metadata: TTaskMetadata) {
+
+    }
 }
 
 /**
@@ -124,7 +129,7 @@ export interface TaskQueue<TData, TTaskMetadata> {
     /**
      * Removes a task from the queue and returns it.
      */
-    dequeue(): ProcessorTask<TData, TTaskMetadata>;
+    dequeue(): ProcessorTask<TData, TTaskMetadata> | undefined;
 }
 
 /**
@@ -145,7 +150,7 @@ export class FifoTaskQueue<TData, TTaskMetadata> implements TaskQueue<TData, TTa
         this.queue.enqueue(task);
     }
 
-    public dequeue(): ProcessorTask<TData, TTaskMetadata> {
+    public dequeue(): ProcessorTask<TData, TTaskMetadata> | undefined {
         return this.queue.dequeue();
     }
 }

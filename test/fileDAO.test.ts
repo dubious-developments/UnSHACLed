@@ -24,7 +24,7 @@ describe("FileDAO Class", () => {
                         data.setComponent(ModelComponent.DataGraph, comp);
                         busy = false;
                     },
-                    null)
+                    new ModelTaskMetadata([], [ModelComponent.DataGraph]))
                 );
                 model.tasks.processTask();
 

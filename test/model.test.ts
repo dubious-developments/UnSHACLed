@@ -39,7 +39,7 @@ describe("Model Class", () => {
             (data) =>
                 data.setComponent(
                     ModelComponent.DataGraph,
-                    data.getComponent<number>(ModelComponent.DataGraph) + 1),
+                    <number> data.getComponent<number>(ModelComponent.DataGraph) + 1),
             graphTweakMetadata);
 
         model.registerObserver((changeBuf) => {

@@ -43,14 +43,12 @@ export class Model {
      * This constructor exists mostly for testing purposes.
      */
     public constructor(data?: ModelData) {
-        if (!data) {
-            data = new ModelData();
-        }
+        let wellDefinedData = !data ? new ModelData() : data;
         this.tasks = new TaskProcessor<ModelData, ModelTaskMetadata>(
-            data,
-            new FifoTaskQueue<ModelData, ModelTaskMetadata>(),
+            wellDefinedData,
+            new FifoTaskQueue(),
             (task) => task,
-            (task) => this.notifyObservers(data.drainChangeBuffer()));
+            (task) => this.notifyObservers(wellDefinedData.drainChangeBuffer()));
         this.observers = [];
     }
 

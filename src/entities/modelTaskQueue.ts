@@ -83,9 +83,12 @@ export class ModelTaskQueue implements TaskQueue<ModelData, ModelTaskMetadata> {
     /**
      * Removes a task from the queue and returns it.
      */
-    public dequeue(): ProcessorTask<ModelData, ModelTaskMetadata> {
+    public dequeue(): ProcessorTask<ModelData, ModelTaskMetadata> | undefined {
         // Pick the eligible instruction with the highest priority.
         let instr = this.eligibleInstructions.dequeue();
+        if (instr === undefined) {
+            return undefined;
+        }
         // Complete that instruction (pre-emptively).
         this.complete(instr);
         // Return the task associated with the instruction.
@@ -227,7 +230,7 @@ class PriorityPartitionedQueue<T> {
     /**
      * Dequeues an element from this priority-partitioned queue.
      */
-    public dequeue(): T {
+    public dequeue(): T | undefined {
         if (this.isEmpty) {
             return undefined;
         }
