@@ -8,7 +8,7 @@ type TaskCompletedCallback =
 
 /**
  * An object that executes tasks on a piece of data.
-*/
+ */
 export class TaskProcessor<TData, TTaskMetadata> {
     private tasks: TaskQueue<TData, TTaskMetadata>;
     private data: TData;
@@ -18,7 +18,7 @@ export class TaskProcessor<TData, TTaskMetadata> {
     /**
      * Creates a task processor that manages a particular piece of data
      * and uses a particular task queue.
-    */
+     */
     public constructor(
         data: TData,
         tasks?: TaskQueue<TData, TTaskMetadata>,
@@ -85,7 +85,7 @@ export class TaskProcessor<TData, TTaskMetadata> {
 
     /**
      * Tells if the model's task schedule is empty.
-    */
+     */
     public get isScheduleEmpty(): boolean {
         return this.tasks.isEmpty;
     }
@@ -93,7 +93,7 @@ export class TaskProcessor<TData, TTaskMetadata> {
 
 /**
  * A task that can be executed on a task processor.
-*/
+ */
 export class ProcessorTask<TData, TTaskMetadata> {
     /**
      * Creates a model task.
@@ -108,11 +108,11 @@ export class ProcessorTask<TData, TTaskMetadata> {
 /**
  * A queue of tasks for task processors. Implementations
  * of this interface need not adhere to a FIFO scheduling policy.
-*/
+ */
 export interface TaskQueue<TData, TTaskMetadata> {
     /**
      * Tells if the task queue is empty.
-    */
+     */
     isEmpty: boolean;
 
     /**
@@ -123,13 +123,13 @@ export interface TaskQueue<TData, TTaskMetadata> {
 
     /**
      * Removes a task from the queue and returns it.
-    */
+     */
     dequeue(): ProcessorTask<TData, TTaskMetadata>;
 }
 
 /**
  * A task queue that executes tasks in FIFO order.
-*/
+ */
 export class FifoTaskQueue<TData, TTaskMetadata> implements TaskQueue<TData, TTaskMetadata> {
     private queue: Collections.Queue<ProcessorTask<TData, TTaskMetadata>>;
 
