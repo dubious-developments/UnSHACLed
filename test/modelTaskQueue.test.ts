@@ -30,7 +30,7 @@ describe("ModelTaskQueue Class", () => {
         let queue = new ModelTaskQueue();
         queue.enqueue(
             new ProcessorTask<ModelData, ModelTaskMetadata>(
-                (data: ModelData) => { count++ },
+                (data: ModelData) => { count++; },
                 new ModelTaskMetadata(
                     [ModelComponent.DataGraph],
                     [ModelComponent.DataGraph])));
@@ -46,13 +46,13 @@ describe("ModelTaskQueue Class", () => {
         let queue = new ModelTaskQueue();
         queue.enqueue(
             new ProcessorTask<ModelData, ModelTaskMetadata>(
-                (data: ModelData) => { count++ },
+                (data: ModelData) => { count++; },
                 new ModelTaskMetadata(
                     [ModelComponent.DataGraph],
                     [ModelComponent.DataGraph])));
         queue.enqueue(
             new ProcessorTask<ModelData, ModelTaskMetadata>(
-                (data: ModelData) => { count++ },
+                (data: ModelData) => { count++; },
                 new ModelTaskMetadata(
                     [ModelComponent.DataGraph],
                     [ModelComponent.DataGraph])));
