@@ -32,8 +32,8 @@ export class ModelTaskMetadata {
      * @param priority The priority assigned to the model task.
      */
     public constructor(
-        private readonly readSet: Collections.Set<ModelComponent>,
-        private readonly writeSet: Collections.Set<ModelComponent>,
+        public readonly readSet: Collections.Set<ModelComponent>,
+        public readonly writeSet: Collections.Set<ModelComponent>,
         priority?: number) {
         if (priority) {
             this.priority = priority;
