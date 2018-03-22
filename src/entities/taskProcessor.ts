@@ -99,12 +99,17 @@ export class TaskProcessor<TData, TTaskMetadata> {
  */
 export class ProcessorTask<TData, TTaskMetadata> {
     private static taskCounter = 0;
-    private static generateTaskIndex(): number {
-        return this.taskCounter++;
-    }
 
     /**
      * A task-unique index.
+     *
+     * NOTE: we need these indices to make sets work. JavaScript
+     * arrays are stupid and assume that objects are equal iff
+     * their string representations are. Additionally, string
+     * representations are *structural,* so without this index,
+     * the string representation for two different tasks would
+     * be the same. That breaks sets and hash maps, which we can't
+     * have.
      */
     public readonly index: number;
 
@@ -118,6 +123,10 @@ export class ProcessorTask<TData, TTaskMetadata> {
         public metadata: TTaskMetadata) {
 
         this.index = ProcessorTask.generateTaskIndex();
+    }
+
+    private static generateTaskIndex(): number {
+        return this.taskCounter++;
     }
 
     /**
