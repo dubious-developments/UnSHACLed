@@ -55,7 +55,9 @@ export class Model {
     }
 
     /**
-     * Registers an observer with the model.
+     * Registers an observer with the model. Observers are notified when
+     * a task completes and may queue additional tasks based on the changes
+     * made to components.
      */
     public registerObserver(observer: ModelObserver): void {
         this.observers.push(observer);
