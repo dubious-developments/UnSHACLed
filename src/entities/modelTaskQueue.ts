@@ -171,6 +171,13 @@ class TaskInstruction {
     public get isEligibleForExecution(): boolean {
         return this.dependencies.isEmpty();
     }
+
+    /**
+     * Gets a string representation for this instruction.
+     */
+    public toString(): string {
+        return `Instruction ${this.task.index}`;
+    }
 }
 
 /**

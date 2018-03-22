@@ -98,6 +98,16 @@ export class TaskProcessor<TData, TTaskMetadata> {
  * A task that can be executed on a task processor.
  */
 export class ProcessorTask<TData, TTaskMetadata> {
+    private static taskCounter = 0;
+    private static generateTaskIndex(): number {
+        return this.taskCounter++;
+    }
+
+    /**
+     * A task-unique index.
+     */
+    public readonly index: number;
+
     /**
      * Creates a model task.
      * @param execute The task itself.
@@ -107,6 +117,14 @@ export class ProcessorTask<TData, TTaskMetadata> {
         public execute: (proc: TData) => void,
         public metadata: TTaskMetadata) {
 
+        this.index = ProcessorTask.generateTaskIndex();
+    }
+
+    /**
+     * Gets a string representation for this task.
+     */
+    public toString(): string {
+        return `Task ${this.index}`;
     }
 }
 
