@@ -11,8 +11,19 @@ export class ModelTaskQueue implements TaskQueue<ModelData, ModelTaskMetadata> {
     // This task queue uses the same techniques as superscalar out-of-order processors
     // and state-of-the-art compilers such as LLVM and GCC to reason about instructions.
     //
-    // Specifically, each task is represented as an instruction in single static
-    // assignment (SSA) form.
+    // Specifically, each task is represented as an instruction in a mutable
+    // variant of single static assignment (SSA) form. When an instruction is executed,
+    // that instruction is removed as a dependency from all dependent instructions.
+    // Instructions become eligible for execution when their dependency set becomes empty,
+    // i.e., all of their dependencies have been executed.
+    //
+    // This scheme is used in superscalar out-of-order processors to run multiple tasks
+    // at the same time. It is used here to prioritize tasks---data flow execution allows
+    // us to cherry-pick high-priority from the task queue, dependencies permitting.
+    //
+    // Operations in the model task queue are never worse than `O(n)`, where `n` is the
+    // number of tasks in the queue. For typical workloads, the complexity of enqueuing
+    // and dequeuing a task should be much lower than that.
 
     /**
      * A set of all instructions that are eligible for immediate execution,
