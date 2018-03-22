@@ -11,6 +11,7 @@ describe("ModelTaskQueue Class", () => {
     it("is initially empty", () => {
         let queue = new ModelTaskQueue();
         expect(queue.isEmpty).toEqual(true);
+        expect(queue.dequeue()).toBeUndefined();
     });
 
     it("supports enqueuing tasks", () => {
@@ -60,6 +61,38 @@ describe("ModelTaskQueue Class", () => {
         queue.dequeue().execute(new ModelData());
         expect(queue.isEmpty).toEqual(true);
         expect(count).toEqual(2);
+    });
+
+    it("correctly prioritizes tasks", () => {
+        let count = 0;
+        let queue = new ModelTaskQueue();
+        queue.enqueue(
+            new ProcessorTask<ModelData, ModelTaskMetadata>(
+                (data: ModelData) => { if (count === 0) { count = 1; } },
+                new ModelTaskMetadata(
+                    [],
+                    [ModelComponent.DataGraph],
+                    0)));
+        queue.enqueue(
+            new ProcessorTask<ModelData, ModelTaskMetadata>(
+                (data: ModelData) => { if (count === 2) { count = 3; } },
+                new ModelTaskMetadata(
+                    [ModelComponent.DataGraph],
+                    [],
+                    1)));
+        queue.enqueue(
+            new ProcessorTask<ModelData, ModelTaskMetadata>(
+                (data: ModelData) => { if (count === 1) { count = 2; } },
+                new ModelTaskMetadata(
+                    [ModelComponent.DataGraph],
+                    [],
+                    2)));
+        expect(queue.isEmpty).toEqual(false);
+        queue.dequeue().execute(new ModelData());
+        queue.dequeue().execute(new ModelData());
+        queue.dequeue().execute(new ModelData());
+        expect(queue.isEmpty).toEqual(true);
+        expect(count).toEqual(3);
     });
 });
 
