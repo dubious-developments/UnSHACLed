@@ -1,6 +1,52 @@
 import * as React from 'react';
 declare let mxClient, mxUtils, mxGraph, mxRubberband: any;
 
+let shape = '@prefix dash: <http://datashapes.org/dash#> .\n\
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n\
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\
+@prefix schema: <http://schema.org/> .\n\
+@prefix sh: <http://www.w3.org/ns/shacl#> .\n\
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n\
+\n\
+schema:PersonShape\n\
+    a sh:NodeShape ;\n\
+    sh:targetClass schema:Person ;\n\
+    sh:property [\n\
+        sh:path schema:givenName ;\n\
+        sh:datatype xsd:string ;\n\
+        sh:name "given name" ;\n\
+    ] ;\n\
+    sh:property [\n\
+        sh:path schema:birthDate ;\n\
+        sh:lessThan schema:deathDate ;\n\
+        sh:maxCount 1 ;\n\
+    ] ;\n\
+    sh:property [\n\
+        sh:path schema:gender ;\n\
+        sh:in ( "female" "male" ) ;\n\
+    ] ;\n\
+    sh:property [\n\
+        sh:path schema:address ;\n\
+        sh:node schema:AddressShape ;\n\
+    ] .\n\
+\n\
+schema:AddressShape\n\
+    a sh:NodeShape ;\n\
+    sh:closed true ;\n\
+    sh:property [\n\
+        sh:path schema:streetAddress ;\n\
+        sh:datatype xsd:string ;\n\
+    ] ;\n\
+    sh:property [\n\
+        sh:path schema:postalCode ;\n\
+        sh:or ( [ sh:datatype xsd:string ] [ sh:datatype xsd:integer ] ) ;\n\
+        sh:minInclusive 10000 ;\n\
+        sh:maxInclusive 99999 ;\n\
+    ] .';
+
+declare function require(name:string):any;
+let SHACLValidator = require("./shacl");
+
 class MxGraph extends React.Component<any, any> {
     constructor(props: string) {
         super(props);
@@ -16,10 +62,22 @@ class MxGraph extends React.Component<any, any> {
     }
     
     main(container: HTMLElement): void {
+
         // Checks if the browser is supported
         if (!mxClient.isBrowserSupported()) {
             mxUtils.error('Browser is not supported!', 200, false);
         } else {
+
+            let validator = new SHACLValidator();
+            validator.parseShapesGraph(shape, "text/turtle", function () {
+                let store = validator.$shapes.store.statementsMatching(
+                    undefined, undefined, undefined);
+                for (let i = 0; i < store.length; i++) {
+                    if (store[i].subject.uri === "http://schema.org/PersonShape") {
+                        console.log(console.log(store[i].subject.uri), store[i].predicate.uri, store[i].object.uri);
+                    }
+                }
+            });
 
             // Creates the graph inside the given container
             let graph = new mxGraph(container);
