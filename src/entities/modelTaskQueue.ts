@@ -45,14 +45,45 @@ export class ModelTaskQueue implements TaskQueue<ModelData, ModelTaskMetadata> {
         this.latestComponentStateMap = new Collections.Dictionary<ModelComponent, TaskInstruction>();
     }
 
-    public enqueue(task: ProcessorTask<ModelData, ModelTaskMetadata>): void {
-        throw new Error("Method not implemented.");
-    }
-
+    /**
+     * Tells if the task queue is empty.
+     */
     public get isEmpty(): boolean {
         return this.eligibleInstructions.isEmpty();
     }
 
+    /**
+     * Adds a task to the queue.
+     * @param task The task to add.
+     */
+    public enqueue(task: ProcessorTask<ModelData, ModelTaskMetadata>): void {
+        // Create a new instruction.
+        let instruction = new TaskInstruction(task);
+
+        // Turn the instruction's read set into a dependency set.
+        task.metadata.readSet.forEach(component => {
+            let dependency = this.latestComponentStateMap.getValue(component);
+            if (dependency !== undefined) {
+                instruction.dependencies.add(dependency);
+                dependency.invertedDependencies.add(instruction);
+            }
+        });
+
+        // Use the instruction's write set to update the latest component state map.
+        task.metadata.writeSet.forEach(component => {
+            this.latestComponentStateMap.setValue(component, instruction);
+        });
+
+        // Mark the instruction as eligible for instruction if all of its
+        // dependencies have already been computed.
+        if (instruction.isEligibleForExecution) {
+            this.eligibleInstructions.add(instruction);
+        }
+    }
+
+    /**
+     * Removes a task from the queue and returns it.
+     */
     public dequeue(): ProcessorTask<ModelData, ModelTaskMetadata> {
         // Pick the eligible instruction with the highest priority.
         let instr = this.eligibleInstructions.dequeue();
