@@ -56,13 +56,14 @@ export class ModelTaskQueue implements TaskQueue<ModelData, ModelTaskMetadata> {
      * @param task The task to add.
      */
     public enqueue(task: ProcessorTask<ModelData, ModelTaskMetadata>): void {
+
         // Create a new instruction.
         let instruction = new TaskInstruction(task);
 
         // Turn the instruction's read set into a dependency set.
         task.metadata.readSet.forEach(component => {
             let dependency = this.latestComponentStateMap.getValue(component);
-            if (dependency !== undefined) {
+            if (dependency) {
                 instruction.dependencies.add(dependency);
                 dependency.invertedDependencies.add(instruction);
             }
@@ -201,9 +202,9 @@ class PriorityPartitionedQueue<T> {
      */
     public constructor(
         public readonly getPriority: (value: T) => number) {
+        this.nonEmptySubQueueCount = 0;
         this.subQueues = new Collections.DefaultDictionary<number, Collections.Queue<T>>(
             () => new Collections.Queue<T>());
-        this.nonEmptySubQueueCount = 0;
         this.priorityGen = new PriorityGenerator();
     }
 
@@ -225,6 +226,7 @@ class PriorityPartitionedQueue<T> {
             this.priorityGen.notifyPriorityExists(priority);
         }
         subQueue.enqueue(value);
+        this.subQueues.setValue(priority, subQueue);
     }
 
     /**
@@ -240,10 +242,16 @@ class PriorityPartitionedQueue<T> {
         do {
             let priority = this.priorityGen.next();
             subQueue = this.subQueues.getValue(priority);
-        } while (subQueue.isEmpty);
+        } while (subQueue.isEmpty());
 
         // Dequeue an element from the sub-queue.
-        return subQueue.dequeue();
+        let result = subQueue.dequeue();
+
+        if (subQueue.isEmpty()) {
+            this.nonEmptySubQueueCount--;
+        }
+
+        return result;
     }
 }
 
@@ -251,7 +259,7 @@ class PriorityPartitionedQueue<T> {
  * Generates priorities based on a max priority and a min priority.
  * Higher priorities are picked more often.
  */
-class PriorityGenerator {
+export class PriorityGenerator {
     // This class generates priorities by setting a frontier value,
     // iterating from the highest priority all the way to that
     // frontier and then decrementing the frontier. This process
@@ -345,7 +353,13 @@ class PriorityGenerator {
      */
     public notifyPriorityExists(priority: number): void {
         this.min = Math.min(this.min, priority);
+
+        let oldMax = this.max;
         this.max = Math.max(this.max, priority);
+        if (oldMax !== this.max) {
+            this.current = this.max;
+            this.frontier = this.max;
+        }
     }
 
     /**
@@ -353,10 +367,10 @@ class PriorityGenerator {
      */
     public next(): number {
         let result = this.current;
-        if (result === this.frontier) {
+        if (result <= this.frontier) {
             this.nextFrontier();
         } else {
-            this.current++;
+            this.current--;
         }
         return result;
     }
