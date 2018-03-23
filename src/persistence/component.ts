@@ -20,7 +20,7 @@ export class Component {
      * @param {string} key
      * @returns {any}
      */
-    public getPart(key: string) {
+    public getPart(key: string): any {
         return this.parts.getValue(key);
     }
 
@@ -29,7 +29,7 @@ export class Component {
      * @param {string} key
      * @param value
      */
-    public setPart(key: string, value: any) {
+    public setPart(key: string, value: any): void {
         this.parts.setValue(key, value);
     }
 }

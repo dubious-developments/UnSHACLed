@@ -7,20 +7,20 @@ describe("GraphParser Class", () => {
        (done) => {
             let parser = new GraphParser();
             parser.parse(generateTurtle(), "text/turtle", function(result: any) {
-                expect(result.getPersistentStore().countTriples()).toEqual(2);
+                expect(result.getN3Store().countTriples()).toEqual(2);
 
-                let firstTriple = result.getPersistentStore().getTriples()[0];
+                let firstTriple = result.getN3Store().getTriples()[0];
                 expect(firstTriple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
                 expect(firstTriple.predicate).toEqual("http://purl.org/dc/elements/1.1/title");
                 expect(firstTriple.object).toEqual('"Tony Benn"');
 
-                let secondTriple = result.getPersistentStore().getTriples()[1];
+                let secondTriple = result.getN3Store().getTriples()[1];
                 expect(secondTriple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
                 expect(secondTriple.predicate).toEqual("http://purl.org/dc/elements/1.1/publisher");
                 expect(secondTriple.object).toEqual('"Wikipedia"');
 
                 parser.clean();
-                expect(parser.getData().getPersistentStore().countTriples()).toEqual(0);
+                expect(parser.getData().getN3Store().countTriples()).toEqual(0);
                 done();
             });
        });

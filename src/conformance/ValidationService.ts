@@ -38,7 +38,7 @@ export class ValidationService {
         });
     }
 
-    public registerValidator(validator: Validator) {
+    public registerValidator(validator: Validator): void {
         validator.getTypesForValidation().forEach(c => {
             let relevantSet = this.validators.getValue(c);
             if (!relevantSet) {

@@ -7,6 +7,7 @@ import { ModelTaskMetadata, ModelComponent } from "../entities/modelTaskMetadata
 import { ProcessorTask } from "../entities/taskProcessor";
 import { Component } from "./component";
 import { GraphParser } from "./graphParser";
+import {DataAccessObject, Module} from "./dataAccessObject";
 
 /**
  * Provides basic DAO functionality at the file granularity level.
@@ -30,7 +31,7 @@ export class FileDAO implements DataAccessObject {
      * Create a new file.
      * @param module
      */
-    public insert(module: Module) {
+    public insert(module: Module): void {
         this.model.tasks.schedule(SaveTask.create(this.io, module));
         this.model.tasks.processTask(); // TODO: Remove this when we have a scheduler!
     }
@@ -39,7 +40,7 @@ export class FileDAO implements DataAccessObject {
      * Load an existing file.
      * @param module
      */
-    public find(module: Module) {
+    public find(module: Module): void {
         let self = this;
         this.io.readFromFile(module, function (result: any) {
             self.model.tasks.schedule(LoadTask.create(result, module));
@@ -62,7 +63,7 @@ class IOFacilitator {
         this.parsers = new Collections.Dictionary<ModelComponent, Parser>();
     }
 
-    public registerParser(label: ModelComponent, parser: Parser) {
+    public registerParser(label: ModelComponent, parser: Parser): void {
         this.parsers.setValue(label, parser);
     }
 
@@ -70,9 +71,9 @@ class IOFacilitator {
      * Read from an existing file.
      * @returns {Graph}
      * @param module
-     * @param save
+     * @param load
      */
-    public readFromFile(module: Module, save: (result: any) => void) {
+    public readFromFile(module: Module, load: (result: any) => void): void {
         let parser = this.parsers.getValue(module.getType());
         if (!parser) {
             throw new Error("Cannot read unknown format '" + module.getType() + "'");
@@ -84,7 +85,7 @@ class IOFacilitator {
         // every time a portion is loaded, parse this portion of content
         // and aggregate the result (this happens internally).
         function onLoadFunction(evt: any) {
-            wellDefinedParser.parse(evt.target.result, module.getTarget().type, save);
+            wellDefinedParser.parse(evt.target.result, module.getTarget().type, load);
         }
 
         let reader = new FileReader();
@@ -97,12 +98,13 @@ class IOFacilitator {
      * @param module
      * @param data
      */
-    public writeToFile(module: Module, data: any) {
+    public writeToFile(module: Module, data: any): void {
         let FileSaver = require("file-saver");
         let parser = this.parsers.getValue(module.getType());
         if (!parser) {
             throw new Error("Cannot serialize to unknown format '" + module.getType() + "'");
         }
+
         parser.serialize(
             data, module.getTarget().type,
             function (result: string) {
