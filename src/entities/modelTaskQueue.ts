@@ -299,10 +299,18 @@ class InstructionMerger {
     private rewriters: ModelTaskRewriter[];
 
     /**
+     * An array of sets containing all instruction that are of interest
+     * to a rewriter. These sets are indexed in the same way as the
+     * rewriters array.
+     */
+    private interestSets: Collections.Set<TaskInstruction>[];
+
+    /**
      * Creates an empty instruction merger.
      */
     public constructor() {
         this.rewriters = [];
+        this.interestSets = [];
     }
 
     /**
@@ -311,6 +319,30 @@ class InstructionMerger {
      */
     public registerRewriter(rewriter: ModelTaskRewriter): void {
         this.rewriters.push(rewriter);
+        this.interestSets.push(new Collections.Set<TaskInstruction>());
+    }
+
+    /**
+     * Introduces an instruction to this instruction merger.
+     * @param instruction The instruction to introduce.
+     */
+    public introduceInstruction(instruction: TaskInstruction): void {
+        for (let i = 0; i < this.rewriters.length; i++) {
+            if (this.rewriters[i].isOfInterest(instruction.task)) {
+                this.interestSets[i].add(instruction);
+            }
+        }
+    }
+
+    /**
+     * Completes an instruction, removing it from consideration
+     * for instruction merging.
+     * @param instruction The instruction to complete.
+     */
+    public completeInstruction(instruction: TaskInstruction): void {
+        for (let i = 0; i < this.interestSets.length; i++) {
+            this.interestSets[i].remove(instruction);
+        }
     }
 }
 
