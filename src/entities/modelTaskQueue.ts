@@ -48,9 +48,9 @@ export class ModelTaskQueue implements TaskQueue<ModelData, ModelTaskMetadata> {
     private latestComponentStateMap: Collections.Dictionary<ModelComponent, TaskInstruction>;
 
     /**
-     * A list of all rewriters that are registered with this task queue.
+     * Gets the instruction merger used by this model task queue.
      */
-    private rewriters: ModelTaskRewriter[];
+    private merger: InstructionMerger;
 
     /**
      * Creates a new model task queue.
@@ -59,7 +59,7 @@ export class ModelTaskQueue implements TaskQueue<ModelData, ModelTaskMetadata> {
         this.eligibleInstructions = new PriorityPartitionedQueue<TaskInstruction>(
             TaskInstruction.getPriority);
         this.latestComponentStateMap = new Collections.Dictionary<ModelComponent, TaskInstruction>();
-        this.rewriters = [];
+        this.merger = new InstructionMerger();
     }
 
     /**
@@ -148,7 +148,7 @@ export class ModelTaskQueue implements TaskQueue<ModelData, ModelTaskMetadata> {
      * @param rewriter The rewriter to register.
      */
     public registerRewriter(rewriter: ModelTaskRewriter): void {
-        this.rewriters.push(rewriter);
+        this.merger.registerRewriter(rewriter);
     }
 }
 
@@ -285,6 +285,32 @@ class PriorityPartitionedQueue<T> {
         }
 
         return result;
+    }
+}
+
+/**
+ * Merges instructions.
+ */
+class InstructionMerger {
+    /**
+     * A list of all rewriters that are registered with this instruction
+     * merger.
+     */
+    private rewriters: ModelTaskRewriter[];
+
+    /**
+     * Creates an empty instruction merger.
+     */
+    public constructor() {
+        this.rewriters = [];
+    }
+
+    /**
+     * Registers a task rewriter with this instruction merger.
+     * @param rewriter The rewriter to use.
+     */
+    public registerRewriter(rewriter: ModelTaskRewriter): void {
+        this.rewriters.push(rewriter);
     }
 }
 
