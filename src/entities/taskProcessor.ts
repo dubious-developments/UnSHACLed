@@ -50,7 +50,8 @@ export class TaskProcessor<TData, TTaskMetadata> {
     }
 
     /**
-     * Deschedules a task and executes it.
+     * Deschedules a task and executes it. Does nothing if
+     * the task schedule is empty.
      */
     public processTask(): void {
         let task = this.tasks.dequeue();
