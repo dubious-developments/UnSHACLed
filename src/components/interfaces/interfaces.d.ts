@@ -18,6 +18,5 @@ export interface NavbarWorkProps {
 }
 
 export interface SidebarProps {
-    callback: PropTypes.func;
     visible: boolean;
 }

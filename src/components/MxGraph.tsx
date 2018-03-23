@@ -55,6 +55,7 @@ class MxGraph extends React.Component<any, any> {
                 style={{
                     backgroundImage: `url(${ grid })`,
                     cursor: 'default',
+                    height: '100%'
                 }}
             />
         );

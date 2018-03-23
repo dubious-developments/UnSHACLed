@@ -4,7 +4,7 @@ import Auth from "../services/Auth";
 import { withRouter, RouteComponentProps } from 'react-router';
 import { NavbarWorkProps } from './interfaces/interfaces';
 
-class Navbar extends React.Component<NavbarWorkProps & RouteComponentProps<void> , any> {
+class Navbar extends React.Component<NavbarWorkProps, {}> {
 
     allowedExtensions = ".n3,.ttl,.rdf";
 
@@ -15,7 +15,7 @@ class Navbar extends React.Component<NavbarWorkProps & RouteComponentProps<void>
 
     logoutButton(event: any) {
         Auth.logout();
-        this.props.history.push("/login");
+        // this.props.history.push("/login");
     }
 
     uploadFileButton() {
@@ -87,4 +87,4 @@ class Navbar extends React.Component<NavbarWorkProps & RouteComponentProps<void>
         );
     }
 }
-export default withRouter(Navbar);
+export default Navbar;

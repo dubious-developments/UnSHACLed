@@ -8,7 +8,7 @@ class Workspace extends React.Component<any, any> {
 
     constructor(props: any) {
         super(props);
-        this.state = {menuVisible: false};
+        this.state = {menuVisible: true};
 
         this.callBackNavBar = this.callBackNavBar.bind(this);
     }
@@ -22,7 +22,7 @@ class Workspace extends React.Component<any, any> {
         const {menuVisible} = this.state;
         return (
             <Sidebar.Pushable style={{width: '100%', height: '100%'}}>
-                <SideBar visible={menuVisible} callback={this.callBackNavBar}/>
+                <SideBar visible={menuVisible}/>
                 <Sidebar.Pusher style={{height: '100vh', padding: '0em 0em'}}>
                     <Segment basic={true} style={{height: '100vh', padding: '0em 0em'}}>
                         <Navbar visible={menuVisible} callback={this.callBackNavBar}/>
