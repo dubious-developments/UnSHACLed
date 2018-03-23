@@ -2,7 +2,7 @@ import * as React from 'react';
 import Navbar from '../components/navbarWork';
 import SideBar from '../components/Sidebar';
 import MxGraph from '../components/MxGraph';
-import { Grid } from 'semantic-ui-react';
+import { Sidebar, Segment } from 'semantic-ui-react';
 
 class Workspace extends React.Component<any, any> {
 
@@ -12,23 +12,16 @@ class Workspace extends React.Component<any, any> {
     }
 
     render() {
+        const {menuVisible} = this.state;
         return (
-            <Grid style={{height: '100vh'}}>
-                <Grid.Row style={{height: '10%', paddingBottom: 0}}>
-                    <Grid.Column>
-                        <Navbar/>
-                    </Grid.Column>
-                </Grid.Row>
-
-                <Grid.Row columns={16} style={{height: '90%', paddingTop: 0}} stretched={true}>
-                    <Grid.Column width={2} style={{paddingRight: 0}}>
-                        <SideBar/>
-                    </Grid.Column>
-                    <Grid.Column width={14} style={{paddingLeft: 0}}>
+            <Sidebar.Pushable style={{width: '100%', height: '100%'}}>
+                <SideBar/>
+                <Sidebar.Pusher style={{height: '100vh', padding: '0em 0em'}}>
+                    <Segment basic={true} style={{height: '100vh', padding: '0em 0em'}}>
                         <MxGraph/>
-                    </Grid.Column>
-                </Grid.Row>
-            </Grid>
+                    </Segment>
+                </Sidebar.Pusher>
+            </Sidebar.Pushable>
         );
     }
 }
