@@ -1,10 +1,11 @@
 /// <reference path="./Validator.d.ts"/>
 
 import * as Collections from "typescript-collections";
-import {Model, ModelComponent, ModelData, ModelTaskMetadata} from "../entities/model";
+import {Model, ModelData} from "../entities/model";
 import {ProcessorTask} from "../entities/taskProcessor";
 import {SHACLValidator} from "./SHACLValidator";
 import {Validator} from "./Validator";
+import {ModelComponent, ModelTaskMetadata} from "../entities/modelTaskMetadata";
 
 export class ValidationService {
 
@@ -23,12 +24,15 @@ export class ValidationService {
             let relevantValidators = new Collections.Set<Validator>();
             // return a task for every relevant validator
             changeBuffer.forEach(c => {
-                self.validators.getValue(c).forEach(v => {
-                    if (!relevantValidators.contains(v)) {
-                        tasks.push(new ValidationTask(v));
-                        relevantValidators.add(v);
-                    }
-                });
+                let validatorSet;
+                if (validatorSet = self.validators.getValue(c)) {
+                    validatorSet.forEach(v => {
+                        if (!relevantValidators.contains(v)) {
+                            tasks.push(ValidationTask.create(v));
+                            relevantValidators.add(v);
+                        }
+                    });
+                }
             });
             return tasks;
         });
@@ -47,10 +51,13 @@ export class ValidationService {
 
 }
 
-class ValidationTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
-    public constructor(validator: Validator) {
-        super(function(data: ModelData) {
-            validator.validate(data);
-        },    null);
+class ValidationTask {
+    public static create(validator: Validator): ProcessorTask<ModelData, ModelTaskMetadata> {
+        return Model.createTask(
+            (data: ModelData) => {
+                validator.validate(data);
+            },
+            validator.getTypesForValidation(),
+            [ModelComponent.ValidationReport]);
     }
 }

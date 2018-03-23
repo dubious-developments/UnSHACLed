@@ -1,18 +1,16 @@
 /// <reference path="./Validator.d.ts"/>
 
 import * as Collections from "typescript-collections";
-import SHACL from "./shacl";
 import {Validator} from "./Validator";
-import {ModelComponent, ModelData} from "../entities/model";
+import {ModelData} from "../entities/model";
+import {ModelComponent} from "../entities/modelTaskMetadata";
 
 export class SHACLValidator implements Validator {
 
-    private types: Collections.Set<ModelComponent>;
+    private types: Collections.Set<ModelComponent> | Array<ModelComponent>;
 
     public SHACLValidator() {
-        this.types = new Collections.Set<ModelComponent>();
-        this.types.add(ModelComponent.DataGraph);
-        this.types.add(ModelComponent.SHACLShapesGraph);
+        this.types = [ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph];
     }
 
     public getTypesForValidation() {
@@ -20,6 +18,5 @@ export class SHACLValidator implements Validator {
     }
 
     public validate(data: ModelData) {
-        let validator = new SHACL();
     }
 }

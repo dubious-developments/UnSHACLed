@@ -33,7 +33,7 @@ export class GraphParser implements Parser {
      * @param andThen
      * @returns {string}
      */
-    public serialize(data: any, mime: string, andThen: (result: string) => void) {
+    public serialize(data: any, mime: string, andThen: ((result: string) => void) | null) {
         if (this.mimeTypes.contains(mime)) {
             let N3 = require("n3");
             let writer = N3.Writer();
@@ -42,7 +42,9 @@ export class GraphParser implements Parser {
             writer.addPrefixes(graph.getPrefixes());
             writer.addTriples(graph.getPersistentStore().getTriples());
             writer.end(function (error: any, result: any) {
-                andThen(result);
+                if (andThen) {
+                    andThen(result);
+                }
             });
         } else {
             throw new Error("Incorrect MimeType " + mime + "!");
@@ -57,7 +59,7 @@ export class GraphParser implements Parser {
      * @param andThen
      * @returns {any}
      */
-    public parse(content: string, mime: string, andThen: (result: any) => void) {
+    public parse(content: string, mime: string, andThen: ((result: any) => void) | null) {
         if (this.mimeTypes.contains(mime)) {
             let N3 = require("n3");
             let parser = N3.Parser({ format: mime });
@@ -71,7 +73,9 @@ export class GraphParser implements Parser {
                                  if (prefixes) {
                                      self.graph.addPrefixes(prefixes);
                                  }
-                                 andThen(self.graph);
+                                 if (andThen) {
+                                    andThen(self.graph);
+                                 }
                              }
                  });
         } else {

@@ -7,10 +7,9 @@ environment:
 
 # Install scripts. These runs after repo cloning.
 install:
-  # Install Chrome and Opera for testing purposes.
+  # Install Chrome for testing purposes.
   # Firefox should already be installed.
   - choco install --ignore-checksum googlechrome
-  - choco install opera
   # Get the latest stable version of Node.js or io.js
   - ps: Install-Product node $env:nodejs_version
   # Output useful info for debugging.

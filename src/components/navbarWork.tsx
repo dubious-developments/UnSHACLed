@@ -14,7 +14,11 @@ class Navbar extends React.Component<any, any> {
 
     uploadFileButton() {
         var input = document.getElementById("importGraph");
-        input.click();
+        if (input) {
+            input.click();
+        } else {
+            console.log("Could not find element 'importGraph'");
+        }
     }
 
     render() {
