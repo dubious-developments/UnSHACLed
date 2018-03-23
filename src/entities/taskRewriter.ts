@@ -4,7 +4,7 @@ import { Task } from "./task";
  * Rewrites tasks that been scheduled but have not yet been
  * executed.
  */
-interface TaskRewriter<TData, TTaskMetadata> {
+export interface TaskRewriter<TData, TTaskMetadata> {
 
     // The main thing we want to achieve by rewriting tasks
     // is to merge tasks---to reduce the amount of work

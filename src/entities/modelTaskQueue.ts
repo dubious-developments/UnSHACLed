@@ -3,11 +3,17 @@ import { TaskQueue } from "./taskProcessor";
 import { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";
 import { ModelData } from "./modelData";
 import { Task } from "./task";
+import { TaskRewriter } from "./taskRewriter";
 
 /**
  * The type of task used by the model.
  */
 export type ModelTask = Task<ModelData, ModelTaskMetadata>;
+
+/**
+ * The type of task rewriters used by the model.
+ */
+export type ModelTaskRewriter = TaskRewriter<ModelData, ModelTaskMetadata>;
 
 /**
  * A task queue and scheduler for model tasks.
@@ -42,12 +48,18 @@ export class ModelTaskQueue implements TaskQueue<ModelData, ModelTaskMetadata> {
     private latestComponentStateMap: Collections.Dictionary<ModelComponent, TaskInstruction>;
 
     /**
+     * A list of all rewriters that are registered with this task queue.
+     */
+    private rewriters: ModelTaskRewriter[];
+
+    /**
      * Creates a new model task queue.
      */
     public constructor() {
         this.eligibleInstructions = new PriorityPartitionedQueue<TaskInstruction>(
             TaskInstruction.getPriority);
         this.latestComponentStateMap = new Collections.Dictionary<ModelComponent, TaskInstruction>();
+        this.rewriters = [];
     }
 
     /**
@@ -129,6 +141,14 @@ export class ModelTaskQueue implements TaskQueue<ModelData, ModelTaskMetadata> {
                 this.latestComponentStateMap.remove(component);
             }
         });
+    }
+
+    /**
+     * Registers a new rewriter with this task queue.
+     * @param rewriter The rewriter to register.
+     */
+    public registerRewriter(rewriter: ModelTaskRewriter): void {
+        this.rewriters.push(rewriter);
     }
 }
 
