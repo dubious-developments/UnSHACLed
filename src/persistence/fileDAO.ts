@@ -6,6 +6,7 @@ import { Model, ModelData, ModelTask } from "../entities/model";
 import { ModelTaskMetadata, ModelComponent } from "../entities/modelTaskMetadata";
 import { Component } from "./component";
 import { GraphParser } from "./graphParser";
+import { Task } from "../entities/task";
 
 /**
  * Provides basic DAO functionality at the file granularity level.
@@ -30,7 +31,7 @@ export class FileDAO implements DataAccessObject {
      * @param module
      */
     public insert(module: Module) {
-        this.model.tasks.schedule(SaveTask.create(this.io, module));
+        this.model.tasks.schedule(new SaveTask(this.io, module));
         this.model.tasks.processTask(); // TODO: Remove this when we have a scheduler!
     }
 
@@ -41,7 +42,7 @@ export class FileDAO implements DataAccessObject {
     public find(module: Module) {
         let self = this;
         this.io.readFromFile(module, function (result: any) {
-            self.model.tasks.schedule(LoadTask.create(result, module));
+            self.model.tasks.schedule(new LoadTask(result, module));
             self.model.tasks.processTask(); // TODO: Remove this when we have a scheduler!
         });
     }
@@ -161,7 +162,8 @@ export class FileModule implements Module {
 /**
  * A Task that reads a file and adds its contents as a component to the Model.
  */
-class LoadTask {
+class LoadTask extends Task<ModelData, ModelTaskMetadata> {
+
     /**
      * Create a new LoadTask.
      * Contains a function that will execute on the model.
@@ -169,15 +171,31 @@ class LoadTask {
      * @param result
      * @param {FileModule} module
      */
-    public static create(result: any, module: Module): ModelTask {
-        return Model.createTask(
-            (data: ModelData) => {
-                let component = data.getOrCreateComponent<Component>(
-                    module.getType(),
-                    () => new Component());
-                component.setPart(module.getName(), result);
-                data.setComponent(module.getType(), component);
-            },
+    public constructor(
+        private readonly result: any,
+        public readonly module: Module) {
+
+        super();
+    }
+
+    /**
+     * Executes this task.
+     * @param data The data the task takes as input.
+     */
+    public execute(data: ModelData): void {
+        let component = data.getOrCreateComponent<Component>(
+            this.module.getType(),
+            () => new Component());
+
+        component.setPart(this.module.getName(), this.result);
+        data.setComponent(this.module.getType(), component);
+    }
+
+    /**
+     * Gets the metadata for this task.
+     */
+    public get metadata(): ModelTaskMetadata {
+        return new ModelTaskMetadata(
             [ModelComponent.DataGraph],
             [ModelComponent.DataGraph]);
     }
@@ -186,8 +204,7 @@ class LoadTask {
 /**
  * A Task that retrieves a component from the Model and writes its contents to a file.
  */
-class SaveTask {
-
+class SaveTask extends Task<ModelData, ModelTaskMetadata> {
     /**
      * Create a new SaveTask.
      * Contains a function that will execute on the model.
@@ -195,17 +212,32 @@ class SaveTask {
      * @param {IOFacilitator} io
      * @param {FileModule} module
      */
-    public static create(io: IOFacilitator, module: Module): ModelTask {
-        return Model.createTask(
-            (data: ModelData) => {
-                let component = data.getComponent<Component>(module.getType());
-                if (component) {
-                    let part = component.getPart(module.getName());
-                    if (part) {
-                        io.writeToFile(module, part);
-                    }
-                }
-            },
+    public constructor(
+        private readonly io: IOFacilitator,
+        public readonly module: Module) {
+
+        super();
+    }
+
+    /**
+     * Executes this task.
+     * @param data The data the task takes as input.
+     */
+    public execute(data: ModelData): void {
+        let component = data.getComponent<Component>(this.module.getType());
+        if (component) {
+            let part = component.getPart(this.module.getName());
+            if (part) {
+                this.io.writeToFile(this.module, part);
+            }
+        }
+    }
+
+    /**
+     * Gets the metadata for this task.
+     */
+    public get metadata(): ModelTaskMetadata {
+        return new ModelTaskMetadata(
             [ModelComponent.DataGraph],
             []);
     }

@@ -39,7 +39,7 @@ export abstract class Task<TData, TTaskMetadata> {
     public abstract execute(data: TData): void;
 
     /**
-     * Gets the standard metadata for this task.
+     * Gets the metadata for this task.
      */
     public abstract get metadata(): TTaskMetadata;
 
