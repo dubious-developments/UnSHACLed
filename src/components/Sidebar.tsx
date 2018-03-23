@@ -91,14 +91,13 @@ class SideBar extends React.Component<SidebarProps, any> {
         return (
             <Sidebar
                 as={Menu}
-                animation='uncover'
+                animation='push'
                 visible={this.props.visible}
                 vertical={true}
                 inverted={true}
                 borderless={true}
-                size="huge"
                 style={{
-                    width: '12em'
+                    width: '50h'
                 }}
             >
                 <Menu.Item style={{height: '5em'}}>

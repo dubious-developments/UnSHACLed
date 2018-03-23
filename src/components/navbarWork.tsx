@@ -4,7 +4,7 @@ import Auth from "../services/Auth";
 import { withRouter, RouteComponentProps } from 'react-router';
 import { NavbarWorkProps } from './interfaces/interfaces';
 
-class Navbar extends React.Component<NavbarWorkProps & RouteComponentProps<any>, any> {
+class Navbar extends React.Component<NavbarWorkProps & RouteComponentProps<void> , any> {
 
     allowedExtensions = ".n3,.ttl,.rdf";
 
@@ -39,11 +39,13 @@ class Navbar extends React.Component<NavbarWorkProps & RouteComponentProps<any>,
                     size="large"
                     icon={true}
                     style={{
-                        height: '5.6em',
                         borderRadius: 0,
                     }}
                 >
-                    <Menu.Item as="a" onClick={this.iconClick}> Test </Menu.Item>
+                    <Menu.Item as="a" onClick={this.iconClick}>
+                        <Icon name='content' />
+                    </Menu.Item>
+
                     <Menu.Menu
                         position="right"
                     >

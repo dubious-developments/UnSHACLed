@@ -13,8 +13,8 @@ import PropTypes from 'prop-types';
 /* Props defintion for navbar in workspace */
 
 export interface NavbarWorkProps {
-    callback: PropTypes.func;
     visible: boolean;
+    callback: PropTypes.func;
 }
 
 export interface SidebarProps {
