@@ -131,7 +131,9 @@ export class ProcessorTask<TData, TTaskMetadata> {
     }
 
     private static generateTaskIndex(): number {
-        return this.taskCounter++;
+        let result = this.taskCounter;
+        this.taskCounter = (this.taskCounter + 1) % (1 << 31 - 1);
+        return result;
     }
 
     /**
