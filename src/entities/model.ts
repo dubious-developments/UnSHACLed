@@ -2,16 +2,16 @@ import * as Collections from "typescript-collections";
 import { TaskProcessor } from "./taskProcessor";
 import { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";
 import { ModelData } from "./modelData";
-import { ModelTaskQueue } from "./modelTaskQueue";
+import { ModelTask, ModelTaskQueue } from "./modelTaskQueue";
 import { Task, OpaqueTask } from "./task";
 export { ModelData } from "./modelData";
+export { ModelTask } from "./modelTaskQueue";
 
 /**
  * A model observer: a function that takes a change set as input
  * and produces a list of tasks to process as output.
  */
-type ModelObserver = (changeBuffer: Collections.Set<ModelComponent>)
-    => Array<Task<ModelData, ModelTaskMetadata>>;
+type ModelObserver = (changeBuffer: Collections.Set<ModelComponent>) => Array<ModelTask>;
 
 /**
  * Models the data handled by the UnSHACLed application.
@@ -68,7 +68,7 @@ export class Model {
         readSet: Collections.Set<ModelComponent> | ModelComponent[],
         writeSet: Collections.Set<ModelComponent> | ModelComponent[],
         priority?: number):
-        Task<ModelData, ModelTaskMetadata> {
+        ModelTask {
 
         return new OpaqueTask<ModelData, ModelTaskMetadata>(
             execute,

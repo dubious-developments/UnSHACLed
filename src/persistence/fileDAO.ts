@@ -2,11 +2,10 @@
 /// <reference path="./parser.d.ts"/>
 
 import * as Collections from "typescript-collections";
-import { Model, ModelData } from "../entities/model";
+import { Model, ModelData, ModelTask } from "../entities/model";
 import { ModelTaskMetadata, ModelComponent } from "../entities/modelTaskMetadata";
 import { Component } from "./component";
 import { GraphParser } from "./graphParser";
-import { Task } from "../entities/task";
 
 /**
  * Provides basic DAO functionality at the file granularity level.
@@ -170,7 +169,7 @@ class LoadTask {
      * @param result
      * @param {FileModule} module
      */
-    public static create(result: any, module: Module): Task<ModelData, ModelTaskMetadata> {
+    public static create(result: any, module: Module): ModelTask {
         return Model.createTask(
             (data: ModelData) => {
                 let component = data.getOrCreateComponent<Component>(
@@ -196,7 +195,7 @@ class SaveTask {
      * @param {IOFacilitator} io
      * @param {FileModule} module
      */
-    public static create(io: IOFacilitator, module: Module): Task<ModelData, ModelTaskMetadata> {
+    public static create(io: IOFacilitator, module: Module): ModelTask {
         return Model.createTask(
             (data: ModelData) => {
                 let component = data.getComponent<Component>(module.getType());

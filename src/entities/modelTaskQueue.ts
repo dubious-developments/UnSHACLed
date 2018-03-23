@@ -5,6 +5,11 @@ import { ModelData } from "./modelData";
 import { Task } from "./task";
 
 /**
+ * The type of task used by the model.
+ */
+export type ModelTask = Task<ModelData, ModelTaskMetadata>;
+
+/**
  * A task queue and scheduler for model tasks.
  */
 export class ModelTaskQueue implements TaskQueue<ModelData, ModelTaskMetadata> {
@@ -56,7 +61,7 @@ export class ModelTaskQueue implements TaskQueue<ModelData, ModelTaskMetadata> {
      * Adds a task to the queue.
      * @param task The task to add.
      */
-    public enqueue(task: Task<ModelData, ModelTaskMetadata>): void {
+    public enqueue(task: ModelTask): void {
 
         // Create a new instruction.
         let instruction = new TaskInstruction(task);
@@ -85,7 +90,7 @@ export class ModelTaskQueue implements TaskQueue<ModelData, ModelTaskMetadata> {
     /**
      * Removes a task from the queue and returns it.
      */
-    public dequeue(): Task<ModelData, ModelTaskMetadata> | undefined {
+    public dequeue(): ModelTask | undefined {
         // Pick the eligible instruction with the highest priority.
         let instr = this.eligibleInstructions.dequeue();
         if (instr === undefined) {
@@ -134,7 +139,7 @@ class TaskInstruction {
     /**
      * The task that is stored in this instruction.
      */
-    public readonly task: Task<ModelData, ModelTaskMetadata>;
+    public readonly task: ModelTask;
 
     /**
      * The set of instructions that must complete before the task
@@ -151,7 +156,7 @@ class TaskInstruction {
      * Creates a task instruction.
      * @param task The task that is stored in this instruction.
      */
-    public constructor(task: Task<ModelData, ModelTaskMetadata>) {
+    public constructor(task: ModelTask) {
         this.task = task;
         this.dependencies = new Collections.Set<TaskInstruction>();
         this.invertedDependencies = new Collections.Set<TaskInstruction>();
