@@ -54,6 +54,27 @@ export class Model {
     }
 
     /**
+     * Creates a task for the model.
+     * @param execute The task itself: a function that manipulates model data.
+     * @param readSet The set of all values from which the model task may read.
+     * It includes elements in the write set that are modified based on their
+     * previous value, as opposed to blindly overwritten.
+     * @param writeSet The set of all values to which the model task writes.
+     * @param priority An optional priority for the task.
+     */
+    public static createTask(
+        execute: (data: ModelData) => void,
+        readSet: Collections.Set<ModelComponent> | ModelComponent[],
+        writeSet: Collections.Set<ModelComponent> | ModelComponent[],
+        priority?: number):
+        ProcessorTask<ModelData, ModelTaskMetadata> {
+
+        return new ProcessorTask<ModelData, ModelTaskMetadata>(
+            execute,
+            new ModelTaskMetadata(readSet, writeSet, priority));
+    }
+
+    /**
      * Registers an observer with the model. Observers are notified when
      * a task completes and may queue additional tasks based on the changes
      * made to components.
