@@ -2,14 +2,20 @@ import * as React from 'react';
 import { Menu, Icon } from 'semantic-ui-react';
 import Auth from "../services/Auth";
 import { withRouter } from 'react-router-dom';
+import { NavbarWorkProps } from './interfaces/interfaces';
 
-class Navbar extends React.Component<any, any> {
+class Navbar extends React.Component<NavbarWorkProps, any> {
 
     allowedExtensions = ".n3,.ttl,.rdf";
 
+    constructor(props: any) {
+        super(props);
+        this.iconClick = this.iconClick.bind(this);
+    }
+
     logoutButton(event: any) {
         Auth.logout();
-        this.props.history.push("/login");
+        // this.props.history.push("/login");
     }
 
     uploadFileButton() {
@@ -21,6 +27,9 @@ class Navbar extends React.Component<any, any> {
         }
     }
 
+    iconClick() {
+        this.props.callback(!this.props.visible);
+    }
     render() {
 
         return (
@@ -34,6 +43,7 @@ class Navbar extends React.Component<any, any> {
                         borderRadius: 0,
                     }}
                 >
+                    <Menu.Item as="a" onClick={this.iconClick}> Test </Menu.Item>
                     <Menu.Menu
                         position="right"
                     >
@@ -75,4 +85,4 @@ class Navbar extends React.Component<any, any> {
         );
     }
 }
-export default withRouter(Navbar);
+export default Navbar;

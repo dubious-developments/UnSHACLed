@@ -1,8 +1,9 @@
 import * as React from 'react';
 import {Sidebar, Menu, Image, Input, Dropdown} from 'semantic-ui-react';
 import TreeView from './treeView';
+import { SidebarProps } from './interfaces/interfaces';
 
-class SideBar extends React.Component<any, any> {
+class SideBar extends React.Component<SidebarProps, any> {
 
     static sidebarOptions = [
         {key: 1, text: 'Add Components', value: 1},
@@ -12,7 +13,7 @@ class SideBar extends React.Component<any, any> {
     static GeneralMenuItems = ["Arrow", "Rectangle"];
     static TemplateMenuItems = ["Building", "Person"];
 
-    constructor(props: string) {
+    constructor(props: any) {
         super(props);
 
         this.state = {
@@ -91,7 +92,7 @@ class SideBar extends React.Component<any, any> {
             <Sidebar
                 as={Menu}
                 animation='uncover'
-                visible={true}
+                visible={this.props.visible}
                 vertical={true}
                 inverted={true}
                 borderless={true}
