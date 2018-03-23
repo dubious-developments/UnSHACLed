@@ -1,5 +1,3 @@
-import { exec } from "child_process";
-
 /**
  * A task that can be executed on a task processor.
  */
@@ -52,19 +50,23 @@ export abstract class Task<TData, TTaskMetadata> {
 }
 
 /**
- * A task that can be executed on a task processor.
+ * A task that uses an opaque function to do its job.
+ * This type of task is suitable for initial task implementations
+ * and tasks that need not be rewritten after scheduling.
+ * However, this type of task is ill-suited for rewriting
+ * after it is scheduled.
  */
 export class OpaqueTask<TData, TTaskMetadata> extends Task<TData, TTaskMetadata> {
-    private executeImpl: (data: TData) => void;
+    private readonly executeImpl: (data: TData) => void;
 
     /**
-     * Creates a model task.
-     * @param execute The task itself.
-     * @param metadata Information related to the task.
+     * Creates an opaque task.
+     * @param execute The task's implementation.
+     * @param metadata Additional information related to the task.
      */
     public constructor(
         execute: (data: TData) => void,
-        public metadata: TTaskMetadata) {
+        public readonly metadata: TTaskMetadata) {
 
         super();
         this.executeImpl = execute;
