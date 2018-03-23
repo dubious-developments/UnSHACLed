@@ -1,14 +1,15 @@
 import { ModelTaskQueue, PriorityGenerator } from "../src/entities/modelTaskQueue";
-import { ProcessorTask, TaskQueue } from "../src/entities/taskProcessor";
+import { TaskQueue } from "../src/entities/taskProcessor";
 import { ModelTaskMetadata, ModelComponent } from "../src/entities/modelTaskMetadata";
 import { ModelData, Model } from "../src/entities/model";
+import { Task } from "../src/entities/task";
 
 function dequeueNonEmpty<TData, TMetadata>(queue: TaskQueue<TData, TMetadata>):
-    ProcessorTask<TData, TMetadata> {
+    Task<TData, TMetadata> {
 
     let result = queue.dequeue();
     expect(result).toBeDefined();
-    return <ProcessorTask<TData, TMetadata>> result;
+    return <Task<TData, TMetadata>> result;
 }
 
 describe("ModelTaskQueue Class", () => {

@@ -1,7 +1,8 @@
 import * as Collections from "typescript-collections";
+import { Task } from "./task";
 
 type TaskStartedCallback<TData, TTaskMetadata> =
-    (task: ProcessorTask<TData, TTaskMetadata>) => any;
+    (task: Task<TData, TTaskMetadata>) => any;
 
 type TaskCompletedCallback =
     (taskInfo: any) => void;
@@ -49,7 +50,7 @@ export class TaskProcessor<TData, TTaskMetadata> {
     /**
      * Schedules a task for execution by this processor.
      */
-    public schedule(task: ProcessorTask<TData, TTaskMetadata>): void {
+    public schedule(task: Task<TData, TTaskMetadata>): void {
         this.tasks.enqueue(task);
     }
 
@@ -100,51 +101,6 @@ export class TaskProcessor<TData, TTaskMetadata> {
 }
 
 /**
- * A task that can be executed on a task processor.
- */
-export class ProcessorTask<TData, TTaskMetadata> {
-    private static taskCounter = 0;
-
-    /**
-     * A task-unique index.
-     *
-     * NOTE: we need these indices to make sets work. JavaScript
-     * arrays are stupid and assume that objects are equal iff
-     * their string representations are. Additionally, string
-     * representations are *structural,* so without this index,
-     * the string representation for two different tasks would
-     * be the same. That breaks sets and hash maps, which we can't
-     * have.
-     */
-    public readonly index: number;
-
-    /**
-     * Creates a model task.
-     * @param execute The task itself.
-     * @param metadata Information related to the task.
-     */
-    public constructor(
-        public execute: (proc: TData) => void,
-        public metadata: TTaskMetadata) {
-
-        this.index = ProcessorTask.generateTaskIndex();
-    }
-
-    private static generateTaskIndex(): number {
-        let result = this.taskCounter;
-        this.taskCounter = (this.taskCounter + 1) % (1 << 31 - 1);
-        return result;
-    }
-
-    /**
-     * Gets a string representation for this task.
-     */
-    public toString(): string {
-        return `Task ${this.index}`;
-    }
-}
-
-/**
  * A queue of tasks for task processors. Implementations
  * of this interface need not adhere to a FIFO scheduling policy.
  */
@@ -158,33 +114,33 @@ export interface TaskQueue<TData, TTaskMetadata> {
      * Adds a task to the queue.
      * @param task The task to add.
      */
-    enqueue(task: ProcessorTask<TData, TTaskMetadata>): void;
+    enqueue(task: Task<TData, TTaskMetadata>): void;
 
     /**
      * Removes a task from the queue and returns it.
      */
-    dequeue(): ProcessorTask<TData, TTaskMetadata> | undefined;
+    dequeue(): Task<TData, TTaskMetadata> | undefined;
 }
 
 /**
  * A task queue that executes tasks in FIFO order.
  */
 export class FifoTaskQueue<TData, TTaskMetadata> implements TaskQueue<TData, TTaskMetadata> {
-    private queue: Collections.Queue<ProcessorTask<TData, TTaskMetadata>>;
+    private queue: Collections.Queue<Task<TData, TTaskMetadata>>;
 
     public constructor() {
-        this.queue = new Collections.Queue<ProcessorTask<TData, TTaskMetadata>>();
+        this.queue = new Collections.Queue<Task<TData, TTaskMetadata>>();
     }
 
     public get isEmpty(): boolean {
         return this.queue.isEmpty();
     }
 
-    public enqueue(task: ProcessorTask<TData, TTaskMetadata>): void {
+    public enqueue(task: Task<TData, TTaskMetadata>): void {
         this.queue.enqueue(task);
     }
 
-    public dequeue(): ProcessorTask<TData, TTaskMetadata> | undefined {
+    public dequeue(): Task<TData, TTaskMetadata> | undefined {
         return this.queue.dequeue();
     }
 }

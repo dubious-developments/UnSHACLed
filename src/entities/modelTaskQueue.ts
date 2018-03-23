@@ -1,7 +1,8 @@
 import * as Collections from "typescript-collections";
-import { ProcessorTask, TaskQueue } from "./taskProcessor";
+import { TaskQueue } from "./taskProcessor";
 import { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";
 import { ModelData } from "./modelData";
+import { Task } from "./task";
 
 /**
  * A task queue and scheduler for model tasks.
@@ -55,7 +56,7 @@ export class ModelTaskQueue implements TaskQueue<ModelData, ModelTaskMetadata> {
      * Adds a task to the queue.
      * @param task The task to add.
      */
-    public enqueue(task: ProcessorTask<ModelData, ModelTaskMetadata>): void {
+    public enqueue(task: Task<ModelData, ModelTaskMetadata>): void {
 
         // Create a new instruction.
         let instruction = new TaskInstruction(task);
@@ -84,7 +85,7 @@ export class ModelTaskQueue implements TaskQueue<ModelData, ModelTaskMetadata> {
     /**
      * Removes a task from the queue and returns it.
      */
-    public dequeue(): ProcessorTask<ModelData, ModelTaskMetadata> | undefined {
+    public dequeue(): Task<ModelData, ModelTaskMetadata> | undefined {
         // Pick the eligible instruction with the highest priority.
         let instr = this.eligibleInstructions.dequeue();
         if (instr === undefined) {
@@ -133,7 +134,7 @@ class TaskInstruction {
     /**
      * The task that is stored in this instruction.
      */
-    public readonly task: ProcessorTask<ModelData, ModelTaskMetadata>;
+    public readonly task: Task<ModelData, ModelTaskMetadata>;
 
     /**
      * The set of instructions that must complete before the task
@@ -150,7 +151,7 @@ class TaskInstruction {
      * Creates a task instruction.
      * @param task The task that is stored in this instruction.
      */
-    public constructor(task: ProcessorTask<ModelData, ModelTaskMetadata>) {
+    public constructor(task: Task<ModelData, ModelTaskMetadata>) {
         this.task = task;
         this.dependencies = new Collections.Set<TaskInstruction>();
         this.invertedDependencies = new Collections.Set<TaskInstruction>();

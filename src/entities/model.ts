@@ -1,8 +1,9 @@
 import * as Collections from "typescript-collections";
-import { TaskProcessor, ProcessorTask } from "./taskProcessor";
+import { TaskProcessor } from "./taskProcessor";
 import { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";
 import { ModelData } from "./modelData";
 import { ModelTaskQueue } from "./modelTaskQueue";
+import { Task, OpaqueTask } from "./task";
 export { ModelData } from "./modelData";
 
 /**
@@ -10,7 +11,7 @@ export { ModelData } from "./modelData";
  * and produces a list of tasks to process as output.
  */
 type ModelObserver = (changeBuffer: Collections.Set<ModelComponent>)
-    => Array<ProcessorTask<ModelData, ModelTaskMetadata>>;
+    => Array<Task<ModelData, ModelTaskMetadata>>;
 
 /**
  * Models the data handled by the UnSHACLed application.
@@ -67,9 +68,9 @@ export class Model {
         readSet: Collections.Set<ModelComponent> | ModelComponent[],
         writeSet: Collections.Set<ModelComponent> | ModelComponent[],
         priority?: number):
-        ProcessorTask<ModelData, ModelTaskMetadata> {
+        Task<ModelData, ModelTaskMetadata> {
 
-        return new ProcessorTask<ModelData, ModelTaskMetadata>(
+        return new OpaqueTask<ModelData, ModelTaskMetadata>(
             execute,
             new ModelTaskMetadata(readSet, writeSet, priority));
     }

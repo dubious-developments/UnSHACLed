@@ -4,9 +4,9 @@
 import * as Collections from "typescript-collections";
 import { Model, ModelData } from "../entities/model";
 import { ModelTaskMetadata, ModelComponent } from "../entities/modelTaskMetadata";
-import { ProcessorTask } from "../entities/taskProcessor";
 import { Component } from "./component";
 import { GraphParser } from "./graphParser";
+import { Task } from "../entities/task";
 
 /**
  * Provides basic DAO functionality at the file granularity level.
@@ -160,7 +160,7 @@ export class FileModule implements Module {
 }
 
 /**
- * A ProcessorTask that reads a file and adds its contents as a component to the Model.
+ * A Task that reads a file and adds its contents as a component to the Model.
  */
 class LoadTask {
     /**
@@ -170,7 +170,7 @@ class LoadTask {
      * @param result
      * @param {FileModule} module
      */
-    public static create(result: any, module: Module): ProcessorTask<ModelData, ModelTaskMetadata> {
+    public static create(result: any, module: Module): Task<ModelData, ModelTaskMetadata> {
         return Model.createTask(
             (data: ModelData) => {
                 let component = data.getOrCreateComponent<Component>(
@@ -185,7 +185,7 @@ class LoadTask {
 }
 
 /**
- * A ProcessorTask that retrieves a component from the Model and writes its contents to a file.
+ * A Task that retrieves a component from the Model and writes its contents to a file.
  */
 class SaveTask {
 
@@ -196,7 +196,7 @@ class SaveTask {
      * @param {IOFacilitator} io
      * @param {FileModule} module
      */
-    public static create(io: IOFacilitator, module: Module): ProcessorTask<ModelData, ModelTaskMetadata> {
+    public static create(io: IOFacilitator, module: Module): Task<ModelData, ModelTaskMetadata> {
         return Model.createTask(
             (data: ModelData) => {
                 let component = data.getComponent<Component>(module.getType());
