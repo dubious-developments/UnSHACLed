@@ -97,6 +97,9 @@ export class ModelTaskQueue implements TaskQueue<ModelData, ModelTaskMetadata> {
         if (instruction.isEligibleForExecution) {
             this.eligibleInstructions.enqueue(instruction);
         }
+
+        // Introduce the instruction to the instruction merger.
+        this.merger.introduceInstruction(instruction);
     }
 
     /**
@@ -119,6 +122,9 @@ export class ModelTaskQueue implements TaskQueue<ModelData, ModelTaskMetadata> {
      * @param instruction The instruction to complete.
      */
     private complete(instruction: TaskInstruction): void {
+        // Remove the instruction from consideration for merging.
+        this.merger.completeInstruction(instruction);
+
         // Remove the instruction from the dependency set of
         // all other instructions.
         instruction.invertedDependencies.forEach(dependentInstruction => {
