@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Menu, Icon } from 'semantic-ui-react';
 import Auth from "../services/Auth";
-import { withRouter } from 'react-router-dom';
+import { withRouter, RouteComponentProps } from 'react-router';
 import { NavbarWorkProps } from './interfaces/interfaces';
 
-class Navbar extends React.Component<NavbarWorkProps, any> {
+class Navbar extends React.Component<NavbarWorkProps & RouteComponentProps<any>, any> {
 
     allowedExtensions = ".n3,.ttl,.rdf";
 
@@ -15,7 +15,7 @@ class Navbar extends React.Component<NavbarWorkProps, any> {
 
     logoutButton(event: any) {
         Auth.logout();
-        // this.props.history.push("/login");
+        this.props.history.push("/login");
     }
 
     uploadFileButton() {
@@ -85,4 +85,4 @@ class Navbar extends React.Component<NavbarWorkProps, any> {
         );
     }
 }
-export default Navbar;
+export default withRouter(Navbar);
