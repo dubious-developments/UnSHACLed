@@ -8,7 +8,7 @@ function dequeueNonEmpty<TData, TMetadata>(queue: TaskQueue<TData, TMetadata>):
 
     let result = queue.dequeue();
     expect(result).toBeDefined();
-    return result;
+    return <ProcessorTask<TData, TMetadata>> result;
 }
 
 describe("ModelTaskQueue Class", () => {
