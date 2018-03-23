@@ -18,6 +18,10 @@ export class TaskProcessor<TData, TTaskMetadata> {
     /**
      * Creates a task processor that manages a particular piece of data
      * and uses a particular task queue.
+     * @param data The data managed by the task processor.
+     * @param tasks The queue implementation for this processor.
+     * @param onTaskStarted An optional callback for when a task starts.
+     * @param onTaskCompleted An optional callback for when a task completes.
      */
     public constructor(
         data: TData,
