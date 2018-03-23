@@ -56,7 +56,7 @@ class SideBar extends React.Component<any, any> {
     DynamicMenu(props: any) {
         var kind = props.kind;
         var query = this.state.value;
-        var items = [];
+        var items = new Array<JSX.Element>();
         var res = this.getMenuItemsFiltered(kind, query);
 
         for (var i = 0; i < res.length; i++) {

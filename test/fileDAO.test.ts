@@ -1,8 +1,9 @@
-import {Model, ModelComponent, ModelData, ModelTaskMetadata} from "../src/entities/model";
-import {FileDAO, FileModule} from "../src/persistence/fileDAO";
-import {GraphParser} from "../src/persistence/graphParser";
-import {Component} from "../src/persistence/component";
-import {ProcessorTask} from "../src/entities/taskProcessor";
+import { Model, ModelData } from "../src/entities/model";
+import { ModelTaskMetadata, ModelComponent } from "../src/entities/modelTaskMetadata";
+import { FileDAO, FileModule } from "../src/persistence/fileDAO";
+import { GraphParser } from "../src/persistence/graphParser";
+import { Component } from "../src/persistence/component";
+import { ProcessorTask } from "../src/entities/taskProcessor";
 
 describe("FileDAO Class", () => {
     it("should create a new file.",
@@ -18,13 +19,14 @@ describe("FileDAO Class", () => {
             let busy = true;
             parser.parse(generateTurtle(), file.type, function(result: any) {
                 comp.setPart(filename, result);
-                model.tasks.schedule(new ProcessorTask<ModelData, ModelTaskMetadata>(
-                    (data) => {
-                        data.setComponent(ModelComponent.DataGraph, comp);
-                        busy = false;
-                    },
-                    null)
-                );
+                model.tasks.schedule(
+                    Model.createTask(
+                        (data) => {
+                            data.setComponent(ModelComponent.DataGraph, comp);
+                            busy = false;
+                        },
+                        [],
+                        [ModelComponent.DataGraph]));
                 model.tasks.processTask();
 
                 // this is pretty horrible and there probably exists a better way of doing this,

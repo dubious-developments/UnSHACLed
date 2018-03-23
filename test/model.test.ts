@@ -1,4 +1,5 @@
-import { ModelTaskMetadata, ModelComponent, Model, ModelData } from "../src/entities/model";
+import { Model, ModelData } from "../src/entities/model";
+import { ModelTaskMetadata, ModelComponent } from "../src/entities/modelTaskMetadata";
 import { Set } from "typescript-collections";
 import { ProcessorTask } from "../src/entities/taskProcessor";
 
@@ -13,6 +14,15 @@ describe("ModelTaskMetadata Class", () => {
         expect(graphTweakMetadata.readsFrom(ModelComponent.DataGraph)).toEqual(true);
         expect(graphTweakMetadata.writesTo(ModelComponent.DataGraph)).toEqual(true);
     });
+
+    it("remembers its priority", () => {
+       expect(new ModelTaskMetadata(graphReadSet, graphWriteSet, 1).priority).toEqual(1); 
+    });
+
+    it("has the right default priority", () => {
+        expect(new ModelTaskMetadata(graphReadSet, graphWriteSet).priority)
+            .toEqual(ModelTaskMetadata.defaultPriority); 
+     });
 });
 
 describe("Model Class", () => {
@@ -29,7 +39,7 @@ describe("Model Class", () => {
             (data) =>
                 data.setComponent(
                     ModelComponent.DataGraph,
-                    data.getComponent<number>(ModelComponent.DataGraph) + 1),
+                    <number> data.getComponent<number>(ModelComponent.DataGraph) + 1),
             graphTweakMetadata);
 
         model.registerObserver((changeBuf) => {

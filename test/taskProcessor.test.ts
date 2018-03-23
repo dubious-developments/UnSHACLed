@@ -23,7 +23,23 @@ describe("TaskProcessor Class", () => {
             (box) => box.num++, 0);
         processor.schedule(task);
         expect(processor.isScheduleEmpty).toEqual(false);
-        processor.processTask();
+        processor.processAllTasks();
         expect(numBox.num).toEqual(1);
+    });
+
+    it("should not run forever unless we want it to", () => {
+        let processor = new TaskProcessor.TaskProcessor<void, void>(
+            undefined,
+            new TaskProcessor.FifoTaskQueue<void, void>());
+        let taskCount = 0;
+        let createTask = (createNext) => new TaskProcessor.ProcessorTask<void, void>(
+            (nothing) => { taskCount += 1; processor.schedule(createNext(createNext)); }, undefined);
+        processor.schedule(createTask(createTask));
+
+        let before = Date.now();
+        processor.processTasksDuring(500);
+        let after = Date.now();
+        expect(after - before).toBeLessThanOrEqual(1000);
+        expect(taskCount).toBeGreaterThan(1);
     });
 });
