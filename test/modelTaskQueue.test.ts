@@ -1,7 +1,15 @@
 import { ModelTaskQueue, PriorityGenerator } from "../src/entities/modelTaskQueue";
-import { ProcessorTask } from "../src/entities/taskProcessor";
+import { ProcessorTask, TaskQueue } from "../src/entities/taskProcessor";
 import { ModelTaskMetadata, ModelComponent } from "../src/entities/modelTaskMetadata";
 import { ModelData } from "../src/entities/model";
+
+function dequeueNonEmpty<TData, TMetadata>(queue: TaskQueue<TData, TMetadata>):
+    ProcessorTask<TData, TMetadata> {
+
+    let result = queue.dequeue();
+    expect(result).toBeDefined();
+    return result;
+}
 
 describe("ModelTaskQueue Class", () => {
     it("can be created", () => {
@@ -35,7 +43,7 @@ describe("ModelTaskQueue Class", () => {
                     [ModelComponent.DataGraph],
                     [ModelComponent.DataGraph])));
         expect(queue.isEmpty).toEqual(false);
-        let task = queue.dequeue();
+        let task = dequeueNonEmpty(queue);
         task.execute(new ModelData());
         expect(queue.isEmpty).toEqual(true);
         expect(count).toEqual(1);
@@ -57,8 +65,8 @@ describe("ModelTaskQueue Class", () => {
                     [ModelComponent.DataGraph],
                     [ModelComponent.DataGraph])));
         expect(queue.isEmpty).toEqual(false);
-        queue.dequeue().execute(new ModelData());
-        queue.dequeue().execute(new ModelData());
+        dequeueNonEmpty(queue).execute(new ModelData());
+        dequeueNonEmpty(queue).execute(new ModelData());
         expect(queue.isEmpty).toEqual(true);
         expect(count).toEqual(2);
     });
@@ -88,9 +96,9 @@ describe("ModelTaskQueue Class", () => {
                     [],
                     2)));
         expect(queue.isEmpty).toEqual(false);
-        queue.dequeue().execute(new ModelData());
-        queue.dequeue().execute(new ModelData());
-        queue.dequeue().execute(new ModelData());
+        dequeueNonEmpty(queue).execute(new ModelData());
+        dequeueNonEmpty(queue).execute(new ModelData());
+        dequeueNonEmpty(queue).execute(new ModelData());
         expect(queue.isEmpty).toEqual(true);
         expect(count).toEqual(3);
     });
