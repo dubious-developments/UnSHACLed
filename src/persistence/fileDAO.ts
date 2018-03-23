@@ -171,7 +171,7 @@ class LoadTask {
      * @param {FileModule} module
      */
     public static create(result: any, module: Module): ProcessorTask<ModelData, ModelTaskMetadata> {
-        return new ProcessorTask<ModelData, ModelTaskMetadata>(
+        return Model.createTask(
             (data: ModelData) => {
                 let component = data.getOrCreateComponent<Component>(
                     module.getType(),
@@ -179,9 +179,8 @@ class LoadTask {
                 component.setPart(module.getName(), result);
                 data.setComponent(module.getType(), component);
             },
-            new ModelTaskMetadata(
-                [ModelComponent.DataGraph],
-                [ModelComponent.DataGraph]));
+            [ModelComponent.DataGraph],
+            [ModelComponent.DataGraph]);
     }
 }
 
@@ -198,7 +197,7 @@ class SaveTask {
      * @param {FileModule} module
      */
     public static create(io: IOFacilitator, module: Module): ProcessorTask<ModelData, ModelTaskMetadata> {
-        return new ProcessorTask<ModelData, ModelTaskMetadata>(
+        return Model.createTask(
             (data: ModelData) => {
                 let component = data.getComponent<Component>(module.getType());
                 if (component) {
@@ -208,8 +207,7 @@ class SaveTask {
                     }
                 }
             },
-            new ModelTaskMetadata(
-                [ModelComponent.DataGraph],
-                []));
+            [ModelComponent.DataGraph],
+            []);
     }
 }

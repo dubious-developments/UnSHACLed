@@ -1,7 +1,7 @@
 import { ModelTaskQueue, PriorityGenerator } from "../src/entities/modelTaskQueue";
 import { ProcessorTask, TaskQueue } from "../src/entities/taskProcessor";
 import { ModelTaskMetadata, ModelComponent } from "../src/entities/modelTaskMetadata";
-import { ModelData } from "../src/entities/model";
+import { ModelData, Model } from "../src/entities/model";
 
 function dequeueNonEmpty<TData, TMetadata>(queue: TaskQueue<TData, TMetadata>):
     ProcessorTask<TData, TMetadata> {
@@ -25,11 +25,10 @@ describe("ModelTaskQueue Class", () => {
     it("supports enqueuing tasks", () => {
         let queue = new ModelTaskQueue();
         queue.enqueue(
-            new ProcessorTask<ModelData, ModelTaskMetadata>(
+            Model.createTask(
                 (data: ModelData) => { },
-                new ModelTaskMetadata(
-                    [ModelComponent.DataGraph],
-                    [ModelComponent.DataGraph])));
+                [ModelComponent.DataGraph],
+                [ModelComponent.DataGraph]));
         expect(queue.isEmpty).toEqual(false);
     });
 
@@ -37,11 +36,10 @@ describe("ModelTaskQueue Class", () => {
         let count = 0;
         let queue = new ModelTaskQueue();
         queue.enqueue(
-            new ProcessorTask<ModelData, ModelTaskMetadata>(
+            Model.createTask(
                 (data: ModelData) => { count++; },
-                new ModelTaskMetadata(
-                    [ModelComponent.DataGraph],
-                    [ModelComponent.DataGraph])));
+                [ModelComponent.DataGraph],
+                [ModelComponent.DataGraph]));
         expect(queue.isEmpty).toEqual(false);
         let task = dequeueNonEmpty(queue);
         task.execute(new ModelData());
@@ -53,17 +51,15 @@ describe("ModelTaskQueue Class", () => {
         let count = 0;
         let queue = new ModelTaskQueue();
         queue.enqueue(
-            new ProcessorTask<ModelData, ModelTaskMetadata>(
+            Model.createTask(
                 (data: ModelData) => { count++; },
-                new ModelTaskMetadata(
-                    [ModelComponent.DataGraph],
-                    [ModelComponent.DataGraph])));
+                [ModelComponent.DataGraph],
+                [ModelComponent.DataGraph]));
         queue.enqueue(
-            new ProcessorTask<ModelData, ModelTaskMetadata>(
+            Model.createTask(
                 (data: ModelData) => { count++; },
-                new ModelTaskMetadata(
-                    [ModelComponent.DataGraph],
-                    [ModelComponent.DataGraph])));
+                [ModelComponent.DataGraph],
+                [ModelComponent.DataGraph]));
         expect(queue.isEmpty).toEqual(false);
         dequeueNonEmpty(queue).execute(new ModelData());
         dequeueNonEmpty(queue).execute(new ModelData());
@@ -75,26 +71,23 @@ describe("ModelTaskQueue Class", () => {
         let count = 0;
         let queue = new ModelTaskQueue();
         queue.enqueue(
-            new ProcessorTask<ModelData, ModelTaskMetadata>(
+            Model.createTask(
                 (data: ModelData) => { if (count === 0) { count = 1; } },
-                new ModelTaskMetadata(
-                    [],
-                    [ModelComponent.DataGraph],
-                    0)));
+                [],
+                [ModelComponent.DataGraph],
+                0));
         queue.enqueue(
-            new ProcessorTask<ModelData, ModelTaskMetadata>(
+            Model.createTask(
                 (data: ModelData) => { if (count === 2) { count = 3; } },
-                new ModelTaskMetadata(
-                    [ModelComponent.DataGraph],
-                    [],
-                    1)));
+                [ModelComponent.DataGraph],
+                [],
+                1));
         queue.enqueue(
-            new ProcessorTask<ModelData, ModelTaskMetadata>(
+            Model.createTask(
                 (data: ModelData) => { if (count === 1) { count = 2; } },
-                new ModelTaskMetadata(
-                    [ModelComponent.DataGraph],
-                    [],
-                    2)));
+                [ModelComponent.DataGraph],
+                [],
+                2));
         expect(queue.isEmpty).toEqual(false);
         dequeueNonEmpty(queue).execute(new ModelData());
         dequeueNonEmpty(queue).execute(new ModelData());
