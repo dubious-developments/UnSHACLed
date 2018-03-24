@@ -5,6 +5,9 @@ import { TaskQueue } from "./taskQueue";
 export type TaskStartedCallback<TData, TTaskMetadata> =
     (task: Task<TData, TTaskMetadata>) => any;
 
+export type TaskFinishedCallback =
+    (taskInfo: any) => any;
+
 export type TaskCompletedCallback =
     (taskInfo: any) => void;
 
@@ -12,27 +15,48 @@ export type TaskCompletedCallback =
  * An object that executes tasks on a piece of data.
  */
 export abstract class TaskProcessor<TData, TTaskMetadata> {
+    /**
+     * A callback for when tasks start.
+     */
     protected readonly onTaskStarted: TaskStartedCallback<TData, TTaskMetadata>;
+
+    /**
+     * A callback for when tasks finish.
+     */
+    protected readonly onTaskFinished: TaskFinishedCallback;
+
+    /**
+     * A callback for when tasks complete.
+     */
     protected readonly onTaskCompleted: TaskCompletedCallback;
 
     /**
      * Creates a task processor.
      * @param onTaskStarted An optional callback for when a task starts.
+     * @param onTaskFinished An optional callback for when a task finishes.
      * @param onTaskCompleted An optional callback for when a task completes.
      */
     public constructor(
-        onTaskStarted?: TaskStartedCallback<TData, TTaskMetadata>,
-        onTaskCompleted?: TaskCompletedCallback) {
+        onTaskStarted: TaskStartedCallback<TData, TTaskMetadata> | undefined,
+        onTaskFinished: TaskFinishedCallback | undefined,
+        onTaskCompleted: TaskCompletedCallback | undefined) {
 
         if (onTaskStarted) {
             this.onTaskStarted = onTaskStarted;
         } else {
-            this.onTaskStarted = (task) => null;
+            this.onTaskStarted = task => null;
         }
+
+        if (onTaskFinished) {
+            this.onTaskFinished = onTaskFinished;
+        } else {
+            this.onTaskFinished = x => x;
+        }
+
         if (onTaskCompleted) {
             this.onTaskCompleted = onTaskCompleted;
         } else {
-            this.onTaskCompleted = (info) => undefined;
+            this.onTaskCompleted = info => undefined;
         }
     }
 
@@ -92,14 +116,16 @@ export class InOrderProcessor<TData, TTaskMetadata> extends TaskProcessor<TData,
      * Creates a task processor that manages a particular piece of data.
      * @param data The data managed by the task processor.
      * @param onTaskStarted An optional callback for when a task starts.
+     * @param onTaskFinished An optional callback for when a task finishes.
      * @param onTaskCompleted An optional callback for when a task completes.
      */
     public constructor(
         data: TData,
         onTaskStarted?: TaskStartedCallback<TData, TTaskMetadata>,
+        onTaskFinished?: TaskFinishedCallback,
         onTaskCompleted?: TaskCompletedCallback) {
 
-        super(onTaskStarted, onTaskCompleted);
+        super(onTaskStarted, onTaskFinished, onTaskCompleted);
 
         this.data = data;
         this.tasks = new Collections.Queue<Task<TData, TTaskMetadata>>();

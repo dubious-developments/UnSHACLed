@@ -7,9 +7,7 @@ import { TaskRewriter } from "./taskRewriter";
 import { PriorityPartitionedQueue } from "./priorityPartitionedQueue";
 import { TaskInstruction, ModelTask } from "./taskInstruction";
 import { InstructionMerger, ModelTaskRewriter } from "./instructionMerger";
-import { TaskProcessor, TaskStartedCallback, TaskCompletedCallback } from "./taskProcessor";
-
-type TaskFinishedCallback = (taskInfo: any) => any;
+import { TaskProcessor, TaskStartedCallback, TaskCompletedCallback, TaskFinishedCallback } from "./taskProcessor";
 
 /**
  * A task queue and scheduler for model tasks.
@@ -61,11 +59,6 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
     private finishedInstructionMap: Collections.Dictionary<TaskInstruction, any>;
 
     /**
-     * A callback for when tasks finish.
-     */
-    private readonly onTaskFinished: TaskFinishedCallback;
-
-    /**
      * Creates a out-of-order processor for model tasks.
      * @param data The data managed by the task processor.
      * @param onTaskStarted An optional callback for when a task starts.
@@ -81,7 +74,7 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
         onTaskCompleted?: TaskCompletedCallback,
         instructionQueue?: TaskQueue<TaskInstruction>) {
 
-        super(onTaskStarted, onTaskCompleted);
+        super(onTaskStarted, onTaskFinished, onTaskCompleted);
 
         this.state = data;
 
@@ -90,12 +83,6 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
         } else {
             this.eligibleInstructions = new PriorityPartitionedQueue<TaskInstruction>(
                 TaskInstruction.getPriority);
-        }
-
-        if (onTaskFinished) {
-            this.onTaskFinished = onTaskFinished;
-        } else {
-            this.onTaskFinished = x => x;
         }
 
         this.latestComponentStateMap = new Collections.Dictionary<ModelComponent, TaskInstruction>();
