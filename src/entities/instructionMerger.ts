@@ -139,6 +139,9 @@ export class InstructionMerger {
             });
         });
 
+        // Update task.
+        first.task = mergedTask;
+
         // Remove the second instruction from consideration.
         this.finishInstruction(second);
     }
