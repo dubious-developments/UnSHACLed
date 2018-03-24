@@ -1,6 +1,6 @@
 import * as Collections from "typescript-collections";
 import { Task } from "./task";
-import { ModelTaskMetadata } from "./modelTaskMetadata";
+import { ModelTaskMetadata, ModelComponent } from "./modelTaskMetadata";
 import { ModelData } from "./modelData";
 
 /**
@@ -24,9 +24,10 @@ export class TaskInstruction {
 
     /**
      * The set of instructions that must complete before the task
-     * represented by this instruction can be executed.
+     * represented by this instruction can be executed. Each
+     * instruction is mapped to the set of components it supplies.
      */
-    public dependencies: Collections.Set<TaskInstruction>;
+    public dependencies: Collections.Dictionary<TaskInstruction, Collections.Set<ModelComponent>>;
 
     /**
      * The set of instructions that have a dependency on this instruction.
@@ -41,7 +42,7 @@ export class TaskInstruction {
     public constructor(task: ModelTask, data: ModelData) {
         this.task = task;
         this.data = data;
-        this.dependencies = new Collections.Set<TaskInstruction>();
+        this.dependencies = new Collections.Dictionary<TaskInstruction, Collections.Set<ModelComponent>>();
         this.invertedDependencies = new Collections.Set<TaskInstruction>();
     }
 
@@ -62,16 +63,34 @@ export class TaskInstruction {
     }
 
     /**
+     * Adds a dependency to this instruction.
+     * @param dependency The instruction on which this instruction is dependent.
+     * @param component The component supplied by that instruction.
+     */
+    public addDependency(dependency: TaskInstruction, component: ModelComponent) {
+        let componentSet = this.dependencies.getValue(dependency);
+        if (componentSet === undefined) {
+            componentSet = new Collections.Set<ModelComponent>();
+        }
+        componentSet.add(component);
+        this.dependencies.setValue(dependency, componentSet);
+        dependency.invertedDependencies.add(this);
+    }
+
+    /**
      * Transfers the this instruction to a dependent instruction.
      * @param target The instruction to which data is copied.
      */
     public transferOutput(target: TaskInstruction): void {
-        this.task.metadata.writeSet.forEach(component => {
-            if (target.task.metadata.readSet.contains(component)) {
-                target.data.setComponent<any>(
-                    component,
-                    this.data.getComponent<any>(component));
-            }
+        let componentsToTransfer = target.dependencies.getValue(this);
+        if (componentsToTransfer === undefined) {
+            throw new Error("Cannot transfer components to independent instruction.");
+        }
+
+        componentsToTransfer.forEach(component => {
+            target.data.setComponent<any>(
+                component,
+                this.data.getComponent<any>(component));
         });
     }
 

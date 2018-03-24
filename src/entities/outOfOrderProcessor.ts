@@ -117,8 +117,7 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
                         ModelComponent.DataGraph,
                         dependency.data.getComponent<any>(ModelComponent.DataGraph));
                 } else {
-                    instruction.dependencies.add(dependency);
-                    dependency.invertedDependencies.add(instruction);
+                    instruction.addDependency(dependency, component);
                 }
             }
         });
@@ -241,6 +240,9 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
         // Remove the instruction from the dependency set of
         // all other instructions.
         instruction.invertedDependencies.forEach(dependentInstruction => {
+            // Update the captured state of the dependent instruction.
+            instruction.transferOutput(dependentInstruction);
+
             dependentInstruction.dependencies.remove(instruction);
 
             // Add instructions that become eligible for execution
@@ -248,9 +250,6 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
             if (dependentInstruction.isEligibleForExecution) {
                 this.eligibleInstructions.enqueue(dependentInstruction);
             }
-
-            // Update the captured state of the dependent instruction.
-            instruction.transferOutput(dependentInstruction);
         });
 
         // Clear the instruction's inverted dependencies because

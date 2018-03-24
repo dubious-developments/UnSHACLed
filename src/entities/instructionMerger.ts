@@ -230,7 +230,7 @@ export class InstructionMerger {
             if (!InstructionMerger.hasEmptyIntersection(
                 dependentInstr.task.metadata.readSet,
                 second.task.metadata.writeSet)
-                || second.dependencies.contains(dependentInstr)) {
+                || second.dependencies.containsKey(dependentInstr)) {
 
                 canMerge = false;
             }
