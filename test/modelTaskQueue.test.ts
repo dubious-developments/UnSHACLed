@@ -1,8 +1,9 @@
-import { ModelTaskQueue, PriorityGenerator } from "../src/entities/modelTaskQueue";
+import { ModelTaskQueue } from "../src/entities/modelTaskQueue";
 import { TaskQueue } from "../src/entities/taskProcessor";
 import { ModelTaskMetadata, ModelComponent } from "../src/entities/modelTaskMetadata";
 import { ModelData, Model } from "../src/entities/model";
 import { Task } from "../src/entities/task";
+import { PriorityGenerator } from "../src/entities/priorityPartitionedQueue";
 
 function dequeueNonEmpty<TData, TMetadata>(queue: TaskQueue<TData, TMetadata>):
     Task<TData, TMetadata> {
