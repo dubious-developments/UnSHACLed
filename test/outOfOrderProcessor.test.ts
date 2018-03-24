@@ -117,6 +117,54 @@ describe("OutOfOrderProcessor Class", () => {
         expect(queue.isEmpty()).toEqual(true);
         expect(<number> modelData.getComponent<number>(ModelComponent.DataGraph)).toEqual(2);
     });
+
+    it("transfers output correctly", () => {
+        let modelData = new ModelData();
+        let queue = new OutOfOrderProcessor(modelData);
+
+        // The following should happen during this test:
+        //
+        //   1. Task #2 runs and copies its IO output to task #3's data.
+        //   2. Task #1 runs and copies *just its data graph output* to task #3's data.
+        //   3. Task #3 runs.
+
+        let counter = 0;
+
+        queue.schedule(
+            Model.createTask(
+                (data: ModelData) => {
+                    data.setComponent<number>(ModelComponent.DataGraph, 1);
+                    data.setComponent<number>(ModelComponent.IO, 1);
+                    expect(counter).toEqual(1);
+                    counter++;
+                },
+                [],
+                [ModelComponent.DataGraph,
+                ModelComponent.IO]));
+        queue.schedule(
+            Model.createTask(
+                (data: ModelData) => {
+                    data.setComponent<number>(ModelComponent.IO, 2);
+                    expect(counter).toEqual(0);
+                    counter++;
+                },
+                [],
+                [ModelComponent.IO],
+                1));
+        queue.schedule(
+            Model.createTask(
+                (data: ModelData) => {
+                    expect(data.getComponent<number>(ModelComponent.DataGraph)).toEqual(1);
+                    expect(data.getComponent<number>(ModelComponent.IO)).toEqual(2);
+                    expect(counter).toEqual(2);
+                    counter++;
+                },
+                [ModelComponent.DataGraph,
+                ModelComponent.IO],
+                []));
+
+        queue.processAllTasks();
+    });
 });
 
 describe("PriorityGenerator Class", () => {
