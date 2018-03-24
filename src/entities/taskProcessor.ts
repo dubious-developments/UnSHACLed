@@ -10,31 +10,19 @@ type TaskCompletedCallback =
 /**
  * An object that executes tasks on a piece of data.
  */
-export class TaskProcessor<TData, TTaskMetadata> {
-    private tasks: TaskQueue<TData, TTaskMetadata>;
-    private data: TData;
-    private onTaskStarted: TaskStartedCallback<TData, TTaskMetadata>;
-    private onTaskCompleted: TaskCompletedCallback;
+export abstract class TaskProcessor<TData, TTaskMetadata> {
+    protected readonly onTaskStarted: TaskStartedCallback<TData, TTaskMetadata>;
+    protected readonly onTaskCompleted: TaskCompletedCallback;
 
     /**
-     * Creates a task processor that manages a particular piece of data
-     * and uses a particular task queue.
-     * @param data The data managed by the task processor.
-     * @param tasks The queue implementation for this processor.
+     * Creates a task processor.
      * @param onTaskStarted An optional callback for when a task starts.
      * @param onTaskCompleted An optional callback for when a task completes.
      */
     public constructor(
-        data: TData,
-        tasks?: TaskQueue<TData, TTaskMetadata>,
         onTaskStarted?: TaskStartedCallback<TData, TTaskMetadata>,
         onTaskCompleted?: TaskCompletedCallback) {
-        this.data = data;
-        if (tasks) {
-            this.tasks = tasks;
-        } else {
-            this.tasks = new FifoTaskQueue<TData, TTaskMetadata>();
-        }
+
         if (onTaskStarted) {
             this.onTaskStarted = onTaskStarted;
         } else {
@@ -48,25 +36,20 @@ export class TaskProcessor<TData, TTaskMetadata> {
     }
 
     /**
+     * Tells if the model's task schedule is empty.
+     */
+    public abstract get isScheduleEmpty(): boolean;
+
+    /**
      * Schedules a task for execution by this processor.
      */
-    public schedule(task: Task<TData, TTaskMetadata>): void {
-        this.tasks.enqueue(task);
-    }
+    public abstract schedule(task: Task<TData, TTaskMetadata>): void;
 
     /**
      * Deschedules a task and executes it. Does nothing if
      * the task schedule is empty.
      */
-    public processTask(): void {
-        let task = this.tasks.dequeue();
-        if (task === undefined) {
-            return;
-        }
-        let info = this.onTaskStarted(task);
-        task.execute(this.data);
-        this.onTaskCompleted(info);
-    }
+    public abstract processTask(): void;
 
     /**
      * Deschedules and executes tasks until the task schedule
@@ -91,12 +74,66 @@ export class TaskProcessor<TData, TTaskMetadata> {
             current = Date.now();
         }
     }
+}
+
+/**
+ * A task processor implementation that executes tasks in the order they
+ * were scheduled.
+ */
+export class InOrderProcessor<TData, TTaskMetadata> extends TaskProcessor<TData, TTaskMetadata> {
+    private tasks: TaskQueue<TData, TTaskMetadata>;
+    private data: TData;
+
+    /**
+     * Creates a task processor that manages a particular piece of data
+     * and uses a particular task queue.
+     * @param data The data managed by the task processor.
+     * @param tasks The queue implementation for this processor.
+     * @param onTaskStarted An optional callback for when a task starts.
+     * @param onTaskCompleted An optional callback for when a task completes.
+     */
+    public constructor(
+        data: TData,
+        tasks?: TaskQueue<TData, TTaskMetadata>,
+        onTaskStarted?: TaskStartedCallback<TData, TTaskMetadata>,
+        onTaskCompleted?: TaskCompletedCallback) {
+
+        super(onTaskStarted, onTaskCompleted);
+
+        this.data = data;
+        if (tasks) {
+            this.tasks = tasks;
+        } else {
+            this.tasks = new FifoTaskQueue<TData, TTaskMetadata>();
+        }
+    }
+
+    /**
+     * Schedules a task for execution by this processor.
+     */
+    public schedule(task: Task<TData, TTaskMetadata>): void {
+        this.tasks.enqueue(task);
+    }
 
     /**
      * Tells if the model's task schedule is empty.
      */
     public get isScheduleEmpty(): boolean {
         return this.tasks.isEmpty;
+    }
+
+    /**
+     * Deschedules a task and executes it. Does nothing if
+     * the task schedule is empty.
+     */
+    public processTask(): void {
+        let task = this.tasks.dequeue();
+        if (task === undefined) {
+            return;
+        }
+        let info = this.onTaskStarted(task);
+        task.execute(this.data);
+        this.onTaskCompleted(info);
     }
 }
 

@@ -1,5 +1,5 @@
 import * as Collections from "typescript-collections";
-import { TaskProcessor } from "./taskProcessor";
+import { InOrderProcessor, TaskProcessor } from "./taskProcessor";
 import { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";
 import { ModelData } from "./modelData";
 import { ModelTaskQueue } from "./modelTaskQueue";
@@ -47,7 +47,7 @@ export class Model {
      */
     public constructor(data?: ModelData) {
         let wellDefinedData = !data ? new ModelData() : data;
-        this.tasks = new TaskProcessor<ModelData, ModelTaskMetadata>(
+        this.tasks = new InOrderProcessor<ModelData, ModelTaskMetadata>(
             wellDefinedData,
             new ModelTaskQueue(),
             (task) => task,

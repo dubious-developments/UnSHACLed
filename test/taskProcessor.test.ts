@@ -7,17 +7,17 @@ class NumberBox {
     }
 }
 
-describe("TaskProcessor Class", () => {
+describe("InOrderProcessor Class", () => {
 
     it("should be empty initially", () => {
-        let processor = new TaskProcessor.TaskProcessor<NumberBox, number>(
+        let processor = new TaskProcessor.InOrderProcessor<NumberBox, number>(
             new NumberBox(0));
         expect(processor.isScheduleEmpty).toEqual(true);
     });
 
     it("should execute tasks", () => {
         let numBox = new NumberBox(0);
-        let processor = new TaskProcessor.TaskProcessor<NumberBox, number>(
+        let processor = new TaskProcessor.InOrderProcessor<NumberBox, number>(
             numBox,
             new TaskProcessor.FifoTaskQueue<NumberBox, number>());
         let task = new OpaqueTask<NumberBox, number>(
@@ -29,7 +29,7 @@ describe("TaskProcessor Class", () => {
     });
 
     it("should not run forever unless we want it to", () => {
-        let processor = new TaskProcessor.TaskProcessor<void, void>(
+        let processor = new TaskProcessor.InOrderProcessor<void, void>(
             undefined,
             new TaskProcessor.FifoTaskQueue<void, void>());
         let taskCount = 0;

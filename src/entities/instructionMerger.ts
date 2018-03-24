@@ -5,7 +5,7 @@ import { ModelData } from "./modelData";
 import { ModelTaskMetadata } from "./modelTaskMetadata";
 
 /**
- * The type of task rewriters used by the model.
+ * The type of task rewriter used by the model.
  */
 export type ModelTaskRewriter = TaskRewriter<ModelData, ModelTaskMetadata>;
 
