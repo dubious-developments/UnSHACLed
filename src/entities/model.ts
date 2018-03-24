@@ -49,8 +49,9 @@ export class Model {
         let wellDefinedData = !data ? new ModelData() : data;
         this.tasks = new OutOfOrderProcessor(
             wellDefinedData,
-            (task) => task,
-            (task) => this.notifyObservers(wellDefinedData.drainChangeBuffer()));
+            task => task,
+            task => wellDefinedData.drainChangeBuffer(),
+            changeBuf => this.notifyObservers(changeBuf));
         this.observers = [];
     }
 

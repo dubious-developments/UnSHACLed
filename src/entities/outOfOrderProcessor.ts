@@ -9,6 +9,8 @@ import { TaskInstruction, ModelTask } from "./taskInstruction";
 import { InstructionMerger, ModelTaskRewriter } from "./instructionMerger";
 import { TaskProcessor, TaskStartedCallback, TaskCompletedCallback } from "./taskProcessor";
 
+type TaskFinishedCallback = (taskInfo: any) => any;
+
 /**
  * A task queue and scheduler for model tasks.
  */
@@ -48,9 +50,26 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
     private data: ModelData;
 
     /**
+     * A queue of instructions awaiting completion.
+     */
+    private reorderBuffer: Collections.Queue<TaskInstruction>;
+
+    /**
+     * Instructions that have finished executing to the information and their
+     * task information.
+     */
+    private finishedInstructionMap: Collections.Dictionary<TaskInstruction, any>;
+
+    /**
+     * A callback for when tasks finish.
+     */
+    private readonly onTaskFinished: TaskFinishedCallback;
+
+    /**
      * Creates a out-of-order processor for model tasks.
      * @param data The data managed by the task processor.
      * @param onTaskStarted An optional callback for when a task starts.
+     * @param onTaskFinished An optional callback for when a task finishes.
      * @param onTaskCompleted An optional callback for when a task completes.
      * @param instructionQueue The queue for instructions that are eligible
      * for immediate execution.
@@ -58,6 +77,7 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
     public constructor(
         data: ModelData,
         onTaskStarted?: TaskStartedCallback<ModelData, ModelTaskMetadata>,
+        onTaskFinished?: TaskFinishedCallback,
         onTaskCompleted?: TaskCompletedCallback,
         instructionQueue?: TaskQueue<TaskInstruction>) {
 
@@ -70,6 +90,12 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
         } else {
             this.eligibleInstructions = new PriorityPartitionedQueue<TaskInstruction>(
                 TaskInstruction.getPriority);
+        }
+
+        if (onTaskFinished) {
+            this.onTaskFinished = onTaskFinished;
+        } else {
+            this.onTaskFinished = x => x;
         }
 
         this.latestComponentStateMap = new Collections.Dictionary<ModelComponent, TaskInstruction>();
@@ -113,6 +139,9 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
 
         // Introduce the instruction to the instruction merger.
         this.merger.introduceInstruction(instruction);
+
+        // Add the instruction to the reorder buffer.
+        this.reorderBuffer.add(instruction);
     }
 
     /**
@@ -128,15 +157,21 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
             return false;
         }
 
+        // Start executing the task.
         let info = this.onTaskStarted(instr.task);
 
         // Execute the task on the data.
         instr.task.execute(this.data);
 
-        // Complete the instruction.
-        this.complete(instr);
+        // Finish executing the task.
+        info = this.onTaskFinished(info);
 
-        this.onTaskCompleted(info);
+        // Add the finished instruction to the finished
+        // instruction map.
+        this.finishedInstructionMap.setValue(instr, info);
+
+        // Try to complete as many instructions as possible.
+        this.completeInstructions();
 
         return true;
     }
@@ -147,6 +182,30 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
      */
     public registerRewriter(rewriter: ModelTaskRewriter): void {
         this.merger.registerRewriter(rewriter);
+    }
+
+    /**
+     * Completes as many instructions as possible.
+     */
+    private completeInstructions(): void {
+        while (!this.reorderBuffer.isEmpty()) {
+            let info = this.finishedInstructionMap.getValue(this.reorderBuffer.peek());
+            if (info) {
+                // Remove the instruction from the reorder buffer.
+                let instruction = this.reorderBuffer.dequeue();
+
+                // Remove the instruction from the finished instruction map.
+                this.finishedInstructionMap.remove(instruction);
+
+                // Complete the instruction.
+                this.complete(instruction);
+
+                // Signal the instruction-completed handler.
+                this.onTaskCompleted(info);
+            } else {
+                break;
+            }
+        }
     }
 
     /**
