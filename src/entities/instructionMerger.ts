@@ -82,6 +82,7 @@ export class InstructionMerger {
     /**
      * Tries to merge a particular instruction once.
      * @param instruction The instruction to merge with other instructions.
+     * This instruction must be eligible for immediate execution.
      */
     public merge(instruction: TaskInstruction):
         { merged: TaskInstruction, nullified: TaskInstruction } | undefined {
@@ -98,7 +99,7 @@ export class InstructionMerger {
         let rawCandidates = this.findReadAfterWriteMergeCandidates(instruction);
 
         for (let rawCandidate of rawCandidates) {
-            let mergedTask = rawCandidate.rewriter.maybeRewrite(
+            let mergedTask = rawCandidate.rewriter.maybeConcat(
                 instruction.task,
                 rawCandidate.candidate.task);
 
@@ -114,7 +115,7 @@ export class InstructionMerger {
             }
         }
 
-        // TODO: consider write-after-write dependencies.
+        // TODO: consider write-after-write dependencies?
 
         // Found nothing of interest.
         return undefined;
@@ -162,6 +163,7 @@ export class InstructionMerger {
      * be merged with a particular instruction, along with the
      * rewriters that would merge them.
      * @param instruction The instruction to find merge candidates for.
+     * This instruction must be eligible for immediate execution.
      */
     private findReadAfterWriteMergeCandidates(instruction: TaskInstruction):
         { candidate: TaskInstruction, rewriter: ModelTaskRewriter }[] {
@@ -177,7 +179,7 @@ export class InstructionMerger {
 
                 if (interestSet.contains(otherInstruction)
                     && interestSet.contains(instruction)
-                    && this.canMergeReadAfterWrite(instruction, otherInstruction)) {
+                    && this.canConcatReadAfterWrite(instruction, otherInstruction)) {
 
                     results.push({ candidate: otherInstruction, rewriter: this.rewriters[i] });
                 }
@@ -192,50 +194,24 @@ export class InstructionMerger {
      * between them can safely be merged.
      *
      * @param first The first instruction to merge, which writes to
-     * a component from which the second instruction reads.
+     * a component from which the second instruction reads. This
+     * instruction must be eligible for immediate execution.
      *
      * @param second The second instruction to merge, which reads
      * from a component to which the first instruction writes.
      */
-    private canMergeReadAfterWrite(first: TaskInstruction, second: TaskInstruction): boolean {
-        // The 'taskRewriter' file contains a more comprehensive
-        // discussion of preconditions for tasks to be mergeable,
-        // but the gist of it is that
+    private canConcatReadAfterWrite(first: TaskInstruction, second: TaskInstruction): boolean {
+        // Two tasks can be merged if they can be executed successively.
         //
-        //   1. The dependencies of the merged task are the union of its
-        //      component tasks' dependencies.
+        // Let's suppose, for the sake of simplicity, that the first
+        // instruction is eligible for immediate execution (this is
+        // actually the case when this method is called).
         //
-        //   2. There is no task that depends on a write of the merged
-        //      task but not on all component tasks that write to that
-        //      component.
-        //
-        //   3. Tasks cannot be merged if there exists some task T
-        //      such that T is dependent on one task to merge and
-        //      another task to merge is dependent on T.
+        // Then we can concatenate the first and second tasks if the
+        // second task does not have any dependencies other than the
+        // first.
 
-        let canMerge = true;
-
-        first.invertedDependencies.forEach(dependentInstr => {
-            if (dependentInstr === second) {
-                return;
-            }
-
-            // Check second condition: we need to make sure that there is
-            // no instruction that reads from a value to which the second
-            // instruction writes.
-            //
-            // Also check third condition: make sure that the second
-            // instruction does not depend on one of the first instruction's
-            // dependent instructions.
-            if (!InstructionMerger.hasEmptyIntersection(
-                dependentInstr.task.metadata.readSet,
-                second.task.metadata.writeSet)
-                || second.dependencies.containsKey(dependentInstr)) {
-
-                canMerge = false;
-            }
-        });
-
-        return canMerge;
+        return second.dependencies.size() === 1
+            && second.dependencies.getValue(first) !== undefined;
     }
 }

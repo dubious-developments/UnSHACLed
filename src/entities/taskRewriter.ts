@@ -97,14 +97,14 @@ export interface TaskRewriter<TData, TTaskMetadata> {
     isOfInterest(task: Task<TData, TTaskMetadata>): boolean;
 
     /**
-     * Merges and rewrites two tasks that are both of interest
+     * Concatenates and rewrites two tasks that are both of interest
      * and eligible for merging. Or doesn't.
      * @param first The first task to merge.
      * @param second The second task to merge.
      * @returns A merged task if the tasks should be merged.
      * Otherwise, `undefined`.
      */
-    maybeRewrite(
+    maybeConcat(
         first: Task<TData, TTaskMetadata>,
         second: Task<TData, TTaskMetadata>):
         Task<TData, TTaskMetadata> | undefined;
