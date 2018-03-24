@@ -62,6 +62,20 @@ export class TaskInstruction {
     }
 
     /**
+     * Transfers the this instruction to a dependent instruction.
+     * @param target The instruction to which data is copied.
+     */
+    public transferOutput(target: TaskInstruction): void {
+        this.task.metadata.writeSet.forEach(component => {
+            if (target.task.metadata.readSet.contains(component)) {
+                target.data.setComponent<any>(
+                    component,
+                    this.data.getComponent<any>(component));
+            }
+        });
+    }
+
+    /**
      * Gets a string representation for this instruction.
      */
     public toString(): string {

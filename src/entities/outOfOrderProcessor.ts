@@ -110,8 +110,16 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
         task.metadata.readSet.forEach(component => {
             let dependency = this.latestComponentStateMap.getValue(component);
             if (dependency) {
-                instruction.dependencies.add(dependency);
-                dependency.invertedDependencies.add(instruction);
+                if (this.finishedInstructionMap.containsKey(dependency)) {
+                    // Finished instructions don't become dependencies. Instead,
+                    // copy their output to the new instruction's captured data.
+                    instruction.data.setComponent<any>(
+                        ModelComponent.DataGraph,
+                        dependency.data.getComponent<any>(ModelComponent.DataGraph));
+                } else {
+                    instruction.dependencies.add(dependency);
+                    dependency.invertedDependencies.add(instruction);
+                }
             }
         });
 
@@ -209,27 +217,8 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
      * @param instructionData The model data for the instruction.
      */
     private complete(instruction: TaskInstruction): void {
-        // Remove the instruction from consideration for merging.
-        this.merger.completeInstruction(instruction);
-
-        // Remove the instruction from the dependency set of
-        // all other instructions.
-        instruction.invertedDependencies.forEach(dependentInstruction => {
-            dependentInstruction.dependencies.remove(instruction);
-
-            // Add instructions that become eligible for execution
-            // to the set of eligible instructions.
-            if (dependentInstruction.isEligibleForExecution) {
-                this.eligibleInstructions.enqueue(dependentInstruction);
-            }
-        });
-
-        // Clear the instruction's inverted dependencies because
-        // they are no longer valid.
-        instruction.invertedDependencies.clear();
-
-        // Update the state map if applicable.
         instruction.task.metadata.writeSet.forEach(component => {
+            // Update the state map if applicable.
             if (this.latestComponentStateMap.getValue(component) === instruction) {
                 this.latestComponentStateMap.remove(component);
             }
@@ -246,13 +235,26 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
      * @param instruction The instruction to finish executing.
      */
     private finish(instruction: TaskInstruction): void {
-        // Update the captured state of dependent instructions.
-        instruction.invertedDependencies.forEach(other => {
-            instruction.task.metadata.writeSet.forEach(component => {
-                other.data.setComponent<any>(
-                    component,
-                    instruction.data.getComponent<any>(component));
-            });
+        // Remove the instruction from consideration for merging.
+        this.merger.finishInstruction(instruction);
+
+        // Remove the instruction from the dependency set of
+        // all other instructions.
+        instruction.invertedDependencies.forEach(dependentInstruction => {
+            dependentInstruction.dependencies.remove(instruction);
+
+            // Add instructions that become eligible for execution
+            // to the set of eligible instructions.
+            if (dependentInstruction.isEligibleForExecution) {
+                this.eligibleInstructions.enqueue(dependentInstruction);
+            }
         });
+
+        // Update the captured state of dependent instructions.
+        instruction.invertedDependencies.forEach(other => instruction.transferOutput(other));
+
+        // Clear the instruction's inverted dependencies because
+        // they are no longer valid.
+        instruction.invertedDependencies.clear();
     }
 }

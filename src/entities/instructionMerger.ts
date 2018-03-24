@@ -69,11 +69,11 @@ export class InstructionMerger {
     }
 
     /**
-     * Completes an instruction, removing it from consideration
+     * Finishes an instruction, removing it from consideration
      * for instruction merging.
      * @param instruction The instruction to complete.
      */
-    public completeInstruction(instruction: TaskInstruction): void {
+    public finishInstruction(instruction: TaskInstruction): void {
         for (let i = 0; i < this.interestSets.length; i++) {
             this.interestSets[i].remove(instruction);
         }
@@ -147,8 +147,8 @@ export class InstructionMerger {
         transferDependencies(second);
 
         // Remove the old instructions from consideration.
-        this.completeInstruction(first);
-        this.completeInstruction(second);
+        this.finishInstruction(first);
+        this.finishInstruction(second);
 
         // Add the merged instruction to the instruction
         // window.
