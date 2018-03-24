@@ -7,12 +7,13 @@ import { TaskRewriter } from "./taskRewriter";
 import { PriorityPartitionedQueue } from "./priorityPartitionedQueue";
 import { TaskInstruction, ModelTask } from "./taskInstruction";
 import { InstructionMerger, ModelTaskRewriter } from "./instructionMerger";
+import { TaskProcessor, TaskStartedCallback, TaskCompletedCallback } from "./taskProcessor";
 
 /**
  * A task queue and scheduler for model tasks.
  */
-export class ModelTaskQueue implements TaskQueue<Task<ModelData, ModelTaskMetadata>> {
-    // This task queue uses the same techniques as superscalar out-of-order processors
+export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetadata> {
+    // This processor uses the same techniques as superscalar out-of-order processors
     // and state-of-the-art compilers such as LLVM and GCC to reason about instructions.
     //
     // Specifically, each task is represented as an instruction in a mutable
@@ -24,16 +25,12 @@ export class ModelTaskQueue implements TaskQueue<Task<ModelData, ModelTaskMetada
     // This scheme is used in superscalar out-of-order processors to run multiple tasks
     // at the same time. It is used here to prioritize tasks---data flow execution allows
     // us to cherry-pick high-priority from the task queue, dependencies permitting.
-    //
-    // Operations in the model task queue are never worse than `O(n)`, where `n` is the
-    // number of tasks in the queue. For typical workloads, the complexity of enqueuing
-    // and dequeuing a task should be much lower than that.
 
     /**
      * A set of all instructions that are eligible for immediate execution,
      * tagged by priority.
      */
-    private eligibleInstructions: PriorityPartitionedQueue<TaskInstruction>;
+    private eligibleInstructions: TaskQueue<TaskInstruction>;
 
     /**
      * A mapping of model components to the latest instruction that defines them.
@@ -41,33 +38,56 @@ export class ModelTaskQueue implements TaskQueue<Task<ModelData, ModelTaskMetada
     private latestComponentStateMap: Collections.Dictionary<ModelComponent, TaskInstruction>;
 
     /**
-     * Gets the instruction merger used by this model task queue.
+     * The instruction merger used by this model task queue.
      */
     private merger: InstructionMerger;
 
     /**
-     * Creates a new model task queue.
+     * The data managed by this out-of-order processor.
      */
-    public constructor() {
-        this.eligibleInstructions = new PriorityPartitionedQueue<TaskInstruction>(
-            TaskInstruction.getPriority);
+    private data: ModelData;
+
+    /**
+     * Creates a out-of-order processor for model tasks.
+     * @param data The data managed by the task processor.
+     * @param onTaskStarted An optional callback for when a task starts.
+     * @param onTaskCompleted An optional callback for when a task completes.
+     * @param instructionQueue The queue for instructions that are eligible
+     * for immediate execution.
+     */
+    public constructor(
+        data: ModelData,
+        onTaskStarted?: TaskStartedCallback<ModelData, ModelTaskMetadata>,
+        onTaskCompleted?: TaskCompletedCallback,
+        instructionQueue?: TaskQueue<TaskInstruction>) {
+
+        super(onTaskStarted, onTaskCompleted);
+
+        this.data = data;
+
+        if (instructionQueue) {
+            this.eligibleInstructions = instructionQueue;
+        } else {
+            this.eligibleInstructions = new PriorityPartitionedQueue<TaskInstruction>(
+                TaskInstruction.getPriority);
+        }
+
         this.latestComponentStateMap = new Collections.Dictionary<ModelComponent, TaskInstruction>();
         this.merger = new InstructionMerger();
     }
 
     /**
-     * Tells if the task queue is empty.
+     * Tells if the schedule for this processor is empty.
      */
     public isEmpty(): boolean {
         return this.eligibleInstructions.isEmpty();
     }
 
     /**
-     * Adds a task to the queue.
-     * @param task The task to add.
+     * Schedules a task for execution.
+     * @param task The task to schedule.
      */
-    public enqueue(task: ModelTask): void {
-
+    public schedule(task: Task<ModelData, ModelTaskMetadata>): void {
         // Create a new instruction.
         let instruction = new TaskInstruction(task);
 
@@ -96,18 +116,29 @@ export class ModelTaskQueue implements TaskQueue<Task<ModelData, ModelTaskMetada
     }
 
     /**
-     * Removes a task from the queue and returns it.
+     * Deschedules a task and executes it. Does nothing if
+     * the task schedule is empty.
+     * @returns `true` if a task was processed;
+     * otherwise, `false`.
      */
-    public dequeue(): ModelTask | undefined {
+    public processTask(): boolean {
         // Pick the eligible instruction with the highest priority.
         let instr = this.eligibleInstructions.dequeue();
         if (instr === undefined) {
-            return undefined;
+            return false;
         }
-        // Complete that instruction (pre-emptively).
+
+        let info = this.onTaskStarted(instr.task);
+
+        // Execute the task on the data.
+        instr.task.execute(this.data);
+
+        // Complete the instruction.
         this.complete(instr);
-        // Return the task associated with the instruction.
-        return instr.task;
+
+        this.onTaskCompleted(info);
+
+        return true;
     }
 
     /**

@@ -30,6 +30,7 @@ export class PriorityPartitionedQueue<T> implements TaskQueue<T> {
      */
     public constructor(
         public readonly getPriority: (value: T) => number) {
+
         this.nonEmptySubQueueCount = 0;
         this.subQueues = new Collections.DefaultDictionary<number, Collections.Queue<T>>(
             () => new Collections.Queue<T>());
@@ -61,7 +62,7 @@ export class PriorityPartitionedQueue<T> implements TaskQueue<T> {
      * Dequeues an element from this priority-partitioned queue.
      */
     public dequeue(): T | undefined {
-        if (this.isEmpty) {
+        if (this.isEmpty()) {
             return undefined;
         }
 

@@ -13,26 +13,24 @@ describe("InOrderProcessor Class", () => {
     it("should be empty initially", () => {
         let processor = new TaskProcessor.InOrderProcessor<NumberBox, number>(
             new NumberBox(0));
-        expect(processor.isScheduleEmpty).toEqual(true);
+        expect(processor.isEmpty()).toEqual(true);
     });
 
     it("should execute tasks", () => {
         let numBox = new NumberBox(0);
         let processor = new TaskProcessor.InOrderProcessor<NumberBox, number>(
-            numBox,
-            new Collections.Queue<Task<NumberBox, number>>());
+            numBox);
         let task = new OpaqueTask<NumberBox, number>(
             (box) => box.num++, 0);
         processor.schedule(task);
-        expect(processor.isScheduleEmpty).toEqual(false);
+        expect(processor.isEmpty()).toEqual(false);
         processor.processAllTasks();
         expect(numBox.num).toEqual(1);
     });
 
     it("should not run forever unless we want it to", () => {
         let processor = new TaskProcessor.InOrderProcessor<void, void>(
-            undefined,
-            new Collections.Queue<Task<void, void>>());
+            undefined);
         let taskCount = 0;
         let createTask = (createNext) => new OpaqueTask<void, void>(
             (nothing) => { taskCount += 1; processor.schedule(createNext(createNext)); }, undefined);

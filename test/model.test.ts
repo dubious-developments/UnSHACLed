@@ -50,9 +50,9 @@ describe("Model Class", () => {
         model.tasks.schedule(task);
 
         model.tasks.processTask();
-        expect(model.tasks.isScheduleEmpty).toEqual(false);
+        expect(model.tasks.isEmpty()).toEqual(false);
         model.tasks.processTask();
-        expect(model.tasks.isScheduleEmpty).toEqual(false);
+        expect(model.tasks.isEmpty()).toEqual(false);
         expect(modelData.getComponent<number>(ModelComponent.DataGraph)).toEqual(2);
     });
 });

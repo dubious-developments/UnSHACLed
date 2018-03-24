@@ -1,32 +1,31 @@
-import { ModelTaskQueue } from "../src/entities/modelTaskQueue";
+import { OutOfOrderProcessor } from "../src/entities/outOfOrderProcessor";
 import { TaskQueue } from "../src/entities/taskQueue";
 import { ModelTaskMetadata, ModelComponent } from "../src/entities/modelTaskMetadata";
 import { ModelData, Model } from "../src/entities/model";
 import { Task } from "../src/entities/task";
 import { PriorityGenerator } from "../src/entities/priorityPartitionedQueue";
+import { TaskProcessor } from "../src/entities/taskProcessor";
 
-function dequeueNonEmpty<TData, TMetadata>(queue: TaskQueue<Task<TData, TMetadata>>):
-    Task<TData, TMetadata> {
+function processNonEmpty<TData, TMetadata>(
+    queue: TaskProcessor<TData, TMetadata>): void {
 
-    let result = queue.dequeue();
-    expect(result).toBeDefined();
-    return <Task<TData, TMetadata>> result;
+    expect(queue.processTask()).toEqual(true);
 }
 
-describe("ModelTaskQueue Class", () => {
+describe("OutOfOrderProcessor Class", () => {
     it("can be created", () => {
-        new ModelTaskQueue();
+        new OutOfOrderProcessor(new ModelData());
     });
 
     it("is initially empty", () => {
-        let queue = new ModelTaskQueue();
+        let queue = new OutOfOrderProcessor(new ModelData());
         expect(queue.isEmpty()).toEqual(true);
-        expect(queue.dequeue()).toBeUndefined();
+        expect(queue.processTask()).toEqual(false);
     });
 
-    it("supports enqueuing tasks", () => {
-        let queue = new ModelTaskQueue();
-        queue.enqueue(
+    it("supports scheduling tasks", () => {
+        let queue = new OutOfOrderProcessor(new ModelData());
+        queue.schedule(
             Model.createTask(
                 (data: ModelData) => { },
                 [ModelComponent.DataGraph],
@@ -34,66 +33,65 @@ describe("ModelTaskQueue Class", () => {
         expect(queue.isEmpty()).toEqual(false);
     });
 
-    it("supports dequeuing tasks", () => {
+    it("supports processing tasks", () => {
         let count = 0;
-        let queue = new ModelTaskQueue();
-        queue.enqueue(
+        let queue = new OutOfOrderProcessor(new ModelData());
+        queue.schedule(
             Model.createTask(
                 (data: ModelData) => { count++; },
                 [ModelComponent.DataGraph],
                 [ModelComponent.DataGraph]));
         expect(queue.isEmpty()).toEqual(false);
-        let task = dequeueNonEmpty(queue);
-        task.execute(new ModelData());
+        processNonEmpty(queue);
         expect(queue.isEmpty()).toEqual(true);
         expect(count).toEqual(1);
     });
 
-    it("supports dequeuing dependent tasks", () => {
+    it("supports processing dependent tasks", () => {
         let count = 0;
-        let queue = new ModelTaskQueue();
-        queue.enqueue(
+        let queue = new OutOfOrderProcessor(new ModelData());
+        queue.schedule(
             Model.createTask(
                 (data: ModelData) => { count++; },
                 [ModelComponent.DataGraph],
                 [ModelComponent.DataGraph]));
-        queue.enqueue(
+        queue.schedule(
             Model.createTask(
                 (data: ModelData) => { count++; },
                 [ModelComponent.DataGraph],
                 [ModelComponent.DataGraph]));
         expect(queue.isEmpty()).toEqual(false);
-        dequeueNonEmpty(queue).execute(new ModelData());
-        dequeueNonEmpty(queue).execute(new ModelData());
+        processNonEmpty(queue);
+        processNonEmpty(queue);
         expect(queue.isEmpty()).toEqual(true);
         expect(count).toEqual(2);
     });
 
     it("correctly prioritizes tasks", () => {
         let count = 0;
-        let queue = new ModelTaskQueue();
-        queue.enqueue(
+        let queue = new OutOfOrderProcessor(new ModelData());
+        queue.schedule(
             Model.createTask(
                 (data: ModelData) => { if (count === 0) { count = 1; } },
                 [],
                 [ModelComponent.DataGraph],
                 0));
-        queue.enqueue(
+        queue.schedule(
             Model.createTask(
                 (data: ModelData) => { if (count === 2) { count = 3; } },
                 [ModelComponent.DataGraph],
                 [],
                 1));
-        queue.enqueue(
+        queue.schedule(
             Model.createTask(
                 (data: ModelData) => { if (count === 1) { count = 2; } },
                 [ModelComponent.DataGraph],
                 [],
                 2));
         expect(queue.isEmpty()).toEqual(false);
-        dequeueNonEmpty(queue).execute(new ModelData());
-        dequeueNonEmpty(queue).execute(new ModelData());
-        dequeueNonEmpty(queue).execute(new ModelData());
+        processNonEmpty(queue);
+        processNonEmpty(queue);
+        processNonEmpty(queue);
         expect(queue.isEmpty()).toEqual(true);
         expect(count).toEqual(3);
     });

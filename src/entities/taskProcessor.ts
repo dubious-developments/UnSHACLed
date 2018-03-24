@@ -2,10 +2,10 @@ import * as Collections from "typescript-collections";
 import { Task } from "./task";
 import { TaskQueue } from "./taskQueue";
 
-type TaskStartedCallback<TData, TTaskMetadata> =
+export type TaskStartedCallback<TData, TTaskMetadata> =
     (task: Task<TData, TTaskMetadata>) => any;
 
-type TaskCompletedCallback =
+export type TaskCompletedCallback =
     (taskInfo: any) => void;
 
 /**
@@ -37,27 +37,30 @@ export abstract class TaskProcessor<TData, TTaskMetadata> {
     }
 
     /**
-     * Tells if the model's task schedule is empty.
+     * Tells if the processor's task schedule is empty.
      */
-    public abstract get isScheduleEmpty(): boolean;
+    public abstract isEmpty(): boolean;
 
     /**
      * Schedules a task for execution by this processor.
+     * @param task The task to schedule.
      */
     public abstract schedule(task: Task<TData, TTaskMetadata>): void;
 
     /**
      * Deschedules a task and executes it. Does nothing if
      * the task schedule is empty.
+     * @returns `true` if a task was processed;
+     * otherwise, `false`.
      */
-    public abstract processTask(): void;
+    public abstract processTask(): boolean;
 
     /**
      * Deschedules and executes tasks until the task schedule
      * becomes empty..
      */
     public processAllTasks(): void {
-        while (!this.isScheduleEmpty) {
+        while (!this.isEmpty()) {
             this.processTask();
         }
     }
@@ -70,7 +73,7 @@ export abstract class TaskProcessor<TData, TTaskMetadata> {
     public processTasksDuring(milliseconds: number): void {
         let start = Date.now();
         let current = start;
-        while (!this.isScheduleEmpty && current - start < milliseconds) {
+        while (!this.isEmpty() && current - start < milliseconds) {
             this.processTask();
             current = Date.now();
         }
@@ -82,31 +85,24 @@ export abstract class TaskProcessor<TData, TTaskMetadata> {
  * were scheduled.
  */
 export class InOrderProcessor<TData, TTaskMetadata> extends TaskProcessor<TData, TTaskMetadata> {
-    private tasks: TaskQueue<Task<TData, TTaskMetadata>>;
+    private tasks: Collections.Queue<Task<TData, TTaskMetadata>>;
     private data: TData;
 
     /**
-     * Creates a task processor that manages a particular piece of data
-     * and uses a particular task queue.
+     * Creates a task processor that manages a particular piece of data.
      * @param data The data managed by the task processor.
-     * @param tasks The queue implementation for this processor.
      * @param onTaskStarted An optional callback for when a task starts.
      * @param onTaskCompleted An optional callback for when a task completes.
      */
     public constructor(
         data: TData,
-        tasks?: TaskQueue<Task<TData, TTaskMetadata>>,
         onTaskStarted?: TaskStartedCallback<TData, TTaskMetadata>,
         onTaskCompleted?: TaskCompletedCallback) {
 
         super(onTaskStarted, onTaskCompleted);
 
         this.data = data;
-        if (tasks) {
-            this.tasks = tasks;
-        } else {
-            this.tasks = new Collections.Queue<Task<TData, TTaskMetadata>>();
-        }
+        this.tasks = new Collections.Queue<Task<TData, TTaskMetadata>>();
     }
 
     /**
@@ -117,23 +113,26 @@ export class InOrderProcessor<TData, TTaskMetadata> extends TaskProcessor<TData,
     }
 
     /**
-     * Tells if the model's task schedule is empty.
+     * Tells if the processor's task schedule is empty.
      */
-    public get isScheduleEmpty(): boolean {
+    public isEmpty(): boolean {
         return this.tasks.isEmpty();
     }
 
     /**
      * Deschedules a task and executes it. Does nothing if
      * the task schedule is empty.
+     * @returns `true` if a task was processed;
+     * otherwise, `false`.
      */
-    public processTask(): void {
+    public processTask(): boolean {
         let task = this.tasks.dequeue();
         if (task === undefined) {
-            return;
+            return false;
         }
         let info = this.onTaskStarted(task);
         task.execute(this.data);
         this.onTaskCompleted(info);
+        return true;
     }
 }

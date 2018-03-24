@@ -2,9 +2,9 @@ import * as Collections from "typescript-collections";
 import { InOrderProcessor, TaskProcessor } from "./taskProcessor";
 import { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";
 import { ModelData } from "./modelData";
-import { ModelTaskQueue } from "./modelTaskQueue";
 import { Task, OpaqueTask } from "./task";
 import { ModelTask } from "./taskInstruction";
+import { OutOfOrderProcessor } from "./outOfOrderProcessor";
 export { ModelData } from "./modelData";
 export { ModelTask } from "./taskInstruction";
 
@@ -47,9 +47,8 @@ export class Model {
      */
     public constructor(data?: ModelData) {
         let wellDefinedData = !data ? new ModelData() : data;
-        this.tasks = new InOrderProcessor<ModelData, ModelTaskMetadata>(
+        this.tasks = new OutOfOrderProcessor(
             wellDefinedData,
-            new ModelTaskQueue(),
             (task) => task,
             (task) => this.notifyObservers(wellDefinedData.drainChangeBuffer()));
         this.observers = [];
