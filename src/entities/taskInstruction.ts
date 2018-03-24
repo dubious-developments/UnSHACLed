@@ -18,6 +18,11 @@ export class TaskInstruction {
     public readonly task: ModelTask;
 
     /**
+     * The model data captured by this instruction.
+     */
+    public data: ModelData;
+
+    /**
      * The set of instructions that must complete before the task
      * represented by this instruction can be executed.
      */
@@ -31,9 +36,11 @@ export class TaskInstruction {
     /**
      * Creates a task instruction.
      * @param task The task that is stored in this instruction.
+     * @param data The captured data for this instruction.
      */
-    public constructor(task: ModelTask) {
+    public constructor(task: ModelTask, data: ModelData) {
         this.task = task;
+        this.data = data;
         this.dependencies = new Collections.Set<TaskInstruction>();
         this.invertedDependencies = new Collections.Set<TaskInstruction>();
     }

@@ -47,7 +47,7 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
     /**
      * The data managed by this out-of-order processor.
      */
-    private data: ModelData;
+    private state: ModelData;
 
     /**
      * A queue of instructions awaiting completion.
@@ -83,7 +83,7 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
 
         super(onTaskStarted, onTaskCompleted);
 
-        this.data = data;
+        this.state = data;
 
         if (instructionQueue) {
             this.eligibleInstructions = instructionQueue;
@@ -117,7 +117,7 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
      */
     public schedule(task: Task<ModelData, ModelTaskMetadata>): void {
         // Create a new instruction.
-        let instruction = new TaskInstruction(task);
+        let instruction = new TaskInstruction(task, this.state.clone());
 
         // Turn the instruction's read set into a dependency set.
         task.metadata.readSet.forEach(component => {
@@ -163,9 +163,10 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
         let info = this.onTaskStarted(instr.task);
 
         // Execute the task on the data.
-        instr.task.execute(this.data);
+        instr.task.execute(instr.data);
 
         // Finish executing the task.
+        this.finish(instr);
         info = this.onTaskFinished(info);
 
         // Add the finished instruction to the finished
@@ -218,6 +219,7 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
     /**
      * Completes an instruction.
      * @param instruction The instruction to complete.
+     * @param instructionData The model data for the instruction.
      */
     private complete(instruction: TaskInstruction): void {
         // Remove the instruction from consideration for merging.
@@ -244,6 +246,26 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
             if (this.latestComponentStateMap.getValue(component) === instruction) {
                 this.latestComponentStateMap.remove(component);
             }
+
+            // Update the architecture state.
+            this.state.setComponent<any>(
+                component,
+                instruction.data.getComponent<any>(component));
+        });
+    }
+
+    /**
+     * Finishes executing an instruction.
+     * @param instruction The instruction to finish executing.
+     */
+    private finish(instruction: TaskInstruction): void {
+        // Update the captured state of dependent instructions.
+        instruction.invertedDependencies.forEach(other => {
+            instruction.task.metadata.writeSet.forEach(component => {
+                other.data.setComponent<any>(
+                    component,
+                    instruction.data.getComponent<any>(component));
+            });
         });
     }
 }

@@ -131,7 +131,7 @@ export class InstructionMerger {
         second: TaskInstruction,
         mergedTask: ModelTask): TaskInstruction {
 
-        let mergedInstr = new TaskInstruction(mergedTask);
+        let mergedInstr = new TaskInstruction(mergedTask, first.data);
 
         // Transfer dependencies from old instructions to
         // the merged instruction.

@@ -95,6 +95,28 @@ describe("OutOfOrderProcessor Class", () => {
         expect(queue.isEmpty()).toEqual(true);
         expect(count).toEqual(3);
     });
+
+    it("updates data in correct order", () => {
+        let data = new ModelData();
+        let queue = new OutOfOrderProcessor(data);
+        queue.schedule(
+            Model.createTask(
+                (data: ModelData) => { data.setComponent<number>(ModelComponent.DataGraph, 1); },
+                [],
+                [ModelComponent.DataGraph]));
+        queue.schedule(
+            Model.createTask(
+                (data: ModelData) => { data.setComponent<number>(ModelComponent.DataGraph, 2); },
+                [],
+                [ModelComponent.DataGraph],
+                1));
+
+        expect(queue.isEmpty()).toEqual(false);
+        processNonEmpty(queue);
+        processNonEmpty(queue);
+        expect(queue.isEmpty()).toEqual(true);
+        expect(<number> data.getComponent<number>(ModelComponent.DataGraph)).toEqual(2);
+    });
 });
 
 describe("PriorityGenerator Class", () => {

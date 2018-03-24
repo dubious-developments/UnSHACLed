@@ -50,8 +50,8 @@ export class Model {
         this.tasks = new OutOfOrderProcessor(
             wellDefinedData,
             task => task,
-            task => wellDefinedData.drainChangeBuffer(),
-            changeBuf => this.notifyObservers(changeBuf));
+            task => task,
+            task => this.notifyObservers(wellDefinedData.drainChangeBuffer()));
         this.observers = [];
     }
 
