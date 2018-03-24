@@ -248,10 +248,10 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
             if (dependentInstruction.isEligibleForExecution) {
                 this.eligibleInstructions.enqueue(dependentInstruction);
             }
-        });
 
-        // Update the captured state of dependent instructions.
-        instruction.invertedDependencies.forEach(other => instruction.transferOutput(other));
+            // Update the captured state of the dependent instruction.
+            instruction.transferOutput(dependentInstruction);
+        });
 
         // Clear the instruction's inverted dependencies because
         // they are no longer valid.
