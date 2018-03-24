@@ -1,5 +1,6 @@
 import * as Collections from "typescript-collections";
 import { Task } from "./task";
+import { TaskQueue } from "./taskQueue";
 
 type TaskStartedCallback<TData, TTaskMetadata> =
     (task: Task<TData, TTaskMetadata>) => any;
@@ -81,7 +82,7 @@ export abstract class TaskProcessor<TData, TTaskMetadata> {
  * were scheduled.
  */
 export class InOrderProcessor<TData, TTaskMetadata> extends TaskProcessor<TData, TTaskMetadata> {
-    private tasks: TaskQueue<TData, TTaskMetadata>;
+    private tasks: TaskQueue<Task<TData, TTaskMetadata>>;
     private data: TData;
 
     /**
@@ -94,7 +95,7 @@ export class InOrderProcessor<TData, TTaskMetadata> extends TaskProcessor<TData,
      */
     public constructor(
         data: TData,
-        tasks?: TaskQueue<TData, TTaskMetadata>,
+        tasks?: TaskQueue<Task<TData, TTaskMetadata>>,
         onTaskStarted?: TaskStartedCallback<TData, TTaskMetadata>,
         onTaskCompleted?: TaskCompletedCallback) {
 
@@ -104,7 +105,7 @@ export class InOrderProcessor<TData, TTaskMetadata> extends TaskProcessor<TData,
         if (tasks) {
             this.tasks = tasks;
         } else {
-            this.tasks = new FifoTaskQueue<TData, TTaskMetadata>();
+            this.tasks = new Collections.Queue<Task<TData, TTaskMetadata>>();
         }
     }
 
@@ -119,7 +120,7 @@ export class InOrderProcessor<TData, TTaskMetadata> extends TaskProcessor<TData,
      * Tells if the model's task schedule is empty.
      */
     public get isScheduleEmpty(): boolean {
-        return this.tasks.isEmpty;
+        return this.tasks.isEmpty();
     }
 
     /**
@@ -134,50 +135,5 @@ export class InOrderProcessor<TData, TTaskMetadata> extends TaskProcessor<TData,
         let info = this.onTaskStarted(task);
         task.execute(this.data);
         this.onTaskCompleted(info);
-    }
-}
-
-/**
- * A queue of tasks for task processors. Implementations
- * of this interface need not adhere to a FIFO scheduling policy.
- */
-export interface TaskQueue<TData, TTaskMetadata> {
-    /**
-     * Tells if the task queue is empty.
-     */
-    isEmpty: boolean;
-
-    /**
-     * Adds a task to the queue.
-     * @param task The task to add.
-     */
-    enqueue(task: Task<TData, TTaskMetadata>): void;
-
-    /**
-     * Removes a task from the queue and returns it.
-     */
-    dequeue(): Task<TData, TTaskMetadata> | undefined;
-}
-
-/**
- * A task queue that executes tasks in FIFO order.
- */
-export class FifoTaskQueue<TData, TTaskMetadata> implements TaskQueue<TData, TTaskMetadata> {
-    private queue: Collections.Queue<Task<TData, TTaskMetadata>>;
-
-    public constructor() {
-        this.queue = new Collections.Queue<Task<TData, TTaskMetadata>>();
-    }
-
-    public get isEmpty(): boolean {
-        return this.queue.isEmpty();
-    }
-
-    public enqueue(task: Task<TData, TTaskMetadata>): void {
-        this.queue.enqueue(task);
-    }
-
-    public dequeue(): Task<TData, TTaskMetadata> | undefined {
-        return this.queue.dequeue();
     }
 }

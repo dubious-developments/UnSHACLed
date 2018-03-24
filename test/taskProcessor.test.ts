@@ -1,5 +1,6 @@
+import * as Collections from "typescript-collections";
 import * as TaskProcessor from "../src/entities/taskProcessor";
-import { OpaqueTask } from "../src/entities/task";
+import { OpaqueTask, Task } from "../src/entities/task";
 
 class NumberBox {
     public constructor(public num: number) {
@@ -19,7 +20,7 @@ describe("InOrderProcessor Class", () => {
         let numBox = new NumberBox(0);
         let processor = new TaskProcessor.InOrderProcessor<NumberBox, number>(
             numBox,
-            new TaskProcessor.FifoTaskQueue<NumberBox, number>());
+            new Collections.Queue<Task<NumberBox, number>>());
         let task = new OpaqueTask<NumberBox, number>(
             (box) => box.num++, 0);
         processor.schedule(task);
@@ -31,7 +32,7 @@ describe("InOrderProcessor Class", () => {
     it("should not run forever unless we want it to", () => {
         let processor = new TaskProcessor.InOrderProcessor<void, void>(
             undefined,
-            new TaskProcessor.FifoTaskQueue<void, void>());
+            new Collections.Queue<Task<void, void>>());
         let taskCount = 0;
         let createTask = (createNext) => new OpaqueTask<void, void>(
             (nothing) => { taskCount += 1; processor.schedule(createNext(createNext)); }, undefined);

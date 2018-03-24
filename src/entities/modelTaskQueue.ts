@@ -1,5 +1,5 @@
 import * as Collections from "typescript-collections";
-import { TaskQueue } from "./taskProcessor";
+import { TaskQueue } from "./taskQueue";
 import { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";
 import { ModelData } from "./modelData";
 import { Task } from "./task";
@@ -11,7 +11,7 @@ import { InstructionMerger, ModelTaskRewriter } from "./instructionMerger";
 /**
  * A task queue and scheduler for model tasks.
  */
-export class ModelTaskQueue implements TaskQueue<ModelData, ModelTaskMetadata> {
+export class ModelTaskQueue implements TaskQueue<Task<ModelData, ModelTaskMetadata>> {
     // This task queue uses the same techniques as superscalar out-of-order processors
     // and state-of-the-art compilers such as LLVM and GCC to reason about instructions.
     //
@@ -58,7 +58,7 @@ export class ModelTaskQueue implements TaskQueue<ModelData, ModelTaskMetadata> {
     /**
      * Tells if the task queue is empty.
      */
-    public get isEmpty(): boolean {
+    public isEmpty(): boolean {
         return this.eligibleInstructions.isEmpty;
     }
 

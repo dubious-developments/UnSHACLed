@@ -1,11 +1,11 @@
 import { ModelTaskQueue } from "../src/entities/modelTaskQueue";
-import { TaskQueue } from "../src/entities/taskProcessor";
+import { TaskQueue } from "../src/entities/taskQueue";
 import { ModelTaskMetadata, ModelComponent } from "../src/entities/modelTaskMetadata";
 import { ModelData, Model } from "../src/entities/model";
 import { Task } from "../src/entities/task";
 import { PriorityGenerator } from "../src/entities/priorityPartitionedQueue";
 
-function dequeueNonEmpty<TData, TMetadata>(queue: TaskQueue<TData, TMetadata>):
+function dequeueNonEmpty<TData, TMetadata>(queue: TaskQueue<Task<TData, TMetadata>>):
     Task<TData, TMetadata> {
 
     let result = queue.dequeue();
@@ -20,7 +20,7 @@ describe("ModelTaskQueue Class", () => {
 
     it("is initially empty", () => {
         let queue = new ModelTaskQueue();
-        expect(queue.isEmpty).toEqual(true);
+        expect(queue.isEmpty()).toEqual(true);
         expect(queue.dequeue()).toBeUndefined();
     });
 
@@ -31,7 +31,7 @@ describe("ModelTaskQueue Class", () => {
                 (data: ModelData) => { },
                 [ModelComponent.DataGraph],
                 [ModelComponent.DataGraph]));
-        expect(queue.isEmpty).toEqual(false);
+        expect(queue.isEmpty()).toEqual(false);
     });
 
     it("supports dequeuing tasks", () => {
@@ -42,10 +42,10 @@ describe("ModelTaskQueue Class", () => {
                 (data: ModelData) => { count++; },
                 [ModelComponent.DataGraph],
                 [ModelComponent.DataGraph]));
-        expect(queue.isEmpty).toEqual(false);
+        expect(queue.isEmpty()).toEqual(false);
         let task = dequeueNonEmpty(queue);
         task.execute(new ModelData());
-        expect(queue.isEmpty).toEqual(true);
+        expect(queue.isEmpty()).toEqual(true);
         expect(count).toEqual(1);
     });
 
@@ -62,10 +62,10 @@ describe("ModelTaskQueue Class", () => {
                 (data: ModelData) => { count++; },
                 [ModelComponent.DataGraph],
                 [ModelComponent.DataGraph]));
-        expect(queue.isEmpty).toEqual(false);
+        expect(queue.isEmpty()).toEqual(false);
         dequeueNonEmpty(queue).execute(new ModelData());
         dequeueNonEmpty(queue).execute(new ModelData());
-        expect(queue.isEmpty).toEqual(true);
+        expect(queue.isEmpty()).toEqual(true);
         expect(count).toEqual(2);
     });
 
@@ -90,11 +90,11 @@ describe("ModelTaskQueue Class", () => {
                 [ModelComponent.DataGraph],
                 [],
                 2));
-        expect(queue.isEmpty).toEqual(false);
+        expect(queue.isEmpty()).toEqual(false);
         dequeueNonEmpty(queue).execute(new ModelData());
         dequeueNonEmpty(queue).execute(new ModelData());
         dequeueNonEmpty(queue).execute(new ModelData());
-        expect(queue.isEmpty).toEqual(true);
+        expect(queue.isEmpty()).toEqual(true);
         expect(count).toEqual(3);
     });
 });
