@@ -2,10 +2,11 @@ import * as Collections from "typescript-collections";
 import { TaskProcessor } from "./taskProcessor";
 import { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";
 import { ModelData } from "./modelData";
-import { ModelTask, ModelTaskQueue } from "./modelTaskQueue";
+import { ModelTaskQueue } from "./modelTaskQueue";
 import { Task, OpaqueTask } from "./task";
+import { ModelTask } from "./taskInstruction";
 export { ModelData } from "./modelData";
-export { ModelTask } from "./modelTaskQueue";
+export { ModelTask } from "./taskInstruction";
 
 /**
  * A model observer: a function that takes a change set as input
