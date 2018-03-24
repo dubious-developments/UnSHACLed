@@ -59,7 +59,7 @@ export class ModelTaskQueue implements TaskQueue<Task<ModelData, ModelTaskMetada
      * Tells if the task queue is empty.
      */
     public isEmpty(): boolean {
-        return this.eligibleInstructions.isEmpty;
+        return this.eligibleInstructions.isEmpty();
     }
 
     /**

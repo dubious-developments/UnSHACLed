@@ -1,4 +1,5 @@
 import * as Collections from "typescript-collections";
+import { TaskQueue } from "./taskQueue";
 
 /**
  * A sequence of queues that are combined in a single queue-like
@@ -6,7 +7,7 @@ import * as Collections from "typescript-collections";
  * and higher-priority queues are preferred over low-priority queues
  * when dequeuing elements.
  */
-export class PriorityPartitionedQueue<T> {
+export class PriorityPartitionedQueue<T> implements TaskQueue<T> {
     /**
      * The sub-queues in this priority-partitioned queue. Each subqueue
      * is indexed by its priority.
@@ -38,7 +39,7 @@ export class PriorityPartitionedQueue<T> {
     /**
      * Tests if this priority-partitioned queue is empty.
      */
-    public get isEmpty(): boolean {
+    public isEmpty(): boolean {
         return this.nonEmptySubQueueCount === 0;
     }
 
