@@ -100,6 +100,8 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
 
         this.latestComponentStateMap = new Collections.Dictionary<ModelComponent, TaskInstruction>();
         this.merger = new InstructionMerger();
+        this.reorderBuffer = new Collections.Queue<TaskInstruction>();
+        this.finishedInstructionMap = new Collections.Dictionary<TaskInstruction, any>();
     }
 
     /**
@@ -141,7 +143,7 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
         this.merger.introduceInstruction(instruction);
 
         // Add the instruction to the reorder buffer.
-        this.reorderBuffer.add(instruction);
+        this.reorderBuffer.enqueue(instruction);
     }
 
     /**
@@ -188,11 +190,16 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
      * Completes as many instructions as possible.
      */
     private completeInstructions(): void {
-        while (!this.reorderBuffer.isEmpty()) {
-            let info = this.finishedInstructionMap.getValue(this.reorderBuffer.peek());
-            if (info) {
+        while (true) {
+            let instruction = this.reorderBuffer.peek();
+            if (instruction === undefined) {
+                break;
+            }
+
+            let info = this.finishedInstructionMap.getValue(instruction);
+            if (info !== undefined) {
                 // Remove the instruction from the reorder buffer.
-                let instruction = this.reorderBuffer.dequeue();
+                instruction = this.reorderBuffer.dequeue();
 
                 // Remove the instruction from the finished instruction map.
                 this.finishedInstructionMap.remove(instruction);

@@ -27,7 +27,7 @@ export abstract class TaskProcessor<TData, TTaskMetadata> {
         if (onTaskStarted) {
             this.onTaskStarted = onTaskStarted;
         } else {
-            this.onTaskStarted = (task) => undefined;
+            this.onTaskStarted = (task) => null;
         }
         if (onTaskCompleted) {
             this.onTaskCompleted = onTaskCompleted;
