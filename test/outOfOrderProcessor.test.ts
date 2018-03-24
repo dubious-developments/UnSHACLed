@@ -97,8 +97,8 @@ describe("OutOfOrderProcessor Class", () => {
     });
 
     it("updates data in correct order", () => {
-        let data = new ModelData();
-        let queue = new OutOfOrderProcessor(data);
+        let modelData = new ModelData();
+        let queue = new OutOfOrderProcessor(modelData);
         queue.schedule(
             Model.createTask(
                 (data: ModelData) => { data.setComponent<number>(ModelComponent.DataGraph, 1); },
@@ -115,7 +115,7 @@ describe("OutOfOrderProcessor Class", () => {
         processNonEmpty(queue);
         processNonEmpty(queue);
         expect(queue.isEmpty()).toEqual(true);
-        expect(<number> data.getComponent<number>(ModelComponent.DataGraph)).toEqual(2);
+        expect(<number> modelData.getComponent<number>(ModelComponent.DataGraph)).toEqual(2);
     });
 });
 
