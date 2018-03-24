@@ -83,9 +83,11 @@ export class InstructionMerger {
      * Tries to merge a particular instruction once.
      * @param instruction The instruction to merge with other instructions.
      * This instruction must be eligible for immediate execution.
+     * @returns A merged instruction and a nullified instruction if the
+     * instruction was merged with some other instruction; otherwise,
+     * `undefined`.
      */
-    public merge(instruction: TaskInstruction):
-        { merged: TaskInstruction, nullified: TaskInstruction } | undefined {
+    public merge(instruction: TaskInstruction): { merged: TaskInstruction, nullified: TaskInstruction } | undefined {
 
         // This function needs to be fast, so we can't compare every pair
         // of instructions. Instead, we'll make some simplifications.
@@ -93,8 +95,7 @@ export class InstructionMerger {
         //   * We will only consider merging two tasks at a time.
         //
         //   * We will only consider tasks if they have a read-after-write
-        //     or write-after-write dependency. (Considering every pair
-        //     of instructions is costly.)
+        //     dependence.
 
         let rawCandidates = this.findReadAfterWriteMergeCandidates(instruction);
 
@@ -105,17 +106,13 @@ export class InstructionMerger {
 
             if (mergedTask) {
                 // Found a match. Complete the merge.
+                this.concatInstructions(instruction, rawCandidate.candidate, mergedTask);
                 return {
-                    merged: this.createMergedInstruction(
-                        instruction,
-                        rawCandidate.candidate,
-                        mergedTask),
+                    merged: instruction,
                     nullified: rawCandidate.candidate
                 };
             }
         }
-
-        // TODO: consider write-after-write dependencies?
 
         // Found nothing of interest.
         return undefined;
@@ -127,35 +124,23 @@ export class InstructionMerger {
      * @param second The second instruction to merge.
      * @param mergedTask The merged task.
      */
-    private createMergedInstruction(
+    private concatInstructions(
         first: TaskInstruction,
         second: TaskInstruction,
-        mergedTask: ModelTask): TaskInstruction {
+        mergedTask: ModelTask): void {
 
-        let mergedInstr = new TaskInstruction(mergedTask, first.data);
-
-        // Transfer dependencies from old instructions to
-        // the merged instruction.
-        let transferDependencies = originalInstr => {
-            originalInstr.invertedDependencies.forEach(element => {
-                element.dependencies.remove(originalInstr);
-                element.dependencies.add(mergedInstr);
-                mergedInstr.invertedDependencies.add(element);
+        // Transfer dependencies from second instruction to
+        // first instruction.
+        second.invertedDependencies.forEach(element => {
+            let components = element.dependencies.getValue(second);
+            element.dependencies.remove(second);
+            components.forEach(component => {
+                element.addDependency(first, component);
             });
-        };
+        });
 
-        transferDependencies(first);
-        transferDependencies(second);
-
-        // Remove the old instructions from consideration.
-        this.finishInstruction(first);
+        // Remove the second instruction from consideration.
         this.finishInstruction(second);
-
-        // Add the merged instruction to the instruction
-        // window.
-        this.introduceInstruction(mergedInstr);
-
-        return mergedInstr;
     }
 
     /**

@@ -15,7 +15,7 @@ export class TaskInstruction {
     /**
      * The task that is stored in this instruction.
      */
-    public readonly task: ModelTask;
+    public task: ModelTask;
 
     /**
      * The model data captured by this instruction.
