@@ -183,7 +183,7 @@ describe("OutOfOrderProcessor Class", () => {
         // Register it.
         queue.registerRewriter(rewriter);
 
-        // Create a pair of tasks.
+        // Create a triple of tasks.
         let task1 = Model.createTask(
             (data: ModelData) => {
                 data.setComponent<number>(
@@ -196,17 +196,19 @@ describe("OutOfOrderProcessor Class", () => {
             [ModelComponent.DataGraph]);
 
         let task2 = task1.clone();
+        let task3 = task1.clone();
 
         // Schedule the tasks.
         queue.schedule(task1);
         queue.schedule(task2);
+        queue.schedule(task3);
 
         // Process a task and rewriter should kick in here.
         processNonEmpty(queue);
 
         // Task queue will be empty if the rewriter did its job.
         expect(queue.isEmpty()).toEqual(true);
-        expect(modelData.getComponent<number>(ModelComponent.DataGraph)).toEqual(2);
+        expect(modelData.getComponent<number>(ModelComponent.DataGraph)).toEqual(3);
     });
 });
 
