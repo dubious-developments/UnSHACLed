@@ -225,9 +225,20 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
                 if (nullifiedInstr === instr) {
                     // Ignore this instruction and process another task.
                     return this.dequeueInstruction();
-                } else {
+                } else if (nullifiedInstr.isEligibleForExecution) {
                     // Nullify the other instruction and try to keep on
                     // merging instructions.
+                    //
+                    // Only do this if the nullified instruction is eligible
+                    // for instruction. If so, then it will already be in the
+                    // eligible instruction queue.
+                    //
+                    // Nullifying instructions that are not yet in the
+                    // eligible instruction queue will cause a memory leak:
+                    // the nullified instruction gets added to the set of
+                    // nullified instructions but is never removed from that
+                    // set because it will never enter (or leave) the eligible
+                    // instruction queue.
                     this.nullifiedInstructions.add(nullifiedInstr);
                 }
             }
