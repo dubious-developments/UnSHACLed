@@ -25,6 +25,7 @@ class SideBar extends React.Component<SidebarProps, any> {
         this.handleDropDown = this.handleDropDown.bind(this);
         this.getMenuItemsFiltered = this.getMenuItemsFiltered.bind(this);
         this.DynamicMenu = this.DynamicMenu.bind(this);
+        this.getDragID = this.getDragID.bind(this);
     }
 
     getMenuItemsFiltered(kind: string, query: string) {
@@ -62,7 +63,16 @@ class SideBar extends React.Component<SidebarProps, any> {
 
         for (var i = 0; i < res.length; i++) {
             var key = kind + i;
-            items.push(<Menu.Item as="a" id={kind + " " + i}content={res[i]} key={key}/>);
+            items.push(
+                <Menu.Item
+                    as="a"
+                    id={kind + " " + i}
+                    content={res[i]}
+                    key={key}
+                    draggable={true}
+                    onDragStart={this.getDragID}
+                />
+            );
         }
 
         return (
@@ -83,6 +93,10 @@ class SideBar extends React.Component<SidebarProps, any> {
             content: data.value
         });
 
+    }
+
+    getDragID(ev: any) {
+        console.log(ev.target.id);
     }
 
     render() {

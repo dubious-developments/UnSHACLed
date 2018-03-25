@@ -30,6 +30,7 @@ class MxGraph extends React.Component<any, any> {
     handleClick() {
     }
 
+
     main(container: HTMLElement | null): void {
         const { test } = this.state;
         // Checks if the browser is supported
@@ -88,7 +89,10 @@ class MxGraph extends React.Component<any, any> {
             };
 
             // Creates a DOM node that acts as the drag source
-            var img = document.getElementById("SHACL 0");
+            var img = mxUtils.createImage('../img/shacl_logo_trans.png');
+            img.style.width = '48px';
+            img.style.height = '48px';
+            document.body.appendChild(img);
 
             // Creates the element that is being for the actual preview.
             var dragElt = document.createElement('div');
