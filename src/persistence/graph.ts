@@ -1,10 +1,12 @@
 import IndexedFormula from "./rdflib/indexed-formula";
 import Statement from "./rdflib/statement";
+import {Part} from "./component";
 
 /**
  * A wrapper class for library-specific triple stores.
  */
-export class Graph {
+export class Graph implements Part {
+
     private N3Store: any;
     private SHACLStore: any;
     private prefixes: {};

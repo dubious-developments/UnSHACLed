@@ -1,11 +1,12 @@
 import * as Collections from "typescript-collections";
 import { ModelTaskMetadata, ModelComponent } from "../entities/modelTaskMetadata";
-import { Component } from "./component";
+import {Component, Part} from "./component";
 import { GraphParser } from "./graphParser";
 import { DataAccessObject, Module } from "./dataAccessObject";
 import { Task } from "../entities/task";
 import {Model} from "../entities/model";
 import {ModelData} from "../entities/modelData";
+import {Parser} from "./parser";
 
 /**
  * Provides basic DAO functionality at the file granularity level.
@@ -201,7 +202,17 @@ class LoadTask extends Task<ModelData, ModelTaskMetadata> {
             () => new Component());
 
         component.setPart(this.module.getIdentifier(), this.result);
-        data.setComponent(this.module.getTarget(), component);
+        data.setComponent(this.module.getTarget(), component); // probably unnecessary
+
+        // merge parts and store as root in the component
+        let root = component.getRoot();
+        if (!root) {
+            root = <Part> this.result;
+        } else {
+            root.merge(this.result);
+        }
+
+        component.setRoot(root);
     }
 
     /**
@@ -237,12 +248,13 @@ class SaveTask extends Task<ModelData, ModelTaskMetadata> {
      * @param data The data the task takes as input.
      */
     public execute(data: ModelData): void {
-        let component = data.getComponent<Component>(this.module.getTarget());
-        if (component) {
-            let part = component.getPart(this.module.getIdentifier());
-            if (part) {
-                this.io.writeToFile(this.module, part);
-            }
+        let component = data.getOrCreateComponent<Component>(
+            this.module.getTarget(),
+            () => new Component());
+
+        let part = component.getPart(this.module.getIdentifier());
+        if (part) {
+            this.io.writeToFile(this.module, part);
         }
     }
 

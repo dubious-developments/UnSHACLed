@@ -1,22 +1,29 @@
-/// <reference path="./Validator.d.ts"/>
-
 import * as Collections from "typescript-collections";
 import {Model, ModelData} from "../entities/model";
-import {SHACLValidator} from "./SHACLValidator";
+import {WellDefinedSHACLValidator} from "./SHACLValidator";
 import {Validator} from "./Validator";
 import {ModelComponent, ModelTaskMetadata} from "../entities/modelTaskMetadata";
 import {Task} from "../entities/task";
+import {ValidationReport} from "./ValidationReport";
+import {Component} from "../persistence/component";
 
+/**
+ * A ValidationService is a managing entity, governing various registered validators.
+ */
 export class ValidationService {
 
     private model: Model;
     private validators: Collections.Dictionary<ModelComponent, Collections.Set<Validator>>;
 
+    /**
+     * Creates a new ValidationService.
+     * @param {Model} model
+     */
     constructor(model: Model) {
         this.model = model;
         this.validators = new Collections.Dictionary<ModelComponent, Collections.Set<Validator>>();
 
-        this.registerValidator(new SHACLValidator());
+        this.registerValidator(new WellDefinedSHACLValidator());
 
         let self = this;
         model.registerObserver(function(changeBuffer: Collections.Set<ModelComponent>) {
@@ -38,14 +45,18 @@ export class ValidationService {
         });
     }
 
+    /**
+     * Register a new validator with this service by adding it to all relevant types.
+     * @param {Validator} validator
+     */
     public registerValidator(validator: Validator): void {
-        validator.getTypesForValidation().forEach(c => {
-            let relevantSet = this.validators.getValue(c);
+        validator.getTypesForValidation().forEach(type => {
+            let relevantSet = this.validators.getValue(type);
             if (!relevantSet) {
                 relevantSet = new Collections.Set<Validator>();
             }
             relevantSet.add(validator);
-            this.validators.setValue(c, relevantSet);
+            this.validators.setValue(type, relevantSet);
         });
     }
 
@@ -73,7 +84,20 @@ class ValidationTask extends Task<ModelData, ModelTaskMetadata> {
      * @param data The data the task takes as input.
      */
     public execute(data: ModelData): void {
-        this.validator.validate(data);
+        this.validator.validate(data, function(report: ValidationReport) {
+            let component = data.getOrCreateComponent<Component>(
+                ModelComponent.ValidationReport,
+                () => new Component());
+
+            // the root part of a component is used for fully merged results
+            let root = component.getOrCreateRoot(() => new ValidationReport());
+
+            // merge new report into root report
+            root.merge(report);
+
+            component.setRoot(root); // probably unnecessary
+            data.setComponent(ModelComponent.ValidationReport, component); // also probably unnecessary
+        });
     }
 
     /**
