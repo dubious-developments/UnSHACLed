@@ -13,11 +13,18 @@ export class ModelData {
     private components: Collections.Dictionary<ModelComponent, any>;
 
     /**
-     * Creates an empty model.
+     * Creates a data container for the model.
+     * @param components A mapping of component types to their values.
      */
-    public constructor() {
+    public constructor(
+        components?: Collections.Dictionary<ModelComponent, any>) {
+
         this.changeBuffer = new Collections.Set<ModelComponent>();
-        this.components = new Collections.Dictionary<ModelComponent, any>();
+        if (components) {
+            this.components = components;
+        } else {
+            this.components = new Collections.Dictionary<ModelComponent, any>();
+        }
     }
 
     /**
@@ -50,8 +57,10 @@ export class ModelData {
      * Sets a particular component of this model.
      */
     public setComponent<T>(component: ModelComponent, value: T): void {
+        if (value !== this.components.getValue(component)) {
+            this.changeBuffer.add(component);
+        }
         this.components.setValue(component, value);
-        this.changeBuffer.add(component);
     }
 
     /**
@@ -61,5 +70,17 @@ export class ModelData {
         let result = this.changeBuffer;
         this.changeBuffer = new Collections.Set<ModelComponent>();
         return result;
+    }
+
+    /**
+     * Creates a shallow copy of this model data's components.
+     * Note that the change buffer is not copied.
+     */
+    public clone(): ModelData {
+        let componentCopy = new Collections.Dictionary<ModelComponent, any>();
+        this.components.forEach((key, value) => {
+            componentCopy.setValue(key, value);
+        });
+        return new ModelData(componentCopy);
     }
 }

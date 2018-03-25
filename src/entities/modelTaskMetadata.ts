@@ -4,7 +4,16 @@ import * as Collections from "typescript-collections";
  * An enumeration of components in the model.
  */
 export enum ModelComponent {
+    /**
+     * The data graph component.
+     */
     DataGraph,
+
+    /**
+     * A pseudo-component for I/O access. Tasks that use
+     * this component must both read from and write to it.
+     */
+    IO
 }
 
 /**

@@ -3,7 +3,6 @@ import { ModelTaskMetadata, ModelComponent } from "../src/entities/modelTaskMeta
 import { FileDAO, FileModule } from "../src/persistence/fileDAO";
 import { GraphParser } from "../src/persistence/graphParser";
 import { Component } from "../src/persistence/component";
-import { ProcessorTask } from "../src/entities/taskProcessor";
 
 describe("FileDAO Class", () => {
     it("should create a new file.",
