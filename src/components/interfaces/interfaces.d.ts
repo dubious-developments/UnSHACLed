@@ -17,6 +17,13 @@ export interface NavbarWorkProps {
     callback: PropTypes.func;
 }
 
+/* Props definition for sidebar in workspace */
 export interface SidebarProps {
     visible: boolean;
+    callback: PropTypes.func;
+}
+
+/* Props definition for mxgraph component */
+export interface MxGraphProps {
+    dragid: string;
 }

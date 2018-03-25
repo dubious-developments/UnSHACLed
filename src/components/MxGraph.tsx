@@ -1,8 +1,9 @@
 import * as React from 'react';
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband: any;
 import { Button, Segment } from 'semantic-ui-react';
+import { MxGraphProps } from './interfaces/interfaces';
 
-class MxGraph extends React.Component<any, any> {
+class MxGraph extends React.Component<MxGraphProps, any> {
 
     constructor(props: any) {
         super(props);
@@ -122,6 +123,7 @@ class MxGraph extends React.Component<any, any> {
     render() {
         const grid = require('../img/grid.gif');
         return (
+            <div>
             <div
                 id="graphContainer"
                 style={{
@@ -130,6 +132,8 @@ class MxGraph extends React.Component<any, any> {
                     height: '50%'
                 }}
             />
+                <Button>{this.props.dragid}</Button>
+            </div>
         );
     }
 }

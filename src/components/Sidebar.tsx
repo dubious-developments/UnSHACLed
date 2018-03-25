@@ -18,7 +18,8 @@ class SideBar extends React.Component<SidebarProps, any> {
 
         this.state = {
             value: '',
-            content: 1
+            content: 1,
+            dragid: null
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -96,6 +97,10 @@ class SideBar extends React.Component<SidebarProps, any> {
     }
 
     getDragID(ev: any) {
+        this.props.callback(ev.target.id);
+        this.setState({
+            dragid: ev.target.id
+        });
         console.log(ev.target.id);
     }
 
