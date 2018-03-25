@@ -1,5 +1,5 @@
 import * as Collections from "typescript-collections";
-import { Task } from "./task";
+import { Task, OpaqueTask } from "./task";
 import { ModelTaskMetadata, ModelComponent } from "./modelTaskMetadata";
 import { ModelData } from "./modelData";
 
@@ -7,6 +7,11 @@ import { ModelData } from "./modelData";
  * The type of task used by the model.
  */
 export type ModelTask = Task<ModelData, ModelTaskMetadata>;
+
+/**
+ * An opaque task suitable for execution on the model.
+ */
+export type OpaqueModelTask = OpaqueTask<ModelData, ModelTaskMetadata>;
 
 /**
  * A task represented as an instruction in SSA form.

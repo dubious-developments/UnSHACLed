@@ -3,10 +3,10 @@ import { InOrderProcessor, TaskProcessor } from "./taskProcessor";
 import { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";
 import { ModelData } from "./modelData";
 import { Task, OpaqueTask } from "./task";
-import { ModelTask } from "./taskInstruction";
+import { ModelTask, OpaqueModelTask } from "./taskInstruction";
 import { OutOfOrderProcessor } from "./outOfOrderProcessor";
 export { ModelData } from "./modelData";
-export { ModelTask } from "./taskInstruction";
+export { ModelTask, OpaqueModelTask } from "./taskInstruction";
 
 /**
  * A model observer: a function that takes a change set as input
@@ -69,7 +69,7 @@ export class Model {
         readSet: Collections.Set<ModelComponent> | ModelComponent[],
         writeSet: Collections.Set<ModelComponent> | ModelComponent[],
         priority?: number):
-        ModelTask {
+        OpaqueModelTask {
 
         return new OpaqueTask<ModelData, ModelTaskMetadata>(
             execute,
