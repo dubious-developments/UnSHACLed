@@ -165,6 +165,34 @@ describe("OutOfOrderProcessor Class", () => {
 
         queue.processAllTasks();
     });
+
+    it("merges instructions", () => {
+        let modelData = new ModelData();
+        let queue = new OutOfOrderProcessor(modelData);
+
+        let task1 = Model.createTask(
+            (data: ModelData) => {
+                data.setComponent<number>(
+                    ModelComponent.DataGraph,
+                    1 + data.getOrCreateComponent<number>(
+                        ModelComponent.DataGraph,
+                        () => 0));
+            },
+            [ModelComponent.DataGraph],
+            [ModelComponent.DataGraph]);
+
+        let task2 = task1.clone();
+
+        queue.schedule(task1);
+        queue.schedule(task2);
+
+        // TODO: register a task merger.
+
+        processNonEmpty(queue);
+        processNonEmpty(queue);
+        expect(queue.isEmpty()).toEqual(true);
+        expect(modelData.getComponent<number>(ModelComponent.DataGraph)).toEqual(2);
+    });
 });
 
 describe("PriorityGenerator Class", () => {
