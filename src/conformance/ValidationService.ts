@@ -5,7 +5,6 @@ import {Model, ModelData} from "../entities/model";
 import {SHACLValidator} from "./SHACLValidator";
 import {Validator} from "./Validator";
 import {ModelComponent, ModelTaskMetadata} from "../entities/modelTaskMetadata";
-import {Component} from "../persistence/component";
 import {Task} from "../entities/task";
 
 export class ValidationService {
@@ -25,9 +24,9 @@ export class ValidationService {
             let relevantValidators = new Collections.Set<Validator>();
             // return a task for every relevant validator
             changeBuffer.forEach(c => {
-                let validatorSet;
-                if (validatorSet = self.validators.getValue(c)) {
-                    validatorSet.forEach(v => {
+                let validators;
+                if (validators = self.validators.getValue(c)) {
+                    validators.forEach(v => {
                         if (!relevantValidators.contains(v)) {
                             tasks.push(new ValidationTask(v));
                             relevantValidators.add(v);
@@ -52,6 +51,10 @@ export class ValidationService {
 
 }
 
+/**
+ * A Task that performs validation for a given
+ * validator and stores the result in the Model.
+ */
 class ValidationTask extends Task<ModelData, ModelTaskMetadata> {
 
     /**

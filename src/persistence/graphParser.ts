@@ -33,8 +33,8 @@ export class GraphParser implements Parser {
      * @param andThen
      * @returns {string}
      */
-    public serialize(data: any, mime: string, andThen: ((result: string) => void) | null): void {
-        if (this.mimeTypes.contains(mime)) {
+    public serialize(data: any, mime: string | undefined, andThen: ((result: string) => void) | null): void {
+        if (mime && this.mimeTypes.contains(mime)) {
             let N3 = require("n3");
             let writer = N3.Writer();
 
@@ -59,8 +59,8 @@ export class GraphParser implements Parser {
      * @param andThen
      * @returns {any}
      */
-    public parse(content: string, mime: string, andThen: ((result: any) => void) | null): void {
-        if (this.mimeTypes.contains(mime)) {
+    public parse(content: string, mime: string | undefined, andThen: ((result: any) => void) | null): void {
+        if (mime && this.mimeTypes.contains(mime)) {
             let N3 = require("n3");
             let parser = N3.Parser({ format: mime });
 

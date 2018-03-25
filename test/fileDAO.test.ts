@@ -9,14 +9,14 @@ describe("FileDAO Class", () => {
        () => {
             let label = ModelComponent.DataGraph;
             let filename = "insert.ttl";
-            let file = new Blob([], {type: "text/turtle"});
+            let file = new Blob([]); // blob is unnecessary for saving to file
             let module = new FileModule(label, filename, file);
 
             let model = new Model();
             let parser = new GraphParser();
             let comp = new Component();
             let busy = true;
-            parser.parse(generateTurtle(), file.type, function(result: any) {
+            parser.parse(generateTurtle(), "text/turtle", function(result: any) {
                 comp.setPart(filename, result);
                 model.tasks.schedule(
                     Model.createTask(
@@ -43,7 +43,7 @@ describe("FileDAO Class", () => {
        () => {
            let label = ModelComponent.DataGraph;
            let filename = "find.ttl";
-           let file = new Blob([generateTurtle()], {type: "text/turtle"});
+           let file = new Blob([generateTurtle()]);
            let module = new FileModule(label, filename, file);
 
            let model = new Model();

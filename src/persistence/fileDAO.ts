@@ -26,6 +26,7 @@ export class FileDAO implements DataAccessObject {
 
         // register parsers
         this.io.registerParser(ModelComponent.DataGraph, new GraphParser());
+        this.io.registerParser(ModelComponent.SHACLShapesGraph, new GraphParser());
     }
 
     /**
@@ -55,13 +56,21 @@ export class FileDAO implements DataAccessObject {
  * Requires a particular parser to modulate between file format and internal representation.
  */
 class IOFacilitator {
+
     private parsers: Collections.Dictionary<ModelComponent, Parser>;
+    private extensionToMime: Collections.Dictionary<string, string>;
 
     /**
      * Create a new IOFacilitator.
      */
     public constructor() {
         this.parsers = new Collections.Dictionary<ModelComponent, Parser>();
+        this.extensionToMime = new Collections.Dictionary<string, string>();
+
+        this.extensionToMime.setValue("nq", "application/n-quads");
+        this.extensionToMime.setValue("nt", "application/n-triples");
+        this.extensionToMime.setValue("trig", "application/trig");
+        this.extensionToMime.setValue("ttl", "text/turtle");
     }
 
     public registerParser(label: ModelComponent, parser: Parser): void {
@@ -75,22 +84,25 @@ class IOFacilitator {
      * @param load
      */
     public readFromFile(module: Module, load: (result: any) => void): void {
-        let parser = this.parsers.getValue(module.getType());
+        let parser = this.parsers.getValue(module.getTarget());
         if (!parser) {
-            throw new Error("Cannot read unknown format '" + module.getType() + "'");
+            throw new Error("Unsupported target " + module.getTarget());
         }
 
         let wellDefinedParser = parser;
         wellDefinedParser.clean();
 
+        let splitID = module.getIdentifier().split(".");
+        let mime = this.extensionToMime.getValue(splitID[splitID.length - 1]);
+
         // every time a portion is loaded, parse this portion of content
         // and aggregate the result (this happens internally).
         function onLoadFunction(evt: any) {
-            wellDefinedParser.parse(evt.target.result, module.getTarget().type, load);
+            wellDefinedParser.parse(evt.target.result, mime, load);
         }
 
         let reader = new FileReader();
-        reader.readAsText(module.getTarget());
+        reader.readAsText(module.getContent());
         reader.onload = onLoadFunction;
     }
 
@@ -101,17 +113,18 @@ class IOFacilitator {
      */
     public writeToFile(module: Module, data: any): void {
         let FileSaver = require("file-saver");
-        let parser = this.parsers.getValue(module.getType());
+        let parser = this.parsers.getValue(module.getTarget());
         if (!parser) {
-            throw new Error("Cannot serialize to unknown format '" + module.getType() + "'");
+            throw new Error("Unsupported target " + module.getTarget());
         }
 
+        let splitID = module.getIdentifier().split(".");
+        let mime = this.extensionToMime.getValue(splitID[splitID.length - 1]);
         parser.serialize(
-            data, module.getTarget().type,
-            function (result: string) {
+            data, mime, function (result: string) {
                 // write to file
-                let file = new File([result], module.getName());
-                FileSaver.saveAs(file);
+                let file = new Blob([result], {type: mime});
+                FileSaver.saveAs(file, module.getIdentifier());
             });
     }
 }
@@ -121,18 +134,18 @@ class IOFacilitator {
  * Contains all the necessary information to carry out a persistence operation.
  */
 export class FileModule implements Module {
-    private type: ModelComponent;
+    private target: ModelComponent;
     private filename: string;
     private file: Blob;
 
     /**
      * Create a new FileModule.
-     * @param {ModelComponent} type
+     * @param {ModelComponent} target
      * @param {string} filename
      * @param {Blob} file
      */
-    public constructor(type: ModelComponent, filename: string, file: Blob) {
-        this.type = type;
+    public constructor(target: ModelComponent, filename: string, file: Blob) {
+        this.target = target;
         this.filename = filename;
         this.file = file;
     }
@@ -141,15 +154,15 @@ export class FileModule implements Module {
      * Return the designated ModelComponent.
      * @returns {ModelComponent}
      */
-    getType(): ModelComponent {
-        return this.type;
+    getTarget(): ModelComponent {
+        return this.target;
     }
 
     /**
      * Return the filename.
      * @returns {string}
      */
-    getName(): string {
+    getIdentifier(): string {
         return this.filename;
     }
 
@@ -157,7 +170,7 @@ export class FileModule implements Module {
      * Return the Blob representing the file.
      * @returns {Blob}
      */
-    getTarget(): Blob {
+    getContent(): Blob {
         return this.file;
     }
 }
@@ -187,11 +200,11 @@ class LoadTask extends Task<ModelData, ModelTaskMetadata> {
      */
     public execute(data: ModelData): void {
         let component = data.getOrCreateComponent<Component>(
-            this.module.getType(),
+            this.module.getTarget(),
             () => new Component());
 
-        component.setPart(this.module.getName(), this.result);
-        data.setComponent(this.module.getType(), component);
+        component.setPart(this.module.getIdentifier(), this.result);
+        data.setComponent(this.module.getTarget(), component);
     }
 
     /**
@@ -227,9 +240,9 @@ class SaveTask extends Task<ModelData, ModelTaskMetadata> {
      * @param data The data the task takes as input.
      */
     public execute(data: ModelData): void {
-        let component = data.getComponent<Component>(this.module.getType());
+        let component = data.getComponent<Component>(this.module.getTarget());
         if (component) {
-            let part = component.getPart(this.module.getName());
+            let part = component.getPart(this.module.getIdentifier());
             if (part) {
                 this.io.writeToFile(this.module, part);
             }

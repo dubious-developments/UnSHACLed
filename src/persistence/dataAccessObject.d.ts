@@ -27,15 +27,15 @@ interface Module {
     /**
      * Return the designated ModelComponent (used to identify a Component).
      */
-    getType(): ModelComponent;
+    getTarget(): ModelComponent;
 
     /**
      * Return the identifier (used to identify a specific part of a Component).
      */
-    getName(): string;
+    getIdentifier(): string;
 
     /**
-     * Return the persistent target of the Module.
+     * Return the content of the Module.
      */
-    getTarget(): Blob;
+    getContent(): any;
 }
