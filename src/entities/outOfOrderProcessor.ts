@@ -101,7 +101,7 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
      * Tells if the schedule for this processor is empty.
      */
     public isEmpty(): boolean {
-        return this.eligibleInstructions.isEmpty();
+        return this.eligibleInstructions.size() - this.nullifiedInstructions.size() === 0;
     }
 
     /**

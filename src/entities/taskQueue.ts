@@ -4,6 +4,11 @@
  */
 export interface TaskQueue<T> {
     /**
+     * Gets the number of tasks in the queue.
+     */
+    size(): number;
+
+    /**
      * Tells if the task queue is empty.
      */
     isEmpty(): boolean;

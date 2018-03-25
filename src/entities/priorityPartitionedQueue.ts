@@ -15,9 +15,9 @@ export class PriorityPartitionedQueue<T> implements TaskQueue<T> {
     private subQueues: Collections.DefaultDictionary<number, Collections.Queue<T>>;
 
     /**
-     * The number of non-empty sub-queues.
+     * The total number of elements in the sub-queues.
      */
-    private nonEmptySubQueueCount: number;
+    private count: number;
 
     /**
      * A generator that chooses which sub-queue is serviced.
@@ -31,17 +31,24 @@ export class PriorityPartitionedQueue<T> implements TaskQueue<T> {
     public constructor(
         public readonly getPriority: (value: T) => number) {
 
-        this.nonEmptySubQueueCount = 0;
+        this.count = 0;
         this.subQueues = new Collections.DefaultDictionary<number, Collections.Queue<T>>(
             () => new Collections.Queue<T>());
         this.priorityGen = new PriorityGenerator();
     }
 
     /**
+     * Gets the number of tasks in the queue.
+     */
+    public size(): number {
+        return this.count;
+    }
+
+    /**
      * Tests if this priority-partitioned queue is empty.
      */
     public isEmpty(): boolean {
-        return this.nonEmptySubQueueCount === 0;
+        return this.count === 0;
     }
 
     /**
@@ -51,10 +58,10 @@ export class PriorityPartitionedQueue<T> implements TaskQueue<T> {
         let priority = this.getPriority(value);
         let subQueue = this.subQueues.getValue(priority);
         if (subQueue.isEmpty()) {
-            this.nonEmptySubQueueCount++;
             this.priorityGen.notifyPriorityExists(priority);
         }
         subQueue.enqueue(value);
+        this.count++;
         this.subQueues.setValue(priority, subQueue);
     }
 
@@ -75,10 +82,7 @@ export class PriorityPartitionedQueue<T> implements TaskQueue<T> {
 
         // Dequeue an element from the sub-queue.
         let result = subQueue.dequeue();
-
-        if (subQueue.isEmpty()) {
-            this.nonEmptySubQueueCount--;
-        }
+        this.count--;
 
         return result;
     }
