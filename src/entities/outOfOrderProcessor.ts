@@ -155,31 +155,12 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
     public processTask(): boolean {
         // Pick the first eligible instruction that has not been
         // nullified (yet).
-        let instr: TaskInstruction | undefined;
-        do {
-            instr = this.eligibleInstructions.dequeue();
-        } while (instr !== undefined && this.nullifiedInstructions.contains(instr));
+        let instr = this.dequeueInstruction();
 
         // Task queue is empty. Do nothing.
         if (instr === undefined) {
             return false;
         }
-
-        // Iteratively merge the instruction with other instructions.
-        let nullifiedInstr: TaskInstruction | undefined;
-        do {
-            nullifiedInstr = this.merger.merge(instr);
-            if (nullifiedInstr !== undefined) {
-                if (nullifiedInstr === instr) {
-                    // Ignore this instruction and process another task.
-                    return this.processTask();
-                } else {
-                    // Nullify the other instruction and try to keep on
-                    // merging instructions.
-                    this.nullifiedInstructions.add(nullifiedInstr);
-                }
-            }
-        } while (nullifiedInstr !== undefined);
 
         // Start executing the task.
         let info = this.onTaskStarted(instr.task);
@@ -199,6 +180,41 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
         this.completeInstructions();
 
         return true;
+    }
+
+    /**
+     * Dequeues an instruction from the eligible instruction queue.
+     */
+    private dequeueInstruction(): TaskInstruction | undefined {
+        // Pick the first eligible instruction that has not been
+        // nullified (yet).
+        let instr: TaskInstruction | undefined;
+        do {
+            instr = this.eligibleInstructions.dequeue();
+        } while (instr !== undefined && this.nullifiedInstructions.contains(instr));
+
+        // Task queue is empty. Return undefined.
+        if (instr === undefined) {
+            return undefined;
+        }
+
+        // Iteratively merge the instruction with other instructions.
+        let nullifiedInstr: TaskInstruction | undefined;
+        do {
+            nullifiedInstr = this.merger.merge(instr);
+            if (nullifiedInstr !== undefined) {
+                if (nullifiedInstr === instr) {
+                    // Ignore this instruction and process another task.
+                    return this.dequeueInstruction();
+                } else {
+                    // Nullify the other instruction and try to keep on
+                    // merging instructions.
+                    this.nullifiedInstructions.add(nullifiedInstr);
+                }
+            }
+        } while (nullifiedInstr !== undefined);
+
+        return instr;
     }
 
     /**
