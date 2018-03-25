@@ -79,4 +79,11 @@ export class OpaqueTask<TData, TTaskMetadata> extends Task<TData, TTaskMetadata>
     public execute(data: TData): void {
         return this.executeImpl(data);
     }
+
+    /**
+     * Creates a copy of this task.
+     */
+    public clone(): OpaqueTask<TData, TTaskMetadata> {
+        return new OpaqueTask<TData, TTaskMetadata>(this.executeImpl, this.metadata);
+    }
 }
