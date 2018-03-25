@@ -183,6 +183,14 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
     }
 
     /**
+     * Registers a new rewriter with this task queue.
+     * @param rewriter The rewriter to register.
+     */
+    public registerRewriter(rewriter: ModelTaskRewriter): void {
+        this.merger.registerRewriter(rewriter);
+    }
+
+    /**
      * Dequeues an instruction from the eligible instruction queue.
      */
     private dequeueInstruction(): TaskInstruction | undefined {
@@ -215,14 +223,6 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
         } while (nullifiedInstr !== undefined);
 
         return instr;
-    }
-
-    /**
-     * Registers a new rewriter with this task queue.
-     * @param rewriter The rewriter to register.
-     */
-    public registerRewriter(rewriter: ModelTaskRewriter): void {
-        this.merger.registerRewriter(rewriter);
     }
 
     /**
