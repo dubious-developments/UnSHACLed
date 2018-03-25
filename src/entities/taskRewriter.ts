@@ -87,7 +87,7 @@ export class SimpleTaskRewriter<TTask> implements TaskRewriter<TTask> {
      */
     public maybeConcat(
         first: TTask,
-        second: TTask): TTask {
+        second: TTask): TTask | undefined {
 
         return this.maybeConcatImpl(first, second);
     }
