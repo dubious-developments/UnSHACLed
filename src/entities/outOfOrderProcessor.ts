@@ -197,13 +197,24 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
         // Pick the first eligible instruction that has not been
         // nullified (yet).
         let instr: TaskInstruction | undefined;
-        do {
+        let isNullified: boolean;
+        while (true) {
             instr = this.eligibleInstructions.dequeue();
-        } while (instr !== undefined && this.nullifiedInstructions.contains(instr));
 
-        // Task queue is empty. Return undefined.
-        if (instr === undefined) {
-            return undefined;
+            // Task queue is empty. Return undefined.
+            if (instr === undefined) {
+                return undefined;
+            }
+
+            // Check if the instruction has been nullified.
+            isNullified = this.nullifiedInstructions.contains(instr);
+            if (isNullified) {
+                // Drop the nullified instruction by proceeding to the next iteration.
+                this.nullifiedInstructions.remove(instr);
+            } else {
+                // We found a non-nullified instruction. Great!
+                break;
+            }
         }
 
         // Iteratively merge the instruction with other instructions.
