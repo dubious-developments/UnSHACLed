@@ -5,6 +5,8 @@ import { ModelData, Model } from "../src/entities/model";
 import { Task } from "../src/entities/task";
 import { PriorityGenerator } from "../src/entities/priorityPartitionedQueue";
 import { TaskProcessor } from "../src/entities/taskProcessor";
+import { SimpleTaskRewriter } from "../src/entities/taskRewriter";
+import { ModelTask } from "../src/entities/taskInstruction";
 
 function processNonEmpty<TData, TMetadata>(
     queue: TaskProcessor<TData, TMetadata>): void {
@@ -170,6 +172,18 @@ describe("OutOfOrderProcessor Class", () => {
         let modelData = new ModelData();
         let queue = new OutOfOrderProcessor(modelData);
 
+        // Create a trivial task rewriter.
+        let rewriter = new SimpleTaskRewriter<ModelTask>(
+            task => true,
+            (first, second) => Model.createTask(
+                data => { first.execute(data); second.execute(data); },
+                [ModelComponent.DataGraph],
+                [ModelComponent.DataGraph]));
+
+        // Register it.
+        queue.registerRewriter(rewriter);
+
+        // Create a pair of tasks.
         let task1 = Model.createTask(
             (data: ModelData) => {
                 data.setComponent<number>(
@@ -183,13 +197,14 @@ describe("OutOfOrderProcessor Class", () => {
 
         let task2 = task1.clone();
 
+        // Schedule the tasks.
         queue.schedule(task1);
         queue.schedule(task2);
 
-        // TODO: register a task merger.
+        // Process a task and rewriter should kick in here.
+        processNonEmpty(queue);
 
-        processNonEmpty(queue);
-        processNonEmpty(queue);
+        // Task queue will be empty if the rewriter did its job.
         expect(queue.isEmpty()).toEqual(true);
         expect(modelData.getComponent<number>(ModelComponent.DataGraph)).toEqual(2);
     });
