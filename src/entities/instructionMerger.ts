@@ -9,6 +9,8 @@ import { ModelTaskMetadata } from "./modelTaskMetadata";
  */
 export type ModelTaskRewriter = TaskRewriter<ModelData, ModelTaskMetadata>;
 
+type ReadAfterWriteCandidate = { candidate: TaskInstruction, rewriter: ModelTaskRewriter };
+
 /**
  * Merges instructions.
  */
@@ -83,11 +85,10 @@ export class InstructionMerger {
      * Tries to merge a particular instruction once.
      * @param instruction The instruction to merge with other instructions.
      * This instruction must be eligible for immediate execution.
-     * @returns A merged instruction and a nullified instruction if the
-     * instruction was merged with some other instruction; otherwise,
-     * `undefined`.
+     * @returns A nullified instruction if the instruction was merged with
+     * some other instruction; otherwise, `undefined`.
      */
-    public merge(instruction: TaskInstruction): { merged: TaskInstruction, nullified: TaskInstruction } | undefined {
+    public merge(instruction: TaskInstruction): TaskInstruction | undefined {
 
         // This function needs to be fast, so we can't compare every pair
         // of instructions. Instead, we'll make some simplifications.
@@ -107,10 +108,7 @@ export class InstructionMerger {
             if (mergedTask) {
                 // Found a match. Complete the merge.
                 this.concatInstructions(instruction, rawCandidate.candidate, mergedTask);
-                return {
-                    merged: instruction,
-                    nullified: rawCandidate.candidate
-                };
+                return rawCandidate.candidate;
             }
         }
 
@@ -132,7 +130,7 @@ export class InstructionMerger {
         // Transfer dependencies from second instruction to
         // first instruction.
         second.invertedDependencies.forEach(element => {
-            let components = element.dependencies.getValue(second);
+            let components = element.dependencies.getValue(second)!;
             element.dependencies.remove(second);
             components.forEach(component => {
                 element.addDependency(first, component);
@@ -154,9 +152,9 @@ export class InstructionMerger {
      * This instruction must be eligible for immediate execution.
      */
     private findReadAfterWriteMergeCandidates(instruction: TaskInstruction):
-        { candidate: TaskInstruction, rewriter: ModelTaskRewriter }[] {
+        ReadAfterWriteCandidate[] {
 
-        let results = [];
+        let results = new Array<ReadAfterWriteCandidate>();
 
         // Look for read-after-write dependencies that can be merged in.
         instruction.invertedDependencies.forEach(otherInstruction => {

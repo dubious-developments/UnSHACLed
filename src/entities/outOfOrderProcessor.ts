@@ -59,6 +59,11 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
     private finishedInstructionMap: Collections.Dictionary<TaskInstruction, any>;
 
     /**
+     * A set of all instructions that have been nullified.
+     */
+    private nullifiedInstructions: Collections.Set<TaskInstruction>;
+
+    /**
      * Creates a out-of-order processor for model tasks.
      * @param data The data managed by the task processor.
      * @param onTaskStarted An optional callback for when a task starts.
@@ -89,6 +94,7 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
         this.merger = new InstructionMerger();
         this.reorderBuffer = new Collections.Queue<TaskInstruction>();
         this.finishedInstructionMap = new Collections.Dictionary<TaskInstruction, any>();
+        this.nullifiedInstructions = new Collections.Set<TaskInstruction>();
     }
 
     /**
@@ -147,11 +153,33 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
      * otherwise, `false`.
      */
     public processTask(): boolean {
-        // Pick the eligible instruction with the highest priority.
-        let instr = this.eligibleInstructions.dequeue();
+        // Pick the first eligible instruction that has not been
+        // nullified (yet).
+        let instr: TaskInstruction | undefined;
+        do {
+            instr = this.eligibleInstructions.dequeue();
+        } while (instr !== undefined && this.nullifiedInstructions.contains(instr));
+
+        // Task queue is empty. Do nothing.
         if (instr === undefined) {
             return false;
         }
+
+        // Iteratively merge the instruction with other instructions.
+        let nullifiedInstr: TaskInstruction | undefined;
+        do {
+            nullifiedInstr = this.merger.merge(instr);
+            if (nullifiedInstr !== undefined) {
+                if (nullifiedInstr === instr) {
+                    // Ignore this instruction and process another task.
+                    return this.processTask();
+                } else {
+                    // Nullify the other instruction and try to keep on
+                    // merging instructions.
+                    this.nullifiedInstructions.add(nullifiedInstr);
+                }
+            }
+        } while (nullifiedInstr !== undefined);
 
         // Start executing the task.
         let info = this.onTaskStarted(instr.task);
@@ -194,7 +222,7 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
             let info = this.finishedInstructionMap.getValue(instruction);
             if (info !== undefined) {
                 // Remove the instruction from the reorder buffer.
-                instruction = this.reorderBuffer.dequeue();
+                instruction = this.reorderBuffer.dequeue()!;
 
                 // Remove the instruction from the finished instruction map.
                 this.finishedInstructionMap.remove(instruction);
