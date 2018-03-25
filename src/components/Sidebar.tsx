@@ -62,7 +62,7 @@ class SideBar extends React.Component<SidebarProps, any> {
 
         for (var i = 0; i < res.length; i++) {
             var key = kind + i;
-            items.push(<Menu.Item as="a" content={res[i]} key={key}/>);
+            items.push(<Menu.Item as="a" id={kind + " " + i}content={res[i]} key={key}/>);
         }
 
         return (
