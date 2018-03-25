@@ -67,7 +67,7 @@ class SideBar extends React.Component<SidebarProps, any> {
             items.push(
                 <Menu.Item
                     as="a"
-                    id={kind + " " + i}
+                    id={res[i]}
                     content={res[i]}
                     key={key}
                     draggable={true}

@@ -9,15 +9,92 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         super(props);
         this.state = {
             graph: null,
+            test: "Shape",
+            preview: null,
+            dragElement: null
         };
         this.handleLoad = this.handleLoad.bind(this);
         this.saveGraph = this.saveGraph.bind(this);
+        this.insertCell = this.insertCell.bind(this);
+        this.setDragElement = this.setDragElement.bind(this);
+        this.initiateDragPreview = this.initiateDragPreview.bind(this);
+        this.getGraphUnderMouse = this.getGraphUnderMouse.bind(this);
+        this.makeDragSource = this.makeDragSource.bind(this);
     }
 
     componentDidMount() {
         this.handleLoad();
     }
 
+    componentWillReceiveProps(nextprops: any) {
+        if (this.props.dragid !== nextprops.dragid) {
+            const {graph} = this.state;
+            console.log("Received updated props" + nextprops.dragid);
+            this.setState({
+                test: nextprops.dragid
+            });
+            console.log(graph);
+            this.setDragElement(nextprops.dragid);
+            var el = document.getElementById(String(nextprops.dragid));
+            console.log(el);
+            this.makeDragSource(el);
+        }
+    }
+
+    insertCell(grph: any, evt: any, target: any, x:any, y:any) {
+        const {test} = this.state;
+        var cell = new mxCell(test, new mxGeometry(0, 0, 80, 30));
+        cell.vertex = true;
+        var cells = grph.importCells([cell], x, y, target);
+        if (cells != null && cells.length > 0) {
+            grph.scrollCellToVisible(cells[0]);
+            grph.setSelectionCells(cells);
+        }
+    }
+
+    setDragElement(dragid: string) {
+        this.setState((prevState, props) => ({
+            dragElement: document.getElementById(dragid)
+        }));
+    }
+    initiateDragPreview() {
+        // Creates the element that is being for the actual preview.
+        var dragElt = document.createElement('div');
+        dragElt.style.border = 'dashed black 1px';
+        dragElt.style.width = '80px';
+        dragElt.style.height = '30px';
+        this.setState((prevState, props) => ({
+            preview: dragElt,
+        }));
+    }
+
+    getGraphUnderMouse(evt: any) {
+        const {graph} = this.state;
+        var x = mxEvent.getClientX(evt);
+        var y = mxEvent.getClientY(evt);
+        var elt = document.elementFromPoint(x, y);
+        if (mxUtils.isAncestorNode(graph.container, elt)) {
+            return graph;
+        }
+        return null;
+    }
+    makeDragSource(dragElement: any) {
+        const {preview} = this.state;
+        const {graph} = this.state;
+        var ds = mxUtils.makeDraggable(
+            dragElement, this.getGraphUnderMouse, this.insertCell, preview, null, null, graph.autoscroll, true
+        );
+
+        // Redirects feature to global switch. Note that this feature should only be used
+        // if the the x and y arguments are used in funct to insert the cell.
+        ds.isGuidesEnabled = function()
+        {
+            return graph.graphHandler.guidesEnabled;
+        };
+
+        // Restores original drag icon while outside of graph
+        ds.createDragElement = mxDragSource.prototype.createDragElement;
+    }
     handleLoad() {
         this.main(document.getElementById('graphContainer'));
     }
@@ -31,9 +108,9 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     handleClick() {
     }
 
-
     main(container: HTMLElement | null): void {
         const { test } = this.state;
+        const did = this.props.dragid;
         // Checks if the browser is supported
         if (!container) {
             mxUtils.error('Could not find \'graphContainer\'', 200, false);
@@ -65,57 +142,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 graph.getModel().endUpdate();
             }
 
-            // Returns the graph under the mouse
-            var graphF = function(evt:any)
-            {
-                var x = mxEvent.getClientX(evt);
-                var y = mxEvent.getClientY(evt);
-                var elt = document.elementFromPoint(x, y);
-                if (mxUtils.isAncestorNode(graph.container, elt)) {
-                    return graph;
-                }
-                return null;
-            };
-
-            // Inserts a cell at the given location
-            var funct = function(grph: any, evt: any, target: any, x:any, y:any)
-            {
-                var cell = new mxCell("Shape", new mxGeometry(0, 0, 80, 30));
-                cell.vertex = true;
-                var cells = grph.importCells([cell], x, y, target);
-                if (cells != null && cells.length > 0) {
-                    grph.scrollCellToVisible(cells[0]);
-                    grph.setSelectionCells(cells);
-                }
-            };
-
-            // Creates a DOM node that acts as the drag source
-            var img = mxUtils.createImage('../img/shacl_logo_trans.png');
-            img.style.width = '48px';
-            img.style.height = '48px';
-            document.body.appendChild(img);
-
-            // Creates the element that is being for the actual preview.
-            var dragElt = document.createElement('div');
-            dragElt.style.border = 'dashed black 1px';
-            dragElt.style.width = '80px';
-            dragElt.style.height = '30px';
-
-            // Drag source is configured to use dragElt for preview and as drag icon
-            // if scalePreview (last) argument is true. Dx and dy are null to force
-            // the use of the defaults. Note that dx and dy are only used for the
-            // drag icon but not for the preview.
-            var ds = mxUtils.makeDraggable(img, graphF, funct, dragElt, null, null, graph.autoscroll, true);
-
-            // Redirects feature to global switch. Note that this feature should only be used
-            // if the the x and y arguments are used in funct to insert the cell.
-            ds.isGuidesEnabled = function()
-            {
-                return graph.graphHandler.guidesEnabled;
-            };
-
-            // Restores original drag icon while outside of graph
-            ds.createDragElement = mxDragSource.prototype.createDragElement;
+            this.initiateDragPreview();
 
         }
     }
