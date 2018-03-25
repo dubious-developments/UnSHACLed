@@ -1,6 +1,3 @@
-/// <reference path="./dataAccessObject.d.ts"/>
-/// <reference path="./parser.d.ts"/>
-
 import * as Collections from "typescript-collections";
 import { ModelTaskMetadata, ModelComponent } from "../entities/modelTaskMetadata";
 import { Component } from "./component";

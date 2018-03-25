@@ -1,7 +1,7 @@
 /**
  * Takes care of (de)serialization.
  */
-interface Parser {
+export interface Parser {
     /**
      * Serialize some internal format.
      * @param data

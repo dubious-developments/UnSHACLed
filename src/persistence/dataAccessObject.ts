@@ -3,7 +3,7 @@
  */
 import {ModelComponent} from "../entities/modelTaskMetadata";
 
-interface DataAccessObject {
+export interface DataAccessObject {
     /**
      * Load the contents of the module from the persistence system
      * (i.e. database, filesystem, CVS, ...).
@@ -23,7 +23,7 @@ interface DataAccessObject {
  * A single persistence directive.
  * Contains all the necessary information to carry out a persistence operation.
  */
-interface Module {
+export interface Module {
     /**
      * Return the designated ModelComponent (used to identify a Component).
      */
