@@ -36,19 +36,6 @@ export class InstructionMerger {
         this.interestSets = [];
     }
 
-    private static hasEmptyIntersection<T>(
-        first: Collections.Set<T>,
-        second: Collections.Set<T>): boolean {
-
-        let hasEmptyIntersection = true;
-        first.forEach(element => {
-            if (second.contains(element)) {
-                hasEmptyIntersection = false;
-            }
-        });
-        return hasEmptyIntersection;
-    }
-
     /**
      * Registers a task rewriter with this instruction merger.
      * @param rewriter The rewriter to use.
