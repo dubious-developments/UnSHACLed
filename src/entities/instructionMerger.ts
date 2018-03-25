@@ -7,7 +7,7 @@ import { ModelTaskMetadata } from "./modelTaskMetadata";
 /**
  * The type of task rewriter used by the model.
  */
-export type ModelTaskRewriter = TaskRewriter<ModelData, ModelTaskMetadata>;
+export type ModelTaskRewriter = TaskRewriter<ModelTask>;
 
 type ReadAfterWriteCandidate = { candidate: TaskInstruction, rewriter: ModelTaskRewriter };
 
@@ -136,6 +136,10 @@ export class InstructionMerger {
                 element.addDependency(first, component);
             });
         });
+
+        // Don't leave the first instruction thinking that it
+        // needs to transfer captured state to the second.
+        first.invertedDependencies.remove(second);
 
         // Update task.
         first.task = mergedTask;

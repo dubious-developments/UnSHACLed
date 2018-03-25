@@ -4,7 +4,7 @@ import { Task } from "./task";
  * Rewrites tasks that been scheduled but have not yet been
  * executed.
  */
-export interface TaskRewriter<TData, TTaskMetadata> {
+export interface TaskRewriter<TTask> {
 
     // The rules for task merging are rather complex and
     // we don't want the task rewriters themselves to think
@@ -21,7 +21,7 @@ export interface TaskRewriter<TData, TTaskMetadata> {
      * opportunity to maybe rewrite the task in the future;
      * otherwise, `false`.
      */
-    isOfInterest(task: Task<TData, TTaskMetadata>): boolean;
+    isOfInterest(task: TTask): boolean;
 
     /**
      * Concatenates and rewrites two tasks that are both of interest
@@ -32,25 +32,25 @@ export interface TaskRewriter<TData, TTaskMetadata> {
      * Otherwise, `undefined`.
      */
     maybeConcat(
-        first: Task<TData, TTaskMetadata>,
-        second: Task<TData, TTaskMetadata>):
-        Task<TData, TTaskMetadata> | undefined;
+        first: TTask,
+        second: TTask):
+        TTask | undefined;
 }
 
-type IsOfInterestFunction<TData, TTaskMetadata> = (
-    task: Task<TData, TTaskMetadata>) =>
+type IsOfInterestFunction<TTask> = (
+    task: TTask) =>
     boolean;
 
-type MaybeConcatFunction<TData, TTaskMetadata> = (
-    first: Task<TData, TTaskMetadata>,
-    second: Task<TData, TTaskMetadata>) =>
-    Task<TData, TTaskMetadata> | undefined;
+type MaybeConcatFunction<TTask> = (
+    first: TTask,
+    second: TTask) =>
+    TTask | undefined;
 
 /**
  * A simple task rewriter implementation that uses functions
  * to implement its is-of-interest and maybe-concat operations.
  */
-export class SimpleTaskRewriter<TData, TTaskMetadata> implements TaskRewriter<TData, TTaskMetadata> {
+export class SimpleTaskRewriter<TTask> implements TaskRewriter<TTask> {
     /**
      * Creates a simple task method from two functions.
      * @param isOfInterestImpl Decides if a particular task is of
@@ -60,8 +60,8 @@ export class SimpleTaskRewriter<TData, TTaskMetadata> implements TaskRewriter<TD
      * Or doesn't.
      */
     public constructor(
-        private readonly isOfInterestImpl: IsOfInterestFunction<TData, TTaskMetadata>,
-        private readonly maybeConcatImpl: MaybeConcatFunction<TData, TTaskMetadata>) {
+        private readonly isOfInterestImpl: IsOfInterestFunction<TTask>,
+        private readonly maybeConcatImpl: MaybeConcatFunction<TTask>) {
 
     }
 
@@ -73,7 +73,7 @@ export class SimpleTaskRewriter<TData, TTaskMetadata> implements TaskRewriter<TD
      * opportunity to maybe rewrite the task in the future;
      * otherwise, `false`.
      */
-    public isOfInterest(task: Task<TData, TTaskMetadata>): boolean {
+    public isOfInterest(task: TTask): boolean {
         return this.isOfInterestImpl(task);
     }
 
@@ -86,9 +86,9 @@ export class SimpleTaskRewriter<TData, TTaskMetadata> implements TaskRewriter<TD
      * Otherwise, `undefined`.
      */
     public maybeConcat(
-        first: Task<TData, TTaskMetadata>,
-        second: Task<TData, TTaskMetadata>): Task<TData, TTaskMetadata> {
+        first: TTask,
+        second: TTask): TTask {
 
-        return this.maybeConcat(first, second);
+        return this.maybeConcatImpl(first, second);
     }
 }
