@@ -2,10 +2,11 @@
 
 import * as Collections from "typescript-collections";
 import {Model, ModelData} from "../entities/model";
-import {ProcessorTask} from "../entities/taskProcessor";
 import {SHACLValidator} from "./SHACLValidator";
 import {Validator} from "./Validator";
 import {ModelComponent, ModelTaskMetadata} from "../entities/modelTaskMetadata";
+import {Component} from "../persistence/component";
+import {Task} from "../entities/task";
 
 export class ValidationService {
 
@@ -28,7 +29,7 @@ export class ValidationService {
                 if (validatorSet = self.validators.getValue(c)) {
                     validatorSet.forEach(v => {
                         if (!relevantValidators.contains(v)) {
-                            tasks.push(ValidationTask.create(v));
+                            tasks.push(new ValidationTask(v));
                             relevantValidators.add(v);
                         }
                     });
@@ -51,13 +52,33 @@ export class ValidationService {
 
 }
 
-class ValidationTask {
-    public static create(validator: Validator): ProcessorTask<ModelData, ModelTaskMetadata> {
-        return Model.createTask(
-            (data: ModelData) => {
-                validator.validate(data);
-            },
-            validator.getTypesForValidation(),
+class ValidationTask extends Task<ModelData, ModelTaskMetadata> {
+
+    /**
+     * Creates a new ValidationTask.
+     * @param {Validator} validator
+     */
+    public constructor(
+        private readonly validator: Validator) {
+        super();
+    }
+
+    /**
+     * Executes this task.
+     * Performs validation for a given validator
+     * and updates the Validation Report in the Model.
+     * @param data The data the task takes as input.
+     */
+    public execute(data: ModelData): void {
+        this.validator.validate(data);
+    }
+
+    /**
+     * Gets the metadata for this task.
+     */
+    public get metadata(): ModelTaskMetadata {
+        return new ModelTaskMetadata(
+            this.validator.getTypesForValidation(),
             [ModelComponent.ValidationReport]);
     }
 }

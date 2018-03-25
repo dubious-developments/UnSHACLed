@@ -4,7 +4,27 @@ import * as Collections from "typescript-collections";
  * An enumeration of components in the model.
  */
 export enum ModelComponent {
-    DataGraph, SHACLShapesGraph, ValidationReport
+    /**
+     * The data graph component.
+     */
+    DataGraph,
+
+    /**
+     * A pseudo-component for I/O access. Tasks that use
+     * this component must both read from and write to it.
+     */
+    IO,
+
+    /**
+     * The shapes graph component used for SHACL validation.
+     */
+    SHACLShapesGraph,
+
+    /**
+     * The validation report indicating which nodes
+     * of the datagraph are conforming to active constraints.
+     */
+    ValidationReport
 }
 
 /**

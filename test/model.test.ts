@@ -1,7 +1,7 @@
 import { Model, ModelData } from "../src/entities/model";
 import { ModelTaskMetadata, ModelComponent } from "../src/entities/modelTaskMetadata";
 import { Set } from "typescript-collections";
-import { ProcessorTask } from "../src/entities/taskProcessor";
+import { Task, OpaqueTask } from "../src/entities/task";
 
 let graphReadSet = new Set<ModelComponent>();
 graphReadSet.add(ModelComponent.DataGraph);
@@ -35,7 +35,7 @@ describe("Model Class", () => {
         modelData.setComponent(ModelComponent.DataGraph, 0);
         let model = new Model(modelData);
 
-        let task = new ProcessorTask<ModelData, ModelTaskMetadata>(
+        let task = new OpaqueTask<ModelData, ModelTaskMetadata>(
             (data) =>
                 data.setComponent(
                     ModelComponent.DataGraph,
@@ -50,9 +50,9 @@ describe("Model Class", () => {
         model.tasks.schedule(task);
 
         model.tasks.processTask();
-        expect(model.tasks.isScheduleEmpty).toEqual(false);
+        expect(model.tasks.isEmpty()).toEqual(false);
         model.tasks.processTask();
-        expect(model.tasks.isScheduleEmpty).toEqual(false);
+        expect(model.tasks.isEmpty()).toEqual(false);
         expect(modelData.getComponent<number>(ModelComponent.DataGraph)).toEqual(2);
     });
 });
