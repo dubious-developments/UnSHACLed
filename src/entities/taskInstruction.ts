@@ -17,6 +17,21 @@ export type OpaqueModelTask = OpaqueTask<ModelData, ModelTaskMetadata>;
  * A task represented as an instruction in SSA form.
  */
 export class TaskInstruction {
+    private static taskCounter = 0;
+
+    /**
+     * An instruction-unique index.
+     *
+     * NOTE: we need these indices to make sets work. JavaScript
+     * arrays are stupid and assume that objects are equal iff
+     * their string representations are. Additionally, string
+     * representations are *structural,* so without this index,
+     * the string representation for two different instructions
+     * would be the same. That breaks sets and hash maps, which
+     * we can't have.
+     */
+    public readonly index: number;
+
     /**
      * The task that is stored in this instruction.
      */
@@ -45,6 +60,7 @@ export class TaskInstruction {
      * @param data The captured data for this instruction.
      */
     public constructor(task: ModelTask, data: ModelData) {
+        this.index = TaskInstruction.generateInstructionIndex();
         this.task = task;
         this.data = data;
         this.dependencies = new Collections.Dictionary<TaskInstruction, Collections.Set<ModelComponent>>();
@@ -58,6 +74,12 @@ export class TaskInstruction {
      */
     public static getPriority(instruction: TaskInstruction): number {
         return instruction.task.metadata.priority;
+    }
+
+    private static generateInstructionIndex(): number {
+        let result = TaskInstruction.taskCounter;
+        TaskInstruction.taskCounter = (TaskInstruction.taskCounter + 1) % (1 << 31 - 1);
+        return result;
     }
 
     /**
@@ -103,6 +125,6 @@ export class TaskInstruction {
      * Gets a string representation for this instruction.
      */
     public toString(): string {
-        return `Instruction ${this.task.index}`;
+        return `Instruction ${this.index}`;
     }
 }
