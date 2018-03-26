@@ -1,6 +1,6 @@
 import * as Collections from "typescript-collections";
 import { ModelTaskMetadata, ModelComponent } from "../entities/modelTaskMetadata";
-import {Component, Part} from "./component";
+import {Component} from "./component";
 import { GraphParser } from "./graphParser";
 import { DataAccessObject, Module } from "./dataAccessObject";
 import { Task } from "../entities/task";
@@ -202,17 +202,7 @@ class LoadTask extends Task<ModelData, ModelTaskMetadata> {
             () => new Component());
 
         component.setPart(this.module.getIdentifier(), this.result);
-        data.setComponent(this.module.getTarget(), component); // probably unnecessary
-
-        // merge parts and store as root in the component
-        let root = component.getRoot();
-        if (!root) {
-            root = <Part> this.result;
-        } else {
-            root.merge(this.result);
-        }
-
-        component.setRoot(root);
+        data.setComponent(this.module.getTarget(), component);
     }
 
     /**

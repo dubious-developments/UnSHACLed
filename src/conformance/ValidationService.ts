@@ -85,18 +85,18 @@ class ValidationTask extends Task<ModelData, ModelTaskMetadata> {
      */
     public execute(data: ModelData): void {
         this.validator.validate(data, function(report: ValidationReport) {
+            // add new report to component
             let component = data.getOrCreateComponent<Component>(
                 ModelComponent.ValidationReport,
                 () => new Component());
-
-            // the root part of a component is used for fully merged results
-            let root = component.getOrCreateRoot(() => new ValidationReport());
+            component.setPart(toString(), report);
 
             // merge new report into root report
+            let root = component.getOrCreateRoot(() => new ValidationReport());
             root.merge(report);
+            component.setRoot(root);
 
-            component.setRoot(root); // probably unnecessary
-            data.setComponent(ModelComponent.ValidationReport, component); // also probably unnecessary
+            data.setComponent(ModelComponent.ValidationReport, component);
         });
     }
 

@@ -1,18 +1,6 @@
 import * as Collections from "typescript-collections";
 
 /**
- * A part of a component.
- */
-export interface Part {
-
-    /**
-     * Merge this part with another part
-     * @param {Part} other
-     */
-    merge(other: Part): void;
-}
-
-/**
  * A structure that is to be stored inside the Model.
  * Possibly contains multiple composite parts all mapped to an identifier.
  * An example component might contain multiple data graphs, each of which is associated with a filename.
@@ -20,13 +8,15 @@ export interface Part {
 export class Component {
 
     private static ROOT: string = "ROOT";
-    private parts: Collections.Dictionary<string, Part>;
+    private parts: Collections.Dictionary<string, any>;
+    private changed: Collections.Set<any>;
 
     /**
      * Create a new Component.
      */
     public constructor() {
-        this.parts = new Collections.Dictionary<string, Part>();
+        this.parts = new Collections.Dictionary<string, any>();
+        this.changed = new Collections.Set<any>();
     }
 
     /**
@@ -34,7 +24,7 @@ export class Component {
      * @param {string} key
      * @returns {T}
      */
-    public getPart(key: string): Part | undefined {
+    public getPart<T>(key: string): T | undefined {
         return this.parts.getValue(key);
     }
 
@@ -45,46 +35,65 @@ export class Component {
      * @param createPart
      * @returns {any}
      */
-    public getOrCreatePart(key: string, createPart: () => Part): Part {
-        let part = this.getPart(key);
+    public getOrCreatePart<T>(key: string, createPart: () => T): T {
+        let part = this.getPart<T>(key);
         if (!part) {
             part = createPart();
-            this.setPart(key, part);
+            this.setPart<T>(key, part);
         }
         return part;
     }
 
     /**
-     * Bind a value to a given key.
+     * Bind a value to a given key,
+     * and add this value to the set of changed values.
      * @param {string} key
      * @param value
      */
-    public setPart(key: string, value: Part): void {
+    public setPart<T>(key: string, value: T): void {
         this.parts.setValue(key, value);
+        this.changed.add(value);
     }
 
     /**
      * Retrieve the root part of this component.
-     * @returns {Part | undefined}
+     * @returns {T | undefined}
      */
-    public getRoot() {
+    public getRoot<T>(): T | undefined {
         return this.getPart(Component.ROOT);
     }
 
     /**
      * Retrieve the root part of this component or create a new root.
      * @param {() => Part} createPart
-     * @returns {Part}
+     * @returns {T}
      */
-    public getOrCreateRoot(createPart: () => Part) {
+    public getOrCreateRoot<T>(createPart: () => T): T {
         return this.getOrCreatePart(Component.ROOT, createPart);
     }
 
     /**
      * Set the value of the root part of this component.
-     * @param {Part} value
+     * @param {T} value
      */
-    public setRoot(value: Part) {
+    public setRoot<T>(value: T): void {
         this.setPart(Component.ROOT, value);
+    }
+
+    /**
+     * Retrieve all parts contained in this component.
+     */
+    public getParts(): any[] {
+        return this.parts.values();
+    }
+
+    /**
+     * Retrieve and subsequently clear the changed parts of this component.
+     * @returns {Set<any>}
+     */
+    public getChanged(): Collections.Set<any> {
+        let changed = this.changed;
+        this.changed = new Collections.Set<any>();
+        return changed;
     }
 }

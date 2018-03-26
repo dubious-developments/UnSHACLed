@@ -35,9 +35,15 @@ export class WellDefinedSHACLValidator implements Validator {
             ModelComponent.SHACLShapesGraph,
             () => new Component());
 
-        // TODO: Possible optimisation => do validation over those parts that are actually changed
-        let dataRoot = <Graph> dataComponent.getOrCreateRoot(() => new Graph());
-        let shapesRoot = <Graph> shapesComponent.getOrCreateRoot(() => new Graph());
+        // TODO: This implementation is very dumb and computationally heavy atm!
+        let dataRoot = new Graph();
+        let shapesRoot = new Graph();
+
+        dataComponent.getParts().forEach(g => dataRoot.merge(g));
+        shapesComponent.getParts().forEach(g => shapesRoot.merge(g));
+
+        dataComponent.setRoot(dataRoot);
+        shapesComponent.setRoot(shapesRoot);
 
         // very odd, somehow this is needed instead of
         // a regular import statement (which works in the test files)
@@ -47,5 +53,9 @@ export class WellDefinedSHACLValidator implements Validator {
         validator.showValidationResults(function (err: any, report: any) {
             andThen(new ValidationReport());
         });
+    }
+
+    public toString() {
+        return "SHACLValidator";
     }
 }
