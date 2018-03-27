@@ -88,3 +88,6 @@ src/**/*.js
 
 # npm package lock
 package-lock.json
+
+# Python bytecode cache
+__pycache__/

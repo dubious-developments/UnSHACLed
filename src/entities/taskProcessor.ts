@@ -8,7 +8,7 @@ type TaskCompletedCallback =
 
 /**
  * An object that executes tasks on a piece of data.
-*/
+ */
 export class TaskProcessor<TData, TTaskMetadata> {
     private tasks: TaskQueue<TData, TTaskMetadata>;
     private data: TData;
@@ -18,7 +18,11 @@ export class TaskProcessor<TData, TTaskMetadata> {
     /**
      * Creates a task processor that manages a particular piece of data
      * and uses a particular task queue.
-    */
+     * @param data The data managed by the task processor.
+     * @param tasks The queue implementation for this processor.
+     * @param onTaskStarted An optional callback for when a task starts.
+     * @param onTaskCompleted An optional callback for when a task completes.
+     */
     public constructor(
         data: TData,
         tasks?: TaskQueue<TData, TTaskMetadata>,
@@ -50,18 +54,46 @@ export class TaskProcessor<TData, TTaskMetadata> {
     }
 
     /**
-     * Deschedules a task and executes it.
+     * Deschedules a task and executes it. Does nothing if
+     * the task schedule is empty.
      */
     public processTask(): void {
         let task = this.tasks.dequeue();
+        if (task === undefined) {
+            return;
+        }
         let info = this.onTaskStarted(task);
         task.execute(this.data);
         this.onTaskCompleted(info);
     }
 
     /**
+     * Deschedules and executes tasks until the task schedule
+     * becomes empty..
+     */
+    public processAllTasks(): void {
+        while (!this.isScheduleEmpty) {
+            this.processTask();
+        }
+    }
+
+    /**
+     * Deschedules and executes tasks until a particular time in
+     * milliseconds has passed or the task schedule becomes empty.
+     * @param milliseconds The duration in milliseconds during which tasks may be executed.
+     */
+    public processTasksDuring(milliseconds: number): void {
+        let start = Date.now();
+        let current = start;
+        while (!this.isScheduleEmpty && current - start < milliseconds) {
+            this.processTask();
+            current = Date.now();
+        }
+    }
+
+    /**
      * Tells if the model's task schedule is empty.
-    */
+     */
     public get isScheduleEmpty(): boolean {
         return this.tasks.isEmpty;
     }
@@ -69,8 +101,23 @@ export class TaskProcessor<TData, TTaskMetadata> {
 
 /**
  * A task that can be executed on a task processor.
-*/
+ */
 export class ProcessorTask<TData, TTaskMetadata> {
+    private static taskCounter = 0;
+
+    /**
+     * A task-unique index.
+     *
+     * NOTE: we need these indices to make sets work. JavaScript
+     * arrays are stupid and assume that objects are equal iff
+     * their string representations are. Additionally, string
+     * representations are *structural,* so without this index,
+     * the string representation for two different tasks would
+     * be the same. That breaks sets and hash maps, which we can't
+     * have.
+     */
+    public readonly index: number;
+
     /**
      * Creates a model task.
      * @param execute The task itself.
@@ -78,17 +125,33 @@ export class ProcessorTask<TData, TTaskMetadata> {
      */
     public constructor(
         public execute: (proc: TData) => void,
-        public metadata: TTaskMetadata) { }
+        public metadata: TTaskMetadata) {
+
+        this.index = ProcessorTask.generateTaskIndex();
+    }
+
+    private static generateTaskIndex(): number {
+        let result = this.taskCounter;
+        this.taskCounter = (this.taskCounter + 1) % (1 << 31 - 1);
+        return result;
+    }
+
+    /**
+     * Gets a string representation for this task.
+     */
+    public toString(): string {
+        return `Task ${this.index}`;
+    }
 }
 
 /**
  * A queue of tasks for task processors. Implementations
  * of this interface need not adhere to a FIFO scheduling policy.
-*/
+ */
 export interface TaskQueue<TData, TTaskMetadata> {
     /**
      * Tells if the task queue is empty.
-    */
+     */
     isEmpty: boolean;
 
     /**
@@ -99,13 +162,13 @@ export interface TaskQueue<TData, TTaskMetadata> {
 
     /**
      * Removes a task from the queue and returns it.
-    */
-    dequeue(): ProcessorTask<TData, TTaskMetadata>;
+     */
+    dequeue(): ProcessorTask<TData, TTaskMetadata> | undefined;
 }
 
 /**
  * A task queue that executes tasks in FIFO order.
-*/
+ */
 export class FifoTaskQueue<TData, TTaskMetadata> implements TaskQueue<TData, TTaskMetadata> {
     private queue: Collections.Queue<ProcessorTask<TData, TTaskMetadata>>;
 
@@ -121,7 +184,7 @@ export class FifoTaskQueue<TData, TTaskMetadata> implements TaskQueue<TData, TTa
         this.queue.enqueue(task);
     }
 
-    public dequeue(): ProcessorTask<TData, TTaskMetadata> {
+    public dequeue(): ProcessorTask<TData, TTaskMetadata> | undefined {
         return this.queue.dequeue();
     }
 }

@@ -7,6 +7,7 @@
     "types": ["jasmine", "node", "material-ui"],
     "lib": ["es6", "dom"],
     "sourceMap": true,
+    "inlineSources": true,
     "allowJs": true,
     "jsx": "react",
     "moduleResolution": "node",
@@ -14,7 +15,7 @@
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "noImplicitAny": false,
-    "strictNullChecks": false,
+    "strictNullChecks": true,
     "suppressImplicitAnyIndexErrors": false,
     "noUnusedLocals": false,
     "allowSyntheticDefaultImports": true
@@ -27,5 +28,10 @@
     "webpack",
     "jest",
     "src/setupTests.ts"
+  ],
+  "files": [
+    "shacl.js",
+    "indexed-formula.js",
+    "statement.js"
   ]
 }

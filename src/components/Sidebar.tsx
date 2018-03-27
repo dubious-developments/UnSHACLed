@@ -1,8 +1,9 @@
 import * as React from 'react';
 import {Sidebar, Menu, Image, Input, Dropdown} from 'semantic-ui-react';
 import TreeView from './treeView';
+import { SidebarProps } from './interfaces/interfaces';
 
-class SideBar extends React.Component<any, any> {
+class SideBar extends React.Component<SidebarProps, any> {
 
     static sidebarOptions = [
         {key: 1, text: 'Add Components', value: 1},
@@ -12,18 +13,20 @@ class SideBar extends React.Component<any, any> {
     static GeneralMenuItems = ["Arrow", "Rectangle"];
     static TemplateMenuItems = ["Building", "Person"];
 
-    constructor(props: string) {
+    constructor(props: any) {
         super(props);
 
         this.state = {
             value: '',
-            content: 1
+            content: 1,
+            dragid: null
         };
 
         this.handleChange = this.handleChange.bind(this);
         this.handleDropDown = this.handleDropDown.bind(this);
         this.getMenuItemsFiltered = this.getMenuItemsFiltered.bind(this);
         this.DynamicMenu = this.DynamicMenu.bind(this);
+        this.getDragID = this.getDragID.bind(this);
     }
 
     getMenuItemsFiltered(kind: string, query: string) {
@@ -56,12 +59,21 @@ class SideBar extends React.Component<any, any> {
     DynamicMenu(props: any) {
         var kind = props.kind;
         var query = this.state.value;
-        var items = [];
+        var items = new Array<JSX.Element>();
         var res = this.getMenuItemsFiltered(kind, query);
 
         for (var i = 0; i < res.length; i++) {
             var key = kind + i;
-            items.push(<Menu.Item as="a" content={res[i]} key={key}/>);
+            items.push(
+                <Menu.Item
+                    as="a"
+                    id={res[i]}
+                    content={res[i]}
+                    key={key}
+                    draggable={true}
+                    onDragStart={this.getDragID}
+                />
+            );
         }
 
         return (
@@ -84,20 +96,27 @@ class SideBar extends React.Component<any, any> {
 
     }
 
+    getDragID(ev: any) {
+        this.props.callback(ev.target.id);
+        this.setState({
+            dragid: ev.target.id
+        });
+        console.log(ev.target.id);
+    }
+
     render() {
         const logo = require('../img/shacl_logo_trans.png');
         const defaultOption = 1;
         return (
             <Sidebar
                 as={Menu}
-                animation='uncover'
-                visible={true}
+                animation='push'
+                visible={this.props.visible}
                 vertical={true}
                 inverted={true}
                 borderless={true}
-                size="huge"
                 style={{
-                    width: '12em'
+                    width: '50h'
                 }}
             >
                 <Menu.Item style={{height: '5em'}}>

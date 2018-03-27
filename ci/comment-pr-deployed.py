@@ -6,45 +6,22 @@
 from __future__ import print_function
 import sys
 from github import Github
-
-def parse_deploy_directory_name(deploy_directory_name):
-    """Parses the name of a deploy directory as a pull request number.
-       Returns None if the deploy directory name does not identify
-       a pull request."""
-    prefix = 'pull-request-'
-    if deploy_directory_name.startswith(prefix):
-        try:
-            return int(deploy_directory_name[len(prefix):])
-        except ValueError:
-            return None
-    else:
-        return None
-
-def has_commented_on_pull_request(pull_request):
-    """Tells if Dubious Spongebot has commented on a pull request."""
-    for comment in pull_request.get_issue_comments():
-        if comment.user.login == 'dubious-spongebot':
-            return True
-    return False
-
-def create_pull_request_deployed_comment(pull_request, deploy_directory_name):
-    """Adds an issue comment to a pull request that links to the deployed build."""
-    pull_request.create_issue_comment(
-"""Oh hi there @%s!
-
-I built and deployed your awesome pull request. 🎉🎆🎉 You can try it out [right here](https://dubious-developments.github.io/%s/index.html).
-
-Thanks for contributing! Keep up the good work and have a wonderful day!
-
-> **Note:** it may take a little while before GitHub pages gets updated. Try again in a minute if your deployed build doesn't show up right away."""
-        % (pull_request.user.login, deploy_directory_name))
-
+from spongebot import \
+    create_pull_request_deployed_comment, \
+    parse_deploy_directory_name, \
+    generate_pull_request_deployed_comment, \
+    has_commented_on_pull_request
 
 def comment_pull_request_deployed(argv):
-    """Comments that a pull request has been built and deployed to GitHub pages,
+    """Comments that a pulparse_depll request has been built and deployed to GitHub pages,
        but only if Dubious Spongebot hasn't commented before."""
+    is_dry_run = False
+    if len(argv) > 1 and argv[1] == '-d':
+        argv = [argv[0]] + argv[2:]
+        is_dry_run = True
+
     if len(argv) != 3:
-        print('Usage: comment-pr-deployed access-token deploy-directory', file=sys.stderr)
+        print('Usage: comment-pr-deployed [-d] access-token deploy-directory', file=sys.stderr)
         return 1
 
     _, access_token, deploy_directory = argv
@@ -62,10 +39,15 @@ def comment_pull_request_deployed(argv):
     # Make sure that we haven't commented already.
     if has_commented_on_pull_request(pr):
         print('Comment has already been placed. Nothing to do here.', file=sys.stderr)
-        return 0
+        if not is_dry_run:
+            return 0
 
     # Create an issue comment.
-    create_pull_request_deployed_comment(pr, deploy_directory)
+    if is_dry_run:
+        print('Would post this:')
+        print(generate_pull_request_deployed_comment(pr, deploy_directory))
+    else:
+        create_pull_request_deployed_comment(pr, deploy_directory)
 
     # Job's done.
     print('Created a comment. My job is done here. Have a wonderful day!', file=sys.stderr)
