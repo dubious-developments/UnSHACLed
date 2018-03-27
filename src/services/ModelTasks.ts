@@ -22,7 +22,7 @@ export class LoadFileTask extends Task<ModelData, ModelTaskMetadata> {
     }
 
     public execute(data: ModelData): void {
-        let component: Component = data.getComponent(this.mComponent);
+        let component: any = data.getComponent(this.mComponent);
         if (component) {
             var fileDAO: FileDAO = DataAccessProvider.getInstance().getFileDAO();
             // get MIME based on extension
@@ -55,7 +55,7 @@ export class GetOpenedFilesTask extends Task<ModelData, ModelTaskMetadata> {
 
     public execute(data: ModelData): void {
         if (this.navBar) {
-            let component: Component = data.getComponent(this.mComponent);
+            let component: any = data.getComponent(this.mComponent);
             if (component) {
                 this.navBar.setLoadedFiles(component.getAllKeys());
             }

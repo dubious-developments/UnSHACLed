@@ -41,15 +41,28 @@ export class Navbar extends React.Component<any, any> {
 
     saveFileButton() {
         var input = document.getElementById("saveGraph");
-        input.click();
+        if (input) {
+            input.click();
+        } else {
+            console.log("error: could not find saveGraph button");
+        }
     }
 
     importGraph(e: any) {
-        var file = (document.getElementById("importGraph") as HTMLInputElement).files[0];
+        var input = (document.getElementById("importGraph") as HTMLInputElement);
 
-        var fileDAO = DataAccessProvider.getInstance().getFileDAO();
-        if (file) {
-            fileDAO.find(new FileModule(ModelComponent.DataGraph, file.name, file));
+        if (input) {
+            var files = input.files;
+            var fileDAO = DataAccessProvider.getInstance().getFileDAO();
+            if (files) {
+                if (files[0]) {
+                    fileDAO.find(new FileModule(ModelComponent.DataGraph, files[0].name, files[0]));
+                }
+            } else {
+                console.log("error: no files found");
+            }
+        } else {
+            console.log("error: could not find importGraph button");
         }
     }
 
@@ -72,7 +85,7 @@ export class Navbar extends React.Component<any, any> {
     * Used for dynamically building the list of opened files in the editor
     */
     OpenedFiles(props: any) {
-        var items = [];
+        var items: any[] = [];
 
         for (var i = 0; i < this.loadedFiles.length; i++) {
             var cur = this.loadedFiles[i];
@@ -100,12 +113,15 @@ export class Navbar extends React.Component<any, any> {
 
     uploadProjectButton() {
         var input = document.getElementById("importProject");
-        input.click();
+        if (input) {
+            input.click();
+        } else {
+            console.log("error: could not find importProject button");
+        }
     }
 
     importProject(e: any) {
-        var file = (document.getElementById("importGraph") as HTMLInputElement).files[0];
-        console.log(file);
+        console.log(e);
     }
 
     render() {
