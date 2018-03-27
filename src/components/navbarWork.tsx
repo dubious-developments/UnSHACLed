@@ -3,9 +3,10 @@ import { Menu, Icon, Popup, List} from 'semantic-ui-react';
 import Auth from "../services/Auth";
 import { withRouter } from 'react-router-dom';
 import { FileModule } from "../persistence/fileDAO";
-import { Model, ModelComponent } from "../entities/model";
+import { Model } from "../entities/model";
 import { DataAccessProvider } from "../persistence/dataAccessProvider";
 import { LoadFileTask, GetOpenedFilesTask} from "../services/ModelTasks";
+import {ModelComponent} from "../entities/modelTaskMetadata";
 
 export class Navbar extends React.Component<any, any> {
 
