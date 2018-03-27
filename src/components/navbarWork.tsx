@@ -41,7 +41,7 @@ export class Navbar extends React.Component<any, any> {
 
     importGraph(e: any) {
         var file = (document.getElementById("importGraph") as HTMLInputElement).files[0];
-        // TODO map extension on MIME type for common extensions
+
         var fileDAO = DataAccessProvider.getInstance().getFileDAO();
         if (file) {
             fileDAO.find(new FileModule(ModelComponent.DataGraph, file.name, file));
