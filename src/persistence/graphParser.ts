@@ -4,7 +4,7 @@ import * as Collections from "typescript-collections";
 import {Graph} from "./graph";
 
 /**
- * A Parser that takes care of (de)modulation for data graphs.
+ * A Parser that takes care of (de)serialization for graph structures.
  */
 export class GraphParser implements Parser {
 
@@ -33,7 +33,7 @@ export class GraphParser implements Parser {
      * @param andThen
      * @returns {string}
      */
-    public serialize(data: any, mime: string, andThen: (result: string) => void) {
+    public serialize(data: any, mime: string, andThen: ((result: string) => void) | null) {
         // TODO if no MIME check on extension
         // if (this.mimeTypes.contains(mime)) {
             let N3 = require("n3");
@@ -41,10 +41,14 @@ export class GraphParser implements Parser {
 
             let graph: Graph = data;
             writer.addPrefixes(graph.getPrefixes());
-            writer.addTriples(graph.getTriples());
-            writer.end(function (error: any, result: any) { andThen(result); });
+            writer.addTriples(graph.getPersistentStore().getTriples());
+            writer.end(function (error: any, result: any) {
+                if (andThen) {
+                    andThen(result);
+                }
+            });
         // } else {
-        //     throw new Error("Incorrect MimeType " + mime + "!");
+        //    throw new Error("Incorrect MimeType " + mime + "!");
         // }
     }
 
@@ -56,7 +60,7 @@ export class GraphParser implements Parser {
      * @param andThen
      * @returns {any}
      */
-    public parse(content: string, mime: string, andThen: (result: any) => void) {
+    public parse(content: string, mime: string, andThen: ((result: any) => void) | null) {
         // TODO if no MIME check on extension
         // if (this.mimeTypes.contains(mime)) {
             let N3 = require("n3");
@@ -68,8 +72,12 @@ export class GraphParser implements Parser {
                              if (triple) {
                                  self.graph.addTriple(triple.subject, triple.predicate, triple.object);
                              } else {
-                                 self.graph.addPrefixes(prefixes);
-                                 andThen(self.graph);
+                                 if (prefixes) {
+                                     self.graph.addPrefixes(prefixes);
+                                 }
+                                 if (andThen) {
+                                    andThen(self.graph);
+                                 }
                              }
                  });
         // } else {
@@ -89,7 +97,6 @@ export class GraphParser implements Parser {
      * Clean whatever is contained by this GraphParser.
      */
     public clean() {
-        let N3 = require("n3");
-        this.graph = new Graph(N3.Store());
+        this.graph = new Graph();
     }
 }

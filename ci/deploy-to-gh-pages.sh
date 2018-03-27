@@ -5,55 +5,35 @@
 set -e
 
 CURRENT_DIR=$(dirname $0)
-ACCESS_TOKEN=$1
+export ACCESS_TOKEN=$1
 
 # The second parameter is the directory to store the build in.
-TARGET_DIRECTORY=$2
+export TARGET_DIRECTORY=$2
 
 # The third parameter is the (human-readable) name of the build.
-NAME=$3
+export NAME=$3
 
 # The fourth parameter is the build's version.
-VERSION=$4
+export VERSION=$4
 
 pushd "$CURRENT_DIR/.."
+
+export SHA=$(git rev-parse --verify HEAD)
 
 # Clone the GitHub pages repository.
 git clone https://github.com/dubious-developments/dubious-developments.github.io
 
-# Delete the old build, if any.
-rm -rf "dubious-developments.github.io/$TARGET_DIRECTORY"
-
-# Copy the build and the coverage to the GitHub pages directory.
-mkdir "dubious-developments.github.io/$TARGET_DIRECTORY"
-cp -r build/* "dubious-developments.github.io/$TARGET_DIRECTORY"
-mkdir "dubious-developments.github.io/$TARGET_DIRECTORY/coverage"
-cp -r coverage/Firefox*/* "dubious-developments.github.io/$TARGET_DIRECTORY/coverage"
-
-# Create build name and version files.
-echo "$NAME" > "dubious-developments.github.io/$TARGET_DIRECTORY/build-name"
-echo "$VERSION" > "dubious-developments.github.io/$TARGET_DIRECTORY/version"
-
-pushd dubious-developments.github.io
-
-# Regenerate the index.
-python3 ../ci/generate-index.py > index.html
-
-# Add the changes.
-git add .
-
-# Create a commit.
-git -c user.name='Dubious Spongebot' \
-    -c user.email='jonathan.vdc+dubious-spongebot@outlook.com' \
-    commit -m "Deploy $TARGET_DIRECTORY"
-
-# Push the changes.
-git push https://dubious-spongebot:$ACCESS_TOKEN@github.com/dubious-developments/dubious-developments.github.io master &2> /dev/null
+# Try to push until we succeed.
+i=0
+while (( i < 5 )) && ! ./ci/try-deploy-to-gh-pages.sh; do
+    # Sleep for a while.
+    sleep 10
+    # Try again.
+    i=$((i+1))
+done
 
 # Add a comment to the pull request if this is the first time
 # we're deploying it to GitHub pages.
-python3 ../ci/comment-pr-deployed.py "$ACCESS_TOKEN" "$TARGET_DIRECTORY"
-
-popd
+python3 ./ci/comment-pr-deployed.py "$ACCESS_TOKEN" "$TARGET_DIRECTORY"
 
 popd

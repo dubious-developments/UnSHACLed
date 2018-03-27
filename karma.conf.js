@@ -16,6 +16,11 @@ module.exports = function(config) {
         },
 
         karmaTypescriptConfig: {
+            bundlerOptions: {
+                transforms: [
+                    require("karma-typescript-es6-transform")()
+                ]
+            },
             reports:
             {
                 "lcovonly": {
@@ -36,7 +41,7 @@ module.exports = function(config) {
             enabled: true,
 
             // enable/disable phantomjs support, default is true
-            usePhantomJS: true,
+            usePhantomJS: false,
 
             // post processing of browsers list
             // here you can edit the list of browsers used by karma

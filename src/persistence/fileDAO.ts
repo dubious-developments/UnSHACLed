@@ -2,10 +2,11 @@
 /// <reference path="./parser.d.ts"/>
 
 import * as Collections from "typescript-collections";
-import {Model, ModelComponent, ModelData, ModelTaskMetadata} from "../entities/model";
-import {ProcessorTask} from "../entities/taskProcessor";
-import {Component} from "./component";
-import {GraphParser} from "./graphParser";
+import { Model, ModelData, ModelTask } from "../entities/model";
+import { ModelTaskMetadata, ModelComponent } from "../entities/modelTaskMetadata";
+import { Component } from "./component";
+import { GraphParser } from "./graphParser";
+import { Task } from "../entities/task";
 
 /**
  * Provides basic DAO functionality at the file granularity level.
@@ -31,7 +32,7 @@ export class FileDAO implements DataAccessObject {
      */
     public insert(module: Module) {
         this.model.tasks.schedule(new SaveTask(this.io, module));
-        this.model.tasks.processTask();
+        this.model.tasks.processTask(); // TODO: Remove this when we have a scheduler!
     }
 
     /**
@@ -40,9 +41,9 @@ export class FileDAO implements DataAccessObject {
      */
     public find(module: Module) {
         let self = this;
-        this.io.readFromFile(module, function(result: any) {
+        this.io.readFromFile(module, function (result: any) {
             self.model.tasks.schedule(new LoadTask(result, module));
-            self.model.tasks.processTask();
+            self.model.tasks.processTask(); // TODO: Remove this when we have a scheduler!
         });
     }
 }
@@ -72,17 +73,23 @@ class IOFacilitator {
      * @param save
      */
     public readFromFile(module: Module, save: (result: any) => void) {
-        let reader = new FileReader();
-        reader.readAsText(module.getTarget());
-        reader.onload = onLoadFunction;
-
         let parser = this.parsers.getValue(module.getType());
-        parser.clean();
+        if (!parser) {
+            throw new Error("Cannot read unknown format '" + module.getType() + "'");
+        }
+
+        let wellDefinedParser = parser;
+        wellDefinedParser.clean();
+
         // every time a portion is loaded, parse this portion of content
         // and aggregate the result (this happens internally).
         function onLoadFunction(evt: any) {
-            parser.parse(evt.target.result, module.getTarget().type, save);
+            wellDefinedParser.parse(evt.target.result, module.getTarget().type, save);
         }
+
+        let reader = new FileReader();
+        reader.readAsText(module.getTarget());
+        reader.onload = onLoadFunction;
     }
 
     /**
@@ -92,9 +99,13 @@ class IOFacilitator {
      */
     public writeToFile(module: Module, data: any) {
         let FileSaver = require("file-saver");
-        this.parsers.getValue(module.getType()).serialize(
+        let parser = this.parsers.getValue(module.getType());
+        if (!parser) {
+            throw new Error("Cannot serialize to unknown format '" + module.getType() + "'");
+        }
+        parser.serialize(
             data, module.getTarget().type,
-            function(result: string) {
+            function (result: string) {
                 // write to file
                 let file = new File([result], module.getName());
                 FileSaver.saveAs(file);
@@ -149,9 +160,9 @@ export class FileModule implements Module {
 }
 
 /**
- * A ProcessorTask that reads a file and adds its contents as a component to the Model.
+ * A Task that reads a file and adds its contents as a component to the Model.
  */
-class LoadTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
+class LoadTask extends Task<ModelData, ModelTaskMetadata> {
 
     /**
      * Create a new LoadTask.
@@ -160,23 +171,40 @@ class LoadTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
      * @param result
      * @param {FileModule} module
      */
-    public constructor(result: any, module: Module) {
-        super(function(data: ModelData) {
-            let component: Component = data.getComponent(module.getType());
-            if (component == null || component === undefined) {
-                component = new Component();
-            }
-            component.setPart(module.getName(), result);
-            data.setComponent(module.getType(), component);
-        },    null);
+    public constructor(
+        private readonly result: any,
+        public readonly module: Module) {
+
+        super();
+    }
+
+    /**
+     * Executes this task.
+     * @param data The data the task takes as input.
+     */
+    public execute(data: ModelData): void {
+        let component = data.getOrCreateComponent<Component>(
+            this.module.getType(),
+            () => new Component());
+
+        component.setPart(this.module.getName(), this.result);
+        data.setComponent(this.module.getType(), component);
+    }
+
+    /**
+     * Gets the metadata for this task.
+     */
+    public get metadata(): ModelTaskMetadata {
+        return new ModelTaskMetadata(
+            [ModelComponent.DataGraph, ModelComponent.IO],
+            [ModelComponent.DataGraph, ModelComponent.IO]);
     }
 }
 
 /**
- * A ProcessorTask that retrieves a component from the Model and writes its contents to a file.
+ * A Task that retrieves a component from the Model and writes its contents to a file.
  */
-class SaveTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
-
+class SaveTask extends Task<ModelData, ModelTaskMetadata> {
     /**
      * Create a new SaveTask.
      * Contains a function that will execute on the model.
@@ -184,15 +212,33 @@ class SaveTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
      * @param {IOFacilitator} io
      * @param {FileModule} module
      */
-    public constructor(io: IOFacilitator, module: Module) {
-        super(function(data: ModelData) {
-            let component: Component = data.getComponent(module.getType());
-            if (component != null && component !== undefined) {
-                let part = component.getPart(module.getName());
-                if (part != null && part !== undefined) {
-                    io.writeToFile(module, part);
-                }
+    public constructor(
+        private readonly io: IOFacilitator,
+        public readonly module: Module) {
+
+        super();
+    }
+
+    /**
+     * Executes this task.
+     * @param data The data the task takes as input.
+     */
+    public execute(data: ModelData): void {
+        let component = data.getComponent<Component>(this.module.getType());
+        if (component) {
+            let part = component.getPart(this.module.getName());
+            if (part) {
+                this.io.writeToFile(this.module, part);
             }
-        },    null);
+        }
+    }
+
+    /**
+     * Gets the metadata for this task.
+     */
+    public get metadata(): ModelTaskMetadata {
+        return new ModelTaskMetadata(
+            [ModelComponent.DataGraph, ModelComponent.IO],
+            [ModelComponent.IO]);
     }
 }
