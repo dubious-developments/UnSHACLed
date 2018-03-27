@@ -37,10 +37,21 @@ export class LoadFileTask extends Task<ModelData, ModelTaskMetadata> {
         return new ModelTaskMetadata([this.mComponent, ModelComponent.UI], [ModelComponent.UI]);
     }
 }
+
 /*
  *
  */
 export class GetOpenedFilesTask extends Task<ModelData, ModelTaskMetadata> {
+
+    /**
+     * Get the loaded files in the model
+     * Contains a function that will execute on the model.
+     * @param {c} ModelComponent
+     * @param {f} module
+     */
+    public constructor(private mComponent: ModelComponent, private navBar: Navbar) {
+        super();
+    }
 
     public execute(data: ModelData): void {
         if (this.navBar) {
@@ -55,16 +66,6 @@ export class GetOpenedFilesTask extends Task<ModelData, ModelTaskMetadata> {
 
     public get metadata(): ModelTaskMetadata {
         return new ModelTaskMetadata([this.mComponent, ModelComponent.IO], [ModelComponent.IO]);
-    }
-
-    /**
-     * Get the loaded files in the model
-     * Contains a function that will execute on the model.
-     * @param {c} ModelComponent
-     * @param {f} module
-     */
-    public constructor(private mComponent: ModelComponent, private navBar: Navbar) {
-        super();
     }
 
 }

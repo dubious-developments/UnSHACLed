@@ -36,4 +36,9 @@ interface Module {
      * Return the persistent target of the Module.
      */
     getTarget();
+
+    /**
+     * Returns the MIME type
+     */
+    getMime();
 }
