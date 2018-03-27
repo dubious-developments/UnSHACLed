@@ -42,7 +42,6 @@ export class LoadFileTask extends Task<ModelData, ModelTaskMetadata> {
  */
 export class GetOpenedFilesTask extends Task<ModelData, ModelTaskMetadata> {
 
-
     public execute(data: ModelData): void {
         if (this.navBar) {
             let component: Component = data.getComponent(this.mComponent);
@@ -67,6 +66,5 @@ export class GetOpenedFilesTask extends Task<ModelData, ModelTaskMetadata> {
     public constructor(private mComponent: ModelComponent, private navBar: Navbar) {
         super();
     }
-
 
 }
