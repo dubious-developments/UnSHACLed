@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Menu, Icon } from 'semantic-ui-react';
 import Auth from "../services/Auth";
+import { Link } from 'react-router-dom';
 import { withRouter, RouteComponentProps } from 'react-router';
 import { NavbarWorkProps } from './interfaces/interfaces';
 
@@ -79,7 +80,9 @@ class Navbar extends React.Component<NavbarWorkProps, {}> {
                         >
                         v0.1
                         </Menu.Item>
-                        <Menu.Item onClick={(event) => this.logoutButton(event)}> Logout </Menu.Item>
+                        <Menu.Item onClick={(event) => this.logoutButton(event)}>
+                            <Link to="/login"> Logout </Link>
+                        </Menu.Item>
                     </Menu.Menu>
 
                 </Menu>
