@@ -4,6 +4,7 @@ import * as Collections from "typescript-collections";
 declare let mxClient, mxUtils, mxGraph, mxRubberband: any;
 
 declare function require(name: string): any;
+
 let $rdf = require('rdflib');
 
 let dataGraph = '@prefix dash: <http://datashapes.org/dash#> .\n\
@@ -49,6 +50,25 @@ schema:AddressShape\n\
         sh:maxInclusive 99999 ;\n\
     ] .';
 
+let resources = new Collections.DefaultDictionary<any, Collections.DefaultDictionary<any, Array<any>>>
+(() => new Collections.DefaultDictionary<any, Array<any>>
+(() => [], (key) => key.termType + key.value),
+ (key) => key.termType + key.value);
+
+function traverseResource(resource: any) {
+    resources.getValue(resource).forEach(function (predicate: any, objects: Array<any>) {
+        for (let object of objects) {
+            if (object.hasOwnProperty("value")) {
+                console.log(resource.value, predicate.value, object.value);
+            } else {
+                console.log(resource.value, predicate.value, object);
+            }
+
+            traverseResource(object);
+        }
+    });
+}
+
 class MxGraph extends React.Component<any, any> {
     constructor(props: string) {
         super(props);
@@ -78,13 +98,6 @@ class MxGraph extends React.Component<any, any> {
                 $rdf.parse(dataGraph, store, uri, mimeType);
 
                 let triples = store.statementsMatching(undefined, undefined, undefined);
-                let resources = new Collections.DefaultDictionary<
-                    any, Collections.DefaultDictionary<any, Array<any>>
-                    >(() => new Collections.DefaultDictionary<
-                    any, Array<any>
-                    >(() => [],
-                      (key) => key.termType + key.value),
-                      (key) => key.termType + key.value);
                 let topLevel = new Collections.Set<any>((item) => item.value);
                 let downLevel = new Collections.Set<any>((item) => item.value);
 
@@ -107,17 +120,14 @@ class MxGraph extends React.Component<any, any> {
                 // let RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
                 // let RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
                 // let SCHEMA = $rdf.Namespace("http://schema.org/");
-                let SH = $rdf.Namespace("http://www.w3.org/ns/shacl#");
+                // let SH = $rdf.Namespace("http://www.w3.org/ns/shacl#");
                 // let XSD = $rdf.Namespace("http://www.w3.org/2001/XMLSchema#");
 
                 // visualisation should start from the resources in topLevel,
                 // since all other resources are dependant on them
                 topLevel.forEach(function (resource: any) {
                     // todo visualise using `resources` to iterate triples store, type: {subject: {predicate: [object]}}
-                    // for example, to get all property traits of `resource`
-                    console.log(resources.getValue(resource).getValue(SH("property")));
-                    // the traits of these properties can on their turn be obtained
-                    // trough 'resources' in the same manner etc
+                    traverseResource(resource);
                 });
 
             } catch (err) {
