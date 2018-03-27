@@ -4,6 +4,7 @@ import {ProcessorTask} from "../entities/taskProcessor";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
 import {Component} from "../persistence/component";
 import {Navbar} from "../components/navbarWork";
+import { extensionToMIME } from "./extensionToMIME";
 
 /*
  *
@@ -20,8 +21,9 @@ export class LoadFileTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
             let component: Component = data.getComponent(mComponent);
             if (component) {
                 var fileDAO: FileDAO = DataAccessProvider.getInstance().getFileDAO();
-                // TODO how to get the current type
-                var blob = new Blob([], {type: "text/turtle"});
+                // get MIME based on extension
+                var splitted = fileName.split(".");
+                var blob = new Blob([], {type: extensionToMIME[splitted[splitted.length - 1]]});
                 fileDAO.insert(new FileModule(ModelComponent.DataGraph, fileName, blob));
             }
         },    null);
