@@ -80,7 +80,7 @@ class Navbar extends React.Component<NavbarWorkProps, {}> {
                         >
                         v0.1
                         </Menu.Item>
-                        <Menu.Item onClick={(event) => this.logoutButton(event)}>
+                        <Menu.Item as="a" onClick={(event) => this.logoutButton(event)}>
                             <Link to="/login"> Logout </Link>
                         </Menu.Item>
                     </Menu.Menu>
