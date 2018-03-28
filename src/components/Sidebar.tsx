@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Sidebar, Menu, Image, Input, Dropdown} from 'semantic-ui-react';
+import {Sidebar, Menu, Image, Input, Dropdown, Button} from 'semantic-ui-react';
 import TreeView from './treeView';
 import { SidebarProps } from './interfaces/interfaces';
 
@@ -118,6 +118,7 @@ class SideBar extends React.Component<SidebarProps, any> {
                 style={{
                     width: '50h'
                 }}
+                id="sideBarID"
             >
                 <Menu.Item style={{height: '5em'}}>
                     <Image src={logo} size="mini" centered={true}/>
@@ -162,6 +163,11 @@ class SideBar extends React.Component<SidebarProps, any> {
                             Template
                             <this.DynamicMenu kind="Template"/>
                         </Menu.Item>
+
+                        <Menu.Item>
+                            <Button id="t"> TAB </Button>
+                        </Menu.Item>
+
                     </div>
                 ) : (
                     <Menu.Item>

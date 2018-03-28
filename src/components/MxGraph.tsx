@@ -525,6 +525,9 @@ class MxGraph extends React.Component<any, any> {
             this.initiateDragPreview();
             container.focus();
 
+            /* Drag & drop */
+            var sidebar = document.getElementById("sideBarID");
+            this.addDraggableElement(graph, sidebar, "Shape")
             /* Toolbar functionality */
             this.addToolbarButton(editor, toolbar, 'delete', '', 'delete');
             this.addToolbarButton(editor, toolbar, 'undo', '', 'undo');
@@ -613,6 +616,38 @@ class MxGraph extends React.Component<any, any> {
             editor.execute(action);
         });
         mxUtils.write(button, label);
+    }
+
+    addDraggableElement(graph: any, sidebar: any, id: any) {
+        // Function that is executed when the image is dropped on
+        // the graph. The cell argument points to the cell under
+        // the mousepointer if there is one.
+        var funct2 = function (g: any, evt: any, target: any, x: any, y: any) {
+            var cell = new mxCell("new " + id, new mxGeometry(0, 0, 80, 30));
+            cell.vertex = true;
+            var cells = g.importCells([cell], x, y, target);
+            if (cells != null && cells.length > 0) {
+                g.scrollCellToVisible(cells[0]);
+                g.setSelectionCells(cells);
+            }
+        };
+
+        // Creates the image which is used as the sidebar icon (drag source)
+        var img = document.getElementById(String(id));
+        console.log(img);
+        // Creates the image which is used as the drag icon (preview)
+        var dragElt = document.createElement('div');
+        dragElt.style.border = 'dashed black 1px';
+        dragElt.style.width = '80px';
+        dragElt.style.height = '30px';
+        var ds = mxUtils.makeDraggable(img, graph, funct2, dragElt);
+        ds.isGuidesEnabled = function()
+        {
+            return graph.graphHandler.guidesEnabled;
+        };
+
+        // Restores original drag icon while outside of graph
+        ds.createDragElement = mxDragSource.prototype.createDragElement;
     }
 
     render() {
