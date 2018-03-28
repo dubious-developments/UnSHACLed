@@ -26,7 +26,6 @@ class SideBar extends React.Component<SidebarProps, any> {
         this.handleDropDown = this.handleDropDown.bind(this);
         this.getMenuItemsFiltered = this.getMenuItemsFiltered.bind(this);
         this.DynamicMenu = this.DynamicMenu.bind(this);
-        this.getDragID = this.getDragID.bind(this);
     }
 
     getMenuItemsFiltered(kind: string, query: string) {
@@ -70,8 +69,6 @@ class SideBar extends React.Component<SidebarProps, any> {
                     id={res[i]}
                     content={res[i]}
                     key={key}
-                    draggable={true}
-                    onDragStart={this.getDragID}
                 />
             );
         }
@@ -95,15 +92,6 @@ class SideBar extends React.Component<SidebarProps, any> {
         });
 
     }
-
-    getDragID(ev: any) {
-        this.props.callback(ev.target.id);
-        this.setState({
-            dragid: ev.target.id
-        });
-        console.log(ev.target.id);
-    }
-
     render() {
         const logo = require('../img/shacl_logo_trans.png');
         const defaultOption = 1;
