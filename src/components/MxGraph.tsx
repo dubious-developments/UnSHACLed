@@ -3,9 +3,10 @@ import { Button, Segment } from 'semantic-ui-react';
 import { MxGraphProps } from './interfaces/interfaces';
 import * as Collections from "typescript-collections";
 
-declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband: any;
+declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor: any;
 
 declare function require(name: string): any;
+
 let $rdf = require('rdflib');
 
 let dataGraph = '@prefix dash: <http://datashapes.org/dash#> .\n\
@@ -51,9 +52,31 @@ schema:AddressShape\n\
         sh:maxInclusive 99999 ;\n\
     ] .';
 
-class MxGraph extends React.Component<MxGraphProps, any> {
+let resources = new Collections.DefaultDictionary<any, Collections.DefaultDictionary<any, Array<any>>>
+(() => new Collections.DefaultDictionary<any, Array<any>>
+(() => [], (key) => key.termType + key.value),
+ (key) => key.termType + key.value);
 
-    constructor(props: any) {
+function traverseResource(resource: any) {
+    let result = [];
+
+    resources.getValue(resource).forEach(function (predicate: any, objects: Array<any>) {
+        for (let object of objects) {
+            if (object.hasOwnProperty("value")) {
+                result.push([resource.value, predicate.value, object.value]);
+            } else {
+                result.push([resource.value, predicate.value, object]);
+            }
+
+            traverseResource(object).forEach(res => result.push(res));
+        }
+    });
+
+    return result;
+}
+
+class MxGraph extends React.Component<any, any> {
+    constructor(props: string) {
         super(props);
         this.state = {
             graph: null,
@@ -171,59 +194,58 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             let mimeType = 'text/turtle';
             let store = $rdf.graph();
 
-            try {
-                $rdf.parse(dataGraph, store, uri, mimeType);
+            $rdf.parse(dataGraph, store, uri, mimeType);
 
-                let triples = store.statementsMatching(undefined, undefined, undefined);
-                let resources = new Collections.DefaultDictionary<
-                    any, Collections.DefaultDictionary<any, Array<any>>
-                    >(() => new Collections.DefaultDictionary<
-                    any, Array<any>
-                    >(() => [],
-                      (key) => key.termType + key.value),
-                      (key) => key.termType + key.value);
-                let topLevel = new Collections.Set<any>((item) => item.value);
-                let downLevel = new Collections.Set<any>((item) => item.value);
+            let triples = store.statementsMatching(undefined, undefined, undefined);
+            let topLevel = new Collections.Set<any>((item) => item.value);
+            let downLevel = new Collections.Set<any>((item) => item.value);
 
-                for (let triple of triples) {
-                    resources.getValue(triple.subject).getValue(triple.predicate).push(triple.object);
+            for (let triple of triples) {
+                resources.getValue(triple.subject).getValue(triple.predicate).push(triple.object);
 
-                    topLevel.add(triple.subject);
-                    if (triple.object.hasOwnProperty("elements")) {
-                        for (let elem of triple.object.elements) {
-                            downLevel.add(elem);
-                        }
-                    } else {
-                        downLevel.add(triple.object);
+                topLevel.add(triple.subject);
+                if (triple.object.hasOwnProperty("elements")) {
+                    for (let elem of triple.object.elements) {
+                        downLevel.add(elem);
                     }
+                } else {
+                    downLevel.add(triple.object);
                 }
-
-                topLevel.difference(downLevel);
-
-                // let DASH = $rdf.Namespace("http://datashapes.org/dash#");
-                // let RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-                // let RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
-                // let SCHEMA = $rdf.Namespace("http://schema.org/");
-                let SH = $rdf.Namespace("http://www.w3.org/ns/shacl#");
-                // let XSD = $rdf.Namespace("http://www.w3.org/2001/XMLSchema#");
-
-                // visualisation should start from the resources in topLevel,
-                // since all other resources are dependant on them
-                topLevel.forEach(function (resource: any) {
-                    // todo visualise using `resources` to iterate triples store, type: {subject: {predicate: [object]}}
-                    // for example, to get all property traits of `resource`
-                    console.log(resource);
-                    // console.log(resources.getValue(resource).getValue(SH("property")));
-                    // the traits of these properties can on their turn be obtained
-                    // trough 'resources' in the same manner etc
-                });
-
-            } catch (err) {
-                console.log(err);
             }
 
+            topLevel.difference(downLevel);
+
+            // let DASH = $rdf.Namespace("http://datashapes.org/dash#");
+            // let RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+            // let RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
+            // let SCHEMA = $rdf.Namespace("http://schema.org/");
+            // let SH = $rdf.Namespace("http://www.w3.org/ns/shacl#");
+            // let XSD = $rdf.Namespace("http://www.w3.org/2001/XMLSchema#");
+
+            // visualisation should start from the resources in topLevel,
+            // since all other resources are dependant on them
+
+            let editor = new mxEditor();
+
             // Creates the graph inside the given container
-            let graph = new mxGraph(container);
+            editor.setGraphContainer(container);
+            let graph = editor.graph;
+            let model = graph.getModel();
+
+            editor.layoutSwimlanes = true;
+            editor.createSwimlaneLayout = function () {
+                let layout = new mxStackLayout(this.graph, false);
+                layout.fill = true;
+                layout.resizeParent = true;
+
+                // Overrides the function to always return true
+                layout.isVertexMovable = function(cell: any) {
+                    return true;
+                };
+
+                return layout;
+            };
+
             graph.panningHandler.ignoreCell = false;
             graph.setPanning(true);
 
@@ -374,6 +396,16 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 }
             };
 
+            // Only shapes/tables are movable
+            graph.isCellMovable = function(cell: any) {
+                return this.isSwimlane(cell);
+            };
+
+            // Only shapes/tables are resizable, this fixes the style
+            graph.isCellResizable = function(cell: any) {
+                return this.isSwimlane(cell);
+            };
+
             // Enables rubberband selection
             new mxRubberband(graph);
 
@@ -408,22 +440,15 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             
             this.configureStylesheet(graph);
 
-            let shapeObject = new Shape('shape 1');
+            let shapeObject = new Shape('new shape');
             let shape = new mxCell(shapeObject, new mxGeometry(0, 0, 200, 28), 'shape');
             shape.setVertex(true);
 
-            let columnObject = new Row('prop1');
-            let column = new mxCell(columnObject, new mxGeometry(0, 0, 0, 26));
-            column.setVertex(true);
-            column.setConnectable(false);
-            
-            let firstColumn = column.clone();
-            firstColumn.value.name = 'FIRST PROPERTY';
-            shape.insert(firstColumn);
+            let rowObject = new Row('new row');
+            let row = new mxCell(rowObject, new mxGeometry(0, 0, 0, 26), 'row');
 
-            let secondColumn = column.clone();
-            secondColumn.value.name = 'SECOND PROPERTY';
-            shape.insert(secondColumn);
+            row.setVertex(true);
+            row.setConnectable(false);
 
             // Returns the name field of the user object for the label
             graph.convertValueToString = function(cell: any) {
@@ -457,31 +482,78 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 return !this.isSwimlane(cell) && !this.model.isEdge(cell);
             };
 
-            let v1 = graph.getModel().cloneCell(shape);
+            topLevel.forEach(function (resource: any) {
+                // todo visualise using `resources` to iterate triples store, type: {subject: {predicate: [object]}}
+                let triplesArr = traverseResource(resource);
+                for (let s of convertTriplesToShapes(triplesArr)) {
+                    addShape(s);
+                }
+            });
 
-            // Adds cells to the model in a single step
-            graph.getModel().beginUpdate();
-            // save graph into state
-            this.saveGraph(graph);
-            try {
-
-                v1.value.name = "First shape";
-                v1.geometry.x = 20;
-                v1.geometry.y = 20;
-
-                graph.addCell(v1, parent);
-
-                v1.geometry.alternateBounds = 
-                    new mxRectangle(100, 100, v1.geometry.width + 100, v1.geometry.height + 100);
-
-                // let _v2 = graph.insertVertex(parent, null, column, 200, 150, 80, 30);
-                // let _e1 = graph.insertEdge(parent, null, '', v1, v2);
-            } finally {
-                // Updates the display
-                graph.getModel().endUpdate();
+            function convertTriplesToShapes(tripArr: any): any {
+                let result = [];
+                let temp = [];
+                for (let t of tripArr) {
+                    if (t[1] === "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+                        && t[2] === "http://www.w3.org/ns/shacl#NodeShape") {
+                            if (temp.length > 0) {
+                                result.push(temp);
+                                temp = [];
+                            }
+                        }
+                    temp.push(t);
+                }
+                result.push(temp);
+                return result;
             }
 
+            function addShape(t: Array<Array<string>>) {
+                let v1 = model.cloneCell(shape);
+                // Adds cells to the model in a single step
+                model.beginUpdate();
+                try {
+
+                    let shapeName = t[0][0];
+                    let longestname = 0;
+                    t.forEach(trip => {
+                        let temprow = model.cloneCell(row);
+                        let name = trip[0] !== shapeName ? trip[0] + " : " : "";
+                        name += trip[1] + " : " + trip[2];
+                        longestname = Math.max(name.length, longestname);
+                        temprow.value = {name: name, triple: trip};
+                        v1.insert(temprow);
+                    });
+
+                    var edgeElements = 0;
+                    for (var i = 0; i < graph.model.getChildCount(parent); i++) {
+                        if (!graph.model.isEdge(graph.model.getChildAt(parent, i))) {
+                            edgeElements++;
+                        }
+                    }
+
+                    v1.value = {name: shapeName};
+                    v1.geometry.x = 20 + 700 * edgeElements;
+                    v1.geometry.y = 20;
+                    v1.geometry.width += longestname * 4;
+                    graph.addCell(v1, parent);
+
+                    v1.geometry.alternateBounds =
+                        new mxRectangle(0, 0, v1.geometry.width, v1.geometry.height);
+                } finally {
+                    // save graph into state
+                    // this.saveGraph(graph);
+
+                    // Updates the display
+                    model.endUpdate();
+                }
+
+                graph.setSelectionCell(v1);
+            }
+            // save graph into state
+            this.saveGraph(graph);
+
             this.initiateDragPreview();
+            container.focus();
 
             // Sets initial scrollbar positions
             window.setTimeout(
@@ -496,12 +568,9 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 },
                 0
             );
-            graph.getSelectionCell(v1);
         }
     }
 
-    addShape()
-    
     configureStylesheet(graph: any) {
         let style = new Object();
         style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RECTANGLE;
@@ -531,6 +600,17 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         style[mxConstants.STYLE_FONTSTYLE] = 1;
         style[mxConstants.STYLE_SHADOW] = 1;
         graph.getStylesheet().putCellStyle('shape', style);
+
+        style = new Object();
+        style[mxConstants.STYLE_STROKEWIDTH] = '1';
+        style[mxConstants.STYLE_STROKECOLOR] = '#A1E44D';
+        graph.getStylesheet().putCellStyle('row', style);
+
+        style = graph.stylesheet.getDefaultEdgeStyle();
+        style[mxConstants.STYLE_LABEL_BACKGROUNDCOLOR] = '#FFFFFF';
+        style[mxConstants.STYLE_STROKEWIDTH] = '2';
+        style[mxConstants.STYLE_ROUNDED] = true;
+        style[mxConstants.STYLE_EDGE] = mxEdgeStyle.EntityRelation;
     }
     
     render() {
