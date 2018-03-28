@@ -434,7 +434,7 @@ class MxGraph extends React.Component<any, any> {
             this.configureStylesheet(graph);
 
             let blockObject = new Block();
-            let block = new mxCell(blockObject, new mxGeometry(0, 0, 200, 28));
+            let block = new mxCell(blockObject, new mxGeometry(0, 0, 250, 28));
             block.setVertex(true);
 
             let rowObject = new Row();
@@ -487,10 +487,15 @@ class MxGraph extends React.Component<any, any> {
                 b.arrows.forEach(target => {
                     let v1 = blockDict.getValue(b);
                     let v2 = blockDict.getValue(target);
+                    
+                    let newRow =  model.cloneCell(row);
+                    let name = (target.blockType === "NodeShape" ? "sh:node" : "sh:property" ) + ": " + target.name;
+                    newRow.value = {name: name};
+                    v1.insert(newRow);
 
                     model.beginUpdate();
                     try {
-                        graph.insertEdge(parent, null, '', v1, v2);
+                        graph.insertEdge(parent, null, '', newRow, v2);
                     } finally {
                         model.endUpdate();
                     }
