@@ -48,7 +48,6 @@ schema:AddressShape\n\
     ] ;\n\
     sh:property [\n\
         sh:path schema:postalCode ;\n\
-        sh:or ( [ sh:datatype xsd:string ] [ sh:datatype xsd:integer ] ) ;\n\
         sh:minInclusive 10000 ;\n\
         sh:maxInclusive 99999 ;\n\
     ] .';
@@ -212,6 +211,7 @@ class MxGraph extends React.Component<any, any> {
                 } else if (predicate.uri === SH("path").uri) {
                     subjectBlock.name = object.uri;
                 } else {
+                    // todo parse Collections of graphs
                     subjectBlock.traits.push([predicate.uri, object.toString()]);
                 }
             });
@@ -474,7 +474,28 @@ class MxGraph extends React.Component<any, any> {
                 return !this.isSwimlane(cell) && !this.model.isEdge(cell);
             };
 
-            blocks.forEach(bl => addBlock(bl));
+            let blockDict = new Collections.Dictionary<Block, any>((b) => b.name);
+            blocks.forEach(bl => {
+                blockDict.setValue(bl, addBlock(bl));
+            });
+
+            blocks.forEach(bl => {
+                addArrows(bl);
+            });
+
+            function addArrows(b: Block) {
+                b.arrows.forEach(target => {
+                    let v1 = blockDict.getValue(b);
+                    let v2 = blockDict.getValue(target);
+
+                    model.beginUpdate();
+                    try {
+                        graph.insertEdge(parent, null, '', v1, v2);
+                    } finally {
+                        model.endUpdate();
+                    }
+                });
+            }
 
             function addBlock(b: Block) {
                 let v1 = model.cloneCell(block);
@@ -515,6 +536,7 @@ class MxGraph extends React.Component<any, any> {
                 }
 
                 graph.setSelectionCell(v1);
+                return v1;
             }
             // save graph into state
             this.saveGraph(graph);
