@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { Button, Segment } from 'semantic-ui-react';
-import { MxGraphProps } from './interfaces/interfaces';
+import {Button, Segment} from 'semantic-ui-react';
+import {MxGraphProps} from './interfaces/interfaces';
 import * as Collections from "typescript-collections";
 
-declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor, 
+declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout: any;
 
 declare function require(name: string): any;
@@ -59,7 +59,8 @@ class MxGraph extends React.Component<any, any> {
             graph: null,
             test: "Shape",
             preview: null,
-            dragElement: null
+            dragElement: null,
+            dragElList: ["Shape", "Node Shape", "Property Shape", "Address", "Person"]
         };
         this.handleLoad = this.handleLoad.bind(this);
         this.saveGraph = this.saveGraph.bind(this);
@@ -69,27 +70,15 @@ class MxGraph extends React.Component<any, any> {
         this.getGraphUnderMouse = this.getGraphUnderMouse.bind(this);
         this.makeDragSource = this.makeDragSource.bind(this);
     }
-    
+
     componentDidMount() {
         this.handleLoad();
     }
 
     componentWillReceiveProps(nextprops: any) {
-        if (this.props.dragid !== nextprops.dragid) {
-            const {graph} = this.state;
-            console.log("Received updated props" + nextprops.dragid);
-            this.setState({
-                test: nextprops.dragid
-            });
-            console.log(graph);
-            this.setDragElement(nextprops.dragid);
-            var el = document.getElementById(String(nextprops.dragid));
-            console.log(el);
-            this.makeDragSource(el);
-        }
     }
 
-    insertCell(grph: any, evt: any, target: any, x:any, y:any) {
+    insertCell(grph: any, evt: any, target: any, x: any, y: any) {
         const {test} = this.state;
         var cell = new mxCell(test, new mxGeometry(0, 0, 80, 30));
         cell.vertex = true;
@@ -105,6 +94,7 @@ class MxGraph extends React.Component<any, any> {
             dragElement: document.getElementById(dragid)
         }));
     }
+
     initiateDragPreview() {
         // Creates the element that is being for the actual preview.
         var dragElt = document.createElement('div');
@@ -126,6 +116,7 @@ class MxGraph extends React.Component<any, any> {
         }
         return null;
     }
+
     makeDragSource(dragElement: any) {
         const {preview} = this.state;
         const {graph} = this.state;
@@ -135,30 +126,30 @@ class MxGraph extends React.Component<any, any> {
 
         // Redirects feature to global switch. Note that this feature should only be used
         // if the the x and y arguments are used in funct to insert the cell.
-        ds.isGuidesEnabled = function()
-        {
+        ds.isGuidesEnabled = function () {
             return graph.graphHandler.guidesEnabled;
         };
 
         // Restores original drag icon while outside of graph
         ds.createDragElement = mxDragSource.prototype.createDragElement;
     }
+
     handleLoad() {
         this.main(document.getElementById('graphContainer'));
     }
 
     saveGraph(g: {}) {
-      this.setState((prevState, props) => ({
-          graph: g,
-      }));
+        this.setState((prevState, props) => ({
+            graph: g,
+        }));
     }
 
     handleClick() {
-        
+
     }
 
     main(container: HTMLElement | null): void {
-        const { test } = this.state;
+        const {test} = this.state;
         const did = this.props.dragid;
         // Checks if the browser is supported
         if (!container) {
@@ -186,13 +177,13 @@ class MxGraph extends React.Component<any, any> {
             let triples = store.statementsMatching(undefined, undefined, undefined);
 
             let resources = new Collections.Dictionary<any, Block>();
-            triples.forEach( function (resource: any) {
-                if (! resources.containsKey(resource.subject)) {
+            triples.forEach(function (resource: any) {
+                if (!resources.containsKey(resource.subject)) {
                     resources.setValue(resource.subject, new Block());
                 }
             });
 
-            triples.forEach( function (resource: any) {
+            triples.forEach(function (resource: any) {
                 // console.log(resource.subject.value, resource.predicate.value, resource.object.value);
                 let subject = resource.subject;
                 let predicate = resource.predicate;
@@ -217,7 +208,7 @@ class MxGraph extends React.Component<any, any> {
             });
 
             let blocks = resources.values();
-
+            console.log(blocks);
             let editor = new mxEditor();
 
             // Creates the graph inside the given container
@@ -232,7 +223,7 @@ class MxGraph extends React.Component<any, any> {
                 layout.resizeParent = true;
 
                 // Overrides the function to always return true
-                layout.isVertexMovable = function(cell: any) {
+                layout.isVertexMovable = function (cell: any) {
                     return true;
                 };
 
@@ -390,12 +381,12 @@ class MxGraph extends React.Component<any, any> {
             };
 
             // Only shapes/tables are movable
-            graph.isCellMovable = function(cell: any) {
+            graph.isCellMovable = function (cell: any) {
                 return this.isSwimlane(cell);
             };
 
             // Only shapes/tables are resizable, this fixes the style
-            graph.isCellResizable = function(cell: any) {
+            graph.isCellResizable = function (cell: any) {
                 return this.isSwimlane(cell);
             };
 
@@ -430,7 +421,7 @@ class MxGraph extends React.Component<any, any> {
             // Gets the default parent for inserting new cells. This
             // is normally the first child of the root (ie. layer 0).
             let parent = graph.getDefaultParent();
-            
+
             this.configureStylesheet(graph);
 
             let blockObject = new Block();
@@ -443,7 +434,7 @@ class MxGraph extends React.Component<any, any> {
             row.setConnectable(false);
 
             // Returns the name field of the user object for the label
-            graph.convertValueToString = function(cell: any) {
+            graph.convertValueToString = function (cell: any) {
                 if (cell.value != null && cell.value.name != null) {
                     return cell.value.name;
                 }
@@ -451,7 +442,7 @@ class MxGraph extends React.Component<any, any> {
             };
 
             let superCellLabelChanged = graph.cellLabelChanged;
-            graph.cellLabelChanged = function(cell: any, newValue: string, autoSize: any) {
+            graph.cellLabelChanged = function (cell: any, newValue: string, autoSize: any) {
                 if (mxUtils.isNode(cell.value.name)) {
                     // Clones the value for correct undo/redo
                     let elt = cell.value.cloneNode(true);
@@ -461,7 +452,7 @@ class MxGraph extends React.Component<any, any> {
                 superCellLabelChanged.apply(this, arguments);
             };
 
-            graph.getLabel = function(cell: any) {
+            graph.getLabel = function (cell: any) {
                 if (this.isHtmlLabel(cell)) {
                     return mxUtils.htmlEntities(cell.value.name);
                 }
@@ -470,7 +461,7 @@ class MxGraph extends React.Component<any, any> {
 
             // Properties are dynamically created HTML labels
             // Returns true for properties and false for shapes
-            graph.isHtmlLabel = function(cell: any) {
+            graph.isHtmlLabel = function (cell: any) {
                 return !this.isSwimlane(cell) && !this.model.isEdge(cell);
             };
 
@@ -525,8 +516,6 @@ class MxGraph extends React.Component<any, any> {
 
                     v1.value = b;
                     v1.style = b.blockType;
-                    // v1.geometry.x = 20 + 100 * edgeElements;
-                    // v1.geometry.y = 20;
                     v1.geometry.width += longestname * 4;
                     graph.addCell(v1, parent);
 
@@ -552,6 +541,22 @@ class MxGraph extends React.Component<any, any> {
 
             this.initiateDragPreview();
             container.focus();
+
+            /* Drag & drop */
+            var sidebar = document.getElementById("sideBarID");
+            for (let id of this.state.dragElList) {
+                this.addDraggableElement(graph, block, sidebar, id, model, row);
+            }
+
+            /* Toolbar functionality */
+            this.addToolbarButton(editor, toolbar, 'delete', '', 'delete');
+            this.addToolbarButton(editor, toolbar, 'undo', '', 'undo');
+            this.addToolbarButton(editor, toolbar, 'redo', '', 'redo');
+            this.addToolbarButton(editor, toolbar, 'show', '', 'camera');
+            this.addToolbarButton(editor, toolbar, 'zoomIn', '+', 'zoom in');
+            this.addToolbarButton(editor, toolbar, 'zoomOut', '-', 'zoom out');
+            this.addToolbarButton(editor, toolbar, 'actualSize', '', 'actual size');
+            this.addToolbarButton(editor, toolbar, 'fit', '', 'fit');
 
             // Sets initial scrollbar positions
             window.setTimeout(
@@ -626,7 +631,67 @@ class MxGraph extends React.Component<any, any> {
         style[mxConstants.STYLE_ROUNDED] = true;
         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.EntityRelation;
     }
-    
+
+    addToolbarButton(editor: any, toolbar: any, action: any, label: any, id: any) {
+        var button = document.getElementById(String(id));
+        mxEvent.addListener(button, 'click', function (evt: any) {
+            editor.execute(action);
+        });
+        mxUtils.write(button, label);
+    }
+
+    addDraggableElement(graph: any, block: any, sidebar: any, id: any, model: any, row:any) {
+        // Function that is executed when the image is dropped on
+        // the graph. The cell argument points to the cell under
+        // the mousepointer if there is one.
+        var funct = function (g: any, evt: any, target: any, x: any, y: any) {
+            let v1 = model.cloneCell(block);
+            let parent = graph.getDefaultParent();
+            /* Set correct styling based on input */
+            let style = 'NodeShape';
+            if (id.indexOf('Property') >= 0) {
+                style = 'Property';
+            }
+            /* Create empty block */
+            let b = new Block();
+            b.name = "new " + id;
+            b.blockType = style;
+
+            /* Create empty row */
+            let temprow = model.cloneCell(row);
+            temprow.value = {name: "new property ", trait: "null"};
+            b.traits = [temprow];
+
+            model.beginUpdate();
+            try {
+                v1.insert(temprow);
+                v1.value = b.name;
+                v1.style = style;
+                v1.geometry.x = x;
+                v1.geometry.y = y;
+                v1.geometry.width += 10 * 4;
+                graph.addCell(v1, parent);
+                v1.geometry.alternateBounds =
+                    new mxRectangle(0, 0, v1.geometry.width, v1.geometry.height);
+            } finally {
+                // Updates the display
+                model.endUpdate();
+            }
+            graph.setSelectionCell(v1);
+        };
+
+        // Creates the compoent which is used as the draggabmle element (drag source)
+        var comp = document.getElementById(String(id));
+        /* Create draggable element */
+        var ds = mxUtils.makeDraggable(comp, graph, funct);
+        ds.isGuidesEnabled = function () {
+            return graph.graphHandler.guidesEnabled;
+        };
+
+        // Restores original drag icon while outside of graph
+        ds.createDragElement = mxDragSource.prototype.createDragElement;
+    }
+
     render() {
         const grid = require('../img/grid.gif');
         return (
@@ -653,11 +718,11 @@ class Block {
         this.arrows = [];
         this.traits = [];
     }
- 
+
     clone() {
         return mxUtils.clone(this);
     }
-} 
+}
 
 class Row {
     name: string;
@@ -665,6 +730,6 @@ class Row {
     clone() {
         return mxUtils.clone(this);
     }
-} 
+}
 
 export default MxGraph;

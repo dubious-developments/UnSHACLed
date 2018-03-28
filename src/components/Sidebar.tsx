@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Sidebar, Menu, Image, Input, Dropdown} from 'semantic-ui-react';
+import {Sidebar, Menu, Image, Input, Dropdown, Button} from 'semantic-ui-react';
 import TreeView from './treeView';
 import { SidebarProps } from './interfaces/interfaces';
 
@@ -11,7 +11,7 @@ class SideBar extends React.Component<SidebarProps, any> {
     ];
     static SHACLMenuItems = ["Shape", "Node Shape", "Property Shape"];
     static GeneralMenuItems = ["Arrow", "Rectangle"];
-    static TemplateMenuItems = ["Building", "Person"];
+    static TemplateMenuItems = ["Address", "Person"];
 
     constructor(props: any) {
         super(props);
@@ -26,7 +26,6 @@ class SideBar extends React.Component<SidebarProps, any> {
         this.handleDropDown = this.handleDropDown.bind(this);
         this.getMenuItemsFiltered = this.getMenuItemsFiltered.bind(this);
         this.DynamicMenu = this.DynamicMenu.bind(this);
-        this.getDragID = this.getDragID.bind(this);
     }
 
     getMenuItemsFiltered(kind: string, query: string) {
@@ -70,8 +69,6 @@ class SideBar extends React.Component<SidebarProps, any> {
                     id={res[i]}
                     content={res[i]}
                     key={key}
-                    draggable={true}
-                    onDragStart={this.getDragID}
                 />
             );
         }
@@ -95,15 +92,6 @@ class SideBar extends React.Component<SidebarProps, any> {
         });
 
     }
-
-    getDragID(ev: any) {
-        this.props.callback(ev.target.id);
-        this.setState({
-            dragid: ev.target.id
-        });
-        console.log(ev.target.id);
-    }
-
     render() {
         const logo = require('../img/shacl_logo_trans.png');
         const defaultOption = 1;
@@ -118,6 +106,7 @@ class SideBar extends React.Component<SidebarProps, any> {
                 style={{
                     width: '50h'
                 }}
+                id="sideBarID"
             >
                 <Menu.Item style={{height: '5em'}}>
                     <Image src={logo} size="mini" centered={true}/>
@@ -141,7 +130,7 @@ class SideBar extends React.Component<SidebarProps, any> {
                                 onChange={this.handleChange}
                                 type="text"
                                 value={this.state.value}
-                                placeholder="Search . . ."
+                                placeholder="Search components . . ."
                                 inverted={true}
                                 transparent={true}
                                 icon="search"
@@ -152,12 +141,10 @@ class SideBar extends React.Component<SidebarProps, any> {
                             SHACL
                             <this.DynamicMenu kind="SHACL"/>
                         </Menu.Item>
-
-                        <Menu.Item>
+{/*                        <Menu.Item>
                             General
                             <this.DynamicMenu kind="General"/>
-                        </Menu.Item>
-
+                        </Menu.Item>*/}
                         <Menu.Item>
                             Template
                             <this.DynamicMenu kind="Template"/>

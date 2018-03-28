@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { Menu, Icon } from 'semantic-ui-react';
+import {Menu, Icon} from 'semantic-ui-react';
 import Auth from "../services/Auth";
-import { Link } from 'react-router-dom';
-import { withRouter, RouteComponentProps } from 'react-router';
-import { NavbarWorkProps } from './interfaces/interfaces';
+import {Link} from 'react-router-dom';
+import {withRouter, RouteComponentProps} from 'react-router';
+import {NavbarWorkProps} from './interfaces/interfaces';
 
 class Navbar extends React.Component<NavbarWorkProps, {}> {
 
@@ -31,6 +31,7 @@ class Navbar extends React.Component<NavbarWorkProps, {}> {
     iconClick() {
         this.props.callback(!this.props.visible);
     }
+
     render() {
 
         return (
@@ -43,51 +44,55 @@ class Navbar extends React.Component<NavbarWorkProps, {}> {
                         borderRadius: 0,
                     }}
                 >
-                    <Menu.Item as="a" onClick={this.iconClick}>
-                        <Icon name='content' />
-                    </Menu.Item>
+                    {/* Toolbar icons */}
+                    <Menu.Item as="a" onClick={this.iconClick} content={<Icon name='content'/>}/>
+                    <Menu.Item as="a" id="delete" content={<Icon name='trash'/>}/>
+                    <Menu.Item as="a" id="undo" content={<Icon name='reply'/>}/>
+                    <Menu.Item as="a" id="redo" content={<Icon name='share'/>}/>
+                    <Menu.Item as="a" id="camera" content={<Icon name='camera'/>}/>
+                    <Menu.Item as="a" id="zoom in" content={<Icon name='search'  style={{paddingRight: '1em'}}/>}/>
+                    <Menu.Item as="a" id="zoom out" content={<Icon name='search' style={{paddingRight: '1em'}}/>} />
+                    <Menu.Item as="a" id="actual size" content={<Icon name='compress'/>}/>
+                    <Menu.Item as="a" id="fit" content={<Icon name='expand'/>}/>
 
-                    <Menu.Menu
-                        position="right"
-                    >
-                        <Menu.Item as="a">Import Project</Menu.Item>
-                        <Menu.Item as="a">Save Project</Menu.Item>
-                        <Menu.Item as="a" onClick={this.uploadFileButton}>
-                            Import Graph
-                            <input
-                                type="file"
-                                id="importGraph"
-                                style={{"display" : "none"}}
-                                accept={this.allowedExtensions}
-                            />
-                        </Menu.Item>
-                        <Menu.Item as="a">Save Graph</Menu.Item>
-                        <Menu.Item
-                            as="a"
-                            href="https://github.com/dubious-developments/UnSHACLed"
-                            target="_blank"
-                            icon={
-                                <Icon
-                                    name="github"
-                                    inverted={true}
-                                />
-                            }
+                    <Menu.Item as="a">Import Project</Menu.Item>
+                    <Menu.Item as="a">Save Project</Menu.Item>
+                    <Menu.Item as="a" onClick={this.uploadFileButton}>
+                        Import Graph
+                        <input
+                            type="file"
+                            id="importGraph"
+                            style={{"display": "none"}}
+                            accept={this.allowedExtensions}
                         />
-                        <Menu.Item
-                            as="a"
-                            target="_blank"
-                            href="https://github.com/dubious-developments/UnSHACLed/wiki/Release-notes"
-                        >
-                        v0.1
-                        </Menu.Item>
-                        <Menu.Item as="a" onClick={(event) => this.logoutButton(event)}>
-                            <Link to="/login"> Logout </Link>
-                        </Menu.Item>
-                    </Menu.Menu>
+                    </Menu.Item>
+                    <Menu.Item as="a">Save Graph</Menu.Item>
+                    <Menu.Item
+                        as="a"
+                        href="https://github.com/dubious-developments/UnSHACLed"
+                        target="_blank"
+                        icon={
+                            <Icon
+                                name="github"
+                                inverted={true}
+                            />
+                        }
+                    />
+                    <Menu.Item
+                        as="a"
+                        target="_blank"
+                        href="https://github.com/dubious-developments/UnSHACLed/wiki/Release-notes"
+                    >
+                        v0.3
+                    </Menu.Item>
+                    <Menu.Item as="a" onClick={(event) => this.logoutButton(event)}>
+                        <Link to="/login"> Logout </Link>
+                    </Menu.Item>
 
                 </Menu>
             </div>
         );
     }
 }
+
 export default Navbar;
