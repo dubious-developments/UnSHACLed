@@ -60,7 +60,8 @@ class MxGraph extends React.Component<any, any> {
             graph: null,
             test: "Shape",
             preview: null,
-            dragElement: null
+            dragElement: null,
+            dragElList: ["Shape", "Node Shape", "Property Shape", "Address", "Person"]
         };
         this.handleLoad = this.handleLoad.bind(this);
         this.saveGraph = this.saveGraph.bind(this);
@@ -76,18 +77,6 @@ class MxGraph extends React.Component<any, any> {
     }
 
     componentWillReceiveProps(nextprops: any) {
-        if (this.props.dragid !== nextprops.dragid) {
-            const {graph} = this.state;
-            console.log("Received updated props" + nextprops.dragid);
-            this.setState({
-                test: nextprops.dragid
-            });
-            console.log(graph);
-            this.setDragElement(nextprops.dragid);
-            var el = document.getElementById(String(nextprops.dragid));
-            console.log(el);
-            this.makeDragSource(el);
-        }
     }
 
     insertCell(grph: any, evt: any, target: any, x: any, y: any) {
@@ -219,7 +208,7 @@ class MxGraph extends React.Component<any, any> {
             });
 
             let blocks = resources.values();
-
+            console.log(blocks);
             let editor = new mxEditor();
 
             // Creates the graph inside the given container
@@ -527,7 +516,10 @@ class MxGraph extends React.Component<any, any> {
 
             /* Drag & drop */
             var sidebar = document.getElementById("sideBarID");
-            this.addDraggableElement(graph, sidebar, "Shape")
+            for (let id of this.state.dragElList) {
+                this.addDraggableElement(graph, block, sidebar, id, model, row);
+            }
+
             /* Toolbar functionality */
             this.addToolbarButton(editor, toolbar, 'delete', '', 'delete');
             this.addToolbarButton(editor, toolbar, 'undo', '', 'undo');
@@ -535,6 +527,8 @@ class MxGraph extends React.Component<any, any> {
             this.addToolbarButton(editor, toolbar, 'show', '', 'camera');
             this.addToolbarButton(editor, toolbar, 'zoomIn', '+', 'zoom in');
             this.addToolbarButton(editor, toolbar, 'zoomOut', '-', 'zoom out');
+            this.addToolbarButton(editor, toolbar, 'actualSize', '', 'actual size');
+            this.addToolbarButton(editor, toolbar, 'fit', '', 'fit');
 
             // Sets initial scrollbar positions
             window.setTimeout(
@@ -618,31 +612,51 @@ class MxGraph extends React.Component<any, any> {
         mxUtils.write(button, label);
     }
 
-    addDraggableElement(graph: any, sidebar: any, id: any) {
+    addDraggableElement(graph: any, block: any, sidebar: any, id: any, model: any, row:any) {
         // Function that is executed when the image is dropped on
         // the graph. The cell argument points to the cell under
         // the mousepointer if there is one.
-        var funct2 = function (g: any, evt: any, target: any, x: any, y: any) {
-            var cell = new mxCell("new " + id, new mxGeometry(0, 0, 80, 30));
-            cell.vertex = true;
-            var cells = g.importCells([cell], x, y, target);
-            if (cells != null && cells.length > 0) {
-                g.scrollCellToVisible(cells[0]);
-                g.setSelectionCells(cells);
+        var funct = function (g: any, evt: any, target: any, x: any, y: any) {
+            let v1 = model.cloneCell(block);
+            let parent = graph.getDefaultParent();
+            /* Set correct styling based on input */
+            let style = 'NodeShape';
+            if (id.indexOf('Property') >= 0) {
+                style = 'Property';
             }
+            /* Create empty block */
+            let b = new Block();
+            b.name = "new " + id;
+            b.blockType = style;
+
+            /* Create empty row */
+            let temprow = model.cloneCell(row);
+            temprow.value = {name: "new property ", trait: "null"};
+            b.traits = [temprow];
+
+            model.beginUpdate();
+            try {
+                v1.insert(temprow);
+                v1.value = b.name;
+                v1.style = style;
+                v1.geometry.x = x;
+                v1.geometry.y = y;
+                v1.geometry.width += 10 * 4;
+                graph.addCell(v1, parent);
+                v1.geometry.alternateBounds =
+                    new mxRectangle(0, 0, v1.geometry.width, v1.geometry.height);
+            } finally {
+                // Updates the display
+                model.endUpdate();
+            }
+            graph.setSelectionCell(v1);
         };
 
-        // Creates the image which is used as the sidebar icon (drag source)
-        var img = document.getElementById(String(id));
-        console.log(img);
-        // Creates the image which is used as the drag icon (preview)
-        var dragElt = document.createElement('div');
-        dragElt.style.border = 'dashed black 1px';
-        dragElt.style.width = '80px';
-        dragElt.style.height = '30px';
-        var ds = mxUtils.makeDraggable(img, graph, funct2, dragElt);
-        ds.isGuidesEnabled = function()
-        {
+        // Creates the compoent which is used as the draggabmle element (drag source)
+        var comp = document.getElementById(String(id));
+        /* Create draggable element */
+        var ds = mxUtils.makeDraggable(comp, graph, funct);
+        ds.isGuidesEnabled = function () {
             return graph.graphHandler.guidesEnabled;
         };
 

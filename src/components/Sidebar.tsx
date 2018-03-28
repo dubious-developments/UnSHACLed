@@ -11,7 +11,7 @@ class SideBar extends React.Component<SidebarProps, any> {
     ];
     static SHACLMenuItems = ["Shape", "Node Shape", "Property Shape"];
     static GeneralMenuItems = ["Arrow", "Rectangle"];
-    static TemplateMenuItems = ["Building", "Person"];
+    static TemplateMenuItems = ["Address", "Person"];
 
     constructor(props: any) {
         super(props);
@@ -130,7 +130,7 @@ class SideBar extends React.Component<SidebarProps, any> {
                                 onChange={this.handleChange}
                                 type="text"
                                 value={this.state.value}
-                                placeholder="Search . . ."
+                                placeholder="Search components . . ."
                                 inverted={true}
                                 transparent={true}
                                 icon="search"
@@ -141,21 +141,14 @@ class SideBar extends React.Component<SidebarProps, any> {
                             SHACL
                             <this.DynamicMenu kind="SHACL"/>
                         </Menu.Item>
-
-                        <Menu.Item>
+{/*                        <Menu.Item>
                             General
                             <this.DynamicMenu kind="General"/>
-                        </Menu.Item>
-
+                        </Menu.Item>*/}
                         <Menu.Item>
                             Template
                             <this.DynamicMenu kind="Template"/>
                         </Menu.Item>
-
-                        <Menu.Item>
-                            <Button id="t"> TAB </Button>
-                        </Menu.Item>
-
                     </div>
                 ) : (
                     <Menu.Item>
