@@ -526,8 +526,13 @@ class MxGraph extends React.Component<any, any> {
             container.focus();
 
             /* Toolbar functionality */
-            // Delete function
             this.addToolbarButton(editor, toolbar, 'delete', '', 'delete');
+            this.addToolbarButton(editor, toolbar, 'undo', '', 'undo');
+            this.addToolbarButton(editor, toolbar, 'redo', '', 'redo');
+            this.addToolbarButton(editor, toolbar, 'show', '', 'camera');
+            this.addToolbarButton(editor, toolbar, 'zoomIn', '+', 'zoom in');
+            this.addToolbarButton(editor, toolbar, 'zoomOut', '-', 'zoom out');
+
             // Sets initial scrollbar positions
             window.setTimeout(
                 function () {
