@@ -487,7 +487,7 @@ class MxGraph extends React.Component<any, any> {
                 b.arrows.forEach(target => {
                     let v1 = blockDict.getValue(b);
                     let v2 = blockDict.getValue(target);
-                    
+
                     let newRow =  model.cloneCell(row);
                     let name = (target.blockType === "NodeShape" ? "sh:node" : "sh:property" ) + ": " + target.name;
                     newRow.value = {name: name};
@@ -525,8 +525,8 @@ class MxGraph extends React.Component<any, any> {
 
                     v1.value = b;
                     v1.style = b.blockType;
-                    v1.geometry.x = 20 + 100 * edgeElements;
-                    v1.geometry.y = 20;
+                    // v1.geometry.x = 20 + 100 * edgeElements;
+                    // v1.geometry.y = 20;
                     v1.geometry.width += longestname * 4;
                     graph.addCell(v1, parent);
 
@@ -543,6 +543,10 @@ class MxGraph extends React.Component<any, any> {
                 graph.setSelectionCell(v1);
                 return v1;
             }
+
+            let layout = new mxStackLayout(graph, false, 35);
+            layout.execute(graph.getDefaultParent());
+            
             // save graph into state
             this.saveGraph(graph);
 
