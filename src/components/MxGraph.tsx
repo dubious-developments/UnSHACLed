@@ -3,7 +3,8 @@ import { Button, Segment } from 'semantic-ui-react';
 import { MxGraphProps } from './interfaces/interfaces';
 import * as Collections from "typescript-collections";
 
-declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor: any;
+declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor, 
+    mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout: any;
 
 declare function require(name: string): any;
 
@@ -51,29 +52,6 @@ schema:AddressShape\n\
         sh:minInclusive 10000 ;\n\
         sh:maxInclusive 99999 ;\n\
     ] .';
-
-let resources = new Collections.DefaultDictionary<any, Collections.DefaultDictionary<any, Array<any>>>
-(() => new Collections.DefaultDictionary<any, Array<any>>
-(() => [], (key) => key.termType + key.value),
- (key) => key.termType + key.value);
-
-function traverseResource(resource: any) {
-    let result = [];
-
-    resources.getValue(resource).forEach(function (predicate: any, objects: Array<any>) {
-        for (let object of objects) {
-            if (object.hasOwnProperty("value")) {
-                result.push([resource.value, predicate.value, object.value]);
-            } else {
-                result.push([resource.value, predicate.value, object]);
-            }
-
-            traverseResource(object).forEach(res => result.push(res));
-        }
-    });
-
-    return result;
-}
 
 class MxGraph extends React.Component<any, any> {
     constructor(props: string) {
@@ -194,36 +172,51 @@ class MxGraph extends React.Component<any, any> {
             let mimeType = 'text/turtle';
             let store = $rdf.graph();
 
-            $rdf.parse(dataGraph, store, uri, mimeType);
-
-            let triples = store.statementsMatching(undefined, undefined, undefined);
-            let topLevel = new Collections.Set<any>((item) => item.value);
-            let downLevel = new Collections.Set<any>((item) => item.value);
-
-            for (let triple of triples) {
-                resources.getValue(triple.subject).getValue(triple.predicate).push(triple.object);
-
-                topLevel.add(triple.subject);
-                if (triple.object.hasOwnProperty("elements")) {
-                    for (let elem of triple.object.elements) {
-                        downLevel.add(elem);
-                    }
-                } else {
-                    downLevel.add(triple.object);
-                }
-            }
-
-            topLevel.difference(downLevel);
-
             // let DASH = $rdf.Namespace("http://datashapes.org/dash#");
-            // let RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+            let RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
             // let RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
             // let SCHEMA = $rdf.Namespace("http://schema.org/");
-            // let SH = $rdf.Namespace("http://www.w3.org/ns/shacl#");
+            let SH = $rdf.Namespace("http://www.w3.org/ns/shacl#");
             // let XSD = $rdf.Namespace("http://www.w3.org/2001/XMLSchema#");
 
             // visualisation should start from the resources in topLevel,
             // since all other resources are dependant on them
+
+            $rdf.parse(dataGraph, store, uri, mimeType);
+
+            let triples = store.statementsMatching(undefined, undefined, undefined);
+
+            let resources = new Collections.Dictionary<any, Block>();
+            triples.forEach( function (resource: any) {
+                if (! resources.containsKey(resource.subject)) {
+                    resources.setValue(resource.subject, new Block());
+                }
+            });
+
+            triples.forEach( function (resource: any) {
+                // console.log(resource.subject.value, resource.predicate.value, resource.object.value);
+                let subject = resource.subject;
+                let predicate = resource.predicate;
+                let object = resource.object;
+                let subjectBlock = resources.getValue(subject);
+                let objectBlock = resources.getValue(object);
+
+                if (predicate.uri === SH("property").uri) {
+                    subjectBlock.arrows.push(objectBlock);
+                    objectBlock.blockType = "Property";
+                } else if (predicate.uri === SH("node").uri) {
+                    subjectBlock.arrows.push(objectBlock);
+                } else if (predicate.uri === RDF("type").uri && object.uri === SH("NodeShape").uri) {
+                    subjectBlock.blockType = "NodeShape";
+                    subjectBlock.name = subject.uri;
+                } else if (predicate.uri === SH("path").uri) {
+                    subjectBlock.name = object.uri;
+                } else {
+                    subjectBlock.traits.push([predicate.uri, object.toString()]);
+                }
+            });
+
+            let blocks = resources.values();
 
             let editor = new mxEditor();
 
@@ -440,13 +433,12 @@ class MxGraph extends React.Component<any, any> {
             
             this.configureStylesheet(graph);
 
-            let shapeObject = new Shape('new shape');
-            let shape = new mxCell(shapeObject, new mxGeometry(0, 0, 200, 28), 'shape');
-            shape.setVertex(true);
+            let blockObject = new Block();
+            let block = new mxCell(blockObject, new mxGeometry(0, 0, 200, 28));
+            block.setVertex(true);
 
-            let rowObject = new Row('new row');
+            let rowObject = new Row();
             let row = new mxCell(rowObject, new mxGeometry(0, 0, 0, 26), 'row');
-
             row.setVertex(true);
             row.setConnectable(false);
 
@@ -482,45 +474,19 @@ class MxGraph extends React.Component<any, any> {
                 return !this.isSwimlane(cell) && !this.model.isEdge(cell);
             };
 
-            topLevel.forEach(function (resource: any) {
-                // todo visualise using `resources` to iterate triples store, type: {subject: {predicate: [object]}}
-                let triplesArr = traverseResource(resource);
-                for (let s of convertTriplesToShapes(triplesArr)) {
-                    addShape(s);
-                }
-            });
+            blocks.forEach(bl => addBlock(bl));
 
-            function convertTriplesToShapes(tripArr: any): any {
-                let result = [];
-                let temp = [];
-                for (let t of tripArr) {
-                    if (t[1] === "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
-                        && t[2] === "http://www.w3.org/ns/shacl#NodeShape") {
-                            if (temp.length > 0) {
-                                result.push(temp);
-                                temp = [];
-                            }
-                        }
-                    temp.push(t);
-                }
-                result.push(temp);
-                return result;
-            }
-
-            function addShape(t: Array<Array<string>>) {
-                let v1 = model.cloneCell(shape);
+            function addBlock(b: Block) {
+                let v1 = model.cloneCell(block);
                 // Adds cells to the model in a single step
                 model.beginUpdate();
                 try {
-
-                    let shapeName = t[0][0];
                     let longestname = 0;
-                    t.forEach(trip => {
+                    b.traits.forEach(trait => {
                         let temprow = model.cloneCell(row);
-                        let name = trip[0] !== shapeName ? trip[0] + " : " : "";
-                        name += trip[1] + " : " + trip[2];
+                        let name = trait[0] + ": " + trait[1];
                         longestname = Math.max(name.length, longestname);
-                        temprow.value = {name: name, triple: trip};
+                        temprow.value = {name: name, trait: trait};
                         v1.insert(temprow);
                     });
 
@@ -531,8 +497,9 @@ class MxGraph extends React.Component<any, any> {
                         }
                     }
 
-                    v1.value = {name: shapeName};
-                    v1.geometry.x = 20 + 700 * edgeElements;
+                    v1.value = b;
+                    v1.style = b.blockType;
+                    v1.geometry.x = 20 + 100 * edgeElements;
                     v1.geometry.y = 20;
                     v1.geometry.width += longestname * 4;
                     graph.addCell(v1, parent);
@@ -599,7 +566,23 @@ class MxGraph extends React.Component<any, any> {
         style[mxConstants.STYLE_FONTSIZE] = '12';
         style[mxConstants.STYLE_FONTSTYLE] = 1;
         style[mxConstants.STYLE_SHADOW] = 1;
-        graph.getStylesheet().putCellStyle('shape', style);
+        graph.getStylesheet().putCellStyle('NodeShape', style);
+
+        style = new Object();
+        style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_SWIMLANE;
+        style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
+        style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
+        style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_TOP;
+        style[mxConstants.STYLE_FILLCOLOR] = '#2FBF71';
+        style[mxConstants.STYLE_SWIMLANE_FILLCOLOR] = '#ffffff';
+        style[mxConstants.STYLE_STROKECOLOR] = '#2FBF71';
+        style[mxConstants.STYLE_FONTCOLOR] = '#000000';
+        style[mxConstants.STYLE_STROKEWIDTH] = '1';
+        style[mxConstants.STYLE_STARTSIZE] = '28';
+        style[mxConstants.STYLE_FONTSIZE] = '12';
+        style[mxConstants.STYLE_FONTSTYLE] = 1;
+        style[mxConstants.STYLE_SHADOW] = 1;
+        graph.getStylesheet().putCellStyle('Property', style);
 
         style = new Object();
         style[mxConstants.STYLE_STROKEWIDTH] = '1';
@@ -629,11 +612,15 @@ class MxGraph extends React.Component<any, any> {
     }
 }
 
-class Shape {
-    name: string;
+class Block {
+    public arrows: Array<Block>;
+    public traits: Array<Array<string>>;
+    public blockType: string;
+    public name: string;
 
-    constructor(name: string) {
-        this.name = name;
+    constructor() {
+        this.arrows = [];
+        this.traits = [];
     }
  
     clone() {
@@ -644,10 +631,6 @@ class Shape {
 class Row {
     name: string;
 
-    constructor(name: string) {
-        this.name = name;
-    }
- 
     clone() {
         return mxUtils.clone(this);
     }
