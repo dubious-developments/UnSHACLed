@@ -1,57 +1,55 @@
-'use strict';
-
-var jsonParser = function () {
+var jsonParser = (function () {
   return {
-    parseJSON: function parseJSON(data, source, store) {
-      var subject, predicate, object;
-      var bnodes = {};
-      var why = store.sym(source);
+    parseJSON: function (data, source, store) {
+      var subject, predicate, object
+      var bnodes = {}
+      var why = store.sym(source)
       for (var x in data) {
         if (x.indexOf('_:') === 0) {
           if (bnodes[x]) {
-            subject = bnodes[x];
+            subject = bnodes[x]
           } else {
-            subject = store.bnode(x);
-            bnodes[x] = subject;
+            subject = store.bnode(x)
+            bnodes[x] = subject
           }
         } else {
-          subject = store.sym(x);
+          subject = store.sym(x)
         }
-        var preds = data[x];
+        var preds = data[x]
         for (var y in preds) {
-          var objects = preds[y];
-          predicate = store.sym(y);
+          var objects = preds[y]
+          predicate = store.sym(y)
           for (var z in objects) {
-            var obj = objects[z];
+            var obj = objects[z]
             if (obj.type === 'uri') {
-              object = store.sym(obj.value);
-              store.add(subject, predicate, object, why);
+              object = store.sym(obj.value)
+              store.add(subject, predicate, object, why)
             } else if (obj.type === 'BlankNode') {
               if (bnodes[obj.value]) {
-                object = bnodes[obj.value];
+                object = bnodes[obj.value]
               } else {
-                object = store.bnode(obj.value);
-                bnodes[obj.value] = object;
+                object = store.bnode(obj.value)
+                bnodes[obj.value] = object
               }
-              store.add(subject, predicate, object, why);
+              store.add(subject, predicate, object, why)
             } else if (obj.type === 'Literal') {
               // var datatype
               if (obj.datatype) {
-                object = store.literal(obj.value, undefined, store.sym(obj.datatype));
+                object = store.literal(obj.value, undefined, store.sym(obj.datatype))
               } else if (obj.lang) {
-                object = store.literal(obj.value, obj.lang);
+                object = store.literal(obj.value, obj.lang)
               } else {
-                object = store.literal(obj.value);
+                object = store.literal(obj.value)
               }
-              store.add(subject, predicate, object, why);
+              store.add(subject, predicate, object, why)
             } else {
-              throw new Error('error: unexpected termtype: ' + z.type);
+              throw new Error('error: unexpected termtype: ' + z.type)
             }
           }
         }
       }
     }
-  };
-}();
+  }
+})()
 
-module.exports = jsonParser;
+module.exports = jsonParser

@@ -1,81 +1,53 @@
-'use strict';
+'use strict'
 /**
  * The superclass of all RDF Statement objects, that is
  * NamedNode, Literal, BlankNode, etc.
  * @class Node
  */
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Node = function () {
-  function Node() {
-    _classCallCheck(this, Node);
+class Node {
+  substitute (bindings) {
+    console.log('@@@ node substitute' + this)
+    return this
   }
-
-  _createClass(Node, [{
-    key: 'substitute',
-    value: function substitute(bindings) {
-      console.log('@@@ node substitute' + this);
-      return this;
+  compareTerm (other) {
+    if (this.classOrder < other.classOrder) {
+      return -1
     }
-  }, {
-    key: 'compareTerm',
-    value: function compareTerm(other) {
-      if (this.classOrder < other.classOrder) {
-        return -1;
-      }
-      if (this.classOrder > other.classOrder) {
-        return +1;
-      }
-      if (this.value < other.value) {
-        return -1;
-      }
-      if (this.value > other.value) {
-        return +1;
-      }
-      return 0;
+    if (this.classOrder > other.classOrder) {
+      return +1
     }
-  }, {
-    key: 'equals',
-    value: function equals(other) {
-      if (!other) {
-        return false;
-      }
-      return this.termType === other.termType && this.value === other.value;
+    if (this.value < other.value) {
+      return -1
     }
-  }, {
-    key: 'hashString',
-    value: function hashString() {
-      return this.toCanonical();
+    if (this.value > other.value) {
+      return +1
     }
-  }, {
-    key: 'sameTerm',
-    value: function sameTerm(other) {
-      return this.equals(other);
+    return 0
+  }
+  equals (other) {
+    if (!other) {
+      return false
     }
-  }, {
-    key: 'toCanonical',
-    value: function toCanonical() {
-      return this.toNT();
-    }
-  }, {
-    key: 'toNT',
-    value: function toNT() {
-      return this.toString();
-    }
-  }, {
-    key: 'toString',
-    value: function toString() {
-      throw new Error('Node.toString() is abstract - see the subclasses instead');
-    }
-  }]);
-
-  return Node;
-}();
-
-module.exports = Node;
+    return (this.termType === other.termType) &&
+      (this.value === other.value)
+  }
+  hashString () {
+    return this.toCanonical()
+  }
+  sameTerm (other) {
+    return this.equals(other)
+  }
+  toCanonical () {
+    return this.toNT()
+  }
+  toNT () {
+    return this.toString()
+  }
+  toString () {
+    throw new Error('Node.toString() is abstract - see the subclasses instead')
+  }
+}
+module.exports = Node
 
 /**
  * Creates an RDF Node from a native javascript value.
@@ -85,20 +57,19 @@ module.exports = Node;
  * @param value {Node|Date|String|Number|Boolean|Undefined}
  * @return {Node|Collection}
  */
-Node.fromValue = function fromValue(value) {
-  var Collection = require('./collection');
-  var Literal = require('./literal');
-  var NamedNode = require('./named-node');
+Node.fromValue = function fromValue (value) {
+  const Collection = require('./collection')
+  const Literal = require('./literal')
+  const NamedNode = require('./named-node')
   if (typeof value === 'undefined' || value === null) {
-    return value;
+    return value
   }
-  var isNode = value && value.termType;
-  if (isNode) {
-    // a Node subclass or a Collection
-    return value;
+  const isNode = value && value.termType
+  if (isNode) {  // a Node subclass or a Collection
+    return value
   }
   if (Array.isArray(value)) {
-    return new Collection(value);
+    return new Collection(value)
   }
-  return Literal.fromValue(value);
-};
+  return Literal.fromValue(value)
+}

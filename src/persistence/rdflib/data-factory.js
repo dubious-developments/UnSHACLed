@@ -1,79 +1,72 @@
-'use strict';
+'use strict'
+const BlankNode = require('./blank-node')
+const Collection = require('./collection')
+const DefaultGraph = require('./default-graph')
+const Fetcher = require('./fetcher')
+import IndexedFormula from './indexed-formula'
+const Literal = require('./literal')
+const NamedNode = require('./named-node')
+const Statement = require('./statement')
+const Variable = require('./variable')
 
-var _indexedFormula = require('./indexed-formula');
-
-var _indexedFormula2 = _interopRequireDefault(_indexedFormula);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var BlankNode = require('./blank-node');
-var Collection = require('./collection');
-var DefaultGraph = require('./default-graph');
-var Fetcher = require('./fetcher');
-
-var Literal = require('./literal');
-var NamedNode = require('./named-node');
-var Statement = require('./statement');
-var Variable = require('./variable');
-
-function blankNode(value) {
-  return new BlankNode(value);
+function blankNode (value) {
+  return new BlankNode(value)
 }
-function collection(elements) {
-  return new Collection(elements);
+function collection (elements) {
+  return new Collection(elements)
 }
-function defaultGraph() {
-  return new DefaultGraph();
+function defaultGraph () {
+  return new DefaultGraph()
 }
-function fetcher(store, options) {
-  return new Fetcher(store, options);
+function fetcher (store, options) {
+  return new Fetcher(store, options)
 }
-function graph() {
-  return new _indexedFormula2.default();
+function graph () {
+  return new IndexedFormula()
 }
-function lit(val, lang, dt) {
-  return new Literal('' + val, lang, dt);
+function lit (val, lang, dt) {
+  return new Literal('' + val, lang, dt)
 }
-function literal(value, languageOrDatatype) {
+function literal (value, languageOrDatatype) {
   if (typeof languageOrDatatype === 'string') {
     if (languageOrDatatype.indexOf(':') === -1) {
-      return new Literal(value, languageOrDatatype);
+      return new Literal(value, languageOrDatatype)
     } else {
-      return new Literal(value, null, namedNode(languageOrDatatype));
+      return new Literal(value, null, namedNode(languageOrDatatype))
     }
   } else {
-    return new Literal(value, null, languageOrDatatype);
+    return new Literal(value, null, languageOrDatatype)
   }
 }
-function namedNode(value) {
-  return new NamedNode(value);
+function namedNode (value) {
+  return new NamedNode(value)
 }
-function quad(subject, predicate, object, graph) {
-  graph = graph || new DefaultGraph();
-  return new Statement(subject, predicate, object, graph);
+function quad (subject, predicate, object, graph) {
+  graph = graph || new DefaultGraph()
+  return new Statement(subject, predicate, object, graph)
 }
-function st(subject, predicate, object, graph) {
-  return new Statement(subject, predicate, object, graph);
+function st (subject, predicate, object, graph) {
+  return new Statement(subject, predicate, object, graph)
 }
-function triple(subject, predicate, object) {
-  return quad(subject, predicate, object);
+function triple (subject, predicate, object) {
+  return quad(subject, predicate, object)
 }
-function variable(name) {
-  return new Variable(name);
+function variable (name) {
+  return new Variable(name)
 }
 
 // rdfjs spec factory methods
-module.exports.blankNode = blankNode;
-module.exports.defaultGraph = defaultGraph;
-module.exports.graph = graph;
-module.exports.literal = literal;
-module.exports.namedNode = namedNode;
-module.exports.quad = quad;
-module.exports.triple = triple;
-module.exports.variable = variable;
+module.exports.blankNode = blankNode
+module.exports.defaultGraph = defaultGraph
+module.exports.graph = graph
+module.exports.literal = literal
+module.exports.namedNode = namedNode
+module.exports.quad = quad
+module.exports.triple = triple
+module.exports.variable = variable
 
 // rdflib only
-module.exports.collection = collection;
-module.exports.fetcher = fetcher;
-module.exports.lit = lit;
-module.exports.st = st;
+module.exports.collection = collection
+module.exports.fetcher = fetcher
+module.exports.lit = lit
+module.exports.st = st

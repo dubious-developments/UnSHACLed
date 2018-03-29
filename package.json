@@ -2,6 +2,9 @@
   "name": "dp2",
   "version": "0.1.0",
   "private": true,
+  "babel": {
+    "presets": ["es2015"]
+  },
   "dependencies": {
     "file-saver": "^1.3.3",
     "n3": "^0.11.2",
@@ -35,6 +38,7 @@
     "@types/node": "^9.4.6",
     "@types/react": "^16.0.38",
     "@types/react-dom": "^16.0.4",
+    "babel-cli": "^6.26.0",
     "browser-sync": "^2.17.3",
     "browserify": "^14.0.0",
     "gulp": "^3.9.1",
