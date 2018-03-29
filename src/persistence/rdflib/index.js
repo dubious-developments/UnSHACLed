@@ -1,4 +1,10 @@
-import IndexedFormula from './indexed-formula'
+'use strict';
+
+var _indexedFormula = require('./indexed-formula');
+
+var _indexedFormula2 = _interopRequireDefault(_indexedFormula);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var $rdf = {
   BlankNode: require('./blank-node'),
@@ -8,7 +14,7 @@ var $rdf = {
   Empty: require('./empty'),
   Fetcher: require('./fetcher'),
   Formula: require('./formula'),
-  IndexedFormula,
+  IndexedFormula: _indexedFormula2.default,
   jsonParser: require('./jsonparser'),
   Literal: require('./literal'),
   log: require('./log'),
@@ -33,24 +39,24 @@ var $rdf = {
   uri: require('./uri'),
   Util: require('./util'),
   Variable: require('./variable')
-}
+};
 
-$rdf.NextId = $rdf.BlankNode.nextId
+$rdf.NextId = $rdf.BlankNode.nextId;
 
-$rdf.fromNT = $rdf.Formula.prototype.fromNT
-$rdf.fetcher = $rdf.DataFactory.fetcher
-$rdf.graph = $rdf.DataFactory.graph
-$rdf.lit = $rdf.DataFactory.lit
-$rdf.st = $rdf.DataFactory.st
-$rdf.sym = $rdf.DataFactory.namedNode
-$rdf.variable = $rdf.DataFactory.variable
+$rdf.fromNT = $rdf.Formula.prototype.fromNT;
+$rdf.fetcher = $rdf.DataFactory.fetcher;
+$rdf.graph = $rdf.DataFactory.graph;
+$rdf.lit = $rdf.DataFactory.lit;
+$rdf.st = $rdf.DataFactory.st;
+$rdf.sym = $rdf.DataFactory.namedNode;
+$rdf.variable = $rdf.DataFactory.variable;
 
 // RDFJS DataFactory interface
-$rdf.blankNode = $rdf.DataFactory.blankNode
-$rdf.defaultGraph = $rdf.DataFactory.defaultGraph
-$rdf.literal = $rdf.DataFactory.literal
-$rdf.namedNode = $rdf.DataFactory.namedNode
-$rdf.quad = $rdf.DataFactory.quad
-$rdf.triple = $rdf.DataFactory.triple
+$rdf.blankNode = $rdf.DataFactory.blankNode;
+$rdf.defaultGraph = $rdf.DataFactory.defaultGraph;
+$rdf.literal = $rdf.DataFactory.literal;
+$rdf.namedNode = $rdf.DataFactory.namedNode;
+$rdf.quad = $rdf.DataFactory.quad;
+$rdf.triple = $rdf.DataFactory.triple;
 
-module.exports = $rdf
+module.exports = $rdf;

@@ -1,3 +1,5 @@
+'use strict';
+
 /*
  * Implements URI-specific functions
  *
@@ -8,177 +10,177 @@
  *   http://www.w3.org/2000/10/swap/uripath.py
  *
  */
-var alert = alert || console.log
+var alert = alert || console.log;
 
-module.exports.docpart = docpart
-module.exports.document = document
-module.exports.hostpart = hostpart
-module.exports.join = join
-module.exports.protocol = protocol
-module.exports.refTo = refTo
+module.exports.docpart = docpart;
+module.exports.document = document;
+module.exports.hostpart = hostpart;
+module.exports.join = join;
+module.exports.protocol = protocol;
+module.exports.refTo = refTo;
 
-const NamedNode = require('./named-node')
+var NamedNode = require('./named-node');
 
-function docpart (uri) {
-  var i
-  i = uri.indexOf('#')
+function docpart(uri) {
+  var i;
+  i = uri.indexOf('#');
   if (i < 0) {
-    return uri
+    return uri;
   } else {
-    return uri.slice(0, i)
+    return uri.slice(0, i);
   }
 }
 
-function document (x) {
-  return new NamedNode(docpart(x.uri))
+function document(x) {
+  return new NamedNode(docpart(x.uri));
 }
 
-function hostpart (u) {
-  var m = /[^\/]*\/\/([^\/]*)\//.exec(u)
+function hostpart(u) {
+  var m = /[^\/]*\/\/([^\/]*)\//.exec(u);
   if (m) {
-    return m[1]
+    return m[1];
   } else {
-    return ''
+    return '';
   }
 }
 
-function join (given, base) {
-  var baseColon, baseScheme, baseSingle
-  var colon, lastSlash, path
-  var baseHash = base.indexOf('#')
+function join(given, base) {
+  var baseColon, baseScheme, baseSingle;
+  var colon, lastSlash, path;
+  var baseHash = base.indexOf('#');
   if (baseHash > 0) {
-    base = base.slice(0, baseHash)
+    base = base.slice(0, baseHash);
   }
   if (given.length === 0) {
-    return base
+    return base;
   }
   if (given.indexOf('#') === 0) {
-    return base + given
+    return base + given;
   }
-  colon = given.indexOf(':')
+  colon = given.indexOf(':');
   if (colon >= 0) {
-    return given
+    return given;
   }
-  baseColon = base.indexOf(':')
+  baseColon = base.indexOf(':');
   if (base.length === 0) {
-    return given
+    return given;
   }
   if (baseColon < 0) {
-    alert('Invalid base: ' + base + ' in join with given: ' + given)
-    return given
+    alert('Invalid base: ' + base + ' in join with given: ' + given);
+    return given;
   }
-  baseScheme = base.slice(0, +baseColon + 1 || 9e9)
+  baseScheme = base.slice(0, +baseColon + 1 || 9e9);
   if (given.indexOf('//') === 0) {
-    return baseScheme + given
+    return baseScheme + given;
   }
   if (base.indexOf('//', baseColon) === baseColon + 1) {
-    baseSingle = base.indexOf('/', baseColon + 3)
+    baseSingle = base.indexOf('/', baseColon + 3);
     if (baseSingle < 0) {
       if (base.length - baseColon - 3 > 0) {
-        return base + '/' + given
+        return base + '/' + given;
       } else {
-        return baseScheme + given
+        return baseScheme + given;
       }
     }
   } else {
-    baseSingle = base.indexOf('/', baseColon + 1)
+    baseSingle = base.indexOf('/', baseColon + 1);
     if (baseSingle < 0) {
       if (base.length - baseColon - 1 > 0) {
-        return base + '/' + given
+        return base + '/' + given;
       } else {
-        return baseScheme + given
+        return baseScheme + given;
       }
     }
   }
   if (given.indexOf('/') === 0) {
-    return base.slice(0, baseSingle) + given
+    return base.slice(0, baseSingle) + given;
   }
-  path = base.slice(baseSingle)
-  lastSlash = path.lastIndexOf('/')
+  path = base.slice(baseSingle);
+  lastSlash = path.lastIndexOf('/');
   if (lastSlash < 0) {
-    return baseScheme + given
+    return baseScheme + given;
   }
   if (lastSlash >= 0 && lastSlash < path.length - 1) {
-    path = path.slice(0, +lastSlash + 1 || 9e9)
+    path = path.slice(0, +lastSlash + 1 || 9e9);
   }
-  path += given
+  path += given;
   while (path.match(/[^\/]*\/\.\.\//)) {
-    path = path.replace(/[^\/]*\/\.\.\//, '')
+    path = path.replace(/[^\/]*\/\.\.\//, '');
   }
-  path = path.replace(/\.\//g, '')
-  path = path.replace(/\/\.$/, '/')
-  return base.slice(0, baseSingle) + path
+  path = path.replace(/\.\//g, '');
+  path = path.replace(/\/\.$/, '/');
+  return base.slice(0, baseSingle) + path;
 }
 
-function protocol (uri) {
-  var i
-  i = uri.indexOf(':')
+function protocol(uri) {
+  var i;
+  i = uri.indexOf(':');
   if (i < 0) {
-    return null
+    return null;
   } else {
-    return uri.slice(0, i)
+    return uri.slice(0, i);
   }
 }
 
-function refTo (base, uri) {
-  var c, i, k, l, len, len1, n, o, p, q, ref, ref1, s
-  var commonHost = new RegExp('^[-_a-zA-Z0-9.]+:(//[^/]*)?/[^/]*$')
+function refTo(base, uri) {
+  var c, i, k, l, len, len1, n, o, p, q, ref, ref1, s;
+  var commonHost = new RegExp('^[-_a-zA-Z0-9.]+:(//[^/]*)?/[^/]*$');
   if (!base) {
-    return uri
+    return uri;
   }
   if (base === uri) {
-    return ''
+    return '';
   }
   for (i = o = 0, len = uri.length; o < len; i = ++o) {
-    c = uri[i]
+    c = uri[i];
     if (c !== base[i]) {
-      break
+      break;
     }
   }
   if (base.slice(0, i).match(commonHost)) {
-    k = uri.indexOf('//')
+    k = uri.indexOf('//');
     if (k < 0) {
-      k = -2
+      k = -2;
     }
-    l = uri.indexOf('/', k + 2)
+    l = uri.indexOf('/', k + 2);
     if (uri[l + 1] !== '/' && base[l + 1] !== '/' && uri.slice(0, l) === base.slice(0, l)) {
-      return uri.slice(l)
+      return uri.slice(l);
     }
   }
   if (uri[i] === '#' && base.length === i) {
-    return uri.slice(i)
+    return uri.slice(i);
   }
   while (i > 0 && uri[i - 1] !== '/') {
-    i--
+    i--;
   }
   if (i < 3) {
-    return uri
+    return uri;
   }
   if (base.indexOf('//', i - 2) > 0 || uri.indexOf('//', i - 2) > 0) {
-    return uri
+    return uri;
   }
   if (base.indexOf(':', i) > 0) {
-    return uri
+    return uri;
   }
-  n = 0
-  ref = base.slice(i)
+  n = 0;
+  ref = base.slice(i);
   for (p = 0, len1 = ref.length; p < len1; p++) {
-    c = ref[p]
+    c = ref[p];
     if (c === '/') {
-      n++
+      n++;
     }
   }
   if (n === 0 && i < uri.length && uri[i] === '#') {
-    return './' + uri.slice(i)
+    return './' + uri.slice(i);
   }
   if (n === 0 && i === uri.length) {
-    return './'
+    return './';
   }
-  s = ''
+  s = '';
   if (n > 0) {
     for (q = 1, ref1 = n; ref1 >= 1 ? q <= ref1 : q >= ref1; ref1 >= 1 ? ++q : --q) {
-      s += '../'
+      s += '../';
     }
   }
-  return s + uri.slice(i)
+  return s + uri.slice(i);
 }

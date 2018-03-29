@@ -1,3 +1,5 @@
+'use strict';
+
 var ClassOrder = {
   'Literal': 1,
   'Collection': 3,
@@ -5,6 +7,6 @@ var ClassOrder = {
   'NamedNode': 5,
   'BlankNode': 6,
   'Variable': 7
-}
+};
 
-module.exports = ClassOrder
+module.exports = ClassOrder;

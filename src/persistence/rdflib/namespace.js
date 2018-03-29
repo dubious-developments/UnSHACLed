@@ -1,9 +1,11 @@
-const NamedNode = require('./named-node')
+'use strict';
 
-function Namespace (nsuri) {
+var NamedNode = require('./named-node');
+
+function Namespace(nsuri) {
   return function (ln) {
-    return new NamedNode(nsuri + (ln || ''))
-  }
+    return new NamedNode(nsuri + (ln || ''));
+  };
 }
 
-module.exports = Namespace
+module.exports = Namespace;

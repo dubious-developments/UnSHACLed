@@ -1,67 +1,91 @@
-'use strict'
-const ClassOrder = require('./class-order')
-const Node = require('./node')
+'use strict';
 
-class BlankNode extends Node {
-  constructor (id) {
-    super()
-    this.termType = BlankNode.termType
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ClassOrder = require('./class-order');
+var Node = require('./node');
+
+var BlankNode = function (_Node) {
+  _inherits(BlankNode, _Node);
+
+  function BlankNode(id) {
+    _classCallCheck(this, BlankNode);
+
+    var _this = _possibleConstructorReturn(this, (BlankNode.__proto__ || Object.getPrototypeOf(BlankNode)).call(this));
+
+    _this.termType = BlankNode.termType;
 
     if (id) {
       if (typeof id !== 'string') {
-        console.log('Bad blank id:', id)
-        throw new Error('Bad id argument to new blank node: ' + id)
+        console.log('Bad blank id:', id);
+        throw new Error('Bad id argument to new blank node: ' + id);
       }
       if (id.indexOf('#') >= 0) {
         // Is a URI with hash fragment
-        let fragments = id.split('#')
-        id = fragments[fragments.length - 1]
+        var fragments = id.split('#');
+        id = fragments[fragments.length - 1];
       }
-      this.id = id
+      _this.id = id;
       // this.id = '' + BlankNode.nextId++
     } else {
-      this.id = 'n' + BlankNode.nextId++
+      _this.id = 'n' + BlankNode.nextId++;
     }
 
-    this.value = this.id
+    _this.value = _this.id;
+    return _this;
   }
 
-  compareTerm (other) {
-    if (this.classOrder < other.classOrder) {
-      return -1
+  _createClass(BlankNode, [{
+    key: 'compareTerm',
+    value: function compareTerm(other) {
+      if (this.classOrder < other.classOrder) {
+        return -1;
+      }
+      if (this.classOrder > other.classOrder) {
+        return +1;
+      }
+      if (this.id < other.id) {
+        return -1;
+      }
+      if (this.id > other.id) {
+        return +1;
+      }
+      return 0;
     }
-    if (this.classOrder > other.classOrder) {
-      return +1
+  }, {
+    key: 'copy',
+    value: function copy(formula) {
+      // depends on the formula
+      var bnodeNew = new BlankNode();
+      formula.copyTo(this, bnodeNew);
+      return bnodeNew;
     }
-    if (this.id < other.id) {
-      return -1
+  }, {
+    key: 'toCanonical',
+    value: function toCanonical() {
+      return '_:' + this.value;
     }
-    if (this.id > other.id) {
-      return +1
+  }, {
+    key: 'toString',
+    value: function toString() {
+      return BlankNode.NTAnonymousNodePrefix + this.id;
     }
-    return 0
-  }
+  }]);
 
-  copy (formula) { // depends on the formula
-    var bnodeNew = new BlankNode()
-    formula.copyTo(this, bnodeNew)
-    return bnodeNew
-  }
+  return BlankNode;
+}(Node);
 
-  toCanonical () {
-    return '_:' + this.value
-  }
+BlankNode.nextId = 0;
+BlankNode.termType = 'BlankNode';
+BlankNode.NTAnonymousNodePrefix = '_:';
+BlankNode.prototype.classOrder = ClassOrder['BlankNode'];
+BlankNode.prototype.isBlank = 1;
+BlankNode.prototype.isVar = 1;
 
-  toString () {
-    return BlankNode.NTAnonymousNodePrefix + this.id
-  }
-}
-
-BlankNode.nextId = 0
-BlankNode.termType = 'BlankNode'
-BlankNode.NTAnonymousNodePrefix = '_:'
-BlankNode.prototype.classOrder = ClassOrder['BlankNode']
-BlankNode.prototype.isBlank = 1
-BlankNode.prototype.isVar = 1
-
-module.exports = BlankNode
+module.exports = BlankNode;
