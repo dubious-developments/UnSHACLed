@@ -1,5 +1,4 @@
-import IndexedFormula from "./rdflib/indexed-formula";
-import Statement from "./rdflib/statement";
+import {IndexedFormula, Statement} from "rdflib";
 
 /**
  * A wrapper class for library-specific triple stores.

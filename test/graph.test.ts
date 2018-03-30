@@ -1,5 +1,5 @@
 import SHACLValidator from "../src/conformance/shacl";
-import Statement from "../src/persistence/rdflib/statement";
+import {Statement} from "rdflib";
 import {Graph} from "../src/persistence/graph";
 import {GraphParser} from "../src/persistence/graphParser";
 
