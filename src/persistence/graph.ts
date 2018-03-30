@@ -42,7 +42,7 @@ export class Graph {
      */
     public addTriple(subject: string, predicate: string, object: string) {
         this.persistentStore.addTriple(subject, predicate, object);
-        this.validationStore.add(new Statement(subject, predicate, object, null));
+        this.validationStore.add(new Statement(subject, predicate, object, this.validationStore));
     }
 
     /**
@@ -63,7 +63,7 @@ export class Graph {
     public addTriples(triples: Array<any>) {
         this.persistentStore.addTriples(triples);
         triples.forEach(t => {
-            this.validationStore.add(new Statement(t.subject, t.predicate, t.object, null));
+            this.validationStore.add(new Statement(t.subject, t.predicate, t.object, this.validationStore));
         });
     }
 
