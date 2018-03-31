@@ -6,7 +6,7 @@ module.exports = {
                     '>1%',
                     'last 4 versions',
                     'Firefox ESR',
-                    'IE 11',
+                    'Explorer 11',
                     'not ie < 9']
             }
         }]
