@@ -170,7 +170,7 @@ class MxGraph extends React.Component<any, any> {
 
             $rdf.parse(dataGraph, store, uri, mimeType);
 
-            let triples = store.statementsMatching(undefined, undefined, undefined);
+            let triples = store.statementsMatching(undefined, undefined, undefined, undefined, false);
 
             let resources = new Collections.Dictionary<any, Block>();
             triples.forEach(function (resource: any) {
@@ -220,7 +220,7 @@ class MxGraph extends React.Component<any, any> {
                 layout.resizeParent = true;
 
                 // Overrides the function to always return true
-                layout.isVertexMovable = function (cell: any) {
+                layout.isVertexMovable = function () {
                     return true;
                 };
 
@@ -236,7 +236,7 @@ class MxGraph extends React.Component<any, any> {
                 }
             };
 
-            document.onkeyup = function (evt: KeyboardEvent) {
+            document.onkeyup = function () {
                 graph.panningHandler.ignoreCell = false;
             };
 
@@ -308,7 +308,7 @@ class MxGraph extends React.Component<any, any> {
                     this.scale * layout.height * page.height);
             };
 
-            graph.getPreferredPageSize = function (bounds: any, width: number, height: number) {
+            graph.getPreferredPageSize = function () {
                 let pages = this.getPageLayout();
                 let size = this.getPageSize();
 
@@ -444,6 +444,7 @@ class MxGraph extends React.Component<any, any> {
                     // Clones the value for correct undo/redo
                     let elt = cell.value.cloneNode(true);
                     elt.setAttribute('label', newValue);
+                    newValue = elt;
                 }
 
                 superCellLabelChanged.apply(this, arguments);
@@ -572,7 +573,7 @@ class MxGraph extends React.Component<any, any> {
     }
 
     configureStylesheet(graph: any) {
-        let style = new Object();
+        let style = {};
         style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RECTANGLE;
         style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
         style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_LEFT;
@@ -585,7 +586,7 @@ class MxGraph extends React.Component<any, any> {
         style[mxConstants.STYLE_IMAGE_HEIGHT] = '48';
         graph.getStylesheet().putDefaultVertexStyle(style);
 
-        style = new Object();
+        style = {};
         style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_SWIMLANE;
         style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
         style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
@@ -601,7 +602,7 @@ class MxGraph extends React.Component<any, any> {
         style[mxConstants.STYLE_SHADOW] = 1;
         graph.getStylesheet().putCellStyle('NodeShape', style);
 
-        style = new Object();
+        style = {};
         style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_SWIMLANE;
         style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
         style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
@@ -617,7 +618,7 @@ class MxGraph extends React.Component<any, any> {
         style[mxConstants.STYLE_SHADOW] = 1;
         graph.getStylesheet().putCellStyle('Property', style);
 
-        style = new Object();
+        style = {};
         style[mxConstants.STYLE_STROKEWIDTH] = '1';
         style[mxConstants.STYLE_STROKECOLOR] = '#A1E44D';
         graph.getStylesheet().putCellStyle('row', style);
@@ -631,7 +632,7 @@ class MxGraph extends React.Component<any, any> {
 
     addToolbarButton(editor: any, toolbar: any, action: any, label: any, id: any) {
         let button = document.getElementById(String(id));
-        mxEvent.addListener(button, 'click', function (evt: any) {
+        mxEvent.addListener(button, 'click', function () {
             editor.execute(action);
         });
         mxUtils.write(button, label);
