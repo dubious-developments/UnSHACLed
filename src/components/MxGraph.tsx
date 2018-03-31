@@ -58,7 +58,9 @@ class MxGraph extends React.Component<any, any> {
             test: "Shape",
             preview: null,
             dragElement: null,
-            dragElList: ["Shape", "Node Shape", "Property Shape", "Address", "Person"]
+            dragElList: ["Shape", "Node Shape", "Property Shape", "Address", "Person"],
+            nameToStandardCellDict: new Collections.Dictionary<string, any>(),
+            blockToCellDict: new Collections.Dictionary<Block, any>((b) => b.name)
         };
         this.handleLoad = this.handleLoad.bind(this);
         this.saveGraph = this.saveGraph.bind(this);
@@ -414,21 +416,18 @@ class MxGraph extends React.Component<any, any> {
                     graph.container.style.cursor = 'default';
                 }
             );
-
-            // Gets the default parent for inserting new cells. This
-            // is normally the first child of the root (ie. layer 0).
-            let parent = graph.getDefaultParent();
-
             this.configureStylesheet(graph);
 
             let blockObject = new Block();
             let block = new mxCell(blockObject, new mxGeometry(0, 0, 250, 28));
             block.setVertex(true);
+            this.state.nameToStandardCellDict.setValue('block', block);
 
             let rowObject = new Row();
             let row = new mxCell(rowObject, new mxGeometry(0, 0, 0, 26), 'row');
             row.setVertex(true);
             row.setConnectable(false);
+            this.state.nameToStandardCellDict.setValue('row', row);
 
             // Returns the name field of the user object for the label
             graph.convertValueToString = function (cell: any) {
@@ -463,73 +462,11 @@ class MxGraph extends React.Component<any, any> {
                 return !this.isSwimlane(cell) && !this.model.isEdge(cell);
             };
 
-            let blockDict = new Collections.Dictionary<Block, any>((b) => b.name);
             blocks.forEach(bl => {
-                blockDict.setValue(bl, addBlock(bl));
+                this.state.blockToCellDict.setValue(bl, this.addBlock(graph, bl));
             });
 
-            blocks.forEach(bl => {
-                addArrows(bl);
-            });
-
-            function addArrows(b: Block) {
-                b.arrows.forEach(target => {
-                    let v1 = blockDict.getValue(b);
-                    let v2 = blockDict.getValue(target);
-
-                    let newRow =  model.cloneCell(row);
-                    let name = (target.blockType === "NodeShape" ? "sh:node" : "sh:property" ) + ": " + target.name;
-                    newRow.value = {name: name};
-                    v1.insert(newRow);
-
-                    model.beginUpdate();
-                    try {
-                        graph.insertEdge(parent, null, '', newRow, v2);
-                    } finally {
-                        model.endUpdate();
-                    }
-                });
-            }
-
-            function addBlock(b: Block) {
-                let v1 = model.cloneCell(block);
-                // Adds cells to the model in a single step
-                model.beginUpdate();
-                try {
-                    let longestname = 0;
-                    b.traits.forEach(trait => {
-                        let temprow = model.cloneCell(row);
-                        let name = trait[0] + ": " + trait[1];
-                        longestname = Math.max(name.length, longestname);
-                        temprow.value = {name: name, trait: trait};
-                        v1.insert(temprow);
-                    });
-
-                    let edgeElements = 0;
-                    for (let i = 0; i < graph.model.getChildCount(parent); i++) {
-                        if (!graph.model.isEdge(graph.model.getChildAt(parent, i))) {
-                            edgeElements++;
-                        }
-                    }
-
-                    v1.value = b;
-                    v1.style = b.blockType;
-                    v1.geometry.width += longestname * 4;
-                    graph.addCell(v1, parent);
-
-                    v1.geometry.alternateBounds =
-                        new mxRectangle(0, 0, v1.geometry.width, v1.geometry.height);
-                } finally {
-                    // save graph into state
-                    // this.saveGraph(graph);
-
-                    // Updates the display
-                    model.endUpdate();
-                }
-
-                graph.setSelectionCell(v1);
-                return v1;
-            }
+            blocks.forEach(bl => this.addArrows(graph, bl));
 
             let layout = new mxStackLayout(graph, false, 35);
             layout.execute(graph.getDefaultParent());
@@ -570,6 +507,73 @@ class MxGraph extends React.Component<any, any> {
                 0
             );
         }
+    }
+
+    addBlock(graph: any, b: Block) {
+        let model = graph.getModel();
+
+        // Gets the default parent for inserting new cells. This
+        // is normally the first child of the root (ie. layer 0).
+        let parent = graph.getDefaultParent();
+
+        let v1 = model.cloneCell(this.state.nameToStandardCellDict.getValue('block'));
+
+        // Adds cells to the model in a single step
+        model.beginUpdate();
+        try {
+            let longestname = 0;
+            b.traits.forEach(trait => {
+                let temprow = model.cloneCell(this.state.nameToStandardCellDict.getValue('row'));
+                let name = trait[0] + ": " + trait[1];
+                longestname = Math.max(name.length, longestname);
+                temprow.value = {name: name, trait: trait};
+                v1.insert(temprow);
+            });
+
+            let edgeElements = 0;
+            for (let i = 0; i < model.getChildCount(parent); i++) {
+                if (!model.isEdge(model.getChildAt(parent, i))) {
+                    edgeElements++;
+                }
+            }
+
+            v1.value = b;
+            v1.style = b.blockType;
+            v1.geometry.width += longestname * 4;
+            graph.addCell(v1, parent);
+
+            v1.geometry.alternateBounds =
+                new mxRectangle(0, 0, v1.geometry.width, v1.geometry.height);
+        } finally {
+            // save graph into state
+            // this.saveGraph(graph);
+
+            // Updates the display
+            model.endUpdate();
+        }
+
+        graph.setSelectionCell(v1);
+        return v1;
+    }
+
+    addArrows(graph: any, b: Block) {
+        b.arrows.forEach(target => {
+            let model = graph.getModel();
+            let v1 = this.state.blockToCellDict.getValue(b);
+            let v2 = this.state.blockToCellDict.getValue(target);
+
+            let newRow =  model.cloneCell(this.state.nameToStandardCellDict.getValue('row'));
+            let name = (target.blockType === "NodeShape" ? "sh:node" : "sh:property" ) + ": " + target.name;
+            newRow.value = {name: name};
+            v1.insert(newRow);
+
+            model.beginUpdate();
+            try {
+                graph.insertEdge(graph.getDefaultParent(), null, '', newRow, v2);
+            } finally {
+                model.endUpdate();
+            }
+        });
     }
 
     configureStylesheet(graph: any) {
