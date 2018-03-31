@@ -31,7 +31,7 @@ class Workspace extends React.Component<any, any> {
 
     render() {
         const {menuVisible} = this.state;
-        const {dragid} = this.state
+        const {dragid} = this.state;
         return (
             <Sidebar.Pushable style={{width: '100%', height: '100%'}}>
                 <SideBar visible={menuVisible} callback={this.idCallback}/>
