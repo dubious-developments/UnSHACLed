@@ -191,19 +191,21 @@ class MxGraph extends React.Component<any, any> {
                 let subjectBlock = resources.getValue(subject);
                 let objectBlock = resources.getValue(object);
 
-                if (predicate.uri === SH("property").uri) {
-                    subjectBlock.arrows.push(objectBlock);
-                    objectBlock.blockType = "Property";
-                } else if (predicate.uri === SH("node").uri) {
-                    subjectBlock.arrows.push(objectBlock);
-                } else if (predicate.uri === RDF("type").uri && object.uri === SH("NodeShape").uri) {
-                    subjectBlock.blockType = "NodeShape";
-                    subjectBlock.name = subject.uri;
-                } else if (predicate.uri === SH("path").uri) {
-                    subjectBlock.name = object.uri;
-                } else {
-                    // todo parse Collections of graphs
-                    subjectBlock.traits.push([predicate.uri, object.toString()]);
+                if (objectBlock && subjectBlock) {
+                    if (predicate.uri === SH("property").uri) {
+                        subjectBlock.arrows.push(objectBlock);
+                        objectBlock.blockType = "Property";
+                    } else if (predicate.uri === SH("node").uri) {
+                        subjectBlock.arrows.push(objectBlock);
+                    } else if (predicate.uri === RDF("type").uri && object.uri === SH("NodeShape").uri) {
+                        subjectBlock.blockType = "NodeShape";
+                        subjectBlock.name = subject.uri;
+                    } else if (predicate.uri === SH("path").uri) {
+                        subjectBlock.name = object.uri;
+                    } else {
+                        // todo parse Collections of graphs
+                        subjectBlock.traits.push([predicate.uri, object.toString()]);
+                    }
                 }
             });
 
@@ -659,7 +661,7 @@ class MxGraph extends React.Component<any, any> {
 
             /* Create empty row */
             let temprow = model.cloneCell(row);
-            temprow.value = {name: "new property ", trait: "null"};
+            temprow.value = {name: "", trait: "null"};
             b.traits = [temprow];
 
             model.beginUpdate();
