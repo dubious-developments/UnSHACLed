@@ -78,7 +78,10 @@ module.exports = function(config) {
                 //
                 // During CI builds, we'll just make sure Chrome's actually installed if
                 // karma-detect-browser advertises it.
-                let undesirables = process.env.CI ? ['PhantomJS'] : ['PhantomJS', 'Chrome'];
+                let undesirables = ['PhantomJS', 'IE'];
+                if (!process.env.CI) {
+                    undesirables.push('Chrome');
+                }
 
                 // Remove undesirables if another browser has been detected.
                 for (let i = 0; i < undesirables.length; i++) {
