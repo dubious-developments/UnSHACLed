@@ -148,365 +148,344 @@ class MxGraph extends React.Component<any, any> {
 
     }
 
-    main(container: HTMLElement | null): void {
-        // Checks if the browser is supported
-        if (!container) {
-            mxUtils.error('Could not find \'graphContainer\'', 200, false);
-        } else if (!mxClient.isBrowserSupported()) {
-            mxUtils.error('Browser is not supported!', 200, false);
-        } else {
+    extendCanvas(graph: any) {
+        /**
+         * Specifies the size of the size for "tiles" to be used for a graph with
+         * scrollbars but no visible background page. A good value is large
+         * enough to reduce the number of repaints that is caused for auto-
+         * translation, which depends on this value, and small enough to give
+         * a small empty buffer around the graph. Default is 400x400.
+         */
+        graph.scrollTileSize = new mxRectangle(0, 0, 400, 400);
 
-            let uri = 'https://example.org/resource.ttl';
-            let mimeType = 'text/turtle';
-            let store = $rdf.graph();
+        /**
+         * Returns the padding for pages in page view with scrollbars.
+         */
+        graph.getPagePadding = function () {
+            return new mxPoint(
+                Math.max(0, Math.round(graph.container.offsetWidth - 34)),
+                Math.max(0, Math.round(graph.container.offsetHeight - 34)));
+        };
 
-            // let DASH = $rdf.Namespace("http://datashapes.org/dash#");
-            let RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-            // let RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
-            // let SCHEMA = $rdf.Namespace("http://schema.org/");
-            let SH = $rdf.Namespace("http://www.w3.org/ns/shacl#");
-            // let XSD = $rdf.Namespace("http://www.w3.org/2001/XMLSchema#");
+        /**
+         * Returns the size of the page format scaled with the page size.
+         */
+        graph.getPageSize = function () {
+            return (this.pageVisible) ?
+                new mxRectangle(
+                    0, 0,
+                    this.pageFormat.width * this.pageScale, this.pageFormat.height * this.pageScale)
+                : this.scrollTileSize;
+        };
 
-            // visualisation should start from the resources in topLevel,
-            // since all other resources are dependant on them
+        /**
+         * Returns a rectangle describing the position and count of the
+         * background pages, where x and y are the position of the top,
+         * left page and width and height are the vertical and horizontal
+         * page count.
+         */
+        graph.getPageLayout = function () {
+            let size = (this.pageVisible) ? this.getPageSize() : this.scrollTileSize;
+            let bounds = this.getGraphBounds();
+            if (bounds.width === 0 || bounds.height === 0) {
+                return new mxRectangle(0, 0, 1, 1);
+            } else {
+                // Computes untransformed graph bounds
+                let x = Math.ceil(bounds.x / this.view.scale - this.view.translate.x);
+                let y = Math.ceil(bounds.y / this.view.scale - this.view.translate.y);
+                let w = Math.floor(bounds.width / this.view.scale);
+                let h = Math.floor(bounds.height / this.view.scale);
 
-            $rdf.parse(dataGraph, store, uri, mimeType);
+                let x0 = Math.floor(x / size.width);
+                let y0 = Math.floor(y / size.height);
+                let w0 = Math.ceil((x + w) / size.width) - x0;
+                let h0 = Math.ceil((y + h) / size.height) - y0;
 
-            let triples = store.statementsMatching(undefined, undefined, undefined, undefined, false);
+                return new mxRectangle(x0, y0, w0, h0);
+            }
+        };
 
-            let resources = new Collections.Dictionary<any, Block>();
-            triples.forEach(function (resource: any) {
-                if (!resources.containsKey(resource.subject)) {
-                    resources.setValue(resource.subject, new Block());
-                }
-            });
+        // Fits the number of background pages to the graph
+        graph.view.getBackgroundPageBounds = function () {
+            let layout = this.graph.getPageLayout();
+            let page = this.graph.getPageSize();
 
-            triples.forEach(function (resource: any) {
-                // console.log(resource.subject.value, resource.predicate.value, resource.object.value);
-                let subject = resource.subject;
-                let predicate = resource.predicate;
-                let object = resource.object;
-                let subjectBlock = resources.getValue(subject);
-                let objectBlock = resources.getValue(object);
+            return new mxRectangle(
+                this.scale * (this.translate.x + layout.x * page.width),
+                this.scale * (this.translate.y + layout.y * page.height),
+                this.scale * layout.width * page.width,
+                this.scale * layout.height * page.height);
+        };
 
-                if (subjectBlock) {
-                    if (predicate.uri === SH("property").uri && objectBlock) {
-                        subjectBlock.arrows.push(objectBlock);
-                        objectBlock.blockType = "Property";
-                    } else if (predicate.uri === SH("node").uri && objectBlock) {
-                        subjectBlock.arrows.push(objectBlock);
-                    } else if (predicate.uri === RDF("type").uri && object.uri === SH("NodeShape").uri) {
-                        subjectBlock.blockType = "NodeShape";
-                        subjectBlock.name = subject.uri;
-                    } else if (predicate.uri === SH("path").uri) {
-                        subjectBlock.name = object.uri;
-                    } else {
-                        // todo parse Collections of graphs
-                        subjectBlock.traits.push([predicate.uri, object.toString()]);
-                    }
-                }
-            });
+        graph.getPreferredPageSize = function () {
+            let pages = this.getPageLayout();
+            let size = this.getPageSize();
 
-            let blocks = resources.values();
-            let editor = new mxEditor();
+            return new mxRectangle(0, 0, pages.width * size.width, pages.height * size.height);
+        };
 
-            // Creates the graph inside the given container
-            editor.setGraphContainer(container);
-            let graph = editor.graph;
-            let model = graph.getModel();
+        /**
+         * Guesses autoTranslate to avoid another repaint (see below).
+         * Works if only the scale of the graph changes or if pages
+         * are visible and the visible pages do not change.
+         */
+        let graphViewValidate = graph.view.validate;
+        graph.view.validate = function () {
+            if (this.graph.container !== null && mxUtils.hasScrollbars(this.graph.container)) {
+                let pad = this.graph.getPagePadding();
+                let size = this.graph.getPageSize();
 
-            editor.layoutSwimlanes = true;
-            editor.createSwimlaneLayout = function () {
-                let layout = new mxStackLayout(this.graph, false);
-                layout.fill = true;
-                layout.resizeParent = true;
-
-                // Overrides the function to always return true
-                layout.isVertexMovable = function () {
-                    return true;
-                };
-
-                return layout;
-            };
-
-            graph.panningHandler.ignoreCell = false;
-            graph.setPanning(true);
-
-            document.onkeydown = function (evt: KeyboardEvent) {
-                if (evt.altKey) {
-                    graph.panningHandler.ignoreCell = true;
-                }
-            };
-
-            document.onkeyup = function () {
-                graph.panningHandler.ignoreCell = false;
-            };
-
-            /**
-             * Specifies the size of the size for "tiles" to be used for a graph with
-             * scrollbars but no visible background page. A good value is large
-             * enough to reduce the number of repaints that is caused for auto-
-             * translation, which depends on this value, and small enough to give
-             * a small empty buffer around the graph. Default is 400x400.
-             */
-            graph.scrollTileSize = new mxRectangle(0, 0, 400, 400);
-
-            /**
-             * Returns the padding for pages in page view with scrollbars.
-             */
-            graph.getPagePadding = function () {
-                return new mxPoint(
-                    Math.max(0, Math.round(graph.container.offsetWidth - 34)),
-                    Math.max(0, Math.round(graph.container.offsetHeight - 34)));
-            };
-
-            /**
-             * Returns the size of the page format scaled with the page size.
-             */
-            graph.getPageSize = function () {
-                return (this.pageVisible) ?
-                    new mxRectangle(
-                        0, 0,
-                        this.pageFormat.width * this.pageScale, this.pageFormat.height * this.pageScale)
-                    : this.scrollTileSize;
-            };
-
-            /**
-             * Returns a rectangle describing the position and count of the
-             * background pages, where x and y are the position of the top,
-             * left page and width and height are the vertical and horizontal
-             * page count.
-             */
-            graph.getPageLayout = function () {
-                let size = (this.pageVisible) ? this.getPageSize() : this.scrollTileSize;
-                let bounds = this.getGraphBounds();
-                if (bounds.width === 0 || bounds.height === 0) {
-                    return new mxRectangle(0, 0, 1, 1);
-                } else {
-                    // Computes untransformed graph bounds
-                    let x = Math.ceil(bounds.x / this.view.scale - this.view.translate.x);
-                    let y = Math.ceil(bounds.y / this.view.scale - this.view.translate.y);
-                    let w = Math.floor(bounds.width / this.view.scale);
-                    let h = Math.floor(bounds.height / this.view.scale);
-
-                    let x0 = Math.floor(x / size.width);
-                    let y0 = Math.floor(y / size.height);
-                    let w0 = Math.ceil((x + w) / size.width) - x0;
-                    let h0 = Math.ceil((y + h) / size.height) - y0;
-
-                    return new mxRectangle(x0, y0, w0, h0);
-                }
-            };
-
-            // Fits the number of background pages to the graph
-            graph.view.getBackgroundPageBounds = function () {
-                let layout = this.graph.getPageLayout();
-                let page = this.graph.getPageSize();
-
-                return new mxRectangle(
-                    this.scale * (this.translate.x + layout.x * page.width),
-                    this.scale * (this.translate.y + layout.y * page.height),
-                    this.scale * layout.width * page.width,
-                    this.scale * layout.height * page.height);
-            };
-
-            graph.getPreferredPageSize = function () {
-                let pages = this.getPageLayout();
-                let size = this.getPageSize();
-
-                return new mxRectangle(0, 0, pages.width * size.width, pages.height * size.height);
-            };
-
-            /**
-             * Guesses autoTranslate to avoid another repaint (see below).
-             * Works if only the scale of the graph changes or if pages
-             * are visible and the visible pages do not change.
-             */
-            let graphViewValidate = graph.view.validate;
-            graph.view.validate = function () {
-                if (this.graph.container !== null && mxUtils.hasScrollbars(this.graph.container)) {
-                    let pad = this.graph.getPagePadding();
-                    let size = this.graph.getPageSize();
-
-                    // Updating scrollbars here causes flickering in quirks and is not needed
-                    // if zoom method is always used to set the current scale on the graph.
-                    this.translate.x = pad.x / this.scale - (this.x0 || 0) * size.width;
-                    this.translate.y = pad.y / this.scale - (this.y0 || 0) * size.height;
-                }
-
-                graphViewValidate.apply(this, arguments);
-            };
-
-            let graphSizeDidChange = graph.sizeDidChange;
-            graph.sizeDidChange = function () {
-                if (this.container !== null && mxUtils.hasScrollbars(this.container)) {
-                    let pages = this.getPageLayout();
-                    let pad = this.getPagePadding();
-                    let size = this.getPageSize();
-
-                    // Updates the minimum graph size
-                    let minw = Math.ceil(2 * pad.x / this.view.scale + pages.width * size.width);
-                    let minh = Math.ceil(2 * pad.y / this.view.scale + pages.height * size.height);
-
-                    let min = graph.minimumGraphSize;
-
-                    // LATER: Fix flicker of scrollbar size in IE quirks mode
-                    // after delayed call in window.resize event handler
-                    if (min === null || min.width !== minw || min.height !== minh) {
-                        graph.minimumGraphSize = new mxRectangle(0, 0, minw, minh);
-                    }
-
-                    // Updates auto-translate to include padding and graph size
-                    let dx = pad.x / this.view.scale - pages.x * size.width;
-                    let dy = pad.y / this.view.scale - pages.y * size.height;
-
-                    if (!this.autoTranslate && (this.view.translate.x !== dx || this.view.translate.y !== dy)) {
-                        this.autoTranslate = true;
-                        this.view.x0 = pages.x;
-                        this.view.y0 = pages.y;
-                        // NOTE: THIS INVOKES THIS METHOD AGAIN. UNFORTUNATELY THERE IS NO WAY AROUND THIS SINCE THE
-                        // BOUNDS ARE KNOWN AFTER THE VALIDATION AND SETTING THE TRANSLATE TRIGGERS A REVALIDATION.
-                        // SHOULD MOVE TRANSLATE/SCALE TO VIEW.
-                        let tx = graph.view.translate.x;
-                        let ty = graph.view.translate.y;
-                        graph.view.setTranslate(dx, dy);
-                        graph.container.scrollLeft += (dx - tx) * graph.view.scale;
-                        graph.container.scrollTop += (dy - ty) * graph.view.scale;
-                        this.autoTranslate = false;
-                        return;
-                    }
-                    graphSizeDidChange.apply(this, arguments);
-                }
-            };
-
-            // Only shapes/tables are movable
-            graph.isCellMovable = function (cell: any) {
-                return this.isSwimlane(cell);
-            };
-
-            // Only shapes/tables are resizable, this fixes the style
-            graph.isCellResizable = function (cell: any) {
-                return this.isSwimlane(cell);
-            };
-
-            // Enables rubberband selection
-            new mxRubberband(graph);
-
-            // // Adds mouse wheel handling for zoom
-            mxEvent.addMouseWheelListener((evt, up) => {
-                if (up && evt.altKey) {
-                    graph.zoomIn();
-                    mxEvent.consume(evt);
-                } else if (evt.altKey) {
-                    graph.zoomOut();
-                    mxEvent.consume(evt);
-                }
-            });
-
-            graph.panningHandler.addListener(
-                mxEvent.PAN_START,
-                function () {
-                    graph.container.style.cursor = 'move';
-                }
-            );
-
-            graph.panningHandler.addListener(
-                mxEvent.PAN_END,
-                function () {
-                    graph.container.style.cursor = 'default';
-                }
-            );
-            this.configureStylesheet(graph);
-
-            let blockObject = new Block();
-            let block = new mxCell(blockObject, new mxGeometry(0, 0, 250, 28));
-            block.setVertex(true);
-            this.state.nameToStandardCellDict.setValue('block', block);
-
-            let rowObject = new Row();
-            let row = new mxCell(rowObject, new mxGeometry(0, 0, 0, 26), 'row');
-            row.setVertex(true);
-            row.setConnectable(false);
-            this.state.nameToStandardCellDict.setValue('row', row);
-
-            // Returns the name field of the user object for the label
-            graph.convertValueToString = function (cell: any) {
-                if (cell.value != null && cell.value.name != null) {
-                    return cell.value.name;
-                }
-                return mxGraph.prototype.convertValueToString.apply(this, arguments); // "supercall"
-            };
-
-            let superCellLabelChanged = graph.cellLabelChanged;
-            graph.cellLabelChanged = function (cell: any, newValue: string, autoSize: any) {
-                if (mxUtils.isNode(cell.value.name)) {
-                    // Clones the value for correct undo/redo
-                    let elt = cell.value.cloneNode(true);
-                    elt.setAttribute('label', newValue);
-                    newValue = elt;
-                }
-
-                superCellLabelChanged.apply(this, arguments);
-            };
-
-            graph.getLabel = function (cell: any) {
-                if (this.isHtmlLabel(cell)) {
-                    return mxUtils.htmlEntities(cell.value.name);
-                }
-                return mxGraph.prototype.getLabel.apply(this, arguments);
-            };
-
-            // Properties are dynamically created HTML labels
-            // Returns true for properties and false for shapes
-            graph.isHtmlLabel = function (cell: any) {
-                return !this.isSwimlane(cell) && !this.model.isEdge(cell);
-            };
-
-            blocks.forEach(bl => {
-                this.state.blockToCellDict.setValue(bl, this.addBlock(graph, bl));
-            });
-
-            blocks.forEach(bl => this.addArrows(graph, bl));
-
-            let layout = new mxStackLayout(graph, false, 35);
-            layout.execute(graph.getDefaultParent());
-            
-            // save graph into state
-            this.saveGraph(graph);
-
-            this.initiateDragPreview();
-            container.focus();
-
-            /* Drag & drop */
-            let sidebar = document.getElementById("sideBarID");
-            for (let id of this.state.dragElList) {
-                this.addDraggableElement(graph, block, sidebar, id, model, row);
+                // Updating scrollbars here causes flickering in quirks and is not needed
+                // if zoom method is always used to set the current scale on the graph.
+                this.translate.x = pad.x / this.scale - (this.x0 || 0) * size.width;
+                this.translate.y = pad.y / this.scale - (this.y0 || 0) * size.height;
             }
 
-            /* Toolbar functionality */
-            this.addToolbarButton(editor, toolbar, 'delete', '', 'delete');
-            this.addToolbarButton(editor, toolbar, 'undo', '', 'undo');
-            this.addToolbarButton(editor, toolbar, 'redo', '', 'redo');
-            this.addToolbarButton(editor, toolbar, 'show', '', 'camera');
-            this.addToolbarButton(editor, toolbar, 'zoomIn', '+', 'zoom in');
-            this.addToolbarButton(editor, toolbar, 'zoomOut', '-', 'zoom out');
-            this.addToolbarButton(editor, toolbar, 'actualSize', '', 'actual size');
-            this.addToolbarButton(editor, toolbar, 'fit', '', 'fit');
+            graphViewValidate.apply(this, arguments);
+        };
 
-            // Sets initial scrollbar positions
-            window.setTimeout(
-                function () {
-                    let bounds = graph.getGraphBounds();
-                    let width = Math.max(bounds.width, graph.scrollTileSize.width * graph.view.scale);
-                    let height = Math.max(bounds.height, graph.scrollTileSize.height * graph.view.scale);
-                    graph.container.scrollTop =
-                        Math.floor(Math.max(0, bounds.y - Math.max(20, (graph.container.clientHeight - height) / 4)));
-                    graph.container.scrollLeft =
-                        Math.floor(Math.max(0, bounds.x - Math.max(0, (graph.container.clientWidth - width) / 2)));
-                },
-                0
-            );
-        }
+        let graphSizeDidChange = graph.sizeDidChange;
+        graph.sizeDidChange = function () {
+            if (this.container !== null && mxUtils.hasScrollbars(this.container)) {
+                let pages = this.getPageLayout();
+                let pad = this.getPagePadding();
+                let size = this.getPageSize();
+
+                // Updates the minimum graph size
+                let minw = Math.ceil(2 * pad.x / this.view.scale + pages.width * size.width);
+                let minh = Math.ceil(2 * pad.y / this.view.scale + pages.height * size.height);
+
+                let min = graph.minimumGraphSize;
+
+                // LATER: Fix flicker of scrollbar size in IE quirks mode
+                // after delayed call in window.resize event handler
+                if (min === null || min.width !== minw || min.height !== minh) {
+                    graph.minimumGraphSize = new mxRectangle(0, 0, minw, minh);
+                }
+
+                // Updates auto-translate to include padding and graph size
+                let dx = pad.x / this.view.scale - pages.x * size.width;
+                let dy = pad.y / this.view.scale - pages.y * size.height;
+
+                if (!this.autoTranslate && (this.view.translate.x !== dx || this.view.translate.y !== dy)) {
+                    this.autoTranslate = true;
+                    this.view.x0 = pages.x;
+                    this.view.y0 = pages.y;
+                    // NOTE: THIS INVOKES THIS METHOD AGAIN. UNFORTUNATELY THERE IS NO WAY AROUND THIS SINCE THE
+                    // BOUNDS ARE KNOWN AFTER THE VALIDATION AND SETTING THE TRANSLATE TRIGGERS A REVALIDATION.
+                    // SHOULD MOVE TRANSLATE/SCALE TO VIEW.
+                    let tx = graph.view.translate.x;
+                    let ty = graph.view.translate.y;
+                    graph.view.setTranslate(dx, dy);
+                    graph.container.scrollLeft += (dx - tx) * graph.view.scale;
+                    graph.container.scrollTop += (dy - ty) * graph.view.scale;
+                    this.autoTranslate = false;
+                    return;
+                }
+                graphSizeDidChange.apply(this, arguments);
+            }
+        };
+
+        // Sets initial scrollbar positions
+        window.setTimeout(
+            function () {
+                let bounds = graph.getGraphBounds();
+                let width = Math.max(bounds.width, graph.scrollTileSize.width * graph.view.scale);
+                let height = Math.max(bounds.height, graph.scrollTileSize.height * graph.view.scale);
+                graph.container.scrollTop =
+                    Math.floor(Math.max(0, bounds.y - Math.max(20, (graph.container.clientHeight - height) / 4)));
+                graph.container.scrollLeft =
+                    Math.floor(Math.max(0, bounds.x - Math.max(0, (graph.container.clientWidth - width) / 2)));
+            },
+            0
+        );
+    }
+    
+    /* ALT + SCROLL: zoom, ALT: panning */
+    initPeripheralHandling(graph: any) {
+        // // Adds mouse wheel handling for zoom
+        mxEvent.addMouseWheelListener((evt, up) => {
+            if (up && evt.altKey) {
+                graph.zoomIn();
+                mxEvent.consume(evt);
+            } else if (evt.altKey) {
+                graph.zoomOut();
+                mxEvent.consume(evt);
+            }
+        });
+
+        document.onkeydown = function (evt: KeyboardEvent) {
+            if (evt.altKey) {
+                graph.panningHandler.ignoreCell = true;
+            }
+        };
+
+        document.onkeyup = function () {
+            graph.panningHandler.ignoreCell = false;
+        };
+
+        graph.panningHandler.addListener(
+            mxEvent.PAN,
+            function () {
+                graph.container.style.cursor = 'move';
+            }
+        );
+
+        graph.panningHandler.addListener(
+            mxEvent.PAN_START,
+            function () {
+                graph.container.style.cursor = 'move';
+            }
+        );
+
+        graph.panningHandler.addListener(
+            mxEvent.PAN_END,
+            function () {
+                graph.container.style.cursor = 'default';
+            }
+        );
+    }
+    
+    configureCells(editor: any, graph: any) {
+        editor.layoutSwimlanes = true;
+        editor.createSwimlaneLayout = function () {
+            let layout = new mxStackLayout(this.graph, false);
+            layout.fill = true;
+            layout.resizeParent = true;
+
+            // Overrides the function to always return true
+            layout.isVertexMovable = function () {
+                return true;
+            };
+
+            return layout;
+        };
+
+        // Only shapes/tables are movable
+        graph.isCellMovable = function (cell: any) {
+            return this.isSwimlane(cell);
+        };
+
+        // Only shapes/tables are resizable, this fixes the style
+        graph.isCellResizable = function (cell: any) {
+            return this.isSwimlane(cell);
+        };
+    }
+
+    configureLabels(graph: any) {
+        // Returns the name field of the user object for the label
+        graph.convertValueToString = function (cell: any) {
+            if (cell.value != null && cell.value.name != null) {
+                return cell.value.name;
+            }
+            return mxGraph.prototype.convertValueToString.apply(this, arguments); // "supercall"
+        };
+
+        let superCellLabelChanged = graph.cellLabelChanged;
+        graph.cellLabelChanged = function (cell: any, newValue: string, autoSize: any) {
+            if (mxUtils.isNode(cell.value.name)) {
+                // Clones the value for correct undo/redo
+                let elt = cell.value.cloneNode(true);
+                elt.setAttribute('label', newValue);
+                newValue = elt;
+            }
+
+            superCellLabelChanged.apply(this, arguments);
+        };
+
+        graph.getLabel = function (cell: any) {
+            if (this.isHtmlLabel(cell)) {
+                return mxUtils.htmlEntities(cell.value.name);
+            }
+            return mxGraph.prototype.getLabel.apply(this, arguments);
+        };
+
+        // Properties are dynamically created HTML labels
+        // Returns true for properties and false for shapes
+        graph.isHtmlLabel = function (cell: any) {
+            return !this.isSwimlane(cell) && !this.model.isEdge(cell);
+        };
+
+    }
+
+    initStandardCells() {
+        let blockObject = new Block();
+        let block = new mxCell(blockObject, new mxGeometry(0, 0, 250, 28));
+        block.setVertex(true);
+        this.state.nameToStandardCellDict.setValue('block', block);
+
+        let rowObject = new Row();
+        let row = new mxCell(rowObject, new mxGeometry(0, 0, 0, 26), 'row');
+        row.setVertex(true);
+        row.setConnectable(false);
+        this.state.nameToStandardCellDict.setValue('row', row);
+    }
+
+    parseDataGraphToBlocks() {
+        let uri = 'https://example.org/resource.ttl';
+        let mimeType = 'text/turtle';
+        let store = $rdf.graph();
+
+        // let DASH = $rdf.Namespace("http://datashapes.org/dash#");
+        let RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+        // let RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
+        // let SCHEMA = $rdf.Namespace("http://schema.org/");
+        let SH = $rdf.Namespace("http://www.w3.org/ns/shacl#");
+        // let XSD = $rdf.Namespace("http://www.w3.org/2001/XMLSchema#");
+
+        // visualisation should start from the resources in topLevel,
+        // since all other resources are dependant on them
+
+        $rdf.parse(dataGraph, store, uri, mimeType);
+
+        let triples = store.statementsMatching(undefined, undefined, undefined, undefined, false);
+
+        let resources = new Collections.Dictionary<any, Block>();
+        triples.forEach(function (resource: any) {
+            if (!resources.containsKey(resource.subject)) {
+                resources.setValue(resource.subject, new Block());
+            }
+        });
+
+        triples.forEach(function (resource: any) {
+            // console.log(resource.subject.value, resource.predicate.value, resource.object.value);
+            let subject = resource.subject;
+            let predicate = resource.predicate;
+            let object = resource.object;
+            let subjectBlock = resources.getValue(subject);
+            let objectBlock = resources.getValue(object);
+
+            if (subjectBlock) {
+                if (predicate.uri === SH("property").uri && objectBlock) {
+                    subjectBlock.arrows.push(objectBlock);
+                    objectBlock.blockType = "Property";
+                } else if (predicate.uri === SH("node").uri && objectBlock) {
+                    subjectBlock.arrows.push(objectBlock);
+                } else if (predicate.uri === RDF("type").uri && object.uri === SH("NodeShape").uri) {
+                    subjectBlock.blockType = "NodeShape";
+                    subjectBlock.name = subject.uri;
+                } else if (predicate.uri === SH("path").uri) {
+                    subjectBlock.name = object.uri;
+                } else {
+                    // todo parse Collections of graphs
+                    subjectBlock.traits.push([predicate.uri, object.toString()]);
+                }
+            }
+        });
+
+        return resources.values();
+    }
+
+    visualizeDataGraph(graph: any) {
+        let blocks = this.parseDataGraphToBlocks();
+        blocks.forEach(bl => {
+            this.state.blockToCellDict.setValue(bl, this.addBlock(graph, bl));
+        });
+
+        blocks.forEach(bl => this.addArrows(graph, bl));
+
+        let layout = new mxStackLayout(graph, false, 35);
+        layout.execute(graph.getDefaultParent());
     }
 
     addBlock(graph: any, b: Block) {
@@ -634,6 +613,18 @@ class MxGraph extends React.Component<any, any> {
         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.EntityRelation;
     }
 
+    initToolBar(editor: any) {
+        /* Toolbar functionality */
+        this.addToolbarButton(editor, toolbar, 'delete', '', 'delete');
+        this.addToolbarButton(editor, toolbar, 'undo', '', 'undo');
+        this.addToolbarButton(editor, toolbar, 'redo', '', 'redo');
+        this.addToolbarButton(editor, toolbar, 'show', '', 'camera');
+        this.addToolbarButton(editor, toolbar, 'zoomIn', '+', 'zoom in');
+        this.addToolbarButton(editor, toolbar, 'zoomOut', '-', 'zoom out');
+        this.addToolbarButton(editor, toolbar, 'actualSize', '', 'actual size');
+        this.addToolbarButton(editor, toolbar, 'fit', '', 'fit');
+    }
+
     addToolbarButton(editor: any, toolbar: any, action: any, label: any, id: any) {
         let button = document.getElementById(String(id));
         mxEvent.addListener(button, 'click', function () {
@@ -642,10 +633,20 @@ class MxGraph extends React.Component<any, any> {
         mxUtils.write(button, label);
     }
 
-    addDraggableElement(graph: any, block: any, sidebar: any, id: any, model: any, row:any) {
+    initDragAndDrop(graph: any) {
+        let sidebar = document.getElementById("sideBarID");
+        for (let id of this.state.dragElList) {
+            this.addDraggableElement(graph, sidebar, id);
+        }
+    }
+
+    addDraggableElement(graph: any, sidebar: any, id: any) {
         // Function that is executed when the image is dropped on
         // the graph. The cell argument points to the cell under
         // the mousepointer if there is one.
+        let model = graph.getModel();
+        let block = this.state.nameToStandardCellDict.getValue('block');
+        let row = this.state.nameToStandardCellDict.getValue('row');
         let funct = function (g: any, evt: any, target: any, x: any, y: any) {
             let v1 = model.cloneCell(block);
             let parent = graph.getDefaultParent();
@@ -692,6 +693,39 @@ class MxGraph extends React.Component<any, any> {
 
         // Restores original drag icon while outside of graph
         ds.createDragElement = mxDragSource.prototype.createDragElement;
+    }
+
+    main(container: HTMLElement | null): void {
+        // Checks if the browser is supported
+        if (!container) {
+            mxUtils.error('Could not find \'graphContainer\'', 200, false);
+        } else if (!mxClient.isBrowserSupported()) {
+            mxUtils.error('Browser is not supported!', 200, false);
+        } else {
+            let editor = new mxEditor();
+
+            // Creates the graph inside the given container
+            editor.setGraphContainer(container);
+            let graph = editor.graph;
+
+            // Enable Panning
+            graph.panningHandler.ignoreCell = false;
+            graph.setPanning(true);
+
+            this.extendCanvas(graph);
+            new mxRubberband(graph); // Enables rubberband selection
+            this.initPeripheralHandling(graph);
+            this.configureStylesheet(graph);
+            this.configureCells(editor, graph);
+            this.configureLabels(graph);
+            this.initStandardCells();
+            this.visualizeDataGraph(graph);
+            this.saveGraph(graph);
+            this.initiateDragPreview();
+            this.initDragAndDrop(graph);
+            this.initToolBar(editor);
+            container.focus();
+        }
     }
 
     render() {
