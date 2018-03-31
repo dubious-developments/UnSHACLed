@@ -1,3 +1,5 @@
+const babelConfig = require('./babel-config');
+
 module.exports = function(config) {
     config.set({
         frameworks: ["jasmine", "karma-typescript", "detectBrowsers"],
@@ -24,7 +26,7 @@ module.exports = function(config) {
                     ]
                 },
                 transforms: [
-                    require("karma-typescript-es6-transform")()
+                    require("karma-typescript-es6-transform")(babelConfig)
                 ]
             },
             reports:
