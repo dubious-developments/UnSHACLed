@@ -3,10 +3,11 @@ module.exports = {
         ['env', {
             'targets': {
                 'browsers': [
-                '>1%',
-                'last 4 versions',
-                'Firefox ESR',
-                'not ie < 9']
+                    '>1%',
+                    'last 4 versions',
+                    'Firefox ESR',
+                    'IE 11',
+                    'not ie < 9']
             }
         }]
     ],
