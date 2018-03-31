@@ -25,6 +25,7 @@ const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const paths = require('react-scripts-ts/config/paths');
 const getClientEnvironment = require('react-scripts-ts/config/env');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const babelConfig = require("./babel-config");
 
 // Webpack uses `publicPath` to determine where the app is being served from.
 // It requires a trailing slash, or the file assets will get an incorrect path.
@@ -195,20 +196,7 @@ module.exports = {
             ],
             use: {
               loader: 'babel-loader',
-              options: {
-                presets: [
-                  ["env", {
-                    "targets": {
-                      "browsers": [
-                        '>1%',
-                        'last 4 versions',
-                        'Firefox ESR',
-                        'not ie < 9']
-                    }
-                  }]
-                ],
-                babelrc: false
-              }
+              options: babelConfig
             }
           },
           // The notation here is somewhat confusing.
