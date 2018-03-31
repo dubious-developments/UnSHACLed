@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Sidebar, Menu, Image, Input, Dropdown, Button} from 'semantic-ui-react';
+import {Sidebar, Menu, Image, Input, Dropdown} from 'semantic-ui-react';
 import TreeView from './treeView';
 import { SidebarProps } from './interfaces/interfaces';
 
@@ -30,7 +30,7 @@ class SideBar extends React.Component<SidebarProps, any> {
 
     getMenuItemsFiltered(kind: string, query: string) {
         // determine kind of submenu
-        var collection;
+        let collection;
         if (kind === "SHACL") {
             collection = SideBar.SHACLMenuItems;
         } else if (kind === "General") {
@@ -56,13 +56,13 @@ class SideBar extends React.Component<SidebarProps, any> {
      * In the props must specify the menu type
      */
     DynamicMenu(props: any) {
-        var kind = props.kind;
-        var query = this.state.value;
-        var items = new Array<JSX.Element>();
-        var res = this.getMenuItemsFiltered(kind, query);
+        let kind = props.kind;
+        let query = this.state.value;
+        let items = Array<JSX.Element>();
+        let res = this.getMenuItemsFiltered(kind, query);
 
-        for (var i = 0; i < res.length; i++) {
-            var key = kind + i;
+        for (let i = 0; i < res.length; i++) {
+            let key = kind + i;
             items.push(
                 <Menu.Item
                     as="a"
