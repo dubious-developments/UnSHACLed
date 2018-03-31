@@ -1,7 +1,5 @@
 import * as React from 'react';
-import {Button, Segment} from 'semantic-ui-react';
-import {MxGraphProps} from './interfaces/interfaces';
-import * as Collections from "typescript-collections";
+import * as Collections from 'typescript-collections';
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout: any;
@@ -191,11 +189,11 @@ class MxGraph extends React.Component<any, any> {
                 let subjectBlock = resources.getValue(subject);
                 let objectBlock = resources.getValue(object);
 
-                if (objectBlock && subjectBlock) {
-                    if (predicate.uri === SH("property").uri) {
+                if (subjectBlock) {
+                    if (predicate.uri === SH("property").uri && objectBlock) {
                         subjectBlock.arrows.push(objectBlock);
                         objectBlock.blockType = "Property";
-                    } else if (predicate.uri === SH("node").uri) {
+                    } else if (predicate.uri === SH("node").uri && objectBlock) {
                         subjectBlock.arrows.push(objectBlock);
                     } else if (predicate.uri === RDF("type").uri && object.uri === SH("NodeShape").uri) {
                         subjectBlock.blockType = "NodeShape";
@@ -210,7 +208,6 @@ class MxGraph extends React.Component<any, any> {
             });
 
             let blocks = resources.values();
-            console.log(blocks);
             let editor = new mxEditor();
 
             // Creates the graph inside the given container
