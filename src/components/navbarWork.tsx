@@ -2,7 +2,6 @@ import * as React from 'react';
 import {Menu, Icon} from 'semantic-ui-react';
 import Auth from "../services/Auth";
 import {Link} from 'react-router-dom';
-import {withRouter, RouteComponentProps} from 'react-router';
 import {NavbarWorkProps} from './interfaces/interfaces';
 
 class Navbar extends React.Component<NavbarWorkProps, {}> {
@@ -20,7 +19,7 @@ class Navbar extends React.Component<NavbarWorkProps, {}> {
     }
 
     uploadFileButton() {
-        var input = document.getElementById("importGraph");
+        let input = document.getElementById("importGraph");
         if (input) {
             input.click();
         } else {
@@ -85,10 +84,13 @@ class Navbar extends React.Component<NavbarWorkProps, {}> {
                     >
                         v0.3
                     </Menu.Item>
-                    <Menu.Item as="a" onClick={(event) => this.logoutButton(event)}>
-                        <Link to="/login"> Logout </Link>
+                    <Menu.Item
+                        as={Link}
+                        to="/login"
+                        onClick={(event) => this.logoutButton(event)}
+                    >
+                        Logout
                     </Menu.Item>
-
                 </Menu>
             </div>
         );
