@@ -78,9 +78,9 @@ class MxGraph extends React.Component<any, any> {
 
     insertCell(grph: any, evt: any, target: any, x: any, y: any) {
         const {test} = this.state;
-        var cell = new mxCell(test, new mxGeometry(0, 0, 80, 30));
+        let cell = new mxCell(test, new mxGeometry(0, 0, 80, 30));
         cell.vertex = true;
-        var cells = grph.importCells([cell], x, y, target);
+        let cells = grph.importCells([cell], x, y, target);
         if (cells != null && cells.length > 0) {
             grph.scrollCellToVisible(cells[0]);
             grph.setSelectionCells(cells);
@@ -95,7 +95,7 @@ class MxGraph extends React.Component<any, any> {
 
     initiateDragPreview() {
         // Creates the element that is being for the actual preview.
-        var dragElt = document.createElement('div');
+        let dragElt = document.createElement('div');
         dragElt.style.border = 'dashed black 1px';
         dragElt.style.width = '80px';
         dragElt.style.height = '30px';
@@ -106,9 +106,9 @@ class MxGraph extends React.Component<any, any> {
 
     getGraphUnderMouse(evt: any) {
         const {graph} = this.state;
-        var x = mxEvent.getClientX(evt);
-        var y = mxEvent.getClientY(evt);
-        var elt = document.elementFromPoint(x, y);
+        let x = mxEvent.getClientX(evt);
+        let y = mxEvent.getClientY(evt);
+        let elt = document.elementFromPoint(x, y);
         if (mxUtils.isAncestorNode(graph.container, elt)) {
             return graph;
         }
@@ -118,7 +118,7 @@ class MxGraph extends React.Component<any, any> {
     makeDragSource(dragElement: any) {
         const {preview} = this.state;
         const {graph} = this.state;
-        var ds = mxUtils.makeDraggable(
+        let ds = mxUtils.makeDraggable(
             dragElement, this.getGraphUnderMouse, this.insertCell, preview, null, null, graph.autoscroll, true
         );
 
@@ -506,8 +506,8 @@ class MxGraph extends React.Component<any, any> {
                         v1.insert(temprow);
                     });
 
-                    var edgeElements = 0;
-                    for (var i = 0; i < graph.model.getChildCount(parent); i++) {
+                    let edgeElements = 0;
+                    for (let i = 0; i < graph.model.getChildCount(parent); i++) {
                         if (!graph.model.isEdge(graph.model.getChildAt(parent, i))) {
                             edgeElements++;
                         }
@@ -542,7 +542,7 @@ class MxGraph extends React.Component<any, any> {
             container.focus();
 
             /* Drag & drop */
-            var sidebar = document.getElementById("sideBarID");
+            let sidebar = document.getElementById("sideBarID");
             for (let id of this.state.dragElList) {
                 this.addDraggableElement(graph, block, sidebar, id, model, row);
             }
@@ -632,7 +632,7 @@ class MxGraph extends React.Component<any, any> {
     }
 
     addToolbarButton(editor: any, toolbar: any, action: any, label: any, id: any) {
-        var button = document.getElementById(String(id));
+        let button = document.getElementById(String(id));
         mxEvent.addListener(button, 'click', function (evt: any) {
             editor.execute(action);
         });
@@ -643,7 +643,7 @@ class MxGraph extends React.Component<any, any> {
         // Function that is executed when the image is dropped on
         // the graph. The cell argument points to the cell under
         // the mousepointer if there is one.
-        var funct = function (g: any, evt: any, target: any, x: any, y: any) {
+        let funct = function (g: any, evt: any, target: any, x: any, y: any) {
             let v1 = model.cloneCell(block);
             let parent = graph.getDefaultParent();
             /* Set correct styling based on input */
@@ -680,9 +680,9 @@ class MxGraph extends React.Component<any, any> {
         };
 
         // Creates the compoent which is used as the draggabmle element (drag source)
-        var comp = document.getElementById(String(id));
+        let comp = document.getElementById(String(id));
         /* Create draggable element */
-        var ds = mxUtils.makeDraggable(comp, graph, funct);
+        let ds = mxUtils.makeDraggable(comp, graph, funct);
         ds.isGuidesEnabled = function () {
             return graph.graphHandler.guidesEnabled;
         };
