@@ -88,7 +88,7 @@ class MxGraph extends React.Component<any, any> {
     }
 
     setDragElement(dragid: string) {
-        this.setState((prevState, props) => ({
+        this.setState(() => ({
             dragElement: document.getElementById(dragid)
         }));
     }
@@ -99,7 +99,7 @@ class MxGraph extends React.Component<any, any> {
         dragElt.style.border = 'dashed black 1px';
         dragElt.style.width = '80px';
         dragElt.style.height = '30px';
-        this.setState((prevState, props) => ({
+        this.setState(() => ({
             preview: dragElt,
         }));
     }
@@ -137,7 +137,7 @@ class MxGraph extends React.Component<any, any> {
     }
 
     saveGraph(g: {}) {
-        this.setState((prevState, props) => ({
+        this.setState(() => ({
             graph: g,
         }));
     }
@@ -147,8 +147,6 @@ class MxGraph extends React.Component<any, any> {
     }
 
     main(container: HTMLElement | null): void {
-        const {test} = this.state;
-        const did = this.props.dragid;
         // Checks if the browser is supported
         if (!container) {
             mxUtils.error('Could not find \'graphContainer\'', 200, false);
