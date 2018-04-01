@@ -7,6 +7,7 @@ import { ModelTaskMetadata, ModelComponent } from "../entities/modelTaskMetadata
 import { Component } from "./component";
 import { GraphParser } from "./graphParser";
 import { Task } from "../entities/task";
+import {extensionToMIME} from "../services/extensionToMIME";
 
 /**
  * Provides basic DAO functionality at the file granularity level.
@@ -84,7 +85,7 @@ class IOFacilitator {
         // every time a portion is loaded, parse this portion of content
         // and aggregate the result (this happens internally).
         function onLoadFunction(evt: any) {
-            wellDefinedParser.parse(evt.target.result, module.getTarget().type, save);
+            wellDefinedParser.parse(evt.target.result, module.getMime(), save);
         }
 
         let reader = new FileReader();
@@ -103,8 +104,9 @@ class IOFacilitator {
         if (!parser) {
             throw new Error("Cannot serialize to unknown format '" + module.getType() + "'");
         }
+
         parser.serialize(
-            data, module.getTarget().type,
+            data, module.getMime(),
             function (result: string) {
                 // write to file
                 let file = new File([result], module.getName());
@@ -156,6 +158,21 @@ export class FileModule implements Module {
      */
     getTarget(): Blob {
         return this.file;
+    }
+
+    /**
+     * Returns the MIME type
+     * @returns {string}
+     */
+    getMime(): string {
+        let mime = this.file.type;
+        // this happens when file type can not be determined
+        if (mime === "") {
+            // set the type using the extension
+            var splitted = this.filename.split(".");
+            mime = extensionToMIME[splitted[splitted.length - 1]];
+        }
+        return mime;
     }
 }
 

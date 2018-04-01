@@ -13,7 +13,12 @@ export enum ModelComponent {
      * A pseudo-component for I/O access. Tasks that use
      * this component must both read from and write to it.
      */
-    IO
+    IO,
+
+    /**
+     * A pseudo-component for UI access.
+     */
+    UI
 }
 
 /**

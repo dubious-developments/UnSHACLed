@@ -70,7 +70,7 @@ gulp.task("test", function(done) {
 //* BUILD DEV
 //******************************************************************************
 gulp.task("build", function() {
-    return run('react-scripts-ts build').exec();
+    return run('node build.js').exec();
 });
 
 //******************************************************************************
