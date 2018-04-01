@@ -1,4 +1,4 @@
-const babelConfig = require('./babel-config');
+const babelConfig = require("./babel-config");
 
 module.exports = function(config) {
     config.set({
@@ -78,9 +78,9 @@ module.exports = function(config) {
                 //
                 // During CI builds, we'll just make sure Chrome's actually installed if
                 // karma-detect-browser advertises it.
-                let undesirables = ['PhantomJS', 'IE'];
+                let undesirables = ["PhantomJS", "IE"];
                 if (!process.env.CI) {
-                    undesirables.push('Chrome');
+                    undesirables.push("Chrome");
                 }
 
                 // Remove undesirables if another browser has been detected.
