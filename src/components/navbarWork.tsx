@@ -1,21 +1,22 @@
 import * as React from 'react';
 import { Menu, Icon, Popup, List} from 'semantic-ui-react';
-import Auth from "../services/Auth";
-import { withRouter } from 'react-router-dom';
-import { FileModule } from "../persistence/fileDAO";
-import { Model } from "../entities/model";
-import { DataAccessProvider } from "../persistence/dataAccessProvider";
-import { LoadFileTask, GetOpenedFilesTask} from "../services/ModelTasks";
-import {ModelComponent} from "../entities/modelTaskMetadata";
+import Auth from '../services/Auth';
+import { Link, withRouter } from 'react-router-dom';
+import { NavbarWorkProps } from './interfaces/interfaces';
+import { FileModule } from '../persistence/fileDAO';
+import { Model } from '../entities/model';
+import { DataAccessProvider } from '../persistence/dataAccessProvider';
+import { LoadFileTask, GetOpenedFilesTask } from '../services/ModelTasks';
+import { ModelComponent } from '../entities/modelTaskMetadata';
 
-export class Navbar extends React.Component<any, any> {
+export class Navbar extends React.Component<NavbarWorkProps, {}> {
 
     allowedExtensions = ".n3,.ttl,.rdf";
     loadedFiles = [];
 
-    constructor(props: string) {
+    constructor(props: NavbarWorkProps) {
         super(props);
-
+        this.iconClick = this.iconClick.bind(this);
         this.setLoadedFiles = this.setLoadedFiles.bind(this);
         this.OpenedFiles = this.OpenedFiles.bind(this);
         this.saveGraph = this.saveGraph.bind(this);
@@ -27,11 +28,11 @@ export class Navbar extends React.Component<any, any> {
 
     logoutButton(event: any) {
         Auth.logout();
-        this.props.history.push("/login");
+        // this.props.history.push("/login");
     }
 
     uploadFileButton() {
-        var input = document.getElementById("importGraph");
+        let input = document.getElementById("importGraph");
         if (input) {
             input.click();
         } else {
@@ -39,21 +40,16 @@ export class Navbar extends React.Component<any, any> {
         }
     }
 
-    saveFileButton() {
-        var input = document.getElementById("saveGraph");
-        if (input) {
-            input.click();
-        } else {
-            console.log("error: could not find saveGraph button");
-        }
+    iconClick() {
+        this.props.callback(!this.props.visible);
     }
 
     importGraph(e: any) {
-        var input = (document.getElementById("importGraph") as HTMLInputElement);
+        let input = (document.getElementById("importGraph") as HTMLInputElement);
 
         if (input) {
-            var files = input.files;
-            var fileDAO = DataAccessProvider.getInstance().getFileDAO();
+            let files = input.files;
+            let fileDAO = DataAccessProvider.getInstance().getFileDAO();
             if (files) {
                 if (files[0]) {
                     fileDAO.find(new FileModule(ModelComponent.DataGraph, files[0].name, files[0]));
@@ -68,15 +64,15 @@ export class Navbar extends React.Component<any, any> {
 
     // TODO not only load datagraph
     saveGraph(e: any) {
-        var model: Model = DataAccessProvider.getInstance().tmpModel;
+        let model: Model = DataAccessProvider.getInstance().tmpModel;
         model.tasks.schedule(new GetOpenedFilesTask(ModelComponent.DataGraph, this));
         model.tasks.processTask();
     }
 
     getFileFromPopup(e: any) {
-        var fileName = (e.target || e.srcElement).innerHTML;
+        let fileName = (e.target || e.srcElement).innerHTML;
         console.log(fileName);
-        var model: Model = DataAccessProvider.getInstance().tmpModel;
+        let model: Model = DataAccessProvider.getInstance().tmpModel;
         model.tasks.schedule(new LoadFileTask(ModelComponent.DataGraph, fileName));
         model.tasks.processTask();
     }
@@ -85,10 +81,10 @@ export class Navbar extends React.Component<any, any> {
     * Used for dynamically building the list of opened files in the editor
     */
     OpenedFiles(props: any) {
-        var items: any[] = [];
+        let items: any[] = [];
 
-        for (var i = 0; i < this.loadedFiles.length; i++) {
-            var cur = this.loadedFiles[i];
+        for (let i = 0; i < this.loadedFiles.length; i++) {
+            let cur = this.loadedFiles[i];
             items.push(
                 <li key={cur}>
                     <button onClick={this.getFileFromPopup}>
@@ -112,7 +108,7 @@ export class Navbar extends React.Component<any, any> {
     }
 
     uploadProjectButton() {
-        var input = document.getElementById("importProject");
+        let input = document.getElementById("importProject");
         if (input) {
             input.click();
         } else {
@@ -133,67 +129,79 @@ export class Navbar extends React.Component<any, any> {
                     size="large"
                     icon={true}
                     style={{
-                        height: '5.6em',
                         borderRadius: 0,
                     }}
                 >
-                    <Menu.Menu
-                        position="right"
-                    >
-                        <Menu.Item as="a" onClick={this.uploadProjectButton}>
-                            Import Project
-                            <input
-                                onChange={this.importProject}
-                                type="file"
-                                id="importProject"
-                                style={{"display" : "none"}}
+                    {/* Toolbar icons */}
+                    <Menu.Item as="a" onClick={this.iconClick} content={<Icon name='content'/>}/>
+                    <Menu.Item as="a" id="delete" content={<Icon name='trash'/>}/>
+                    <Menu.Item as="a" id="undo" content={<Icon name='reply'/>}/>
+                    <Menu.Item as="a" id="redo" content={<Icon name='share'/>}/>
+                    <Menu.Item as="a" id="camera" content={<Icon name='camera'/>}/>
+                    <Menu.Item as="a" id="zoom in" content={<Icon name='search'  style={{paddingRight: '1em'}}/>}/>
+                    <Menu.Item as="a" id="zoom out" content={<Icon name='search' style={{paddingRight: '1em'}}/>} />
+                    <Menu.Item as="a" id="actual size" content={<Icon name='compress'/>}/>
+                    <Menu.Item as="a" id="fit" content={<Icon name='expand'/>}/>
 
-                            />
-                        </Menu.Item>
-                        <Menu.Item as="a">Save Project</Menu.Item>
-                        <Menu.Item as="a" onClick={this.uploadFileButton}>
-                            Import Graph
-                            <input
-                                onChange={this.importGraph}
-                                type="file"
-                                id="importGraph"
-                                style={{"display" : "none"}}
-                                accept={this.allowedExtensions}
-                            />
-                        </Menu.Item>
+                    <Menu.Item as="a" onClick={this.uploadProjectButton}>
+                        Import Project
+                        <input
+                            onChange={this.importProject}
+                            type="file"
+                            id="importProject"
+                            style={{"display" : "none"}}
 
-                            <Popup
-                                trigger={<Menu.Item as="a" onClick={this.saveGraph}>Save Graph</Menu.Item>}
-                                on="click"
-                                inverted={false}
-                            >
-                                <this.OpenedFiles />
-                            </Popup>
-
-                        <Menu.Item
-                            as="a"
-                            href="https://github.com/dubious-developments/UnSHACLed"
-                            target="_blank"
-                            icon={
-                                <Icon
-                                    name="github"
-                                    inverted={true}
-                                />
-                            }
                         />
-                        <Menu.Item
-                            as="a"
-                            target="_blank"
-                            href="https://github.com/dubious-developments/UnSHACLed/wiki/Release-notes"
-                        >
-                        v0.1
-                        </Menu.Item>
-                        <Menu.Item onClick={(event) => this.logoutButton(event)}> Logout </Menu.Item>
-                    </Menu.Menu>
+                    </Menu.Item>
+                    <Menu.Item as="a">Save Project</Menu.Item>
+                    <Menu.Item as="a" onClick={this.uploadFileButton}>
+                        Import Graph
+                        <input
+                            onChange={this.importGraph}
+                            type="file"
+                            id="importGraph"
+                            style={{"display" : "none"}}
+                            accept={this.allowedExtensions}
+                        />
+                    </Menu.Item>
 
+                        <Popup
+                            trigger={<Menu.Item as="a" onClick={this.saveGraph}>Save Graph</Menu.Item>}
+                            on="click"
+                            inverted={false}
+                        >
+                            <this.OpenedFiles />
+                        </Popup>
+
+                    <Menu.Item
+                        as="a"
+                        href="https://github.com/dubious-developments/UnSHACLed"
+                        target="_blank"
+                        icon={
+                            <Icon
+                                name="github"
+                                inverted={true}
+                            />
+                        }
+                    />
+                    <Menu.Item
+                        as="a"
+                        target="_blank"
+                        href="https://github.com/dubious-developments/UnSHACLed/wiki/Release-notes"
+                    >
+                        v0.3
+                    </Menu.Item>
+                    <Menu.Item
+                        as={Link}
+                        to="/login"
+                        onClick={(event) => this.logoutButton(event)}
+                    >
+                        Logout
+                    </Menu.Item>
                 </Menu>
             </div>
         );
     }
 }
-export default withRouter(Navbar);
+
+export default Navbar; // withRouter(Navbar);
