@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Menu, Icon, Popup, List} from 'semantic-ui-react';
 import Auth from '../services/Auth';
-import { Link } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 import { NavbarWorkProps } from './interfaces/interfaces';
 import { FileModule } from '../persistence/fileDAO';
 import { Model } from '../entities/model';
@@ -9,12 +9,12 @@ import { DataAccessProvider } from '../persistence/dataAccessProvider';
 import { LoadFileTask, GetOpenedFilesTask } from '../services/ModelTasks';
 import { ModelComponent } from '../entities/modelTaskMetadata';
 
-class Navbar extends React.Component<NavbarWorkProps, {}> {
+export class Navbar extends React.Component<NavbarWorkProps, {}> {
 
     allowedExtensions = ".n3,.ttl,.rdf";
     loadedFiles = [];
 
-    constructor(props: any) {
+    constructor(props: NavbarWorkProps) {
         super(props);
         this.iconClick = this.iconClick.bind(this);
         this.setLoadedFiles = this.setLoadedFiles.bind(this);
@@ -204,4 +204,4 @@ class Navbar extends React.Component<NavbarWorkProps, {}> {
     }
 }
 
-export default Navbar;
+export default Navbar; // withRouter(Navbar);
