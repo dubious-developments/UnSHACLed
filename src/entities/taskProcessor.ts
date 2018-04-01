@@ -1,78 +1,90 @@
 import * as Collections from "typescript-collections";
+import { Task } from "./task";
+import { TaskQueue } from "./taskQueue";
 
-type TaskStartedCallback<TData, TTaskMetadata> =
-    (task: ProcessorTask<TData, TTaskMetadata>) => any;
+export type TaskStartedCallback<TData, TTaskMetadata> =
+    (task: Task<TData, TTaskMetadata>) => any;
 
-type TaskCompletedCallback =
+export type TaskFinishedCallback =
+    (taskInfo: any) => any;
+
+export type TaskCompletedCallback =
     (taskInfo: any) => void;
 
 /**
  * An object that executes tasks on a piece of data.
  */
-export class TaskProcessor<TData, TTaskMetadata> {
-    private tasks: TaskQueue<TData, TTaskMetadata>;
-    private data: TData;
-    private onTaskStarted: TaskStartedCallback<TData, TTaskMetadata>;
-    private onTaskCompleted: TaskCompletedCallback;
+export abstract class TaskProcessor<TData, TTaskMetadata> {
+    /**
+     * A callback for when tasks start.
+     */
+    protected readonly onTaskStarted: TaskStartedCallback<TData, TTaskMetadata>;
 
     /**
-     * Creates a task processor that manages a particular piece of data
-     * and uses a particular task queue.
-     * @param data The data managed by the task processor.
-     * @param tasks The queue implementation for this processor.
+     * A callback for when tasks finish.
+     */
+    protected readonly onTaskFinished: TaskFinishedCallback;
+
+    /**
+     * A callback for when tasks complete.
+     */
+    protected readonly onTaskCompleted: TaskCompletedCallback;
+
+    /**
+     * Creates a task processor.
      * @param onTaskStarted An optional callback for when a task starts.
+     * @param onTaskFinished An optional callback for when a task finishes.
      * @param onTaskCompleted An optional callback for when a task completes.
      */
     public constructor(
-        data: TData,
-        tasks?: TaskQueue<TData, TTaskMetadata>,
-        onTaskStarted?: TaskStartedCallback<TData, TTaskMetadata>,
-        onTaskCompleted?: TaskCompletedCallback) {
-        this.data = data;
-        if (tasks) {
-            this.tasks = tasks;
-        } else {
-            this.tasks = new FifoTaskQueue<TData, TTaskMetadata>();
-        }
+        onTaskStarted: TaskStartedCallback<TData, TTaskMetadata> | undefined,
+        onTaskFinished: TaskFinishedCallback | undefined,
+        onTaskCompleted: TaskCompletedCallback | undefined) {
+
         if (onTaskStarted) {
             this.onTaskStarted = onTaskStarted;
         } else {
-            this.onTaskStarted = (task) => undefined;
+            this.onTaskStarted = task => null;
         }
+
+        if (onTaskFinished) {
+            this.onTaskFinished = onTaskFinished;
+        } else {
+            this.onTaskFinished = x => x;
+        }
+
         if (onTaskCompleted) {
             this.onTaskCompleted = onTaskCompleted;
         } else {
-            this.onTaskCompleted = (info) => undefined;
+            this.onTaskCompleted = info => undefined;
         }
     }
 
     /**
-     * Schedules a task for execution by this processor.
+     * Tells if the processor's task schedule is empty.
      */
-    public schedule(task: ProcessorTask<TData, TTaskMetadata>): void {
-        this.tasks.enqueue(task);
-    }
+    public abstract isEmpty(): boolean;
+
+    /**
+     * Schedules a task for execution by this processor.
+     * @param task The task to schedule.
+     */
+    public abstract schedule(task: Task<TData, TTaskMetadata>): void;
 
     /**
      * Deschedules a task and executes it. Does nothing if
      * the task schedule is empty.
+     * @returns `true` if a task was processed;
+     * otherwise, `false`.
      */
-    public processTask(): void {
-        let task = this.tasks.dequeue();
-        if (task === undefined) {
-            return;
-        }
-        let info = this.onTaskStarted(task);
-        task.execute(this.data);
-        this.onTaskCompleted(info);
-    }
+    public abstract processTask(): boolean;
 
     /**
      * Deschedules and executes tasks until the task schedule
      * becomes empty..
      */
     public processAllTasks(): void {
-        while (!this.isScheduleEmpty) {
+        while (!this.isEmpty()) {
             this.processTask();
         }
     }
@@ -85,106 +97,68 @@ export class TaskProcessor<TData, TTaskMetadata> {
     public processTasksDuring(milliseconds: number): void {
         let start = Date.now();
         let current = start;
-        while (!this.isScheduleEmpty && current - start < milliseconds) {
+        while (!this.isEmpty() && current - start < milliseconds) {
             this.processTask();
             current = Date.now();
         }
     }
-
-    /**
-     * Tells if the model's task schedule is empty.
-     */
-    public get isScheduleEmpty(): boolean {
-        return this.tasks.isEmpty;
-    }
 }
 
 /**
- * A task that can be executed on a task processor.
+ * A task processor implementation that executes tasks in the order they
+ * were scheduled.
  */
-export class ProcessorTask<TData, TTaskMetadata> {
-    private static taskCounter = 0;
+export class InOrderProcessor<TData, TTaskMetadata> extends TaskProcessor<TData, TTaskMetadata> {
+    private tasks: Collections.Queue<Task<TData, TTaskMetadata>>;
+    private data: TData;
 
     /**
-     * A task-unique index.
-     *
-     * NOTE: we need these indices to make sets work. JavaScript
-     * arrays are stupid and assume that objects are equal iff
-     * their string representations are. Additionally, string
-     * representations are *structural,* so without this index,
-     * the string representation for two different tasks would
-     * be the same. That breaks sets and hash maps, which we can't
-     * have.
-     */
-    public readonly index: number;
-
-    /**
-     * Creates a model task.
-     * @param execute The task itself.
-     * @param metadata Information related to the task.
+     * Creates a task processor that manages a particular piece of data.
+     * @param data The data managed by the task processor.
+     * @param onTaskStarted An optional callback for when a task starts.
+     * @param onTaskFinished An optional callback for when a task finishes.
+     * @param onTaskCompleted An optional callback for when a task completes.
      */
     public constructor(
-        public execute: (proc: TData) => void,
-        public metadata: TTaskMetadata) {
+        data: TData,
+        onTaskStarted?: TaskStartedCallback<TData, TTaskMetadata>,
+        onTaskFinished?: TaskFinishedCallback,
+        onTaskCompleted?: TaskCompletedCallback) {
 
-        this.index = ProcessorTask.generateTaskIndex();
-    }
+        super(onTaskStarted, onTaskFinished, onTaskCompleted);
 
-    private static generateTaskIndex(): number {
-        let result = this.taskCounter;
-        this.taskCounter = (this.taskCounter + 1) % (1 << 31 - 1);
-        return result;
+        this.data = data;
+        this.tasks = new Collections.Queue<Task<TData, TTaskMetadata>>();
     }
 
     /**
-     * Gets a string representation for this task.
+     * Schedules a task for execution by this processor.
      */
-    public toString(): string {
-        return `Task ${this.index}`;
+    public schedule(task: Task<TData, TTaskMetadata>): void {
+        this.tasks.enqueue(task);
     }
-}
-
-/**
- * A queue of tasks for task processors. Implementations
- * of this interface need not adhere to a FIFO scheduling policy.
- */
-export interface TaskQueue<TData, TTaskMetadata> {
-    /**
-     * Tells if the task queue is empty.
-     */
-    isEmpty: boolean;
 
     /**
-     * Adds a task to the queue.
-     * @param task The task to add.
+     * Tells if the processor's task schedule is empty.
      */
-    enqueue(task: ProcessorTask<TData, TTaskMetadata>): void;
+    public isEmpty(): boolean {
+        return this.tasks.isEmpty();
+    }
 
     /**
-     * Removes a task from the queue and returns it.
+     * Deschedules a task and executes it. Does nothing if
+     * the task schedule is empty.
+     * @returns `true` if a task was processed;
+     * otherwise, `false`.
      */
-    dequeue(): ProcessorTask<TData, TTaskMetadata> | undefined;
-}
-
-/**
- * A task queue that executes tasks in FIFO order.
- */
-export class FifoTaskQueue<TData, TTaskMetadata> implements TaskQueue<TData, TTaskMetadata> {
-    private queue: Collections.Queue<ProcessorTask<TData, TTaskMetadata>>;
-
-    public constructor() {
-        this.queue = new Collections.Queue<ProcessorTask<TData, TTaskMetadata>>();
-    }
-
-    public get isEmpty(): boolean {
-        return this.queue.isEmpty();
-    }
-
-    public enqueue(task: ProcessorTask<TData, TTaskMetadata>): void {
-        this.queue.enqueue(task);
-    }
-
-    public dequeue(): ProcessorTask<TData, TTaskMetadata> | undefined {
-        return this.queue.dequeue();
+    public processTask(): boolean {
+        let task = this.tasks.dequeue();
+        if (task === undefined) {
+            return false;
+        }
+        let info = this.onTaskStarted(task);
+        task.execute(this.data);
+        this.onTaskCompleted(info);
+        return true;
     }
 }

@@ -1,16 +1,18 @@
 import * as Collections from "typescript-collections";
-import { TaskProcessor, ProcessorTask } from "./taskProcessor";
+import { InOrderProcessor, TaskProcessor } from "./taskProcessor";
 import { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";
 import { ModelData } from "./modelData";
-import { ModelTaskQueue } from "./modelTaskQueue";
+import { Task, OpaqueTask } from "./task";
+import { ModelTask, OpaqueModelTask } from "./taskInstruction";
+import { OutOfOrderProcessor } from "./outOfOrderProcessor";
 export { ModelData } from "./modelData";
+export { ModelTask, OpaqueModelTask } from "./taskInstruction";
 
 /**
  * A model observer: a function that takes a change set as input
  * and produces a list of tasks to process as output.
  */
-type ModelObserver = (changeBuffer: Collections.Set<ModelComponent>)
-    => Array<ProcessorTask<ModelData, ModelTaskMetadata>>;
+type ModelObserver = (changeBuffer: Collections.Set<ModelComponent>) => Array<ModelTask>;
 
 /**
  * Models the data handled by the UnSHACLed application.
@@ -45,11 +47,11 @@ export class Model {
      */
     public constructor(data?: ModelData) {
         let wellDefinedData = !data ? new ModelData() : data;
-        this.tasks = new TaskProcessor<ModelData, ModelTaskMetadata>(
+        this.tasks = new OutOfOrderProcessor(
             wellDefinedData,
-            new ModelTaskQueue(),
-            (task) => task,
-            (task) => this.notifyObservers(wellDefinedData.drainChangeBuffer()));
+            task => task,
+            task => task,
+            task => this.notifyObservers(wellDefinedData.drainChangeBuffer()));
         this.observers = [];
     }
 
@@ -67,9 +69,9 @@ export class Model {
         readSet: Collections.Set<ModelComponent> | ModelComponent[],
         writeSet: Collections.Set<ModelComponent> | ModelComponent[],
         priority?: number):
-        ProcessorTask<ModelData, ModelTaskMetadata> {
+        OpaqueModelTask {
 
-        return new ProcessorTask<ModelData, ModelTaskMetadata>(
+        return new OpaqueTask<ModelData, ModelTaskMetadata>(
             execute,
             new ModelTaskMetadata(readSet, writeSet, priority));
     }
