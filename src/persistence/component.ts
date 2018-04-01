@@ -16,6 +16,14 @@ export class Component {
     }
 
     /**
+     * Retrieve all keys.
+     * @returns {string[]}
+     */
+    public getAllKeys() {
+        return this.parts.keys();
+    }
+
+    /**
      * Retrieve a part of the component.
      * @param {string} key
      * @returns {any}
