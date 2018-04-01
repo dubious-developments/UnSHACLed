@@ -79,7 +79,6 @@ export class GraphParser implements Parser {
                              }
                  });
         } else {
-            console.log(mime);
             throw new Error("Incorrect MimeType " + mime + "!");
         }
     }
