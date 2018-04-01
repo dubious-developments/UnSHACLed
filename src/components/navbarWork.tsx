@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Menu, Icon, Popup, List} from 'semantic-ui-react';
 import Auth from '../services/Auth';
-import { Link, withRouter } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { NavbarWorkProps } from './interfaces/interfaces';
 import { FileModule } from '../persistence/fileDAO';
 import { Model } from '../entities/model';
@@ -43,22 +43,13 @@ class Navbar extends React.Component<NavbarWorkProps, {}> {
     iconClick() {
         this.props.callback(!this.props.visible);
     }
-    
-    saveFileButton() {
-        var input = document.getElementById("saveGraph");
-        if (input) {
-            input.click();
-        } else {
-            console.log("error: could not find saveGraph button");
-        }
-    }
 
     importGraph(e: any) {
-        var input = (document.getElementById("importGraph") as HTMLInputElement);
+        let input = (document.getElementById("importGraph") as HTMLInputElement);
 
         if (input) {
-            var files = input.files;
-            var fileDAO = DataAccessProvider.getInstance().getFileDAO();
+            let files = input.files;
+            let fileDAO = DataAccessProvider.getInstance().getFileDAO();
             if (files) {
                 if (files[0]) {
                     fileDAO.find(new FileModule(ModelComponent.DataGraph, files[0].name, files[0]));
@@ -73,15 +64,15 @@ class Navbar extends React.Component<NavbarWorkProps, {}> {
 
     // TODO not only load datagraph
     saveGraph(e: any) {
-        var model: Model = DataAccessProvider.getInstance().tmpModel;
+        let model: Model = DataAccessProvider.getInstance().tmpModel;
         model.tasks.schedule(new GetOpenedFilesTask(ModelComponent.DataGraph, this));
         model.tasks.processTask();
     }
 
     getFileFromPopup(e: any) {
-        var fileName = (e.target || e.srcElement).innerHTML;
+        let fileName = (e.target || e.srcElement).innerHTML;
         console.log(fileName);
-        var model: Model = DataAccessProvider.getInstance().tmpModel;
+        let model: Model = DataAccessProvider.getInstance().tmpModel;
         model.tasks.schedule(new LoadFileTask(ModelComponent.DataGraph, fileName));
         model.tasks.processTask();
     }
@@ -90,10 +81,10 @@ class Navbar extends React.Component<NavbarWorkProps, {}> {
     * Used for dynamically building the list of opened files in the editor
     */
     OpenedFiles(props: any) {
-        var items: any[] = [];
+        let items: any[] = [];
 
-        for (var i = 0; i < this.loadedFiles.length; i++) {
-            var cur = this.loadedFiles[i];
+        for (let i = 0; i < this.loadedFiles.length; i++) {
+            let cur = this.loadedFiles[i];
             items.push(
                 <li key={cur}>
                     <button onClick={this.getFileFromPopup}>
@@ -117,7 +108,7 @@ class Navbar extends React.Component<NavbarWorkProps, {}> {
     }
 
     uploadProjectButton() {
-        var input = document.getElementById("importProject");
+        let input = document.getElementById("importProject");
         if (input) {
             input.click();
         } else {
