@@ -1,5 +1,8 @@
 import * as React from 'react';
 import * as Collections from 'typescript-collections';
+import {ModelComponent} from "../entities/modelTaskMetadata";
+import {DataAccessProvider} from "../persistence/dataAccessProvider";
+import {LoadComponent} from "../services/ModelTasks";
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout: any;
@@ -702,6 +705,21 @@ class MxGraph extends React.Component<any, any> {
         } else if (!mxClient.isBrowserSupported()) {
             mxUtils.error('Browser is not supported!', 200, false);
         } else {
+
+            let model = DataAccessProvider.getInstance().model;
+            model.registerObserver((changeBuf) => {
+                changeBuf.forEach((key) => {
+                    if (key === ModelComponent.DataGraph) { // datagraph has changed
+                        model.tasks.schedule(new LoadComponent(ModelComponent.DataGraph));
+                        // TODO change this later
+                        model.tasks.processAllTasks();
+                    }
+                });
+                return [];
+            });
+
+            model.tasks.processAllTasks();
+
             let editor = new mxEditor();
 
             // Creates the graph inside the given container

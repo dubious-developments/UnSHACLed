@@ -7,14 +7,14 @@ import { extensionToMIME } from "./extensionToMIME";
 import {Task} from "../entities/task";
 
 /*
- *
+ * Load a file from the model using the fileName
  */
 export class LoadFileTask extends Task<ModelData, ModelTaskMetadata> {
 
     /**
      * Create a new load file task from Model
-     * Contains a function that will execute on the model.
      * @param {mComponent} ModelComponent
+     * @param {fileName} the name of the file
      */
     public constructor(private mComponent: ModelComponent, private fileName: string) {
         super();
@@ -39,15 +39,14 @@ export class LoadFileTask extends Task<ModelData, ModelTaskMetadata> {
 }
 
 /*
- *
+ * Gets a list of all opened files in the editor and update the view in the navBar
  */
 export class GetOpenedFilesTask extends Task<ModelData, ModelTaskMetadata> {
 
     /**
      * Get the loaded files in the model
-     * Contains a function that will execute on the model.
      * @param {c} ModelComponent
-     * @param {f} module
+     * @param {navBar} the frontend component
      */
     public constructor(private mComponent: ModelComponent, private navBar: Navbar) {
         super();
@@ -68,4 +67,39 @@ export class GetOpenedFilesTask extends Task<ModelData, ModelTaskMetadata> {
         return new ModelTaskMetadata([this.mComponent, ModelComponent.IO], [ModelComponent.IO]);
     }
 
+}
+
+/*
+ * Load a certain ModelComponent's data from the model
+ */
+export class LoadComponent extends Task<ModelData, ModelTaskMetadata> {
+
+    /**
+     * Create a new LoadComponent task from Model
+     * @param {mComponent} ModelComponent
+     */
+    public constructor(private mComponent: ModelComponent) {
+        super();
+
+    }
+
+    public execute(data: ModelData): void {
+        // console.log(data);
+        let component: any = data.getComponent(this.mComponent);
+        if (component) {
+
+            let tmp = component.getAllKeys();
+            for (let part of tmp) {
+                // handle the graph objects correctly
+                console.log(component.getPart(part));
+            }
+        } else {
+            console.log("Could not find the ModelComponent: ", component);
+        }
+
+    }
+
+    public get metadata(): ModelTaskMetadata {
+        return new ModelTaskMetadata([this.mComponent, ModelComponent.UI], [ModelComponent.UI]);
+    }
 }
