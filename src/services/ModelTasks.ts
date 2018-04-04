@@ -5,6 +5,7 @@ import {Component} from "../persistence/component";
 import {Navbar} from "../components/navbarWork";
 import { extensionToMIME } from "./extensionToMIME";
 import {Task} from "../entities/task";
+import MxGraph from "../components/MxGraph";
 
 /*
  * Load a file from the model using the fileName
@@ -77,8 +78,9 @@ export class LoadComponent extends Task<ModelData, ModelTaskMetadata> {
     /**
      * Create a new LoadComponent task from Model
      * @param {mComponent} ModelComponent
+     * @param {mxGraph} MxGraph
      */
-    public constructor(private mComponent: ModelComponent) {
+    public constructor(private mComponent: ModelComponent, private mxGraph: MxGraph) {
         super();
 
     }
@@ -91,7 +93,14 @@ export class LoadComponent extends Task<ModelData, ModelTaskMetadata> {
             let tmp = component.getAllKeys();
             for (let part of tmp) {
                 // handle the graph objects correctly
-                console.log(component.getPart(part));
+                if (this.mxGraph) {
+                    let graph = component.getPart(part).rdfLibStore;
+                    console.log(graph);
+                    this.mxGraph.visualizeDataGraph(graph);
+                    // this.mxGraph.handleLoad();
+                } else {
+                    console.log("error: could not find MxGraph")
+                }
             }
         } else {
             console.log("Could not find the ModelComponent: ", component);

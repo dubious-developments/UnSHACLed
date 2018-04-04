@@ -432,7 +432,7 @@ class MxGraph extends React.Component<any, any> {
 
     visualizeDataGraph(store: any) {
         let {graph} = this.state;
-        console.log(graph);
+        console.log(this.state);
         let blocks = this.parseDataGraphToBlocks(store);
         blocks.forEach(bl => {
             this.state.blockToCellDict.setValue(bl, this.addBlock(graph, bl));
@@ -441,6 +441,7 @@ class MxGraph extends React.Component<any, any> {
         blocks.forEach(bl => this.addArrows(graph, bl));
 
         let layout = new mxStackLayout(graph, false, 35);
+        console.log(graph.getDefaultParent());
         layout.execute(graph.getDefaultParent());
     }
 
@@ -663,7 +664,7 @@ class MxGraph extends React.Component<any, any> {
             model.registerObserver((changeBuf) => {
                 changeBuf.forEach((key) => {
                     if (key === ModelComponent.DataGraph) { // datagraph has changed
-                        model.tasks.schedule(new LoadComponent(ModelComponent.DataGraph));
+                        model.tasks.schedule(new LoadComponent(ModelComponent.DataGraph, this));
                         // TODO change this later
                         model.tasks.processAllTasks();
                     }
