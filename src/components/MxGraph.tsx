@@ -435,7 +435,7 @@ class MxGraph extends React.Component<any, any> {
         console.log(graph);
         let blocks = this.parseDataGraphToBlocks(store);
         blocks.forEach(bl => {
-            this.state.blockToCellDict.setValue(bl, this.addBlock(bl));
+            this.state.blockToCellDict.setValue(bl, this.addBlock(graph, bl));
         });
 
         blocks.forEach(bl => this.addArrows(graph, bl));
@@ -444,8 +444,7 @@ class MxGraph extends React.Component<any, any> {
         layout.execute(graph.getDefaultParent());
     }
 
-    addBlock(b: Block) {
-        let {graph} = this.state;
+    addBlock(graph: any, b: Block) {
         let model = graph.getModel();
 
         // Gets the default parent for inserting new cells. This
