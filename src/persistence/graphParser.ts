@@ -61,6 +61,10 @@ export class GraphParser implements Parser {
      */
     public parse(content: string, mime: string, andThen: ((result: any) => void) | null) {
         if (this.mimeTypes.contains(mime)) {
+
+            let $rdf = require('rdflib');
+            $rdf.parse(content, this.graph.getRdfLibStore(), "https://example.org/resource.ttl", mime);
+
             let N3 = require("n3");
             let parser = N3.Parser({ format: mime });
 
