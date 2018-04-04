@@ -7,16 +7,16 @@ export class DataAccessProvider {
     private fileDAO: FileDAO;
 
     // tmp field
-    private _tmpModel: Model;
+    private _model: Model;
 
     private constructor() {
         // temporarily create model here
-        this._tmpModel = new Model();
+        this._model = new Model();
     }
 
     // tmp method
-    get tmpModel(): Model {
-        return this._tmpModel;
+    get model(): Model {
+        return this._model;
     }
 
     public static getInstance(): DataAccessProvider {
@@ -27,7 +27,7 @@ export class DataAccessProvider {
         if (this.fileDAO) {
             return this.fileDAO;
         } else {
-            return new FileDAO(this._tmpModel);
+            return new FileDAO(this._model);
         }
     }
 }
