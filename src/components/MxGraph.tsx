@@ -7,51 +7,7 @@ import {LoadComponent} from "../services/ModelTasks";
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout: any;
 
-declare function require(name: string): any;
-
 let $rdf = require('rdflib');
-
-let dataGraph = '@prefix dash: <http://datashapes.org/dash#> .\n\
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n\
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\
-@prefix schema: <http://schema.org/> .\n\
-@prefix sh: <http://www.w3.org/ns/shacl#> .\n\
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n\
-\n\
-schema:PersonShape\n\
-    a sh:NodeShape ;\n\
-    sh:targetClass schema:Person ;\n\
-    sh:property [\n\
-        sh:path schema:givenName ;\n\
-        sh:datatype xsd:string ;\n\
-        sh:name "given name" ;\n\
-    ] ;\n\
-    sh:property [\n\
-        sh:path schema:birthDate ;\n\
-        sh:lessThan schema:deathDate ;\n\
-        sh:maxCount 1 ;\n\
-    ] ;\n\
-    sh:property [\n\
-        sh:path schema:gender ;\n\
-        sh:in ( "female" "male" ) ;\n\
-    ] ;\n\
-    sh:property [\n\
-        sh:path schema:address ;\n\
-        sh:node schema:AddressShape ;\n\
-    ] .\n\
-\n\
-schema:AddressShape\n\
-    a sh:NodeShape ;\n\
-    sh:closed true ;\n\
-    sh:property [\n\
-        sh:path schema:streetAddress ;\n\
-        sh:datatype xsd:string ;\n\
-    ] ;\n\
-    sh:property [\n\
-        sh:path schema:postalCode ;\n\
-        sh:minInclusive 10000 ;\n\
-        sh:maxInclusive 99999 ;\n\
-    ] .';
 
 class MxGraph extends React.Component<any, any> {
     constructor(props: string) {
@@ -72,6 +28,7 @@ class MxGraph extends React.Component<any, any> {
         this.initiateDragPreview = this.initiateDragPreview.bind(this);
         this.getGraphUnderMouse = this.getGraphUnderMouse.bind(this);
         this.makeDragSource = this.makeDragSource.bind(this);
+        this.visualizeDataGraph = this.visualizeDataGraph.bind(this);
     }
 
     componentDidMount() {
@@ -141,10 +98,10 @@ class MxGraph extends React.Component<any, any> {
         this.main(document.getElementById('graphContainer'));
     }
 
-    saveGraph(g: {}) {
-        this.setState(() => ({
-            graph: g,
-        }));
+    saveGraph(g: any) {
+        this.setState({
+            graph: g
+        });
     }
 
     handleClick() {
@@ -424,11 +381,7 @@ class MxGraph extends React.Component<any, any> {
         this.state.nameToStandardCellDict.setValue('row', row);
     }
 
-    parseDataGraphToBlocks() {
-        let uri = 'https://example.org/resource.ttl';
-        let mimeType = 'text/turtle';
-        let store = $rdf.graph();
-
+    parseDataGraphToBlocks(store: any) {
         // let DASH = $rdf.Namespace("http://datashapes.org/dash#");
         let RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
         // let RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
@@ -438,8 +391,6 @@ class MxGraph extends React.Component<any, any> {
 
         // visualisation should start from the resources in topLevel,
         // since all other resources are dependant on them
-
-        $rdf.parse(dataGraph, store, uri, mimeType);
 
         let triples = store.statementsMatching(undefined, undefined, undefined, undefined, false);
 
@@ -479,8 +430,10 @@ class MxGraph extends React.Component<any, any> {
         return resources.values();
     }
 
-    visualizeDataGraph(graph: any) {
-        let blocks = this.parseDataGraphToBlocks();
+    visualizeDataGraph(store: any) {
+        let {graph} = this.state;
+        console.log(graph);
+        let blocks = this.parseDataGraphToBlocks(store);
         blocks.forEach(bl => {
             this.state.blockToCellDict.setValue(bl, this.addBlock(graph, bl));
         });
@@ -737,7 +690,6 @@ class MxGraph extends React.Component<any, any> {
             this.configureCells(editor, graph);
             this.configureLabels(graph);
             this.initStandardCells();
-            this.visualizeDataGraph(graph);
             this.saveGraph(graph);
             this.initiateDragPreview();
             this.initDragAndDrop(graph);
