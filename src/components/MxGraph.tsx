@@ -442,7 +442,6 @@ class MxGraph extends React.Component<any, any> {
         blocks.forEach(bl => this.addArrows(graph, bl));
 
         let layout = new mxStackLayout(graph, false, 35);
-        console.log(graph.getDefaultParent());
         layout.execute(graph.getDefaultParent());
     }
 
@@ -663,7 +662,10 @@ class MxGraph extends React.Component<any, any> {
 
             let model = DataAccessProvider.getInstance().model;
             model.registerObserver((changeBuf) => {
+                console.log("notified: ", changeBuf);
+                // TODO second time when a file is inputted the changeBuf is empty
                 changeBuf.forEach((key) => {
+                    console.log(key);
                     if (key === ModelComponent.DataGraph) { // datagraph has changed
                         model.tasks.schedule(new LoadComponent(ModelComponent.DataGraph, this));
                         // TODO change this later

@@ -86,7 +86,7 @@ export class LoadComponent extends Task<ModelData, ModelTaskMetadata> {
     }
 
     public execute(data: ModelData): void {
-        // console.log(data);
+        console.log("called");
         let component: any = data.getComponent(this.mComponent);
         if (component) {
 
@@ -96,7 +96,6 @@ export class LoadComponent extends Task<ModelData, ModelTaskMetadata> {
                 if (this.mxGraph) {
                     let store = component.getPart(part).rdfLibStore;
                     this.mxGraph.visualizeDataGraph(store);
-                    // this.mxGraph.handleLoad();
                 } else {
                     console.log("error: could not find MxGraph");
                 }
