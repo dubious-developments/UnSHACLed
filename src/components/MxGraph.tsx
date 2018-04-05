@@ -432,7 +432,8 @@ class MxGraph extends React.Component<any, any> {
 
     visualizeDataGraph(store: any) {
         let {graph} = this.state;
-        console.log(this.state);
+        console.log(graph);
+        console.log(store);
         let blocks = this.parseDataGraphToBlocks(store);
         blocks.forEach(bl => {
             this.state.blockToCellDict.setValue(bl, this.addBlock(graph, bl));

@@ -94,12 +94,11 @@ export class LoadComponent extends Task<ModelData, ModelTaskMetadata> {
             for (let part of tmp) {
                 // handle the graph objects correctly
                 if (this.mxGraph) {
-                    let graph = component.getPart(part).rdfLibStore;
-                    console.log(graph);
-                    this.mxGraph.visualizeDataGraph(graph);
+                    let store = component.getPart(part).rdfLibStore;
+                    this.mxGraph.visualizeDataGraph(store);
                     // this.mxGraph.handleLoad();
                 } else {
-                    console.log("error: could not find MxGraph")
+                    console.log("error: could not find MxGraph");
                 }
             }
         } else {
