@@ -1,14 +1,14 @@
 /**
  * Takes care of (de)serialization.
  */
-interface Parser {
+export interface Parser {
     /**
      * Serialize some internal format.
      * @param data
      * @param {string} mime
      * @param {(result: any) => void} andThen
      */
-    serialize(data: any, mime: string, andThen: (result: any) => void);
+    serialize(data: any, mime: string | undefined, andThen: (result: any) => void): void;
 
     /**
      * Parse some form of encoded content.
@@ -16,15 +16,15 @@ interface Parser {
      * @param {string} mime
      * @param {(result: string) => void} andThen
      */
-    parse(content: string, mime: string, andThen: (result: string) => void);
+    parse(content: string, mime: string | undefined, andThen: (result: string) => void): void;
 
     /**
      * Retrieve the data contained by this Parser.
      */
-    getData();
+    getData(): any;
 
     /**
      * Clean whatever is contained by this Parser.
      */
-    clean();
+    clean(): void;
 }

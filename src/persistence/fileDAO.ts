@@ -1,11 +1,12 @@
-/// <reference path="./dataAccessObject.d.ts"/>
-/// <reference path="./parser.d.ts"/>
-
 import * as Collections from "typescript-collections";
-import {Model, ModelComponent, ModelData, ModelTaskMetadata} from "../entities/model";
-import {ProcessorTask} from "../entities/taskProcessor";
+import { ModelTaskMetadata, ModelComponent } from "../entities/modelTaskMetadata";
 import {Component} from "./component";
-import {GraphParser} from "./graphParser";
+import { GraphParser } from "./graphParser";
+import { DataAccessObject, Module } from "./dataAccessObject";
+import { Task } from "../entities/task";
+import {Model} from "../entities/model";
+import {ModelData} from "../entities/modelData";
+import {Parser} from "./parser";
 
 /**
  * Provides basic DAO functionality at the file granularity level.
@@ -23,6 +24,7 @@ export class FileDAO implements DataAccessObject {
 
         // register parsers
         this.io.registerParser(ModelComponent.DataGraph, new GraphParser());
+        this.io.registerParser(ModelComponent.SHACLShapesGraph, new GraphParser());
     }
 
     /**
@@ -38,9 +40,9 @@ export class FileDAO implements DataAccessObject {
      * Load an existing file.
      * @param module
      */
-    public find(module: Module) {
+    public find(module: Module): void {
         let self = this;
-        this.io.readFromFile(module, function(result: any) {
+        this.io.readFromFile(module, function (result: any) {
             self.model.tasks.schedule(new LoadTask(result, module));
             self.model.tasks.processTask(); // TODO: Remove this when we have a scheduler!
         });
@@ -52,16 +54,24 @@ export class FileDAO implements DataAccessObject {
  * Requires a particular parser to modulate between file format and internal representation.
  */
 class IOFacilitator {
+
     private parsers: Collections.Dictionary<ModelComponent, Parser>;
+    private extensionToMime: Collections.Dictionary<string, string>;
 
     /**
      * Create a new IOFacilitator.
      */
     public constructor() {
         this.parsers = new Collections.Dictionary<ModelComponent, Parser>();
+        this.extensionToMime = new Collections.Dictionary<string, string>();
+
+        this.extensionToMime.setValue("nq", "application/n-quads");
+        this.extensionToMime.setValue("nt", "application/n-triples");
+        this.extensionToMime.setValue("trig", "application/trig");
+        this.extensionToMime.setValue("ttl", "text/turtle");
     }
 
-    public registerParser(label: ModelComponent, parser: Parser) {
+    public registerParser(label: ModelComponent, parser: Parser): void {
         this.parsers.setValue(label, parser);
     }
 
@@ -69,20 +79,29 @@ class IOFacilitator {
      * Read from an existing file.
      * @returns {Graph}
      * @param module
-     * @param save
+     * @param load
      */
-    public readFromFile(module: Module, save: (result: any) => void) {
-        let reader = new FileReader();
-        reader.readAsText(module.getTarget());
-        reader.onload = onLoadFunction;
+    public readFromFile(module: Module, load: (result: any) => void): void {
+        let parser = this.parsers.getValue(module.getTarget());
+        if (!parser) {
+            throw new Error("Unsupported target " + module.getTarget());
+        }
 
-        let parser = this.parsers.getValue(module.getType());
-        parser.clean();
+        let wellDefinedParser = parser;
+        wellDefinedParser.clean();
+
+        let splitID = module.getIdentifier().split(".");
+        let mime = this.extensionToMime.getValue(splitID[splitID.length - 1]);
+
         // every time a portion is loaded, parse this portion of content
         // and aggregate the result (this happens internally).
         function onLoadFunction(evt: any) {
-            parser.parse(evt.target.result, module.getTarget().type, save);
+            wellDefinedParser.parse(evt.target.result, mime, load);
         }
+
+        let reader = new FileReader();
+        reader.readAsText(module.getContent());
+        reader.onload = onLoadFunction;
     }
 
     /**
@@ -90,14 +109,20 @@ class IOFacilitator {
      * @param module
      * @param data
      */
-    public writeToFile(module: Module, data: any) {
+    public writeToFile(module: Module, data: any): void {
         let FileSaver = require("file-saver");
-        this.parsers.getValue(module.getType()).serialize(
-            data, module.getTarget().type,
-            function(result: string) {
+        let parser = this.parsers.getValue(module.getTarget());
+        if (!parser) {
+            throw new Error("Unsupported target " + module.getTarget());
+        }
+
+        let splitID = module.getIdentifier().split(".");
+        let mime = this.extensionToMime.getValue(splitID[splitID.length - 1]);
+        parser.serialize(
+            data, mime, function (result: string) {
                 // write to file
-                let file = new File([result], module.getName());
-                FileSaver.saveAs(file);
+                let file = new Blob([result], {type: mime});
+                FileSaver.saveAs(file, module.getIdentifier());
             });
     }
 }
@@ -107,18 +132,18 @@ class IOFacilitator {
  * Contains all the necessary information to carry out a persistence operation.
  */
 export class FileModule implements Module {
-    private type: ModelComponent;
+    private target: ModelComponent;
     private filename: string;
     private file: Blob;
 
     /**
      * Create a new FileModule.
-     * @param {ModelComponent} type
+     * @param {ModelComponent} target
      * @param {string} filename
      * @param {Blob} file
      */
-    public constructor(type: ModelComponent, filename: string, file: Blob) {
-        this.type = type;
+    public constructor(target: ModelComponent, filename: string, file: Blob) {
+        this.target = target;
         this.filename = filename;
         this.file = file;
     }
@@ -127,15 +152,15 @@ export class FileModule implements Module {
      * Return the designated ModelComponent.
      * @returns {ModelComponent}
      */
-    getType(): ModelComponent {
-        return this.type;
+    getTarget(): ModelComponent {
+        return this.target;
     }
 
     /**
      * Return the filename.
      * @returns {string}
      */
-    getName(): string {
+    getIdentifier(): string {
         return this.filename;
     }
 
@@ -143,15 +168,15 @@ export class FileModule implements Module {
      * Return the Blob representing the file.
      * @returns {Blob}
      */
-    getTarget(): Blob {
+    getContent(): Blob {
         return this.file;
     }
 }
 
 /**
- * A ProcessorTask that reads a file and adds its contents as a component to the Model.
+ * A Task that reads a file and adds its contents as a component to the Model.
  */
-class LoadTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
+class LoadTask extends Task<ModelData, ModelTaskMetadata> {
 
     /**
      * Create a new LoadTask.
@@ -160,23 +185,40 @@ class LoadTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
      * @param result
      * @param {FileModule} module
      */
-    public constructor(result: any, module: Module) {
-        super(function(data: ModelData) {
-            let component: Component = data.getComponent(module.getType());
-            if (!component) {
-                component = new Component();
-            }
-            component.setPart(module.getName(), result);
-            data.setComponent(module.getType(), component);
-        },    null);
+    public constructor(
+        private readonly result: any,
+        public readonly module: Module) {
+
+        super();
+    }
+
+    /**
+     * Executes this task.
+     * @param data The data the task takes as input.
+     */
+    public execute(data: ModelData): void {
+        let component = data.getOrCreateComponent<Component>(
+            this.module.getTarget(),
+            () => new Component());
+
+        component.setPart(this.module.getIdentifier(), this.result);
+        data.setComponent(this.module.getTarget(), component);
+    }
+
+    /**
+     * Gets the metadata for this task.
+     */
+    public get metadata(): ModelTaskMetadata {
+        return new ModelTaskMetadata(
+            [ModelComponent.DataGraph, ModelComponent.IO],
+            [ModelComponent.DataGraph, ModelComponent.IO]);
     }
 }
 
 /**
- * A ProcessorTask that retrieves a component from the Model and writes its contents to a file.
+ * A Task that retrieves a component from the Model and writes its contents to a file.
  */
-class SaveTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
-
+class SaveTask extends Task<ModelData, ModelTaskMetadata> {
     /**
      * Create a new SaveTask.
      * Contains a function that will execute on the model.
@@ -184,15 +226,34 @@ class SaveTask extends ProcessorTask<ModelData, ModelTaskMetadata> {
      * @param {IOFacilitator} io
      * @param {FileModule} module
      */
-    public constructor(io: IOFacilitator, module: Module) {
-        super(function(data: ModelData) {
-            let component: Component = data.getComponent(module.getType());
-            if (component) {
-                let part = component.getPart(module.getName());
-                if (part) {
-                    io.writeToFile(module, part);
-                }
-            }
-        },    null);
+    public constructor(
+        private readonly io: IOFacilitator,
+        public readonly module: Module) {
+
+        super();
+    }
+
+    /**
+     * Executes this task.
+     * @param data The data the task takes as input.
+     */
+    public execute(data: ModelData): void {
+        let component = data.getOrCreateComponent<Component>(
+            this.module.getTarget(),
+            () => new Component());
+
+        let part = component.getPart(this.module.getIdentifier());
+        if (part) {
+            this.io.writeToFile(this.module, part);
+        }
+    }
+
+    /**
+     * Gets the metadata for this task.
+     */
+    public get metadata(): ModelTaskMetadata {
+        return new ModelTaskMetadata(
+            [ModelComponent.DataGraph, ModelComponent.IO],
+            [ModelComponent.IO]);
     }
 }

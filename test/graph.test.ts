@@ -12,7 +12,7 @@ describe("Graph Class", () => {
             graph.addTriple("http://en.wikipedia.org/wiki/Tony_Benn",
                             "http://purl.org/dc/elements/1.1/title", '"Tony Benn"');
 
-            let triple = graph.getPersistentStore().getTriples()[0];
+            let triple = graph.getN3Store().getTriples()[0];
             expect(triple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
             expect(triple.predicate).toEqual("http://purl.org/dc/elements/1.1/title");
             expect(triple.object).toEqual('"Tony Benn"');
@@ -21,7 +21,7 @@ describe("Graph Class", () => {
             graph.removeTriple("http://en.wikipedia.org/wiki/Tony_Benn",
                                "http://purl.org/dc/elements/1.1/title", '"Tony Benn"');
 
-            expect(graph.getPersistentStore().countTriples()).toEqual(0);
+            expect(graph.getN3Store().countTriples()).toEqual(0);
 
             // TEST CASE: adding multiple triples
             graph.addTriples([{
@@ -33,12 +33,12 @@ describe("Graph Class", () => {
                     predicate: "http://purl.org/dc/elements/1.1/publisher", object: '"Wikipedia"'
                 }]);
 
-            let firstTriple = graph.getPersistentStore().getTriples()[0];
+            let firstTriple = graph.getN3Store().getTriples()[0];
             expect(firstTriple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
             expect(firstTriple.predicate).toEqual("http://purl.org/dc/elements/1.1/title");
             expect(firstTriple.object).toEqual('"Tony Benn"');
 
-            let secondTriple = graph.getPersistentStore().getTriples()[1];
+            let secondTriple = graph.getN3Store().getTriples()[1];
             expect(secondTriple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
             expect(secondTriple.predicate).toEqual("http://purl.org/dc/elements/1.1/publisher");
             expect(secondTriple.object).toEqual('"Wikipedia"');
@@ -53,7 +53,7 @@ describe("Graph Class", () => {
                     predicate: "http://purl.org/dc/elements/1.1/publisher", object: '"Wikipedia"'
                 }]);
 
-            expect(graph.getPersistentStore().countTriples()).toEqual(0);
+            expect(graph.getN3Store().countTriples()).toEqual(0);
         });
 
     it("should maintain a persistent store for validation purposes.",
@@ -64,7 +64,7 @@ describe("Graph Class", () => {
             graph.addTriple("http://en.wikipedia.org/wiki/Tony_Benn",
                             "http://purl.org/dc/elements/1.1/title", '"Tony Benn"');
 
-            let statement = graph.getValidationStore().match()[0];
+            let statement = graph.getSHACLStore().match()[0];
             let matchingStatement = new Statement("http://en.wikipedia.org/wiki/Tony_Benn",
                                                   "http://purl.org/dc/elements/1.1/title", '"Tony Benn"', null);
             expect(statement.equals(matchingStatement)).toEqual(true);
@@ -73,7 +73,7 @@ describe("Graph Class", () => {
             graph.removeTriple("http://en.wikipedia.org/wiki/Tony_Benn",
                                "http://purl.org/dc/elements/1.1/title", '"Tony Benn"');
 
-            expect(graph.getValidationStore().length).toEqual(0);
+            expect(graph.getSHACLStore().length).toEqual(0);
 
             // TEST CASE: adding multiple triples
             graph.addTriples([{
@@ -85,13 +85,13 @@ describe("Graph Class", () => {
                     predicate: "http://purl.org/dc/elements/1.1/publisher", object: '"Wikipedia"'
                 }]);
 
-            let firstStatement = graph.getValidationStore().match()[0];
+            let firstStatement = graph.getSHACLStore().match()[0];
             let firstMatchingStatement = new Statement("http://en.wikipedia.org/wiki/Tony_Benn",
                                                        "http://purl.org/dc/elements/1.1/title", '"Tony Benn"',
                                                        null);
             expect(firstStatement.equals(firstMatchingStatement)).toEqual(true);
 
-            let secondStatement = graph.getValidationStore().match()[1];
+            let secondStatement = graph.getSHACLStore().match()[1];
             let secondMatchingStatement = new Statement("http://en.wikipedia.org/wiki/Tony_Benn",
                                                         "http://purl.org/dc/elements/1.1/publisher", '"Wikipedia"',
                                                         null);
@@ -107,7 +107,7 @@ describe("Graph Class", () => {
                     predicate: "http://purl.org/dc/elements/1.1/publisher", object: '"Wikipedia"'
                 }]);
 
-            expect(graph.getValidationStore().length).toEqual(0);
+            expect(graph.getSHACLStore().length).toEqual(0);
         });
 
     // TODO: This is not an actual test! To be removed when conformance tests are added.
@@ -116,7 +116,7 @@ describe("Graph Class", () => {
             let parser = new GraphParser();
             parser.parse(getDataGraph(), "text/turtle", function (data: any) {
                 parser.parse(getShapesGraph(), "text/turtle", function (shapes: any) {
-                    let validator = new SHACLValidator(data.getValidationStore(), shapes.getValidationStore());
+                    let validator = new SHACLValidator(data.getSHACLStore(), shapes.getSHACLStore());
                     validator.updateValidationEngine();
                     validator.showValidationResults(function (err: any, report: any) {
                         expect(report.conforms()).toEqual(true);
@@ -161,8 +161,8 @@ describe("Graph Class", () => {
 
             graph.merge(other);
 
-            expect(graph.getPersistentStore().countTriples()).toEqual(2);
-            expect(graph.getValidationStore().length).toEqual(2);
+            expect(graph.getN3Store().countTriples()).toEqual(2);
+            expect(graph.getSHACLStore().length).toEqual(2);
 
             let key = "rdf";
             expect(graph.getPrefixes()[key]).toEqual("http://www.w3.org/1999/02/22-rdf-syntax-ns#");

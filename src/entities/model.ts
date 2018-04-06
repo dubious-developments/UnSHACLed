@@ -1,12 +1,18 @@
 import * as Collections from "typescript-collections";
-import { TaskProcessor, ProcessorTask, FifoTaskQueue } from "./taskProcessor";
+import { InOrderProcessor, TaskProcessor } from "./taskProcessor";
+import { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";
+import { ModelData } from "./modelData";
+import { Task, OpaqueTask } from "./task";
+import { ModelTask, OpaqueModelTask } from "./taskInstruction";
+import { OutOfOrderProcessor } from "./outOfOrderProcessor";
+export { ModelData } from "./modelData";
+export { ModelTask, OpaqueModelTask } from "./taskInstruction";
 
 /**
  * A model observer: a function that takes a change set as input
  * and produces a list of tasks to process as output.
  */
-type ModelObserver = (changeBuffer: Collections.Set<ModelComponent>)
-    => Array<ProcessorTask<ModelData, ModelTaskMetadata>>;
+type ModelObserver = (changeBuffer: Collections.Set<ModelComponent>) => Array<ModelTask>;
 
 /**
  * Models the data handled by the UnSHACLed application.
@@ -40,19 +46,40 @@ export class Model {
      * This constructor exists mostly for testing purposes.
      */
     public constructor(data?: ModelData) {
-        if (!data) {
-            data = new ModelData();
-        }
-        this.tasks = new TaskProcessor<ModelData, ModelTaskMetadata>(
-            data,
-            new FifoTaskQueue<ModelData, ModelTaskMetadata>(),
-            (task) => task,
-            (task) => this.notifyObservers(data.drainChangeBuffer()));
+        let wellDefinedData = !data ? new ModelData() : data;
+        this.tasks = new OutOfOrderProcessor(
+            wellDefinedData,
+            task => task,
+            task => task,
+            task => this.notifyObservers(wellDefinedData.drainChangeBuffer()));
         this.observers = [];
     }
 
     /**
-     * Registers an observer with the model.
+     * Creates a task for the model.
+     * @param execute The task itself: a function that manipulates model data.
+     * @param readSet The set of all values from which the model task may read.
+     * It includes elements in the write set that are modified based on their
+     * previous value, as opposed to blindly overwritten.
+     * @param writeSet The set of all values to which the model task writes.
+     * @param priority An optional priority for the task.
+     */
+    public static createTask(
+        execute: (data: ModelData) => void,
+        readSet: Collections.Set<ModelComponent> | ModelComponent[],
+        writeSet: Collections.Set<ModelComponent> | ModelComponent[],
+        priority?: number):
+        OpaqueModelTask {
+
+        return new OpaqueTask<ModelData, ModelTaskMetadata>(
+            execute,
+            new ModelTaskMetadata(readSet, writeSet, priority));
+    }
+
+    /**
+     * Registers an observer with the model. Observers are notified when
+     * a task completes and may queue additional tasks based on the changes
+     * made to components.
      */
     public registerObserver(observer: ModelObserver): void {
         this.observers.push(observer);
@@ -64,81 +91,5 @@ export class Model {
                 this.tasks.schedule(newTask);
             });
         });
-    }
-}
-
-/**
- * Contains a mutable view of a model.
-*/
-export class ModelData {
-    private changeBuffer: Collections.Set<ModelComponent>;
-
-    /**
-     * A dictionary that contains all of the model's components.
-     */
-    private components: Collections.Dictionary<ModelComponent, any>;
-
-    /**
-     * Creates an empty model.
-     */
-    public constructor() {
-        this.changeBuffer = new Collections.Set<ModelComponent>();
-        this.components = new Collections.Dictionary<ModelComponent, any>();
-    }
-
-    /**
-     * Gets a particular component of this model.
-     */
-    public getComponent<T>(component: ModelComponent): T {
-        return this.components.getValue(component);
-    }
-
-    /**
-     * Sets a particular component of this model.
-     */
-    public setComponent<T>(component: ModelComponent, value: T): void {
-        this.components.setValue(component, value);
-        this.changeBuffer.add(component);
-    }
-
-    /**
-     * Drains the model's change buffer.
-     */
-    public drainChangeBuffer(): Collections.Set<ModelComponent> {
-        let result = this.changeBuffer;
-        this.changeBuffer = new Collections.Set<ModelComponent>();
-        return result;
-    }
-}
-
-/**
- * An enumeration of components in the model.
- */
-export enum ModelComponent {
-    DataGraph, ShapesGraph, ValidationReport
-}
-
-/**
- * Metadata for tasks that are executed on the model.
- */
-export class ModelTaskMetadata {
-    public constructor(
-        public readSet: Collections.Set<ModelComponent>,
-        public writeSet: Collections.Set<ModelComponent>) { }
-
-    /**
-     * Tells if this model task reads from a particular component.
-     * @param component The component this model task may read from.
-     */
-    public readsFrom(component: ModelComponent): boolean {
-        return this.readSet.contains(component);
-    }
-
-    /**
-     * Tells if this model task overwrites a particular component.
-     * @param component The component this model will overwrite.
-     */
-    public writesTo(component: ModelComponent): boolean {
-        return this.writeSet.contains(component);
     }
 }

@@ -1,30 +1,31 @@
-import {Model, ModelComponent, ModelData, ModelTaskMetadata} from "../src/entities/model";
-import {FileDAO, FileModule} from "../src/persistence/fileDAO";
-import {GraphParser} from "../src/persistence/graphParser";
-import {Component} from "../src/persistence/component";
-import {ProcessorTask} from "../src/entities/taskProcessor";
+import { Model } from "../src/entities/model";
+import { ModelComponent } from "../src/entities/modelTaskMetadata";
+import { FileDAO, FileModule } from "../src/persistence/fileDAO";
+import { GraphParser } from "../src/persistence/graphParser";
+import { Component } from "../src/persistence/component";
 
 describe("FileDAO Class", () => {
     it("should create a new file.",
        () => {
             let label = ModelComponent.DataGraph;
             let filename = "insert.ttl";
-            let file = new Blob([], {type: "text/turtle"});
+            let file = new Blob([]); // blob is unnecessary for saving to file
             let module = new FileModule(label, filename, file);
 
             let model = new Model();
             let parser = new GraphParser();
             let comp = new Component();
             let busy = true;
-            parser.parse(generateTurtle(), file.type, function(result: any) {
+            parser.parse(generateTurtle(), "text/turtle", function(result: any) {
                 comp.setPart(filename, result);
-                model.tasks.schedule(new ProcessorTask<ModelData, ModelTaskMetadata>(
-                    (data) => {
-                        data.setComponent(ModelComponent.DataGraph, comp);
-                        busy = false;
-                    },
-                    null)
-                );
+                model.tasks.schedule(
+                    Model.createTask(
+                        (data) => {
+                            data.setComponent(ModelComponent.DataGraph, comp);
+                            busy = false;
+                        },
+                        [],
+                        [ModelComponent.DataGraph]));
                 model.tasks.processTask();
 
                 // this is pretty horrible and there probably exists a better way of doing this,
@@ -42,7 +43,7 @@ describe("FileDAO Class", () => {
        () => {
            let label = ModelComponent.DataGraph;
            let filename = "find.ttl";
-           let file = new Blob([generateTurtle()], {type: "text/turtle"});
+           let file = new Blob([generateTurtle()]);
            let module = new FileModule(label, filename, file);
 
            let model = new Model();

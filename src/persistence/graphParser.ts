@@ -1,7 +1,6 @@
-/// <reference path="./parser.d.ts"/>
-
 import * as Collections from "typescript-collections";
 import {Graph} from "./graph";
+import {Parser} from "./parser";
 
 /**
  * A Parser that takes care of (de)serialization for graph structures.
@@ -33,16 +32,18 @@ export class GraphParser implements Parser {
      * @param andThen
      * @returns {string}
      */
-    public serialize(data: any, mime: string, andThen: (result: string) => void) {
-        if (this.mimeTypes.contains(mime)) {
+    public serialize(data: any, mime: string | undefined, andThen: ((result: string) => void) | null): void {
+        if (mime && this.mimeTypes.contains(mime)) {
             let N3 = require("n3");
             let writer = N3.Writer();
 
             let graph: Graph = data;
             writer.addPrefixes(graph.getPrefixes());
-            writer.addTriples(graph.getPersistentStore().getTriples());
+            writer.addTriples(graph.getN3Store().getTriples());
             writer.end(function (error: any, result: any) {
-                andThen(result);
+                if (andThen) {
+                    andThen(result);
+                }
             });
         } else {
             throw new Error("Incorrect MimeType " + mime + "!");
@@ -57,8 +58,8 @@ export class GraphParser implements Parser {
      * @param andThen
      * @returns {any}
      */
-    public parse(content: string, mime: string, andThen: (result: any) => void) {
-        if (this.mimeTypes.contains(mime)) {
+    public parse(content: string, mime: string | undefined, andThen: ((result: any) => void) | null): void {
+        if (mime && this.mimeTypes.contains(mime)) {
             let N3 = require("n3");
             let parser = N3.Parser({ format: mime });
 
@@ -71,7 +72,9 @@ export class GraphParser implements Parser {
                                  if (prefixes) {
                                      self.graph.addPrefixes(prefixes);
                                  }
-                                 andThen(self.graph);
+                                 if (andThen) {
+                                    andThen(self.graph);
+                                 }
                              }
                  });
         } else {
@@ -83,14 +86,14 @@ export class GraphParser implements Parser {
      * Retrieve the data contained by this GraphParser.
      * @returns {any}
      */
-    public getData() {
+    public getData(): any {
         return this.graph;
     }
 
     /**
      * Clean whatever is contained by this GraphParser.
      */
-    public clean() {
+    public clean(): void {
         this.graph = new Graph();
     }
 }

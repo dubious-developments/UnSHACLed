@@ -1,6 +1,7 @@
-import { ModelTaskMetadata, ModelComponent, Model, ModelData } from "../src/entities/model";
+import { Model, ModelData } from "../src/entities/model";
+import { ModelTaskMetadata, ModelComponent } from "../src/entities/modelTaskMetadata";
 import { Set } from "typescript-collections";
-import { ProcessorTask } from "../src/entities/taskProcessor";
+import { Task, OpaqueTask } from "../src/entities/task";
 
 let graphReadSet = new Set<ModelComponent>();
 graphReadSet.add(ModelComponent.DataGraph);
@@ -13,6 +14,15 @@ describe("ModelTaskMetadata Class", () => {
         expect(graphTweakMetadata.readsFrom(ModelComponent.DataGraph)).toEqual(true);
         expect(graphTweakMetadata.writesTo(ModelComponent.DataGraph)).toEqual(true);
     });
+
+    it("remembers its priority", () => {
+       expect(new ModelTaskMetadata(graphReadSet, graphWriteSet, 1).priority).toEqual(1); 
+    });
+
+    it("has the right default priority", () => {
+        expect(new ModelTaskMetadata(graphReadSet, graphWriteSet).priority)
+            .toEqual(ModelTaskMetadata.defaultPriority); 
+     });
 });
 
 describe("Model Class", () => {
@@ -25,11 +35,11 @@ describe("Model Class", () => {
         modelData.setComponent(ModelComponent.DataGraph, 0);
         let model = new Model(modelData);
 
-        let task = new ProcessorTask<ModelData, ModelTaskMetadata>(
+        let task = new OpaqueTask<ModelData, ModelTaskMetadata>(
             (data) =>
                 data.setComponent(
                     ModelComponent.DataGraph,
-                    data.getComponent<number>(ModelComponent.DataGraph) + 1),
+                    <number> data.getComponent<number>(ModelComponent.DataGraph) + 1),
             graphTweakMetadata);
 
         model.registerObserver((changeBuf) => {
@@ -40,9 +50,9 @@ describe("Model Class", () => {
         model.tasks.schedule(task);
 
         model.tasks.processTask();
-        expect(model.tasks.isScheduleEmpty).toEqual(false);
+        expect(model.tasks.isEmpty()).toEqual(false);
         model.tasks.processTask();
-        expect(model.tasks.isScheduleEmpty).toEqual(false);
+        expect(model.tasks.isEmpty()).toEqual(false);
         expect(modelData.getComponent<number>(ModelComponent.DataGraph)).toEqual(2);
     });
 });

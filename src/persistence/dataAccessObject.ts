@@ -1,39 +1,41 @@
 /**
  * Provides basic DAO functionality (i.e. basic access to a persistence system).
  */
-interface DataAccessObject {
+import {ModelComponent} from "../entities/modelTaskMetadata";
+
+export interface DataAccessObject {
     /**
      * Load the contents of the module from the persistence system
      * (i.e. database, filesystem, CVS, ...).
      * @param {Module} module
      */
-    find(module: Module);
+    find(module: Module): void;
 
     /**
      * Insert the contents of the module into the persistence system
      * (i.e. database, filesystem, CVS, ...).
      * @param {Module} module
      */
-    insert(module: Module);
+    insert(module: Module): void;
 }
 
 /**
  * A single persistence directive.
  * Contains all the necessary information to carry out a persistence operation.
  */
-interface Module {
+export interface Module {
     /**
      * Return the designated ModelComponent (used to identify a Component).
      */
-    getType();
+    getTarget(): ModelComponent;
 
     /**
      * Return the identifier (used to identify a specific part of a Component).
      */
-    getName();
+    getIdentifier(): string;
 
     /**
-     * Return the persistent target of the Module.
+     * Return the content of the Module.
      */
-    getTarget();
+    getContent(): any;
 }

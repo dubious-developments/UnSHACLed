@@ -5,8 +5,9 @@ import Statement from "./rdflib/statement";
  * A wrapper class for library-specific triple stores.
  */
 export class Graph {
-    private persistentStore: any;
-    private validationStore: any;
+
+    private N3Store: any;
+    private SHACLStore: any;
     private prefixes: {};
 
     /**
@@ -14,25 +15,25 @@ export class Graph {
      */
     public constructor() {
         let N3 = require("n3");
-        this.persistentStore = N3.Store();
-        this.validationStore = new IndexedFormula();
+        this.N3Store = N3.Store();
+        this.SHACLStore = new IndexedFormula();
         this.prefixes = {};
     }
 
     /**
-     * Retrieve the representation of the Graph used for persistence.
+     * Retrieve the representation of the Graph used by N3 API.
      * @returns {any}
      */
-    public getPersistentStore() {
-        return this.persistentStore;
+    public getN3Store(): any {
+        return this.N3Store;
     }
 
     /**
-     * Retrieve the representation of the Graph used for validation.
+     * Retrieve the representation of the Graph used by SHACL API.
      * @returns {any}
      */
-    public getValidationStore() {
-        return this.validationStore;
+    public getSHACLStore(): any {
+        return this.SHACLStore;
     }
 
     /**
@@ -41,9 +42,9 @@ export class Graph {
      * @param predicate
      * @param object
      */
-    public addTriple(subject: string, predicate: string, object: string) {
-        this.persistentStore.addTriple(subject, predicate, object);
-        this.validationStore.add(new Statement(subject, predicate, object, null));
+    public addTriple(subject: string, predicate: string, object: string): void {
+        this.N3Store.addTriple(subject, predicate, object);
+        this.SHACLStore.add(new Statement(subject, predicate, object, null));
     }
 
     /**
@@ -52,19 +53,19 @@ export class Graph {
      * @param {string} predicate
      * @param {string} object
      */
-    public removeTriple(subject: string, predicate: string, object: string) {
-        this.persistentStore.removeTriple(subject, predicate, object);
-        this.validationStore.remove(new Statement(subject, predicate, object));
+    public removeTriple(subject: string, predicate: string, object: string): void {
+        this.N3Store.removeTriple(subject, predicate, object);
+        this.SHACLStore.remove(new Statement(subject, predicate, object));
     }
 
     /**
      * Add multiple triples to the Graph.
      * @param triples
      */
-    public addTriples(triples: Array<any>) {
-        this.persistentStore.addTriples(triples);
+    public addTriples(triples: Array<any>): void {
+        this.N3Store.addTriples(triples);
         triples.forEach(t => {
-            this.validationStore.add(new Statement(t.subject, t.predicate, t.object, null));
+            this.SHACLStore.add(new Statement(t.subject, t.predicate, t.object, null));
         });
     }
 
@@ -72,10 +73,10 @@ export class Graph {
      * Remove multiple triples from the Graph.
      * @param {Array<any>} triples
      */
-    public removeTriples(triples: Array<any>) {
-        this.persistentStore.removeTriples(triples);
+    public removeTriples(triples: Array<any>): void {
+        this.N3Store.removeTriples(triples);
         triples.forEach(t => {
-            this.validationStore.remove(new Statement(t.subject, t.predicate, t.object));
+            this.SHACLStore.remove(new Statement(t.subject, t.predicate, t.object));
         });
     }
 
@@ -83,7 +84,7 @@ export class Graph {
      * Retrieve all the prefixes in this Graph.
      * @returns {any}
      */
-    public getPrefixes() {
+    public getPrefixes(): {} {
         return this.prefixes;
     }
 
@@ -92,8 +93,8 @@ export class Graph {
      * @param prefix
      * @param iri
      */
-    public addPrefix(prefix: string, iri: string) {
-        this.persistentStore.addPrefix(prefix, iri);
+    public addPrefix(prefix: string, iri: string): void {
+        this.N3Store.addPrefix(prefix, iri);
         this.prefixes[prefix] = iri;
     }
 
@@ -101,8 +102,8 @@ export class Graph {
      * Add multiple presfixes to this Graph.
      * @param prefixes
      */
-    public addPrefixes(prefixes: {}) {
-        this.persistentStore.addPrefixes(prefixes);
+    public addPrefixes(prefixes: {}): void {
+        this.N3Store.addPrefixes(prefixes);
         Object.keys(prefixes).forEach(k => {
             this.prefixes[k] = prefixes[k];
         });
@@ -112,9 +113,9 @@ export class Graph {
      * Merges this graph with another graph.
      * @param {Graph} other
      */
-    public merge(other: Graph) {
+    public merge(other: Graph): void {
         this.addPrefixes(other.getPrefixes());
-        this.persistentStore.addTriples(other.persistentStore.getTriples());
-        this.validationStore.addAll(other.validationStore.match());
+        this.N3Store.addTriples(other.N3Store.getTriples());
+        this.SHACLStore.addAll(other.SHACLStore.match());
     }
 }

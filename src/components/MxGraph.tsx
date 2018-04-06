@@ -15,9 +15,11 @@ class MxGraph extends React.Component<any, any> {
         this.main(document.getElementById('graphContainer'));
     }
 
-    main(container: HTMLElement): void {
+    main(container: HTMLElement | null): void {
         // Checks if the browser is supported
-        if (!mxClient.isBrowserSupported()) {
+        if (!container) {
+            mxUtils.error('Could not find \'graphContainer\'', 200, false);
+        } else if (!mxClient.isBrowserSupported()) {
             mxUtils.error('Browser is not supported!', 200, false);
         } else {
             // Creates the graph inside the given container
