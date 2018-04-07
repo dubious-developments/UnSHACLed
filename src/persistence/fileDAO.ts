@@ -7,6 +7,7 @@ import { Task } from "../entities/task";
 import {Model} from "../entities/model";
 import {ModelData} from "../entities/modelData";
 import {Parser} from "./parser";
+import {extensionToMIME} from "../services/extensionToMIME";
 
 /**
  * Provides basic DAO functionality at the file granularity level.
@@ -56,19 +57,12 @@ export class FileDAO implements DataAccessObject {
 class IOFacilitator {
 
     private parsers: Collections.Dictionary<ModelComponent, Parser>;
-    private extensionToMime: Collections.Dictionary<string, string>;
 
     /**
      * Create a new IOFacilitator.
      */
     public constructor() {
         this.parsers = new Collections.Dictionary<ModelComponent, Parser>();
-        this.extensionToMime = new Collections.Dictionary<string, string>();
-
-        this.extensionToMime.setValue("nq", "application/n-quads");
-        this.extensionToMime.setValue("nt", "application/n-triples");
-        this.extensionToMime.setValue("trig", "application/trig");
-        this.extensionToMime.setValue("ttl", "text/turtle");
     }
 
     public registerParser(label: ModelComponent, parser: Parser): void {
@@ -90,13 +84,10 @@ class IOFacilitator {
         let wellDefinedParser = parser;
         wellDefinedParser.clean();
 
-        let splitID = module.getIdentifier().split(".");
-        let mime = this.extensionToMime.getValue(splitID[splitID.length - 1]);
-
         // every time a portion is loaded, parse this portion of content
         // and aggregate the result (this happens internally).
         function onLoadFunction(evt: any) {
-            wellDefinedParser.parse(evt.target.result, mime, load);
+            wellDefinedParser.parse(evt.target.result, module.getMime(), load);
         }
 
         let reader = new FileReader();
@@ -116,12 +107,11 @@ class IOFacilitator {
             throw new Error("Unsupported target " + module.getTarget());
         }
 
-        let splitID = module.getIdentifier().split(".");
-        let mime = this.extensionToMime.getValue(splitID[splitID.length - 1]);
         parser.serialize(
-            data, mime, function (result: string) {
+            data, module.getMime(),
+            function (result: string) {
                 // write to file
-                let file = new Blob([result], {type: mime});
+                let file = new Blob([result], {type: module.getMime()});
                 FileSaver.saveAs(file, module.getIdentifier());
             });
     }
@@ -170,6 +160,21 @@ export class FileModule implements Module {
      */
     getContent(): Blob {
         return this.file;
+    }
+
+    /**
+     * Returns the MIME type
+     * @returns {string}
+     */
+    getMime(): string {
+        let mime = this.file.type;
+        // this happens when file type can not be determined
+        if (mime === "") {
+            // set the type using the extension
+            var split = this.filename.split(".");
+            mime = extensionToMIME[split[split.length - 1]];
+        }
+        return mime;
     }
 }
 

@@ -16,6 +16,11 @@ export enum ModelComponent {
     IO,
 
     /**
+     * A pseudo-component for UI access.
+     */
+    UI,
+
+    /**
      * The shapes graph component used for SHACL validation.
      */
     SHACLShapesGraph,

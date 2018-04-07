@@ -1,5 +1,5 @@
 import SHACLValidator from "../src/conformance/shacl";
-import Statement from "../src/persistence/rdflib/statement";
+import {Statement} from "rdflib";
 import {Graph} from "../src/persistence/graph";
 import {GraphParser} from "../src/persistence/graphParser";
 
@@ -66,7 +66,8 @@ describe("Graph Class", () => {
 
             let statement = graph.getSHACLStore().match()[0];
             let matchingStatement = new Statement("http://en.wikipedia.org/wiki/Tony_Benn",
-                                                  "http://purl.org/dc/elements/1.1/title", '"Tony Benn"', null);
+                                                  "http://purl.org/dc/elements/1.1/title", '"Tony Benn"',
+                                                  graph.getSHACLStore());
             expect(statement.equals(matchingStatement)).toEqual(true);
 
             // TEST CASE: removing a triple
@@ -88,13 +89,13 @@ describe("Graph Class", () => {
             let firstStatement = graph.getSHACLStore().match()[0];
             let firstMatchingStatement = new Statement("http://en.wikipedia.org/wiki/Tony_Benn",
                                                        "http://purl.org/dc/elements/1.1/title", '"Tony Benn"',
-                                                       null);
+                                                       graph.getSHACLStore());
             expect(firstStatement.equals(firstMatchingStatement)).toEqual(true);
 
             let secondStatement = graph.getSHACLStore().match()[1];
             let secondMatchingStatement = new Statement("http://en.wikipedia.org/wiki/Tony_Benn",
                                                         "http://purl.org/dc/elements/1.1/publisher", '"Wikipedia"',
-                                                        null);
+                                                        graph.getSHACLStore());
             expect(secondStatement.equals(secondMatchingStatement)).toEqual(true);
 
             // TEST CASE: removing multiple triples

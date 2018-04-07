@@ -27,7 +27,7 @@ export class ValidationService {
 
         let self = this;
         model.registerObserver(function(changeBuffer: Collections.Set<ModelComponent>) {
-            let tasks = [];
+            let tasks = new Collections.Set<ValidationTask>();
             let relevantValidators = new Collections.Set<Validator>();
             // return a task for every relevant validator
             changeBuffer.forEach(c => {
@@ -35,13 +35,13 @@ export class ValidationService {
                 if (validators = self.validators.getValue(c)) {
                     validators.forEach(v => {
                         if (!relevantValidators.contains(v)) {
-                            tasks.push(new ValidationTask(v));
+                            tasks.add(new ValidationTask(v));
                             relevantValidators.add(v);
                         }
                     });
                 }
             });
-            return tasks;
+            return tasks.toArray();
         });
     }
 

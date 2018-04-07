@@ -1,6 +1,4 @@
-import {Part} from "../persistence/component";
-
-export class ValidationReport implements Part {
+export class ValidationReport {
 
     public merge(other: ValidationReport) {
 

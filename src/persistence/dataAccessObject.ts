@@ -38,4 +38,9 @@ export interface Module {
      * Return the content of the Module.
      */
     getContent(): any;
+
+    /**
+     * Returns the MIME type
+     */
+    getMime();
 }

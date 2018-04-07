@@ -1,8 +1,9 @@
 import * as React from 'react';
 import {Sidebar, Menu, Image, Input, Dropdown} from 'semantic-ui-react';
 import TreeView from './treeView';
+import { SidebarProps } from './interfaces/interfaces';
 
-class SideBar extends React.Component<any, any> {
+class SideBar extends React.Component<SidebarProps, any> {
 
     static sidebarOptions = [
         {key: 1, text: 'Add Components', value: 1},
@@ -10,14 +11,15 @@ class SideBar extends React.Component<any, any> {
     ];
     static SHACLMenuItems = ["Shape", "Node Shape", "Property Shape"];
     static GeneralMenuItems = ["Arrow", "Rectangle"];
-    static TemplateMenuItems = ["Building", "Person"];
+    static TemplateMenuItems = ["Address", "Person"];
 
-    constructor(props: string) {
+    constructor(props: any) {
         super(props);
 
         this.state = {
             value: '',
-            content: 1
+            content: 1,
+            dragid: null
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -28,7 +30,7 @@ class SideBar extends React.Component<any, any> {
 
     getMenuItemsFiltered(kind: string, query: string) {
         // determine kind of submenu
-        var collection;
+        let collection;
         if (kind === "SHACL") {
             collection = SideBar.SHACLMenuItems;
         } else if (kind === "General") {
@@ -54,14 +56,21 @@ class SideBar extends React.Component<any, any> {
      * In the props must specify the menu type
      */
     DynamicMenu(props: any) {
-        var kind = props.kind;
-        var query = this.state.value;
-        var items = new Array<JSX.Element>();
-        var res = this.getMenuItemsFiltered(kind, query);
+        let kind = props.kind;
+        let query = this.state.value;
+        let items = Array<JSX.Element>();
+        let res = this.getMenuItemsFiltered(kind, query);
 
-        for (var i = 0; i < res.length; i++) {
-            var key = kind + i;
-            items.push(<Menu.Item as="a" content={res[i]} key={key}/>);
+        for (let i = 0; i < res.length; i++) {
+            let key = kind + i;
+            items.push(
+                <Menu.Item
+                    as="a"
+                    id={res[i]}
+                    content={res[i]}
+                    key={key}
+                />
+            );
         }
 
         return (
@@ -83,22 +92,21 @@ class SideBar extends React.Component<any, any> {
         });
 
     }
-
     render() {
         const logo = require('../img/shacl_logo_trans.png');
         const defaultOption = 1;
         return (
             <Sidebar
                 as={Menu}
-                animation='uncover'
-                visible={true}
+                animation='push'
+                visible={this.props.visible}
                 vertical={true}
                 inverted={true}
                 borderless={true}
-                size="huge"
                 style={{
-                    width: '12em'
+                    width: '50h'
                 }}
+                id="sideBarID"
             >
                 <Menu.Item style={{height: '5em'}}>
                     <Image src={logo} size="mini" centered={true}/>
@@ -122,7 +130,7 @@ class SideBar extends React.Component<any, any> {
                                 onChange={this.handleChange}
                                 type="text"
                                 value={this.state.value}
-                                placeholder="Search . . ."
+                                placeholder="Search components . . ."
                                 inverted={true}
                                 transparent={true}
                                 icon="search"
@@ -133,12 +141,10 @@ class SideBar extends React.Component<any, any> {
                             SHACL
                             <this.DynamicMenu kind="SHACL"/>
                         </Menu.Item>
-
-                        <Menu.Item>
+{/*                        <Menu.Item>
                             General
                             <this.DynamicMenu kind="General"/>
-                        </Menu.Item>
-
+                        </Menu.Item>*/}
                         <Menu.Item>
                             Template
                             <this.DynamicMenu kind="Template"/>
