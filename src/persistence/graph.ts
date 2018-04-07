@@ -1,3 +1,4 @@
+import * as Collections from "typescript-collections";
 import {IndexedFormula, Statement} from "rdflib";
 
 /**
@@ -7,6 +8,9 @@ export class Graph {
 
     private N3Store: any;
     private SHACLStore: any;
+
+    private changes: Collections.Dictionary<ChangeSet, Collections.Set<any>>;
+
     private prefixes: {};
 
     /**
@@ -16,6 +20,12 @@ export class Graph {
         let N3 = require("n3");
         this.N3Store = N3.Store();
         this.SHACLStore = new IndexedFormula();
+
+        this.changes = new Collections.Dictionary<ChangeSet, Collections.Set<any>>();
+
+        this.changes.setValue(ChangeSet.ADD, new Collections.Set<any>());
+        this.changes.setValue(ChangeSet.REMOVE, new Collections.Set<any>());
+
         this.prefixes = {};
     }
 
@@ -36,6 +46,34 @@ export class Graph {
     }
 
     /**
+     * Retrieve recent changes made to the graph structure.
+     * @returns {Set<any>}
+     */
+    public getChanges(): Collections.Dictionary<ChangeSet, Collections.Set<any>> {
+        return this.changes;
+    }
+
+    /**
+     * Clear all changes.
+     */
+    public clearChanges(): void {
+        this.changes.values().forEach(s => s.clear());
+    }
+
+    /**
+     * Check whether the graph has recently changed.
+     * @returns {boolean}
+     */
+    public hasChanged(): boolean {
+        let changed = false;
+        this.changes.values().forEach(function (s: Collections.Set<any>) {
+            changed = changed || !s.isEmpty();
+        });
+
+        return changed;
+    }
+
+    /**
      * Add a triple to the Graph.
      * @param subject
      * @param predicate
@@ -44,6 +82,7 @@ export class Graph {
     public addTriple(subject: string, predicate: string, object: string): void {
         this.N3Store.addTriple(subject, predicate, object);
         this.SHACLStore.add(new Statement(subject, predicate, object, this.SHACLStore));
+        this.updateChanges(ChangeSet.ADD, ChangeSet.REMOVE, subject, predicate, object);
     }
 
     /**
@@ -55,6 +94,7 @@ export class Graph {
     public removeTriple(subject: string, predicate: string, object: string): void {
         this.N3Store.removeTriple(subject, predicate, object);
         this.SHACLStore.remove(new Statement(subject, predicate, object));
+        this.updateChanges(ChangeSet.REMOVE, ChangeSet.ADD, subject, predicate, object);
     }
 
     /**
@@ -65,6 +105,7 @@ export class Graph {
         this.N3Store.addTriples(triples);
         triples.forEach(t => {
             this.SHACLStore.add(new Statement(t.subject, t.predicate, t.object, this.SHACLStore));
+            this.updateChanges(ChangeSet.ADD, ChangeSet.REMOVE, t.subject, t.predicate, t.object);
         });
     }
 
@@ -76,7 +117,25 @@ export class Graph {
         this.N3Store.removeTriples(triples);
         triples.forEach(t => {
             this.SHACLStore.remove(new Statement(t.subject, t.predicate, t.object));
+            this.updateChanges(ChangeSet.REMOVE, ChangeSet.ADD, t.subject, t.predicate, t.object);
         });
+    }
+
+    /**
+     * Updates the fields of the original triple with the corresponding new values.
+     * If one of the new value fields is omitted, the original value for that field is maintained.
+     * @param {string} oSubject
+     * @param {string} oPredicate
+     * @param {string} oObject
+     * @param {string} nSubject
+     * @param {string} nPredicate
+     * @param {string} nObject
+     */
+    public updateTriple(oSubject: string, oPredicate: string, oObject: string,
+                        {nSubject = oSubject, nPredicate = oPredicate, nObject = oObject}:
+                            {nSubject?: string, nPredicate?: string, nObject?: string}) {
+        this.removeTriple(oSubject, oPredicate, oObject);
+        this.addTriple(nSubject, nPredicate, nObject);
     }
 
     /**
@@ -113,8 +172,69 @@ export class Graph {
      * @param {Graph} other
      */
     public merge(other: Graph): void {
+        // do merge of prefixes
         this.addPrefixes(other.getPrefixes());
+
+        // do merge of stores.
         this.N3Store.addTriples(other.N3Store.getTriples());
         this.SHACLStore.addAll(other.SHACLStore.match());
+
+        // do merge of change sets
+        let theseChanges = this.changes.getValue(ChangeSet.ADD);
+        if (theseChanges) {
+            let otherChanges = other.changes.getValue(ChangeSet.ADD);
+            if (otherChanges) {
+                theseChanges.union(otherChanges);
+            }
+        }
+
+        theseChanges = this.changes.getValue(ChangeSet.REMOVE);
+        if (theseChanges) {
+            let otherChanges = other.changes.getValue(ChangeSet.REMOVE);
+            if (otherChanges) {
+                theseChanges.union(otherChanges);
+            }
+        }
     }
+
+    /**
+     * Update changes.
+     * @param focus
+     * @param other
+     * @param {string} subject
+     * @param {string} predicate
+     * @param {string} object
+     */
+    private updateChanges(focus: ChangeSet, other: ChangeSet,
+                          subject: string, predicate: string, object: string): void {
+        let focusSet = this.changes.getValue(focus);
+        let otherSet = this.changes.getValue(other);
+        if (focusSet) {
+            // add change to the relevant set
+            // makes use of the shacl.js representation
+            focusSet.add(new Statement(subject, predicate, object, this.SHACLStore));
+            if (otherSet) {
+                // performs a bidirectional difference operation:
+                // we do this to avoid the situation where e.g. if a previously added triple is removed
+                // the changes would still reflect that it was both added and removed;
+                // this gives a false impression of change, because in fact the graph hasn't altered at all
+                let backup = new Collections.Set<any>();
+                backup.union(focusSet);
+                focusSet.difference(otherSet);
+                otherSet.difference(backup);
+            }
+        }
+    }
+}
+
+export enum ChangeSet {
+    /**
+     * Triples that were added to the graph structure.
+     */
+    ADD,
+
+    /**
+     * Triples that were removed from the graph structure.
+     */
+    REMOVE
 }

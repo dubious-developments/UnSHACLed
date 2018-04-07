@@ -1,6 +1,6 @@
 import SHACLValidator from "../src/conformance/shacl";
 import {Statement} from "rdflib";
-import {Graph} from "../src/persistence/graph";
+import {ChangeSet, Graph} from "../src/persistence/graph";
 import {GraphParser} from "../src/persistence/graphParser";
 
 describe("Graph Class", () => {
@@ -17,9 +17,18 @@ describe("Graph Class", () => {
             expect(triple.predicate).toEqual("http://purl.org/dc/elements/1.1/title");
             expect(triple.object).toEqual('"Tony Benn"');
 
+            // TEST CASE: updating a triple
+            graph.updateTriple(triple.subject, triple.predicate, triple.object,
+                               {nObject: '"Someone else"'});
+
+            let updatedTriple = graph.getN3Store().getTriples()[0];
+            expect(updatedTriple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
+            expect(updatedTriple.predicate).toEqual("http://purl.org/dc/elements/1.1/title");
+            expect(updatedTriple.object).toEqual('"Someone else"');
+
             // TEST CASE: removing a triple
             graph.removeTriple("http://en.wikipedia.org/wiki/Tony_Benn",
-                               "http://purl.org/dc/elements/1.1/title", '"Tony Benn"');
+                               "http://purl.org/dc/elements/1.1/title", '"Someone else"');
 
             expect(graph.getN3Store().countTriples()).toEqual(0);
 
@@ -56,7 +65,7 @@ describe("Graph Class", () => {
             expect(graph.getN3Store().countTriples()).toEqual(0);
         });
 
-    it("should maintain a persistent store for validation purposes.",
+    it("should maintain a consistent store for validation purposes.",
        () => {
             let graph = new Graph();
 
@@ -70,9 +79,20 @@ describe("Graph Class", () => {
                                                   graph.getSHACLStore());
             expect(statement.equals(matchingStatement)).toEqual(true);
 
-            // TEST CASE: removing a triple
+            // TEST CASE: updating a triple
+            graph.updateTriple("http://en.wikipedia.org/wiki/Tony_Benn",
+                               "http://purl.org/dc/elements/1.1/title", '"Tony Benn"',
+                               {nObject: '"Someone else"'});
+
+            let updatedStatement = graph.getSHACLStore().match()[0];
+            matchingStatement = new Statement("http://en.wikipedia.org/wiki/Tony_Benn",
+                                              "http://purl.org/dc/elements/1.1/title", '"Someone else"',
+                                              graph.getSHACLStore());
+            expect(updatedStatement.equals(matchingStatement)).toEqual(true);
+
+           // TEST CASE: removing a triple
             graph.removeTriple("http://en.wikipedia.org/wiki/Tony_Benn",
-                               "http://purl.org/dc/elements/1.1/title", '"Tony Benn"');
+                               "http://purl.org/dc/elements/1.1/title", '"Someone else"');
 
             expect(graph.getSHACLStore().length).toEqual(0);
 
@@ -109,7 +129,10 @@ describe("Graph Class", () => {
                 }]);
 
             expect(graph.getSHACLStore().length).toEqual(0);
-        });
+
+           // TEST CASE: updating a triple
+
+       });
 
     // TODO: This is not an actual test! To be removed when conformance tests are added.
     it("The validation store should be usable for validation.",
@@ -162,12 +185,62 @@ describe("Graph Class", () => {
 
             graph.merge(other);
 
+            // the merged graph should contain the other graph's triples and prefixes
             expect(graph.getN3Store().countTriples()).toEqual(2);
             expect(graph.getSHACLStore().length).toEqual(2);
 
             let key = "rdf";
             expect(graph.getPrefixes()[key]).toEqual("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+
+            // the merged graph should also contain the other graph's changes
+            let changes = graph.getChanges().getValue(ChangeSet.ADD);
+            if (changes) {
+                expect(changes.contains(new Statement(
+                    "http://en.wikipedia.org/wiki/Tony_Benn",
+                    "http://purl.org/dc/elements/1.1/publisher", '"Wikipedia"', graph.getSHACLStore()))).toEqual(true);
+            }
        });
+
+    it("should maintain a consistent reflection of changes made to the graph structure.",
+       () => {
+            let graph = new Graph();
+            graph.addTriple("http://en.wikipedia.org/wiki/Tony_Benn",
+                            "http://purl.org/dc/elements/1.1/title", '"Tony Benn"');
+
+            let changes = graph.getChanges().getValue(ChangeSet.ADD);
+            if (changes) {
+                expect(changes.contains(new Statement(
+                    "http://en.wikipedia.org/wiki/Tony_Benn",
+                    "http://purl.org/dc/elements/1.1/title", '"Tony Benn"', graph.getSHACLStore()))).toEqual(true);
+            }
+
+            graph.removeTriple("http://en.wikipedia.org/wiki/Tony_Benn",
+                               "http://purl.org/dc/elements/1.1/title", '"Tony Benn"');
+
+            // antithetical operations should cancel each other out
+            expect(graph.hasChanged()).toEqual(false);
+
+            graph.addTriple("http://en.wikipedia.org/wiki/Tony_Benn",
+                            "http://purl.org/dc/elements/1.1/publisher", '"Wikipedia"');
+
+            expect(graph.hasChanged()).toEqual(true);
+
+            graph.clearChanges();
+
+            expect(graph.hasChanged()).toEqual(false);
+
+            graph.removeTriple("http://en.wikipedia.org/wiki/Tony_Benn",
+                               "http://purl.org/dc/elements/1.1/publisher", '"Wikipedia"');
+
+            // this time the removal is registered as a change, as no inverse addition has preceded it
+            changes = graph.getChanges().getValue(ChangeSet.REMOVE);
+            if (changes) {
+                expect(changes.contains(new Statement(
+                    "http://en.wikipedia.org/wiki/Tony_Benn",
+                    "http://purl.org/dc/elements/1.1/publisher", '"Wikipedia"', graph.getSHACLStore()))).toEqual(true);
+            }
+
+        });
 });
 
 function getDataGraph() {
