@@ -45,10 +45,10 @@ export class ModelData {
     public getOrCreateComponent<T>(
         component: ModelComponent,
         createComponent: () => T): T {
-        let result = this.getComponent<T>(component);
-        if (result === undefined) {
-            result = createComponent();
-            this.setComponent<T>(component, result);
+            let result = this.getComponent<T>(component);
+            if (result === undefined) {
+                result = createComponent();
+                this.setComponent<T>(component, result);
         }
         return result;
     }
@@ -57,16 +57,29 @@ export class ModelData {
      * Sets a particular component of this model.
      */
     public setComponent<T>(component: ModelComponent, value: T): void {
+        console.log("set component is called");
+        console.log(this.components.getValue(component));
+        console.log(value);
         if (value !== this.components.getValue(component)) {
+            console.log("setted component", component);
             this.changeBuffer.add(component);
         }
         this.components.setValue(component, value);
     }
 
     /**
+     *
+     */
+    public addToChangeBuffer(component: ModelComponent) {
+       this.changeBuffer.add(component);
+       console.log("buffer: ", this.changeBuffer);
+    }
+
+    /**
      * Drains the model's change buffer.
      */
     public drainChangeBuffer(): Collections.Set<ModelComponent> {
+        console.log("draining", this.changeBuffer);
         let result = this.changeBuffer;
         this.changeBuffer = new Collections.Set<ModelComponent>();
         return result;

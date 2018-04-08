@@ -1,7 +1,6 @@
 import {ModelComponent, ModelData, ModelTaskMetadata} from "../entities/model";
 import {FileDAO, FileModule} from "../persistence/fileDAO";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
-import {Component} from "../persistence/component";
 import {Navbar} from "../components/navbarWork";
 import { extensionToMIME } from "./extensionToMIME";
 import {Task} from "../entities/task";
@@ -86,7 +85,6 @@ export class LoadComponent extends Task<ModelData, ModelTaskMetadata> {
     }
 
     public execute(data: ModelData): void {
-        console.log("called");
         let component: any = data.getComponent(this.mComponent);
         if (component) {
 
@@ -95,6 +93,7 @@ export class LoadComponent extends Task<ModelData, ModelTaskMetadata> {
                 // handle the graph objects correctly
                 if (this.mxGraph) {
                     let store = component.getPart(part).rdfLibStore;
+                    console.log("store: ", component.getPart(part));
                     this.mxGraph.visualizeDataGraph(store);
                 } else {
                     console.log("error: could not find MxGraph");

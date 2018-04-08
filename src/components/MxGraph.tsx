@@ -432,8 +432,6 @@ class MxGraph extends React.Component<any, any> {
 
     visualizeDataGraph(store: any) {
         let {graph} = this.state;
-        console.log(graph);
-        console.log(store);
         let blocks = this.parseDataGraphToBlocks(store);
         blocks.forEach(bl => {
             this.state.blockToCellDict.setValue(bl, this.addBlock(graph, bl));
@@ -665,7 +663,7 @@ class MxGraph extends React.Component<any, any> {
                 console.log("notified: ", changeBuf);
                 // TODO second time when a file is inputted the changeBuf is empty
                 changeBuf.forEach((key) => {
-                    console.log(key);
+                    console.log("key: ", key);
                     if (key === ModelComponent.DataGraph) { // datagraph has changed
                         model.tasks.schedule(new LoadComponent(ModelComponent.DataGraph, this));
                         // TODO change this later

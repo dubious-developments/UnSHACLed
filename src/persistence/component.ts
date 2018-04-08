@@ -1,4 +1,6 @@
 import * as Collections from "typescript-collections";
+import {ModelData} from "../entities/modelData";
+import {ModelComponent} from "../entities/modelTaskMetadata";
 
 /**
  * A structure that is to be stored inside the Model.
@@ -6,13 +8,19 @@ import * as Collections from "typescript-collections";
  * An example component might contain multiple data graphs, each of which is associated with a filename.
  */
 export class Component {
+
     private parts: Collections.Dictionary<string, any>;
+    private modelData: ModelData;
+    private modelComponent: ModelComponent;
 
     /**
      * Create a new Component.
+     * @param modelData
      */
-    public constructor() {
+    public constructor(modelData: ModelData, modelComponent: ModelComponent) {
         this.parts = new Collections.Dictionary<string, any>();
+        this.modelData = modelData;
+        this.modelComponent = modelComponent;
     }
 
     /**
@@ -38,6 +46,13 @@ export class Component {
      * @param value
      */
     public setPart(key: string, value: any) {
+        // Updating a part of a component should also update the change buffer if the ModelComponent is already set
+        console.log("important: ", this.modelComponent);
+        if (this.modelData.getComponent(this.modelComponent) && this.getPart(key) !== value){
+            console.log("important called");
+            this.modelData.addToChangeBuffer(this.modelComponent);
+        }
+
         this.parts.setValue(key, value);
     }
 }
