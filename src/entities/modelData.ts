@@ -63,11 +63,10 @@ export class ModelData {
         // changeBuffer is not updated second time
 
         // if (value !== this.components.getValue(component)) {
-            this.changeBuffer.add(component);
+        this.changeBuffer.add(component);
         // }
         this.components.setValue(component, value);
     }
-
 
     /**
      * Drains the model's change buffer.
