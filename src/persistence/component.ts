@@ -10,17 +10,13 @@ import {ModelComponent} from "../entities/modelTaskMetadata";
 export class Component {
 
     private parts: Collections.Dictionary<string, any>;
-    private modelData: ModelData;
-    private modelComponent: ModelComponent;
 
     /**
      * Create a new Component.
      * @param modelData
      */
-    public constructor(modelData: ModelData, modelComponent: ModelComponent) {
+    public constructor() {
         this.parts = new Collections.Dictionary<string, any>();
-        this.modelData = modelData;
-        this.modelComponent = modelComponent;
     }
 
     /**
@@ -46,13 +42,6 @@ export class Component {
      * @param value
      */
     public setPart(key: string, value: any) {
-        // Updating a part of a component should also update the change buffer if the ModelComponent is already set
-        console.log("important: ", this.modelComponent);
-        if (this.modelData.getComponent(this.modelComponent) && this.getPart(key) !== value){
-            console.log("important called");
-            this.modelData.addToChangeBuffer(this.modelComponent);
-        }
-
         this.parts.setValue(key, value);
     }
 }

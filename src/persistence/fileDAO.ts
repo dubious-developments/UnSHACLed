@@ -202,11 +202,10 @@ class LoadTask extends Task<ModelData, ModelTaskMetadata> {
     public execute(data: ModelData): void {
         let component = data.getOrCreateComponent<Component>(
             this.module.getType(),
-            () => new Component(data, this.module.getType()));
+            () => new Component());
 
         component.setPart(this.module.getName(), this.result);
         data.setComponent(this.module.getType(), component);
-        console.log("loading file");
     }
 
     /**

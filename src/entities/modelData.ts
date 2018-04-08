@@ -57,29 +57,22 @@ export class ModelData {
      * Sets a particular component of this model.
      */
     public setComponent<T>(component: ModelComponent, value: T): void {
-        console.log("set component is called");
-        console.log(this.components.getValue(component));
-        console.log(value);
-        if (value !== this.components.getValue(component)) {
-            console.log("setted component", component);
+        // TODO ask Jonathan why this check was here
+        // This causes that changeBuffer is not always updated correctly
+        // (e.g. you create component, set it, update the component and set it again:
+        // changeBuffer is not updated second time
+
+        // if (value !== this.components.getValue(component)) {
             this.changeBuffer.add(component);
-        }
+        // }
         this.components.setValue(component, value);
     }
 
-    /**
-     *
-     */
-    public addToChangeBuffer(component: ModelComponent) {
-       this.changeBuffer.add(component);
-       console.log("buffer: ", this.changeBuffer);
-    }
 
     /**
      * Drains the model's change buffer.
      */
     public drainChangeBuffer(): Collections.Set<ModelComponent> {
-        console.log("draining", this.changeBuffer);
         let result = this.changeBuffer;
         this.changeBuffer = new Collections.Set<ModelComponent>();
         return result;
