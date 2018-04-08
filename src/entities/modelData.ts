@@ -42,14 +42,12 @@ export class ModelData {
      * @param createComponent A function that creates the component
      * if it doesn't exist already.
      */
-    public getOrCreateComponent<T>(
-        component: ModelComponent,
-        createComponent: () => T): T {
+    public getOrCreateComponent<T>(component: ModelComponent, createComponent: () => T): T {
             let result = this.getComponent<T>(component);
             if (result === undefined) {
                 result = createComponent();
                 this.setComponent<T>(component, result);
-        }
+            }
 
         return result;
     }
