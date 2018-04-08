@@ -50,6 +50,7 @@ export class ModelData {
                 result = createComponent();
                 this.setComponent<T>(component, result);
         }
+
         return result;
     }
 
