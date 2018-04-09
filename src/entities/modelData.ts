@@ -18,7 +18,6 @@ export class ModelData {
      */
     public constructor(
         components?: Collections.Dictionary<ModelComponent, any>) {
-
         this.changeBuffer = new Collections.Set<ModelComponent>();
         if (components) {
             this.components = components;
@@ -61,10 +60,17 @@ export class ModelData {
         // (e.g. you create component, set it, update the component and set it again:
         // changeBuffer is not updated second time
 
-        // if (value !== this.components.getValue(component)) {
-        this.changeBuffer.add(component);
-        // }
+        if (value !== this.components.getValue(component)) {
+            this.changeBuffer.add(component);
+        }
         this.components.setValue(component, value);
+    }
+
+    /**
+     * temp method to tell the model that a mutable component has changed
+     */
+    public componentHasChanged(component: ModelComponent) {
+        this.changeBuffer.add(component);
     }
 
     /**
