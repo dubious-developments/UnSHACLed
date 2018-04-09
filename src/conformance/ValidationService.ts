@@ -35,7 +35,7 @@ export class ValidationService {
                 if (validators = self.validators.getValue(c)) {
                     validators.forEach(v => {
                         if (!relevantValidators.contains(v)) {
-                            tasks.push(new ValidationTask(v));
+                            // tasks.push(new ValidationTask(v));
                             relevantValidators.add(v);
                         }
                     });

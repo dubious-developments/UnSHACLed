@@ -47,7 +47,7 @@ export class WellDefinedSHACLValidator implements Validator {
 
         // very odd, somehow this is needed instead of
         // a regular import statement (which works in the test files)
-        let SHACLValidator = require("./shacl");
+        let SHACLValidator = require("./../backup/shacl");
         let validator = new SHACLValidator(dataRoot.getSHACLStore(), shapesRoot.getSHACLStore());
         validator.updateValidationEngine();
         validator.showValidationResults(function (err: any, report: any) {
