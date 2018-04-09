@@ -5,5 +5,5 @@ import {ValidationReport} from "./ValidationReport";
 
 export interface Validator {
     getTypesForValidation(): Collections.Set<ModelComponent>;
-    validate(data: ModelData, andThen: (report: ValidationReport) => void): void;
+    validate(data: ModelData, andThen: ((report: ValidationReport) => void) | null): void;
 }

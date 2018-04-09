@@ -16,7 +16,7 @@ export class ValidationService {
     private validators: Collections.Dictionary<ModelComponent, Collections.Set<Validator>>;
 
     /**
-     * Creates a new ValidationService.
+     * Create a new ValidationService.
      * @param {Model} model
      */
     constructor(model: Model) {
@@ -27,7 +27,7 @@ export class ValidationService {
 
         let self = this;
         model.registerObserver(function(changeBuffer: Collections.Set<ModelComponent>) {
-            let tasks = [];
+            let tasks = new Collections.Set<ValidationTask>();
             let relevantValidators = new Collections.Set<Validator>();
             // return a task for every relevant validator
             changeBuffer.forEach(c => {
@@ -35,13 +35,13 @@ export class ValidationService {
                 if (validators = self.validators.getValue(c)) {
                     validators.forEach(v => {
                         if (!relevantValidators.contains(v)) {
-                            // tasks.push(new ValidationTask(v));
+                            tasks.add(new ValidationTask(v));
                             relevantValidators.add(v);
                         }
                     });
                 }
             });
-            return tasks;
+            return tasks.toArray();
         });
     }
 
@@ -69,7 +69,7 @@ export class ValidationService {
 class ValidationTask extends Task<ModelData, ModelTaskMetadata> {
 
     /**
-     * Creates a new ValidationTask.
+     * Create a new ValidationTask.
      * @param {Validator} validator
      */
     public constructor(
@@ -78,7 +78,7 @@ class ValidationTask extends Task<ModelData, ModelTaskMetadata> {
     }
 
     /**
-     * Executes this task.
+     * Execute this task.
      * Performs validation for a given validator
      * and updates the Validation Report in the Model.
      * @param data The data the task takes as input.
@@ -92,7 +92,7 @@ class ValidationTask extends Task<ModelData, ModelTaskMetadata> {
             component.setPart(toString(), report);
 
             // merge new report into root report
-            let root = component.getOrCreateRoot(() => new ValidationReport());
+            let root = component.getOrCreateRoot(() => new ValidationReport(null));
             root.merge(report);
             component.setRoot(root);
 
@@ -101,7 +101,7 @@ class ValidationTask extends Task<ModelData, ModelTaskMetadata> {
     }
 
     /**
-     * Gets the metadata for this task.
+     * Retrieve the metadata for this task.
      */
     public get metadata(): ModelTaskMetadata {
         return new ModelTaskMetadata(

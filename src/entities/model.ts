@@ -7,6 +7,7 @@ import { ModelTask, OpaqueModelTask } from "./taskInstruction";
 import { OutOfOrderProcessor } from "./outOfOrderProcessor";
 export { ModelData } from "./modelData";
 export { ModelTask, OpaqueModelTask } from "./taskInstruction";
+export { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";
 
 /**
  * A model observer: a function that takes a change set as input

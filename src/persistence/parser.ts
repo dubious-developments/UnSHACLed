@@ -8,7 +8,7 @@ export interface Parser {
      * @param {string} mime
      * @param {(result: any) => void} andThen
      */
-    serialize(data: any, mime: string | undefined, andThen: (result: any) => void): void;
+    serialize(data: any, mime: string | undefined, andThen: ((result: any) => void) | null): void;
 
     /**
      * Parse some form of encoded content.
@@ -16,7 +16,7 @@ export interface Parser {
      * @param {string} mime
      * @param {(result: string) => void} andThen
      */
-    parse(content: string, mime: string | undefined, andThen: (result: string) => void): void;
+    parse(content: string, mime: string | undefined, andThen: ((result: string) => void) | null): void;
 
     /**
      * Retrieve the data contained by this Parser.

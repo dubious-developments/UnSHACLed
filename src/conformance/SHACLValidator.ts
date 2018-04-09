@@ -5,6 +5,7 @@ import {ModelComponent} from "../entities/modelTaskMetadata";
 import {ValidationReport} from "./ValidationReport";
 import {Component} from "../persistence/component";
 import {Graph} from "../persistence/graph";
+import {GraphParser} from "../persistence/graphParser";
 
 /**
  * A wrapper class around the shacl.js library.
@@ -22,11 +23,20 @@ export class WellDefinedSHACLValidator implements Validator {
         this.types.add(ModelComponent.SHACLShapesGraph);
     }
 
+    /**
+     * Retrieve the types relevant for this validator.
+     * @returns {Set<ModelComponent>}
+     */
     public getTypesForValidation(): Collections.Set<ModelComponent> {
         return this.types;
     }
 
-    public validate(data: ModelData, andThen: (report: ValidationReport) => void): void {
+    /**
+     * Perform the routine validation operation.
+     * @param {ModelData} data
+     * @param {((report: ValidationReport) => void) | null} andThen
+     */
+    public validate(data: ModelData, andThen: ((report: ValidationReport) => void) | null): void {
         let dataComponent = data.getOrCreateComponent<Component>(
             ModelComponent.DataGraph,
             () => new Component());
@@ -35,7 +45,6 @@ export class WellDefinedSHACLValidator implements Validator {
             ModelComponent.SHACLShapesGraph,
             () => new Component());
 
-        // TODO: This implementation is very dumb and computationally heavy atm!
         let dataRoot = new Graph();
         let shapesRoot = new Graph();
 
@@ -45,16 +54,38 @@ export class WellDefinedSHACLValidator implements Validator {
         dataComponent.setRoot(dataRoot);
         shapesComponent.setRoot(shapesRoot);
 
-        // very odd, somehow this is needed instead of
-        // a regular import statement (which works in the test files)
-        let SHACLValidator = require("./../backup/shacl");
-        let validator = new SHACLValidator(dataRoot.getSHACLStore(), shapesRoot.getSHACLStore());
-        validator.updateValidationEngine();
-        validator.showValidationResults(function (err: any, report: any) {
-            andThen(new ValidationReport());
+        let parser = new GraphParser();
+
+        let self = this;
+        parser.serialize(dataRoot, "text/turtle", function(datastring: string) {
+            parser.serialize(shapesRoot, "text/turtle", function (shapesstring: string) {
+                self.doValidation(datastring, shapesstring, andThen);
+            });
         });
     }
 
+    /**
+     * Do the actual validation operation.
+     * @param data
+     * @param shapes
+     * @param {((report: ValidationReport) => void) | null} andThen
+     */
+    public doValidation(data: string, shapes: string, andThen: ((report: ValidationReport) => void) | null): void {
+        // very odd, somehow this is needed instead of
+        // a regular import statement (which works in the test files)
+        let SHACLValidator = require("./shacl");
+        let validator = new SHACLValidator();
+        validator.validate(data, 'text/turtle', shapes, 'text/turtle', function (error: any, report: any) {
+            if (andThen) {
+                andThen(new ValidationReport(report));
+            }
+        });
+    }
+
+    /**
+     * Return an identifier for this type of validator.
+     * @returns {string}
+     */
     public toString() {
         return "SHACLValidator";
     }

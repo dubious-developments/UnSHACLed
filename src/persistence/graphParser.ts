@@ -39,14 +39,14 @@ export class GraphParser implements Parser {
 
             let graph: Graph = data;
             writer.addPrefixes(graph.getPrefixes());
-            writer.addTriples(graph.getN3Store().getTriples());
+            writer.addTriples(graph.getStore().getTriples());
             writer.end(function (error: any, result: any) {
                 if (andThen) {
                     andThen(result);
                 }
             });
         } else {
-            throw new Error("Incorrect MimeType " + mime + "!");
+           throw new Error("Incorrect MimeType " + mime + "!");
         }
     }
 
