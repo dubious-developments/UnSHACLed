@@ -1,48 +1,60 @@
 import * as Collections from "typescript-collections";
-import {IndexedFormula, Statement} from "rdflib";
+
+/**
+ * Return the string representation of a triple.
+ * @param triple
+ * @returns {string}
+ */
+function tripleToString(triple: any): string {
+    return triple.object + ", " + triple.predicate + ", " + triple.object;
+}
+
+/**
+ * The different types of changes to a graph structure.
+ */
+export enum ChangeSet {
+    /**
+     * When triples are added to the graph structure.
+     */
+    ADD,
+
+    /**
+     * When triples are removed from the graph structure.
+     */
+    REMOVE
+}
 
 /**
  * A wrapper class for library-specific triple stores.
  */
 export class Graph {
 
-    private N3Store: any;
-    private SHACLStore: any;
+    private store: any;
+    private prefixes: {};
 
     private changes: Collections.Dictionary<ChangeSet, Collections.Set<any>>;
-
-    private prefixes: {};
 
     /**
      * Create a new Graph.
      */
     public constructor() {
         let N3 = require("n3");
-        this.N3Store = N3.Store();
-        this.SHACLStore = new IndexedFormula();
+        this.store = N3.Store();
 
         this.changes = new Collections.Dictionary<ChangeSet, Collections.Set<any>>();
 
-        this.changes.setValue(ChangeSet.ADD, new Collections.Set<any>());
-        this.changes.setValue(ChangeSet.REMOVE, new Collections.Set<any>());
+        this.changes.setValue(ChangeSet.ADD, new Collections.Set<any>(tripleToString));
+        this.changes.setValue(ChangeSet.REMOVE, new Collections.Set<any>(tripleToString));
 
         this.prefixes = {};
     }
 
     /**
-     * Retrieve the representation of the Graph used by N3 API.
+     * Retrieve the store contained within this graph structure.
      * @returns {any}
      */
-    public getN3Store(): any {
-        return this.N3Store;
-    }
-
-    /**
-     * Retrieve the representation of the Graph used by SHACL API.
-     * @returns {any}
-     */
-    public getSHACLStore(): any {
-        return this.SHACLStore;
+    public getStore(): any {
+        return this.store;
     }
 
     /**
@@ -80,8 +92,7 @@ export class Graph {
      * @param object
      */
     public addTriple(subject: string, predicate: string, object: string): void {
-        this.N3Store.addTriple(subject, predicate, object);
-        this.SHACLStore.add(new Statement(subject, predicate, object, this.SHACLStore));
+        this.store.addTriple(subject, predicate, object);
         this.updateChanges(ChangeSet.ADD, ChangeSet.REMOVE, subject, predicate, object);
     }
 
@@ -92,8 +103,7 @@ export class Graph {
      * @param {string} object
      */
     public removeTriple(subject: string, predicate: string, object: string): void {
-        this.N3Store.removeTriple(subject, predicate, object);
-        this.SHACLStore.remove(new Statement(subject, predicate, object));
+        this.store.removeTriple(subject, predicate, object);
         this.updateChanges(ChangeSet.REMOVE, ChangeSet.ADD, subject, predicate, object);
     }
 
@@ -102,9 +112,8 @@ export class Graph {
      * @param triples
      */
     public addTriples(triples: Array<any>): void {
-        this.N3Store.addTriples(triples);
+        this.store.addTriples(triples);
         triples.forEach(t => {
-            this.SHACLStore.add(new Statement(t.subject, t.predicate, t.object, this.SHACLStore));
             this.updateChanges(ChangeSet.ADD, ChangeSet.REMOVE, t.subject, t.predicate, t.object);
         });
     }
@@ -114,9 +123,8 @@ export class Graph {
      * @param {Array<any>} triples
      */
     public removeTriples(triples: Array<any>): void {
-        this.N3Store.removeTriples(triples);
+        this.store.removeTriples(triples);
         triples.forEach(t => {
-            this.SHACLStore.remove(new Statement(t.subject, t.predicate, t.object));
             this.updateChanges(ChangeSet.REMOVE, ChangeSet.ADD, t.subject, t.predicate, t.object);
         });
     }
@@ -152,7 +160,7 @@ export class Graph {
      * @param iri
      */
     public addPrefix(prefix: string, iri: string): void {
-        this.N3Store.addPrefix(prefix, iri);
+        this.store.addPrefix(prefix, iri);
         this.prefixes[prefix] = iri;
     }
 
@@ -161,7 +169,7 @@ export class Graph {
      * @param prefixes
      */
     public addPrefixes(prefixes: {}): void {
-        this.N3Store.addPrefixes(prefixes);
+        this.store.addPrefixes(prefixes);
         Object.keys(prefixes).forEach(k => {
             this.prefixes[k] = prefixes[k];
         });
@@ -176,8 +184,7 @@ export class Graph {
         this.addPrefixes(other.getPrefixes());
 
         // do merge of stores.
-        this.N3Store.addTriples(other.N3Store.getTriples());
-        this.SHACLStore.addAll(other.SHACLStore.match());
+        this.store.addTriples(other.store.getTriples());
 
         // do merge of change sets
         let theseChanges = this.changes.getValue(ChangeSet.ADD);
@@ -212,7 +219,7 @@ export class Graph {
         if (focusSet) {
             // add change to the relevant set
             // makes use of the shacl.js representation
-            focusSet.add(new Statement(subject, predicate, object, this.SHACLStore));
+            focusSet.add({subject: subject, predicate: predicate, object: object});
             if (otherSet) {
                 // performs a bidirectional difference operation:
                 // we do this to avoid the situation where e.g. if a previously added triple is removed
@@ -225,16 +232,4 @@ export class Graph {
             }
         }
     }
-}
-
-export enum ChangeSet {
-    /**
-     * Triples that were added to the graph structure.
-     */
-    ADD,
-
-    /**
-     * Triples that were removed from the graph structure.
-     */
-    REMOVE
 }
