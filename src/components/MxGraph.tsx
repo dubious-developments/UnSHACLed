@@ -660,8 +660,6 @@ class MxGraph extends React.Component<any, any> {
 
             let model = DataAccessProvider.getInstance().model;
             model.registerObserver((changeBuf) => {
-                // TODO second time when a file is inputted the changeBuf is empty
-                console.log(changeBuf);
                 changeBuf.forEach((key) => {
                     if (key === ModelComponent.DataGraph) { // datagraph has changed
                         model.tasks.schedule(new LoadComponent(ModelComponent.DataGraph, this));

@@ -55,10 +55,6 @@ export class ModelData {
      * Sets a particular component of this model.
      */
     public setComponent<T>(component: ModelComponent, value: T): void {
-        // TODO ask Jonathan why this check was here
-        // This causes that changeBuffer is not always updated correctly
-        // (e.g. you create component, set it, update the component and set it again:
-        // changeBuffer is not updated second time
 
         if (value !== this.components.getValue(component)) {
             this.changeBuffer.add(component);
