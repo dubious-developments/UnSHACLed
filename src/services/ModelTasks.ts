@@ -70,12 +70,12 @@ export class GetOpenedFilesTask extends Task<ModelData, ModelTaskMetadata> {
 }
 
 /*
- * Load a certain ModelComponent's data from the model
+ * Load a certain ModelComponent's data from the model and visualize it
  */
-export class LoadComponent extends Task<ModelData, ModelTaskMetadata> {
+export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
 
     /**
-     * Create a new LoadComponent task from Model
+     * Create a new VisualizeComponent task from Model
      * @param {mComponent} ModelComponent
      * @param {mxGraph} MxGraph
      */

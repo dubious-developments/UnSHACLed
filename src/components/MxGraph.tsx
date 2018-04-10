@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as Collections from 'typescript-collections';
 import {ModelComponent} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
-import {LoadComponent} from "../services/ModelTasks";
+import {VisualizeComponent} from "../services/ModelTasks";
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout: any;
@@ -662,7 +662,7 @@ class MxGraph extends React.Component<any, any> {
             model.registerObserver((changeBuf) => {
                 changeBuf.forEach((key) => {
                     if (key === ModelComponent.DataGraph) { // datagraph has changed
-                        model.tasks.schedule(new LoadComponent(ModelComponent.DataGraph, this));
+                        model.tasks.schedule(new VisualizeComponent(ModelComponent.DataGraph, this));
                         // TODO change this later
                         model.tasks.processAllTasks();
                     }
