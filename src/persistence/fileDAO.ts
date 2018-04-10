@@ -205,9 +205,6 @@ class LoadTask extends Task<ModelData, ModelTaskMetadata> {
             () => new Component());
 
         component.setPart(this.module.getName(), this.result);
-
-        // TODO this explicitly tells the model that a mutable component has changed
-        data.componentHasChanged(this.module.getType());
     }
 
     /**
