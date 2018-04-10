@@ -13,7 +13,6 @@ export class Component {
 
     /**
      * Create a new Component.
-     * @param modelData
      */
     public constructor() {
         this.parts = new Collections.Dictionary<string, any>();

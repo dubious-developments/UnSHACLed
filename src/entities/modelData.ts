@@ -65,7 +65,7 @@ export class ModelData {
     /**
      * temp method to tell the model that a mutable component has changed
      */
-    public componentHasChanged(component: ModelComponent) {
+    public componentHasChanged(component: ModelComponent): void {
         this.changeBuffer.add(component);
     }
 
