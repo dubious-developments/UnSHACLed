@@ -12,15 +12,13 @@ export class ShaclWrapper {
 
     public unshacledValidate(data: string, dataType: string, shapes: string, shapesType: string): void {
         let validator = new SHACLValidator();
-        console.log("11111111111111111111111111111111111111111111111");
         validator.validate(data, "text/turtle", shapes, "text/turtle", function (e: any, report: any) {
-            console.log("222222222222222222222222222222222222222222222222222222222222");
             console.log("Conforms? " + report.conforms());
             if (report.conforms() === false) {
                 report.results().forEach(function (result: any) {
-                    console.log("33333333333333333333333333333333333333333333333333333333333333");
+                    console.log(result.message() + "\n" + result.path() + "\n" + result.sourceConstraintComponent()
+                        +"\n" + result.focusNode() + "\n" + result.severity() + '\n' + result.sourceShape());
                     console.log(" - Severity: " + result.severity() + " for " + result.sourceConstraintComponent());
-                    console.log("444444444444444444444444444444444444444444444444444444444444444");
                 });
             }
         });
