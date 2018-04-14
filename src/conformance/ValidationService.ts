@@ -4,8 +4,8 @@ import {WellDefinedSHACLValidator} from "./SHACLValidator";
 import {Validator} from "./Validator";
 import {ModelComponent, ModelTaskMetadata} from "../entities/modelTaskMetadata";
 import {Task} from "../entities/task";
-import {ValidationReport} from "./ValidationReport";
 import {Component} from "../persistence/component";
+import {ConformanceReport} from "./wrapper/ConformanceReport";
 
 /**
  * A ValidationService is a managing entity, governing various registered validators.
@@ -84,19 +84,19 @@ class ValidationTask extends Task<ModelData, ModelTaskMetadata> {
      * @param data The data the task takes as input.
      */
     public execute(data: ModelData): void {
-        this.validator.validate(data, function(report: ValidationReport) {
+        this.validator.validate(data, function(report: ConformanceReport) {
             // add new report to component
             let component = data.getOrCreateComponent<Component>(
-                ModelComponent.ValidationReport,
+                ModelComponent.ConformanceReport,
                 () => new Component());
             component.setPart(toString(), report);
 
-            // merge new report into root report
-            let root = component.getOrCreateRoot(() => new ValidationReport(null));
-            root.merge(report);
-            component.setRoot(root);
+            // TODO: merge new report into root report
+            // let root = component.getOrCreateRoot(() => new ConformanceReport());
+            // root.merge(report);
+            component.setRoot(report);
 
-            data.setComponent(ModelComponent.ValidationReport, component);
+            data.setComponent(ModelComponent.ConformanceReport, component);
         });
     }
 
@@ -106,6 +106,6 @@ class ValidationTask extends Task<ModelData, ModelTaskMetadata> {
     public get metadata(): ModelTaskMetadata {
         return new ModelTaskMetadata(
             this.validator.getTypesForValidation(),
-            [ModelComponent.ValidationReport]);
+            [ModelComponent.ConformanceReport]);
     }
 }

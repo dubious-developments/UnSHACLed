@@ -26,10 +26,10 @@ export enum ModelComponent {
     SHACLShapesGraph,
 
     /**
-     * The validation report indicating which nodes
+     * The conformance report indicating which nodes
      * of the datagraph are conforming to active constraints.
      */
-    ValidationReport
+    ConformanceReport
 }
 
 /**

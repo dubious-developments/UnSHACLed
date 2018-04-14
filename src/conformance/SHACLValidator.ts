@@ -2,10 +2,10 @@ import * as Collections from "typescript-collections";
 import {Validator} from "./Validator";
 import {ModelData} from "../entities/model";
 import {ModelComponent} from "../entities/modelTaskMetadata";
-import {ValidationReport} from "./ValidationReport";
 import {Component} from "../persistence/component";
 import {Graph} from "../persistence/graph";
 import {GraphParser} from "../persistence/graphParser";
+import {ConformanceReport} from "./wrapper/ConformanceReport";
 
 /**
  * A wrapper class around the shacl.js library.
@@ -36,7 +36,7 @@ export class WellDefinedSHACLValidator implements Validator {
      * @param {ModelData} data
      * @param {((report: ValidationReport) => void) | null} andThen
      */
-    public validate(data: ModelData, andThen: ((report: ValidationReport) => void) | null): void {
+    public validate(data: ModelData, andThen: ((report: ConformanceReport) => void) | null): void {
         let dataComponent = data.getOrCreateComponent<Component>(
             ModelComponent.DataGraph,
             () => new Component());
@@ -70,16 +70,9 @@ export class WellDefinedSHACLValidator implements Validator {
      * @param shapes
      * @param {((report: ValidationReport) => void) | null} andThen
      */
-    public doValidation(data: string, shapes: string, andThen: ((report: ValidationReport) => void) | null): void {
-        // very odd, somehow this is needed instead of
-        // a regular import statement (which works in the test files)
-        let SHACLValidator = require("./shacl");
-        let validator = new SHACLValidator();
-        validator.validate(data, 'text/turtle', shapes, 'text/turtle', function (error: any, report: any) {
-            if (andThen) {
-                andThen(new ValidationReport(report));
-            }
-        });
+    public doValidation(data: string, shapes: string, andThen: ((report: ConformanceReport) => void) | null): void {
+        let report = new ConformanceReport();
+        report.conforms(data, "text/turtle", shapes, "text/turtle", andThen);
     }
 
     /**

@@ -1,47 +1,38 @@
 import {WellDefinedSHACLValidator} from "../src/conformance/SHACLValidator";
-import {ValidationReport} from "../src/conformance/ValidationReport";
-import SHACLValidator from "../src/conformance/shacl/index.js";
+import {ConformanceReport} from "../src/conformance/wrapper/ConformanceReport";
 
-/*
 describe("WellDefinedSHACLValidator Class", () => {
     it("should perform correct validation for conforming data.",
        (done) => {
-           // let validator = new WellDefinedSHACLValidator();
-           // validator.doValidation(getConformingDataGraph(), getShapesGraph(),
-           //                        function (report: ValidationReport) {
-           //         expect(report.isConforming()).toBe(true);
-           //         done();
-           //     });
-
-           // let validator = new SHACLValidator();
-           // validator.validate(getConformingDataGraph(), 'text/turtle', getShapesGraph(),
-           //                    'text/turtle', function (error: any, report: any) {
-           //      expect(report.conforms()).toBe(true);
-           //      done();
-           // });
+           let validator = new WellDefinedSHACLValidator();
+           validator.doValidation(getConformingDataGraph(), getShapesGraph(),
+                                  function (report: ConformanceReport) {
+                   expect(report.getIsConforming()).toBe(true);
+                   done();
+               });
 
         });
 
     it("should perform correct validation for non-conforming data.",
        (done) => {
-           // let validator = new WellDefinedSHACLValidator();
-           // validator.doValidation(getNonConformingDataGraph(), getShapesGraph(),
-           //                        function (report: ValidationReport) {
-           //         expect(report.isConforming()).toBe(false);
-           //         done();
-           //     });
-
-           let validator = new SHACLValidator();
-           validator.validate(getPlaygroundData(), 'text/turtle', getPlaygroundShapes(),
-                              'text/turtle', function (error: any, report: any) {
-                   expect(report.conforms()).toBe(false);
+           let validator = new WellDefinedSHACLValidator();
+           validator.doValidation(getNonConformingDataGraph(), getShapesGraph(),
+                                  function (report: ConformanceReport) {
+                   expect(report.getIsConforming()).toBe(false);
                    done();
-            });
-
+               });
        });
-});
-*/
 
+    it("should perform correct validation for playground data.",
+       (done) => {
+            let validator = new WellDefinedSHACLValidator();
+            validator.doValidation(getPlaygroundData(), getPlaygroundShapes(),
+                                   function (report: ConformanceReport) {
+                    expect(report.getIsConforming()).toBe(false);
+                    done();
+                });
+        });
+});
 
 function getConformingDataGraph() {
     return '@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.\n' +
@@ -51,7 +42,7 @@ function getConformingDataGraph() {
         '@prefix ex: <http://example.com/ns#>.\n' +
         'ex:Alice\n' +
         'a ex:Person ;\n' +
-        'ex:ssn "987-65-432A" .';
+        'ex:ssn "987-65-4323" .';
 }
 
 function getNonConformingDataGraph() {
