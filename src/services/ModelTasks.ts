@@ -92,7 +92,7 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
             for (let part of tmp) {
                 // handle the graph objects correctly
                 if (this.mxGraph) {
-                    let store = component.getPart(part).rdfLibStore;
+                    let store = component.getPart(part).validationStore;
                     this.mxGraph.visualizeDataGraph(store);
                 } else {
                     console.log("error: could not find MxGraph");

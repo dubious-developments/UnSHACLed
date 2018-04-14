@@ -400,12 +400,18 @@ class MxGraph extends React.Component<any, any> {
         let SH = $rdf.Namespace("http://www.w3.org/ns/shacl#");
         // let XSD = $rdf.Namespace("http://www.w3.org/2001/XMLSchema#");
 
-        let triples = store.statementsMatching(undefined, undefined, undefined, undefined, false);
+        let relations = new Collections.Set<any>();
+        relations.add(SH("property").uri);
+        relations.add(SH("node").uri);
+        relations.add(RDF("rest").uri);
+        relations.add(SH("in").uri);
+
+        let triples = store.statements;
         let newTriples = new Collections.Set<any>();
 
         triples.forEach((triple: any) => {
             if (!this.subjectToBlockDict.containsKey(triple.subject)) {
-                this.subjectToBlockDict.setValue(triple.subject, new Block());
+                this.subjectToBlockDict.setValue(triple.subject, new Block(triple.subject.value));
             }
             newTriples.add(triple);
         });
@@ -423,25 +429,29 @@ class MxGraph extends React.Component<any, any> {
             let objectBlock = this.subjectToBlockDict.getValue(object);
 
             if (subjectBlock) {
-                if (predicate.uri === SH("property").uri || predicate.uri === SH("node").uri) {
-                    if (!objectBlock) {
-                        this.todoTriples.add(triple);
+                // todo maybe hande arrows just like traits and let the visualisation handle arrows?
+                // todo as this might get complex with editing
+                if (relations.contains(predicate.value)) {
+                    if (objectBlock) {
+                        subjectBlock.arrows.push(new Arrow(predicate.value, objectBlock));
                     } else {
-                        subjectBlock.arrows.push(objectBlock);
+                        this.todoTriples.add(triple);
                     }
-                } else if (predicate.uri === RDF("type").uri && object.uri === SH("NodeShape").uri) {
+                } else if (predicate.value === RDF("type").uri && object.value === SH("NodeShape").uri) {
                     subjectBlock.blockType = "NodeShape";
-                    subjectBlock.name = subject.uri;
-                } else if (predicate.uri === SH("path").uri) {
-                    subjectBlock.name = object.uri;
+                    subjectBlock.name = subject.value;
+                } else if (predicate.value === SH("path").uri) {
+                    subjectBlock.name = object.value;
                     subjectBlock.blockType = "Property";
                 } else {
                     // todo parse Collections of graphs
-                    subjectBlock.traits.push([predicate.uri, object.toString()]);
+                    subjectBlock.traits.push([predicate.value, object.toString()]);
                 }
             }
         });
 
+        console.log(this.triples.toArray());
+        console.log(this.todoTriples.toArray());
         return this.subjectToBlockDict.values();
     }
 
@@ -487,6 +497,11 @@ class MxGraph extends React.Component<any, any> {
                 v1.insert(temprow);
             });
 
+            b.arrows.forEach(arrow => {
+                longestname = Math.max(arrow.name.length + arrow.to.name.length, longestname);
+            });
+
+
             let edgeElements = 0;
             for (let i = 0; i < model.getChildCount(parent); i++) {
                 if (!model.isEdge(model.getChildAt(parent, i))) {
@@ -495,6 +510,9 @@ class MxGraph extends React.Component<any, any> {
             }
 
             v1.value = b;
+            if (b.blockType === undefined) {
+                b.blockType = "Data";
+            }
             v1.style = b.blockType;
             v1.geometry.width += longestname * 4;
             graph.addCell(v1, parent);
@@ -514,13 +532,13 @@ class MxGraph extends React.Component<any, any> {
     }
 
     addArrows(graph: any, b: Block) {
-        b.arrows.forEach(target => {
+        b.arrows.forEach(arrow => {
             let model = graph.getModel();
             let v1 = this.blockToCellDict.getValue(b);
-            let v2 = this.blockToCellDict.getValue(target);
+            let v2 = this.blockToCellDict.getValue(arrow.to);
 
             let newRow = model.cloneCell(this.nameToStandardCellDict.getValue('row'));
-            let name = (target.blockType === "NodeShape" ? "sh:node" : "sh:property") + ": " + target.name;
+            let name = arrow.name + ": " + arrow.to.name;
             newRow.value = {name: name};
             v1.insert(newRow);
 
@@ -578,6 +596,22 @@ class MxGraph extends React.Component<any, any> {
         style[mxConstants.STYLE_FONTSTYLE] = 1;
         style[mxConstants.STYLE_SHADOW] = 1;
         graph.getStylesheet().putCellStyle('Property', style);
+
+        style = {};
+        style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_SWIMLANE;
+        style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
+        style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
+        style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_TOP;
+        style[mxConstants.STYLE_FILLCOLOR] = '#2FBF71';
+        style[mxConstants.STYLE_SWIMLANE_FILLCOLOR] = '#ffffff';
+        style[mxConstants.STYLE_STROKECOLOR] = '#2FBF71';
+        style[mxConstants.STYLE_FONTCOLOR] = '#000000';
+        style[mxConstants.STYLE_STROKEWIDTH] = '1';
+        style[mxConstants.STYLE_STARTSIZE] = '28';
+        style[mxConstants.STYLE_FONTSIZE] = '12';
+        style[mxConstants.STYLE_FONTSTYLE] = 1;
+        style[mxConstants.STYLE_SHADOW] = 1;
+        graph.getStylesheet().putCellStyle('Data', style);
 
         style = {};
         style[mxConstants.STYLE_STROKEWIDTH] = '1';
@@ -737,14 +771,29 @@ class MxGraph extends React.Component<any, any> {
 }
 
 class Block {
-    public arrows: Array<Block>;
+    public arrows: Array<Arrow>;
     public traits: Array<Array<string>>;
     public blockType: string;
     public name: string;
 
-    constructor() {
+    constructor(name?: string) {
+        this.name = name || "";
         this.arrows = [];
         this.traits = [];
+    }
+
+    clone() {
+        return mxUtils.clone(this);
+    }
+}
+
+class Arrow {
+    public name: string;
+    public to: Block;
+
+    constructor(name: string, to: Block) {
+        this.name = name;
+        this.to = to;
     }
 
     clone() {
