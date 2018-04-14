@@ -450,8 +450,6 @@ class MxGraph extends React.Component<any, any> {
             }
         });
 
-        console.log(this.triples.toArray());
-        console.log(this.todoTriples.toArray());
         return this.subjectToBlockDict.values();
     }
 
@@ -500,7 +498,6 @@ class MxGraph extends React.Component<any, any> {
             b.arrows.forEach(arrow => {
                 longestname = Math.max(arrow.name.length + arrow.to.name.length, longestname);
             });
-
 
             let edgeElements = 0;
             for (let i = 0; i < model.getChildCount(parent); i++) {
@@ -602,9 +599,9 @@ class MxGraph extends React.Component<any, any> {
         style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
         style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
         style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_TOP;
-        style[mxConstants.STYLE_FILLCOLOR] = '#2FBF71';
+        style[mxConstants.STYLE_FILLCOLOR] = '#7D26CD';
         style[mxConstants.STYLE_SWIMLANE_FILLCOLOR] = '#ffffff';
-        style[mxConstants.STYLE_STROKECOLOR] = '#2FBF71';
+        style[mxConstants.STYLE_STROKECOLOR] = '#7D26CD';
         style[mxConstants.STYLE_FONTCOLOR] = '#000000';
         style[mxConstants.STYLE_STROKEWIDTH] = '1';
         style[mxConstants.STYLE_STARTSIZE] = '28';
