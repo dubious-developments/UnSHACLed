@@ -1,4 +1,6 @@
 import * as Collections from "typescript-collections";
+import {ModelData} from "../entities/modelData";
+import {ModelComponent} from "../entities/modelTaskMetadata";
 
 /**
  * A structure that is to be stored inside the Model.
@@ -6,6 +8,7 @@ import * as Collections from "typescript-collections";
  * An example component might contain multiple data graphs, each of which is associated with a filename.
  */
 export class Component {
+
     private parts: Collections.Dictionary<string, any>;
 
     /**

@@ -205,7 +205,6 @@ class LoadTask extends Task<ModelData, ModelTaskMetadata> {
             () => new Component());
 
         component.setPart(this.module.getName(), this.result);
-        data.setComponent(this.module.getType(), component);
     }
 
     /**

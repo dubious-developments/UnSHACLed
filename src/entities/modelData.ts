@@ -18,7 +18,6 @@ export class ModelData {
      */
     public constructor(
         components?: Collections.Dictionary<ModelComponent, any>) {
-
         this.changeBuffer = new Collections.Set<ModelComponent>();
         if (components) {
             this.components = components;
@@ -42,14 +41,13 @@ export class ModelData {
      * @param createComponent A function that creates the component
      * if it doesn't exist already.
      */
-    public getOrCreateComponent<T>(
-        component: ModelComponent,
-        createComponent: () => T): T {
+    public getOrCreateComponent<T>(component: ModelComponent, createComponent: () => T): T {
         let result = this.getComponent<T>(component);
         if (result === undefined) {
             result = createComponent();
             this.setComponent<T>(component, result);
         }
+
         return result;
     }
 
@@ -57,10 +55,18 @@ export class ModelData {
      * Sets a particular component of this model.
      */
     public setComponent<T>(component: ModelComponent, value: T): void {
+
         if (value !== this.components.getValue(component)) {
             this.changeBuffer.add(component);
         }
         this.components.setValue(component, value);
+    }
+
+    /**
+     * temp method to tell the model that a mutable component has changed
+     */
+    public componentHasChanged(component: ModelComponent): void {
+        this.changeBuffer.add(component);
     }
 
     /**

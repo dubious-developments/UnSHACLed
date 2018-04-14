@@ -13,6 +13,7 @@ export class Graph {
      */
     public constructor() {
         let N3 = require("n3");
+
         this.persistentStore = N3.Store();
         this.validationStore = new IndexedFormula();
         this.prefixes = {};
