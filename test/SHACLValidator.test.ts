@@ -1,5 +1,9 @@
 import {WellDefinedSHACLValidator} from "../src/conformance/SHACLValidator";
 import {ConformanceReport} from "../src/conformance/wrapper/ConformanceReport";
+import {Model} from "../src/entities/model";
+import {ModelComponent} from "../src/entities/modelTaskMetadata";
+import {GraphParser} from "../src/persistence/graphParser";
+import {Component} from "../src/persistence/component";
 
 describe("WellDefinedSHACLValidator Class", () => {
     it("should perform correct validation for conforming data.",
@@ -10,7 +14,6 @@ describe("WellDefinedSHACLValidator Class", () => {
                    expect(report.getIsConforming()).toBe(true);
                    done();
                });
-
         });
 
     it("should perform correct validation for non-conforming data.",
@@ -31,6 +34,53 @@ describe("WellDefinedSHACLValidator Class", () => {
                     expect(report.getIsConforming()).toBe(false);
                     done();
                 });
+        });
+
+    it("should validate correctly (i.e. validation should integrate with " +
+        "the Model).",
+       (done) => {
+            let validator = new WellDefinedSHACLValidator();
+            let model = new Model();
+            let parser = new GraphParser();
+            let comp1 = new Component();
+            let comp2 = new Component();
+
+            let busy = true;
+            parser.parse(getConformingDataGraph(), "text/turtle", function(result1: any) {
+                parser.clean();
+                parser.parse(getShapesGraph(), "text/turtle", function(result2: any) {
+                    comp1.setPart("test", result1);
+                    comp2.setPart("test", result2);
+                    model.tasks.schedule(
+                        Model.createTask(
+                            (data) => {
+                                data.setComponent(ModelComponent.DataGraph, comp1);
+                                data.setComponent(ModelComponent.SHACLShapesGraph, comp2);
+                                busy = false;
+                            },
+                            [],
+                            [ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph]));
+                    model.tasks.processTask();
+
+                    // this is pretty horrible and there probably exists a better way of doing this,
+                    // but at the moment I can't seem to think of one
+                    while (busy) {
+                    }
+                    
+                    model.tasks.schedule(
+                        Model.createTask(
+                            (data) => {
+                                validator.validate(data, function (report: ConformanceReport) {
+                                    expect(report.getIsConforming()).toBe(true);
+                                    done();
+                                });
+                            },
+                            [],
+                            [ModelComponent.ConformanceReport]));
+                    model.tasks.processTask();
+                });
+           });
+
         });
 });
 
