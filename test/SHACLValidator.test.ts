@@ -46,48 +46,48 @@ describe("WellDefinedSHACLValidator Class", () => {
             let comp2 = new Component();
 
             let busy = true;
-            // parser.parse(getConformingDataGraph(), "text/turtle", function (data1: any) {
-            //     parser.clean();
-            //     parser.parse(getShapesGraph(), "text/turtle", function (shapes1: any) {
-            //         parser.clean();
-            //         parser.parse(getPlaygroundData(), "text/turtle", function (data2: any) {
-            //             parser.clean();
-            //             parser.parse(getPlaygroundShapes(), "text/turtle", function (shapes2: any) {
-            //                 comp1.setPart("test1", data1);
-            //                 comp1.setPart("test2", data2);
-            //                 comp2.setPart("test1", shapes1);
-            //                 comp2.setPart("test2", shapes2);
-            //                 model.tasks.schedule(
-            //                     Model.createTask(
-            //                         (data) => {
-            //                             data.setComponent(ModelComponent.DataGraph, comp1);
-            //                             data.setComponent(ModelComponent.SHACLShapesGraph, comp2);
-            //                             busy = false;
-            //                         },
-            //                         [],
-            //                         [ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph]));
-            //                 model.tasks.processTask();
-            //
-            //                 // this is pretty horrible and there probably exists a better way of doing this,
-            //                 // but at the moment I can't seem to think of one
-            //                 while (busy) {
-            //                 }
-            //
-            //                 model.tasks.schedule(
-            //                     Model.createTask(
-            //                         (data) => {
-            //                             validator.validate(data, function (report: ConformanceReport) {
-            //                                 expect(report.getIsConforming()).toBe(false);
-            //                                 done();
-            //                             });
-            //                         },
-            //                         [],
-            //                         [ModelComponent.ConformanceReport]));
-            //                 model.tasks.processTask();
-            //             });
-            //         });
-            //     });
-            // });
+            parser.parse(getConformingDataGraph(), "text/turtle", function (data1: any) {
+                parser.clean();
+                parser.parse(getShapesGraph(), "text/turtle", function (shapes1: any) {
+                    parser.clean();
+                    parser.parse(getPlaygroundData(), "text/turtle", function (data2: any) {
+                        parser.clean();
+                        parser.parse(getPlaygroundShapes(), "text/turtle", function (shapes2: any) {
+                            comp1.setPart("test1", data1);
+                            comp1.setPart("test2", data2);
+                            comp2.setPart("test1", shapes1);
+                            comp2.setPart("test2", shapes2);
+                            model.tasks.schedule(
+                                Model.createTask(
+                                    (data) => {
+                                        data.setComponent(ModelComponent.DataGraph, comp1);
+                                        data.setComponent(ModelComponent.SHACLShapesGraph, comp2);
+                                        busy = false;
+                                    },
+                                    [],
+                                    [ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph]));
+                            model.tasks.processTask();
+
+                            // this is pretty horrible and there probably exists a better way of doing this,
+                            // but at the moment I can't seem to think of one
+                            while (busy) {
+                            }
+
+                            model.tasks.schedule(
+                                Model.createTask(
+                                    (data) => {
+                                        validator.validate(data, function (report: ConformanceReport) {
+                                            expect(report.getIsConforming()).toBe(false);
+                                            done();
+                                        });
+                                    },
+                                    [],
+                                    [ModelComponent.ConformanceReport]));
+                            model.tasks.processTask();
+                        });
+                    });
+                });
+            });
 
         });
 });
