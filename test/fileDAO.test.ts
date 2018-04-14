@@ -40,7 +40,7 @@ describe("FileDAO Class", () => {
         });
 
     it("should load an existing file.",
-       () => {
+       (done) => {
            let label = ModelComponent.DataGraph;
            let filename = "find.ttl";
            let file = new Blob([generateTurtle()]);
@@ -49,6 +49,7 @@ describe("FileDAO Class", () => {
            let model = new Model();
            model.registerObserver((changeBuf) => {
                expect(changeBuf.contains(ModelComponent.DataGraph)).toEqual(true);
+               done();
                return [];
            });
 
