@@ -7,46 +7,55 @@ import { ConformanceReport } from "../src/conformance/wrapper/ConformanceReport"
  */
 
 describe("ShaclLibraryWrapper Class", () => {
-    //it("Given shapes and conforming data, returns a report with conforming message.",
-    //   () => {
-    //        console.log('test 1 conformance');
-    //        let validationWrapper = new ShaclWrapper();
-    //        validationWrapper.unshacledValidate(getConformingDataGraph(), '' , getShapesGraph(), '');
-    //   });
-//
-    //it("Given shapes and 1 non-conforming line of data, returns a report with non-conforming problem data.",
-    //   () => {
-    //        console.log('test 2 non-conformance');
-    //        let validationWrapper = new ShaclWrapper();
-    //        validationWrapper.unshacledValidate(getNonConformingDataGraph(), '' , getShapesGraph(), '');
-    //   });
-//
-    //it("Given shapes and 1 non-conforming line of data, returns a report with non-conforming problem data.",
-    //    () => {
-    //        console.log('test 3 non-conformance');
-    //        let validationWrapper = new ShaclWrapper();
-    //        validationWrapper.unshacledValidate(getNonConformingDataGraphWrongSsnFormat(), '' , getShapesGraph(), '');
-    //    });
-//
-    //it("Given shapes and 2 non-conforming lines of data, returns a report with non-conforming problem data.",
-    //    () => {
-    //        console.log('test 4 non-conformance');
-    //        let validationWrapper = new ShaclWrapper();
-    //        validationWrapper.unshacledValidate(getNonConformingDataGraph2Mistakes(), '' , getShapesGraph(), '');
-    //    });
+    it("Given shapes and conforming data, returns a report with conforming message.",
+       (done) => {
+            console.log('test 1 conformance');
+            let validationWrapper = new ShaclWrapper();
+            validationWrapper.unshacledValidate(getConformingDataGraph(), '' , getShapesGraph(), '');
+            done();
+       });
+
+    it("Given shapes and 1 non-conforming line of data, returns a report with non-conforming problem data.",
+       (done) => {
+            console.log('test 2 non-conformance');
+            let validationWrapper = new ShaclWrapper();
+            validationWrapper.unshacledValidate(getNonConformingDataGraph(), '' , getShapesGraph(), '');
+            done();
+       });
+
+    it("Given shapes and 1 non-conforming line of data, returns a report with non-conforming problem data.",
+        (done) => {
+            console.log('test 3 non-conformance');
+            let validationWrapper = new ShaclWrapper();
+            validationWrapper.unshacledValidate(getNonConformingDataGraphWrongSsnFormat(), '' , getShapesGraph(), '');
+            done();
+        });
 
     it("Given shapes and 2 non-conforming lines of data, returns a report with non-conforming problem data.",
-        () => {
+        (done) => {
+            console.log('test 4 non-conformance');
+            let validationWrapper = new ShaclWrapper();
+            validationWrapper.unshacledValidate(getNonConformingDataGraph2Mistakes(), '' , getShapesGraph(), '');
+            done();
+        });
+
+    it("Given shapes and 2 non-conforming lines of data, returns a report with non-conforming problem data.",
+        (done) => {
             console.log('test 5 non-conformance');
             let conformanceReport = new ConformanceReport();
-            conformanceReport.conforms(getNonConformingDataGraph2Mistakes(), "text/turtle" , getShapesGraph(), "text/turtle");
-
-            console.log(
-                conformanceReport.getValidationErrors()[0].getMessage() + "\n" +
-                conformanceReport.getValidationErrors()[0].getDataElement() + "\n" +
-                conformanceReport.getValidationErrors()[0].getShapeConstraint() + "\n" +
-                conformanceReport.getValidationErrors()[0].getShapeProperty()
-            );
+            conformanceReport.conforms(getNonConformingDataGraph2Mistakes(), "text/turtle" , getShapesGraph(),
+                "text/turtle", function(report: any){
+                    console.log(
+                        report.getValidationErrors().length + "mistakes. \n"
+                    );
+                    console.log(
+                        report.getValidationErrors()[0].getMessage() + "\n" +
+                        report.getValidationErrors()[0].getDataElement() + "\n" +
+                        report.getValidationErrors()[0].getShapeConstraint() + "\n" +
+                        report.getValidationErrors()[0].getShapeProperty()
+                    );
+                    done();
+                });
         });
 
 //

@@ -60,13 +60,15 @@ export class ConformanceReport{
     }
 
 
-    public conforms(data: string, dataType: string, shapes: string, shapesType: string): void{
+
+    public conforms(data: string, dataType: string, shapes: string, shapesType: string,
+                    andThen: ((report: any) => void) | null): void{
         let validator = new SHACLValidator();
         let that = this;
         validator.validate(data, dataType, shapes, shapesType, function (e: any, report: any) {
             if(report.conforms() == true){
                 that.isConforming = true;
-                that.validationErrors = null;
+                that.validationErrors = new Array(0);
             }
             else{
                 that.isConforming = false;
@@ -80,7 +82,18 @@ export class ConformanceReport{
                     counter++;
                 });
             }
+            if (andThen) {
+                andThen(that);
+            }
+            //console.log(
+            //    "Error = " +
+            //    that.validationErrors[0].getMessage() + "\n" +
+            //    that.validationErrors[0].getDataElement() + "\n" +
+            //    that.validationErrors[0].getShapeConstraint() + "\n" +
+            //    that.validationErrors[0].getShapeProperty()
+            //);
         });
+        //console.log(this.isConforming);
     }
 
     public getIsConforming():boolean{
@@ -93,6 +106,7 @@ export class ConformanceReport{
 
 
     public toString(){
+
         for (let error of this.validationErrors) {
             console.log(error.toString());
         }
