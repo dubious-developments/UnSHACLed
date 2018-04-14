@@ -6,7 +6,6 @@ import {IndexedFormula, Statement} from "rdflib";
 export class Graph {
     private persistentStore: any;
     private validationStore: any;
-    private rdfLibStore: any;
     private prefixes: {};
 
     /**
@@ -14,11 +13,9 @@ export class Graph {
      */
     public constructor() {
         let N3 = require("n3");
-        let $rdf = require('rdflib');
 
         this.persistentStore = N3.Store();
         this.validationStore = new IndexedFormula();
-        this.rdfLibStore = $rdf.graph();
         this.prefixes = {};
     }
 
@@ -36,14 +33,6 @@ export class Graph {
      */
     public getValidationStore() {
         return this.validationStore;
-    }
-
-    /**
-     * Retrieve the representation of the Graph used in rdflib
-     * @returns {any}
-     */
-    public getRdfLibStore() {
-        return this.rdfLibStore;
     }
 
     /**

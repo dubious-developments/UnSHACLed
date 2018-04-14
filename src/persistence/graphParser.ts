@@ -61,22 +61,6 @@ export class GraphParser implements Parser {
      */
     public parse(content: string, mime: string, andThen: ((result: any) => void) | null) {
         if (this.mimeTypes.contains(mime)) {
-
-            let $rdf = require('rdflib');
-            try {
-                $rdf.parse(content, this.graph.getRdfLibStore(), "https://example.org/resource.ttl", mime);
-            } catch (e) {
-                // rdflib cannot parse graphs with undefined prefixes (as are used in the tests).
-                // without this catch, the tests would fail, but not for the reason that is tested.
-                if (e.message.includes("Bad syntax: Prefix")) {
-                    // don't throw error here for the tests
-                    // TODO in the future it might be better that we just use existing prefixes in the tests
-                    console.log("could not parse to rdfLibGraph");
-                } else {
-                    throw new Error("Error during parsing rdf");
-                }
-            }
-
             let N3 = require("n3");
             let parser = N3.Parser({ format: mime });
 
