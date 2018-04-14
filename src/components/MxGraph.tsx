@@ -419,7 +419,6 @@ class MxGraph extends React.Component<any, any> {
             if (subjectBlock) {
                 if (predicate === RDF("type").uri && object === SH("NodeShape").uri) {
                     subjectBlock.blockType = "NodeShape";
-                    subjectBlock.name = subject;
                 } else if (predicate === SH("path").uri) {
                     subjectBlock.name = object;
                     subjectBlock.blockType = "Property";
