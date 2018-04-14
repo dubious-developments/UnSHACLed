@@ -59,7 +59,8 @@ def main(argv):
         token,
         deploy_dir,
         build_name,
-        build_version
+        build_version,
+        repo_slug
     ]
 
     if is_dry_run:

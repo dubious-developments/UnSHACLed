@@ -47,6 +47,11 @@ git -c user.name='Dubious Spongebot' \
 echo "Pushing commit..."
 if git push $REPO_URL master &2> /dev/null; then
     echo "Pushed commit"
+
+    # Add a comment to the pull request if this is the first time
+    # we're deploying it to GitHub pages.
+    python3 ./ci/comment-pr-deployed.py "$ACCESS_TOKEN" "$TARGET_DIRECTORY" "$REPO_SLUG"
+
     popd
 else
     # Nuke the commit we just made.
