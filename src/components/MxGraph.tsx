@@ -14,7 +14,7 @@ class MxGraph extends React.Component<any, any> {
     private nameToStandardCellDict: Collections.Dictionary<string, any>;
     private blockToCellDict: Collections.Dictionary<Block, any>;
     private subjectToBlockDict: Collections.Dictionary<string, Block>;
-    private triples: Collections.Set<any>;
+    private triples: Collections.Set<Triple>;
 
     constructor(props: string) {
         super(props);
@@ -37,7 +37,7 @@ class MxGraph extends React.Component<any, any> {
         this.nameToStandardCellDict = new Collections.Dictionary<string, any>();
         this.blockToCellDict = new Collections.Dictionary<Block, any>((b) => b.name);
         this.subjectToBlockDict = new Collections.Dictionary<string, Block>();
-        this.triples = new Collections.Set<any>();
+        this.triples = new Collections.Set<Triple>((t) =>  t.subject + " " + t.predicate + " " + t.object);
     }
 
     componentDidMount() {
@@ -399,13 +399,13 @@ class MxGraph extends React.Component<any, any> {
         // let XSD = $rdf.Namespace("http://www.w3.org/2001/XMLSchema#");
 
         let triples = store.statements;
-        let newTriples = new Collections.Set<any>();
+        let newTriples = new Collections.Set<Triple>((t) =>  t.subject + " " + t.predicate + " " + t.object);
 
         triples.forEach((triple: any) => {
             if (!this.subjectToBlockDict.containsKey(triple.subject.value)) {
                 this.subjectToBlockDict.setValue(triple.subject.value, new Block(triple.subject.value));
             }
-            newTriples.add(triple);
+            newTriples.add(new Triple(triple.subject.value, triple.predicate.value, triple.object.value));
         });
 
         newTriples.difference(this.triples);
@@ -415,18 +415,16 @@ class MxGraph extends React.Component<any, any> {
             let subject = triple.subject;
             let predicate = triple.predicate;
             let object = triple.object;
-            let subjectBlock = this.subjectToBlockDict.getValue(subject.value);
-
+            let subjectBlock = this.subjectToBlockDict.getValue(subject);
             if (subjectBlock) {
-                if (predicate.value === RDF("type").uri && object.value === SH("NodeShape").uri) {
+                if (predicate === RDF("type").uri && object === SH("NodeShape").uri) {
                     subjectBlock.blockType = "NodeShape";
-                    subjectBlock.name = subject.value;
-                } else if (predicate.value === SH("path").uri) {
-                    subjectBlock.name = object.value;
+                    subjectBlock.name = subject;
+                } else if (predicate === SH("path").uri) {
+                    subjectBlock.name = object;
                     subjectBlock.blockType = "Property";
                 } else {
-                    // todo parse Collections of graphs
-                    subjectBlock.traits.push([predicate.value, object.toString()]);
+                    subjectBlock.traits.push(triple);
                 }
             }
         });
@@ -442,67 +440,51 @@ class MxGraph extends React.Component<any, any> {
 
     visualizeDataGraph(store: any) {
         this.clear();
-
         let {graph} = this.state;
         let blocks = this.parseDataGraphToBlocks(store);
+        let model = graph.getModel();
+        let parent = graph.getDefaultParent();
 
-        console.log(this.subjectToBlockDict);
-        blocks.forEach(bl => {
-            this.blockToCellDict.setValue(bl, this.addBlock(graph, bl));
+        blocks.forEach(b => {
+            let v1 = model.cloneCell(this.nameToStandardCellDict.getValue('block'));
+            v1.value = b;
+            this.blockToCellDict.setValue(b, v1);
+        });
+
+        blocks.forEach(b => {
+            let v1 = this.blockToCellDict.getValue(b);
+            model.beginUpdate();
+            try {
+                let longestname = 0;
+                b.traits.forEach(trait => {
+                    let temprow = model.cloneCell(this.nameToStandardCellDict.getValue('row'));
+                    let name = trait.predicate + ": " + trait.object;
+                    longestname = Math.max(name.length, longestname);
+                    temprow.value = {name: name, trait: trait};
+                    v1.insert(temprow);
+
+                    let b2 = this.subjectToBlockDict.getValue(trait.object);
+                    if (b2) {
+                        let v2 = this.blockToCellDict.getValue(b2);
+                        graph.insertEdge(graph.getDefaultParent(), null, '', temprow, v2);
+                    }
+                });
+
+                if (b.blockType === undefined) {
+                    b.blockType = "Data";
+                }
+                v1.style = b.blockType;
+                v1.geometry.width += longestname * 4;
+                v1.geometry.alternateBounds = new mxRectangle(0, 0, v1.geometry.width, v1.geometry.height);
+                graph.addCell(v1, parent);
+
+            } finally {
+                model.endUpdate();
+            }
         });
 
         let layout = new mxStackLayout(graph, false, 35);
         layout.execute(graph.getDefaultParent());
-    }
-
-    addBlock(graph: any, b: Block) {
-        let model = graph.getModel();
-
-        // Gets the default parent for inserting new cells. This
-        // is normally the first child of the root (ie. layer 0).
-        let parent = graph.getDefaultParent();
-
-        let v1 = model.cloneCell(this.nameToStandardCellDict.getValue('block'));
-
-        // Adds cells to the model in a single step
-        model.beginUpdate();
-        try {
-            let longestname = 0;
-            b.traits.forEach(trait => {
-                let temprow = model.cloneCell(this.nameToStandardCellDict.getValue('row'));
-                let name = trait[0] + ": " + trait[1];
-                longestname = Math.max(name.length, longestname);
-                temprow.value = {name: name, trait: trait};
-                v1.insert(temprow);
-            });
-
-            let edgeElements = 0;
-            for (let i = 0; i < model.getChildCount(parent); i++) {
-                if (!model.isEdge(model.getChildAt(parent, i))) {
-                    edgeElements++;
-                }
-            }
-
-            v1.value = b;
-            if (b.blockType === undefined) {
-                b.blockType = "Data";
-            }
-            v1.style = b.blockType;
-            v1.geometry.width += longestname * 4;
-            graph.addCell(v1, parent);
-
-            v1.geometry.alternateBounds =
-                new mxRectangle(0, 0, v1.geometry.width, v1.geometry.height);
-        } finally {
-            // save graph into state
-            // this.saveGraph(graph);
-
-            // Updates the display
-            model.endUpdate();
-        }
-
-        graph.setSelectionCell(v1);
-        return v1;
     }
 
     configureStylesheet(graph: any) {
@@ -725,7 +707,7 @@ class MxGraph extends React.Component<any, any> {
 }
 
 class Block {
-    public traits: Array<Array<string>>;
+    public traits: Array<Triple>;
     public blockType: string;
     public name: string;
 
@@ -736,6 +718,18 @@ class Block {
 
     clone() {
         return mxUtils.clone(this);
+    }
+}
+
+class Triple {
+    public subject: string;
+    public predicate: string;
+    public object: string;
+
+    constructor(subject: string, predicate: string, object: string) {
+        this.subject = subject;
+        this.predicate = predicate;
+        this.object = object;
     }
 }
 
