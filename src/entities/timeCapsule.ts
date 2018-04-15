@@ -59,8 +59,25 @@ export class TimeCapsule<T> {
         first: TimeCapsule<T>,
         second: TimeCapsule<T>): TimeCapsule<T> {
 
-        // TODO: implement this!
-        throw new Error();
+        // Step one: find an ancestor for `first` and `second`
+        // with generation `min(first.generation, second.generation)`.
+        while (first.generation > second.generation) {
+            first = first.parent;
+        }
+        while (second.generation > first.generation) {
+            second = second.parent;
+        }
+
+        // Step two: walk the ancestor tree of `first` and `second`
+        // until we find a common ancestor. This will always be the
+        // last common ancestor because `first === second` implies
+        // `first.parent === second.parent`.
+        while (first !== second) {
+            first = first.parent;
+            second = second.parent;
+        }
+
+        return first;
     }
 
     /**
