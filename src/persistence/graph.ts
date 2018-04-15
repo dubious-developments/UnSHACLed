@@ -119,6 +119,7 @@ export class ImmutableGraph {
      * Creates a new immutable graph data structure.
      */
     public static create(): ImmutableGraph {
+
         return new ImmutableGraph(TimeCapsule.create<GraphData>(new GraphData()));
     }
 
@@ -129,6 +130,7 @@ export class ImmutableGraph {
      * @param func The function to apply.
      */
     public queryN3Store<T>(func: (store: any) => T): T {
+
         // TODO: delete this hack.
         return this.capsule.query<T>(data => func(data.n3Store));
     }
@@ -140,6 +142,7 @@ export class ImmutableGraph {
      * @param func The function to apply.
      */
     public query<T>(func: (store: any) => T): T {
+
         return this.capsule.query<T>(data => func(data.store));
     }
 
@@ -151,12 +154,23 @@ export class ImmutableGraph {
      * @param object
      */
     public addTriple(subject: string, predicate: string, object: string): ImmutableGraph {
-        // TODO: what happens if the graph already contains this triple?
-        // It matters for undo.
-        return new ImmutableGraph(
-            this.capsule.modify(
-                data => data.addTriple(subject, predicate, object),
-                data => data.removeTriple(subject, predicate, object)));
+
+        if (this.containsTriple(subject, predicate, object)) {
+            return this;
+        } else {
+            return new ImmutableGraph(
+                this.capsule.modify(
+                    data => data.addTriple(subject, predicate, object),
+                    data => data.removeTriple(subject, predicate, object)));
+        }
+    }
+
+    /**
+     * Checks if the graph contains a particular triple.
+     */
+    public containsTriple(subject: string, predicate: string, object: string): boolean {
+
+        return this.capsule.query(data => data.containsTriple(subject, predicate, object));
     }
 
     /**
@@ -166,12 +180,15 @@ export class ImmutableGraph {
      * @param object
      */
     public removeTriple(subject: string, predicate: string, object: string): ImmutableGraph {
-        // TODO: what happens if the graph does not already contain this triple?
-        // It matters for undo.
-        return new ImmutableGraph(
-            this.capsule.modify(
-                data => data.removeTriple(subject, predicate, object),
-                data => data.addTriple(subject, predicate, object)));
+
+        if (this.containsTriple(subject, predicate, object)) {
+            return new ImmutableGraph(
+                this.capsule.modify(
+                    data => data.removeTriple(subject, predicate, object),
+                    data => data.addTriple(subject, predicate, object)));
+        } else {
+            return this;
+        }
     }
 
     /**
@@ -212,6 +229,7 @@ export class ImmutableGraph {
      * Retrieves all the prefixes in this graph.
      */
     public getPrefixes(): {} {
+
         return this.capsule.query(data => data.getPrefixes());
     }
 
@@ -221,11 +239,23 @@ export class ImmutableGraph {
      * @param iri
      */
     public addPrefix(prefix: string, iri: string): ImmutableGraph {
-        // TODO: what do we do if the prefix is already in the graph?
-        return new ImmutableGraph(
-            this.capsule.modify(
-                data => data.addPrefix(prefix, iri),
-                data => data.removePrefix(prefix)));
+
+        let currentPrefixes = this.getPrefixes();
+        if (prefix in currentPrefixes)
+        {
+            let oldIri = currentPrefixes[prefix];
+            return new ImmutableGraph(
+                this.capsule.modify(
+                    data => data.addPrefix(prefix, iri),
+                    data => data.addPrefix(prefix, oldIri)));
+        }
+        else
+        {
+            return new ImmutableGraph(
+                this.capsule.modify(
+                    data => data.addPrefix(prefix, iri),
+                    data => data.removePrefix(prefix)));
+        }
     }
 
     /**
@@ -233,6 +263,7 @@ export class ImmutableGraph {
      * @param prefixes
      */
     public addPrefixes(prefixes: {}): ImmutableGraph {
+
         // TODO: maybe add the prefixes in batches?
         let result: ImmutableGraph = this;
         for (let key in prefixes) {
@@ -274,6 +305,13 @@ class GraphData {
     public addTriple(subject: string, predicate: string, object: string) {
         this.n3Store.addTriple(subject, predicate, object);
         this.store.add(new Statement(subject, predicate, object, this.store));
+    }
+
+    /**
+     * Checks if the graph contains a particular triple.
+     */
+    public containsTriple(subject: string, predicate: string, object: string): boolean {
+        return this.store.match(subject, predicate, object).length > 0;
     }
 
     /**
