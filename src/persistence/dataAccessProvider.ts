@@ -14,6 +14,9 @@ export class DataAccessProvider {
     private constructor() {
         // temporarily create model here
         this._model = new Model();
+
+        // This can not be 'lazy initialized' since the registering of observers happens in the constructor
+        this.validationService = new ValidationService(this._model);
     }
 
     // tmp method
@@ -35,11 +38,6 @@ export class DataAccessProvider {
     }
 
     public getValidationService() {
-        if (this.validationService) {
-            return this.validationService;
-        } else {
-            this.validationService = new ValidationService(this._model);
-            return this.validationService;
-        }
+        return this.validationService;
     }
 }
