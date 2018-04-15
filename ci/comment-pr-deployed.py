@@ -20,11 +20,11 @@ def comment_pull_request_deployed(argv):
         argv = [argv[0]] + argv[2:]
         is_dry_run = True
 
-    if len(argv) != 3:
-        print('Usage: comment-pr-deployed [-d] access-token deploy-directory', file=sys.stderr)
+    if len(argv) != 4:
+        print('Usage: comment-pr-deployed [-d] access-token deploy-directory repo-slug', file=sys.stderr)
         return 1
 
-    _, access_token, deploy_directory = argv
+    _, access_token, deploy_directory, repo_slug = argv
 
     pr_number = parse_deploy_directory_name(deploy_directory)
     if pr_number is None:
@@ -33,7 +33,7 @@ def comment_pull_request_deployed(argv):
 
     # Authenticate and grab the repo.
     gh = Github(access_token)
-    repo = gh.get_repo('dubious-developments/UnSHACLed')
+    repo = gh.get_repo(repo_slug)
     pr = repo.get_pull(pr_number)
 
     # Make sure that we haven't commented already.

@@ -1,4 +1,6 @@
 import * as Collections from "typescript-collections";
+import {ModelData} from "../entities/modelData";
+import {ModelComponent} from "../entities/modelTaskMetadata";
 
 /**
  * A structure that is to be stored inside the Model.

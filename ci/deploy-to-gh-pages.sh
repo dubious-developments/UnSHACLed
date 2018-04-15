@@ -16,6 +16,10 @@ export NAME=$3
 # The fourth parameter is the build's version.
 export VERSION=$4
 
+# The fifth parameter is the slug of the repository we are
+# deploying from.
+export REPO_SLUG=$5
+
 pushd "$CURRENT_DIR/.."
 
 export SHA=$(git rev-parse --verify HEAD)
@@ -31,9 +35,5 @@ while (( i < 5 )) && ! ./ci/try-deploy-to-gh-pages.sh; do
     # Try again.
     i=$((i+1))
 done
-
-# Add a comment to the pull request if this is the first time
-# we're deploying it to GitHub pages.
-python3 ./ci/comment-pr-deployed.py "$ACCESS_TOKEN" "$TARGET_DIRECTORY"
 
 popd

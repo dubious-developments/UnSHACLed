@@ -110,6 +110,7 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
      */
     public schedule(task: Task<ModelData, ModelTaskMetadata>): void {
         // Create a new instruction.
+
         let instruction = new TaskInstruction(task, this.state.clone());
 
         // Turn the instruction's read set into a dependency set.
@@ -292,6 +293,8 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
             this.state.setComponent<any>(
                 component,
                 instruction.data.getComponent<any>(component));
+
+            this.state.componentHasChanged(component);
         });
     }
 

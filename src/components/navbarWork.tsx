@@ -64,7 +64,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
 
     // TODO not only load datagraph
     saveGraph(e: any) {
-        let model: Model = DataAccessProvider.getInstance().tmpModel;
+        let model: Model = DataAccessProvider.getInstance().model;
         model.tasks.schedule(new GetOpenedFilesTask(ModelComponent.DataGraph, this));
         model.tasks.processTask();
     }
@@ -72,7 +72,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
     getFileFromPopup(e: any) {
         let fileName = (e.target || e.srcElement).innerHTML;
         console.log(fileName);
-        let model: Model = DataAccessProvider.getInstance().tmpModel;
+        let model: Model = DataAccessProvider.getInstance().model;
         model.tasks.schedule(new LoadFileTask(ModelComponent.DataGraph, fileName));
         model.tasks.processTask();
     }
