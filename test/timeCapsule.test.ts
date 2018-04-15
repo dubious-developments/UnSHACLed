@@ -51,4 +51,21 @@ describe("TimeCapsule Class", () => {
         let root = TimeCapsule.create<NumberBox>(new NumberBox(0));
         expect(root.query(data => root.query(dataPrime => dataPrime.num))).toEqual(0);
     });
+
+    it("disallows double acquire", () => {
+        let root = TimeCapsule.create<NumberBox>(new NumberBox(0));
+        let leaf = root.modify(box => box.num++, box => box.num--);
+        expect(() => { root.acquire(); leaf.acquire(); }).toThrow();
+    });
+
+    it("disallows release before acquire", () => {
+        let root = TimeCapsule.create<NumberBox>(new NumberBox(0));
+        expect(() => { root.release(); }).toThrow();
+    });
+
+    it("disallows release from wrong instant", () => {
+        let root = TimeCapsule.create<NumberBox>(new NumberBox(0));
+        let leaf = root.modify(box => box.num++, box => box.num--);
+        expect(() => { root.acquire(); leaf.release(); }).toThrow();
+    });
 });

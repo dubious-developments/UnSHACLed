@@ -61,8 +61,8 @@ export class TimeCapsule<T> {
         let result = new TimeCapsule<T>(
             new TimeCapsuleState<T>(data),
             undefined,
-            (state: T) => { },
-            (state: T) => { },
+            undefined,
+            undefined,
             0);
         result.state.currentInstant = result;
         return result;
