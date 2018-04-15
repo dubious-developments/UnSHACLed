@@ -1,5 +1,3 @@
-import { reverse } from "dns";
-
 /**
  * A class that presents an "immutable" (but not re-entrant) view of
  * a mutable value by undoing/redoing the actions performed on
@@ -161,6 +159,8 @@ export class TimeCapsule<T> {
         for (let instant of this.pathToAncestor(ancestor).reverse().slice(1)) {
             instant.redoChange(data);
         }
+
+        this.state.currentInstant = this;
 
         return data;
     }
