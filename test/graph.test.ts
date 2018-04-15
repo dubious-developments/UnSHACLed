@@ -1,9 +1,182 @@
 import SHACLValidator from "../src/conformance/shacl";
 import {Statement} from "rdflib";
-import {Graph} from "../src/persistence/graph";
+import {Graph, ImmutableGraph} from "../src/persistence/graph";
 import {GraphParser} from "../src/persistence/graphParser";
 
 describe("Graph Class", () => {
+    it("can add a triple twice", () => {
+        let graph = new Graph();
+
+        graph.addTriple(
+            "http://en.wikipedia.org/wiki/Tony_Benn",
+            "http://purl.org/dc/elements/1.1/title",
+            '"Tony Benn"');
+
+        graph.addTriple(
+            "http://en.wikipedia.org/wiki/Tony_Benn",
+            "http://purl.org/dc/elements/1.1/title",
+            '"Tony Benn"');
+
+        expect(
+            graph.containsTriple(
+                "http://en.wikipedia.org/wiki/Tony_Benn",
+                "http://purl.org/dc/elements/1.1/title",
+                '"Tony Benn"')).toBeTruthy();
+    });
+
+    it("can remove a nonexistent triple", () => {
+        let graph = new Graph();
+
+        graph.removeTriple(
+            "http://en.wikipedia.org/wiki/Tony_Benn",
+            "http://purl.org/dc/elements/1.1/title",
+            '"Tony Benn"');
+
+        expect(
+            !graph.containsTriple(
+                "http://en.wikipedia.org/wiki/Tony_Benn",
+                "http://purl.org/dc/elements/1.1/title",
+                '"Tony Benn"')).toBeTruthy();
+    });
+
+    it("can undo an insertion", () => {
+        let graph = new Graph();
+        let oldImmutable = graph.asImmutable();
+
+        graph.addTriple(
+            "http://en.wikipedia.org/wiki/Tony_Benn",
+            "http://purl.org/dc/elements/1.1/title",
+            '"Tony Benn"');
+
+        expect(
+            graph.containsTriple(
+                "http://en.wikipedia.org/wiki/Tony_Benn",
+                "http://purl.org/dc/elements/1.1/title",
+                '"Tony Benn"')).toBeTruthy();
+        expect(
+            oldImmutable.containsTriple(
+                "http://en.wikipedia.org/wiki/Tony_Benn",
+                "http://purl.org/dc/elements/1.1/title",
+                '"Tony Benn"')).toBeFalsy();
+        expect(
+            graph.containsTriple(
+                "http://en.wikipedia.org/wiki/Tony_Benn",
+                "http://purl.org/dc/elements/1.1/title",
+                '"Tony Benn"')).toBeTruthy();
+    });
+
+    it("can undo a deletion", () => {
+        let graph = new Graph();
+
+        graph.addTriple(
+            "http://en.wikipedia.org/wiki/Tony_Benn",
+            "http://purl.org/dc/elements/1.1/title",
+            '"Tony Benn"');
+
+        let oldImmutable = graph.asImmutable();
+
+        graph.removeTriple(
+            "http://en.wikipedia.org/wiki/Tony_Benn",
+            "http://purl.org/dc/elements/1.1/title",
+            '"Tony Benn"');
+
+        expect(
+            graph.containsTriple(
+                "http://en.wikipedia.org/wiki/Tony_Benn",
+                "http://purl.org/dc/elements/1.1/title",
+                '"Tony Benn"')).toBeFalsy();
+        expect(
+            oldImmutable.containsTriple(
+                "http://en.wikipedia.org/wiki/Tony_Benn",
+                "http://purl.org/dc/elements/1.1/title",
+                '"Tony Benn"')).toBeTruthy();
+        expect(
+            graph.containsTriple(
+                "http://en.wikipedia.org/wiki/Tony_Benn",
+                "http://purl.org/dc/elements/1.1/title",
+                '"Tony Benn"')).toBeFalsy();
+    });
+
+    it("can be created from an immutable graph", () => {
+        let oldImmutable = ImmutableGraph.create();
+        let graph = oldImmutable.toMutable();
+
+        graph.addTriple(
+            "http://en.wikipedia.org/wiki/Tony_Benn",
+            "http://purl.org/dc/elements/1.1/title",
+            '"Tony Benn"');
+
+        expect(
+            graph.containsTriple(
+                "http://en.wikipedia.org/wiki/Tony_Benn",
+                "http://purl.org/dc/elements/1.1/title",
+                '"Tony Benn"')).toBeTruthy();
+        expect(
+            oldImmutable.containsTriple(
+                "http://en.wikipedia.org/wiki/Tony_Benn",
+                "http://purl.org/dc/elements/1.1/title",
+                '"Tony Benn"')).toBeFalsy();
+        expect(
+            graph.containsTriple(
+                "http://en.wikipedia.org/wiki/Tony_Benn",
+                "http://purl.org/dc/elements/1.1/title",
+                '"Tony Benn"')).toBeTruthy();
+    });
+
+    it("can define a prefix", () => {
+        let graph = new Graph();
+
+        graph.addPrefix("dc", "http://purl.org/dc/elements/1.1/");
+
+        expect(graph.getPrefixes()["dc"]).toEqual("http://purl.org/dc/elements/1.1/");
+    });
+
+    it("can define a prefix twice", () => {
+        let graph = new Graph();
+
+        graph.addPrefix("dc", "http://purl.org/dc/elements/1.1/");
+        graph.addPrefix("dc", "http://purl.org/dc/elements/1.1/");
+
+        expect(graph.getPrefixes()["dc"]).toEqual("http://purl.org/dc/elements/1.1/");
+    });
+
+    it("can redefine a prefix", () => {
+        let graph = new Graph();
+
+        graph.addPrefix("dc", "http://purl.org/dc/elements/0.1/");
+        graph.addPrefix("dc", "http://purl.org/dc/elements/1.1/");
+
+        expect(graph.getPrefixes()["dc"]).toEqual("http://purl.org/dc/elements/1.1/");
+    });
+
+    it("can undo a prefix definition", () => {
+        let graph = new Graph();
+        let oldImmutable = graph.asImmutable();
+
+        graph.addPrefix("dc", "http://purl.org/dc/elements/1.1/");
+
+        expect(graph.getPrefixes()["dc"]).toEqual("http://purl.org/dc/elements/1.1/");
+        expect("dc" in oldImmutable.getPrefixes()).toBeFalsy();
+        expect(graph.getPrefixes()["dc"]).toEqual("http://purl.org/dc/elements/1.1/");
+    });
+
+    it("can undo a prefix redefinition", () => {
+        let graph = new Graph();
+        let oldImmutable1 = graph.asImmutable();
+
+        graph.addPrefix("dc", "http://purl.org/dc/elements/0.1/");
+
+        let oldImmutable2 = graph.asImmutable();
+
+        graph.addPrefix("dc", "http://purl.org/dc/elements/1.1/");
+
+        expect(graph.getPrefixes()["dc"]).toEqual("http://purl.org/dc/elements/1.1/");
+        expect("dc" in oldImmutable1.getPrefixes()).toBeFalsy();
+        expect(graph.getPrefixes()["dc"]).toEqual("http://purl.org/dc/elements/1.1/");
+        expect(oldImmutable2.getPrefixes()["dc"]).toEqual("http://purl.org/dc/elements/0.1/");
+        expect(graph.getPrefixes()["dc"]).toEqual("http://purl.org/dc/elements/1.1/");
+    });
+
     it("should maintain a consistent store for persistence purposes.",
        () => {
             let graph = new Graph();

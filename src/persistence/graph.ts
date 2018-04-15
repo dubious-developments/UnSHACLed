@@ -10,10 +10,23 @@ export class Graph {
     private immutableVersion: ImmutableGraph;
 
     /**
-     * Creates a new Graph.
+     * Creates a new graph.
+     * @param immutableGraph An immutable graph to base the mutable graph on.
      */
-    public constructor() {
-        this.immutableVersion = ImmutableGraph.create();
+    public constructor(immutableGraph?: ImmutableGraph) {
+
+        if (immutableGraph) {
+            this.immutableVersion = immutableGraph;
+        } else {
+            this.immutableVersion = ImmutableGraph.create();
+        }
+    }
+
+    /**
+     * Returns an immutable version of this graph.
+     */
+    public asImmutable(): ImmutableGraph {
+        return this.immutableVersion;
     }
 
     /**
@@ -48,6 +61,14 @@ export class Graph {
             subject,
             predicate,
             object);
+    }
+
+    /**
+     * Checks if the graph contains a particular triple.
+     */
+    public containsTriple(subject: string, predicate: string, object: string): boolean {
+
+        return this.immutableVersion.containsTriple(subject, predicate, object);
     }
 
     /**
@@ -124,6 +145,13 @@ export class ImmutableGraph {
     }
 
     /**
+     * Creates a mutable copy of this immutable graph.
+     */
+    public toMutable(): Graph {
+        return new Graph(this);
+    }
+
+    /**
      * Runs a function on the N3 graph store.
      * NOTE: the function is not allowed to modify
      * the N3 store.
@@ -156,8 +184,10 @@ export class ImmutableGraph {
     public addTriple(subject: string, predicate: string, object: string): ImmutableGraph {
 
         if (this.containsTriple(subject, predicate, object)) {
+
             return this;
         } else {
+
             return new ImmutableGraph(
                 this.capsule.modify(
                     data => data.addTriple(subject, predicate, object),
@@ -182,11 +212,13 @@ export class ImmutableGraph {
     public removeTriple(subject: string, predicate: string, object: string): ImmutableGraph {
 
         if (this.containsTriple(subject, predicate, object)) {
+
             return new ImmutableGraph(
                 this.capsule.modify(
                     data => data.removeTriple(subject, predicate, object),
                     data => data.addTriple(subject, predicate, object)));
         } else {
+
             return this;
         }
     }
@@ -200,6 +232,7 @@ export class ImmutableGraph {
         // TODO: maybe add the triples in batches?
         let result: ImmutableGraph = this;
         for (let triple of triples) {
+
             result = result.addTriple(
                 triple.subject,
                 triple.predicate,
@@ -217,6 +250,7 @@ export class ImmutableGraph {
         // TODO: maybe remove the triples in batches?
         let result: ImmutableGraph = this;
         for (let triple of triples) {
+
             result = result.removeTriple(
                 triple.subject,
                 triple.predicate,
@@ -241,16 +275,15 @@ export class ImmutableGraph {
     public addPrefix(prefix: string, iri: string): ImmutableGraph {
 
         let currentPrefixes = this.getPrefixes();
-        if (prefix in currentPrefixes)
-        {
+        if (prefix in currentPrefixes) {
+
             let oldIri = currentPrefixes[prefix];
             return new ImmutableGraph(
                 this.capsule.modify(
                     data => data.addPrefix(prefix, iri),
                     data => data.addPrefix(prefix, oldIri)));
-        }
-        else
-        {
+        } else {
+
             return new ImmutableGraph(
                 this.capsule.modify(
                     data => data.addPrefix(prefix, iri),
@@ -326,28 +359,6 @@ class GraphData {
     }
 
     /**
-     * Adds multiple triples to the Graph.
-     * @param triples The triples to add.
-     */
-    public addTriples(triples: Triple[]) {
-        this.n3Store.addTriples(triples);
-        triples.forEach(t => {
-            this.store.add(new Statement(t.subject, t.predicate, t.object, this.store));
-        });
-    }
-
-    /**
-     * Removes multiple triples from the Graph.
-     * @param triples The triples to remove.
-     */
-    public removeTriples(triples: Triple[]) {
-        this.n3Store.removeTriples(triples);
-        triples.forEach(t => {
-            this.store.remove(new Statement(t.subject, t.predicate, t.object));
-        });
-    }
-
-    /**
      * Retrieves all the prefixes in this Graph.
      */
     public getPrefixes(): {} {
@@ -371,16 +382,5 @@ class GraphData {
     public removePrefix(prefix: string): any {
         delete this.n3Store._prefixes[prefix];
         delete this.prefixes[prefix];
-    }
-
-    /**
-     * Adds multiple prefixes to this Graph.
-     * @param prefixes The prefixes to add.
-     */
-    public addPrefixes(prefixes: {}) {
-        this.n3Store.addPrefixes(prefixes);
-        Object.keys(prefixes).forEach(k => {
-            this.prefixes[k] = prefixes[k];
-        });
     }
 }
