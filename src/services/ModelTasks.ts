@@ -108,3 +108,33 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
         return new ModelTaskMetadata([this.mComponent, ModelComponent.UI], [ModelComponent.UI]);
     }
 }
+
+/*
+ * Load the validationReport from the Model
+ */
+export class GetValidationReport extends Task<ModelData, ModelTaskMetadata> {
+
+    /**
+     * Create a new VisualizeComponent task from Model
+     * @param {mxGraph} MxGraph
+     */
+    public constructor(private mxGraph: MxGraph) {
+        super();
+
+    }
+
+    public execute(data: ModelData): void {
+        let component: any = data.getComponent(ModelComponent.ConformanceReport);
+        if (component) {
+            let tmp = component.getRoot();
+            console.log(tmp);
+        } else {
+            console.log("Could not find the ModelComponent: ", ModelComponent.ConformanceReport);
+        }
+
+    }
+
+    public get metadata(): ModelTaskMetadata {
+        return new ModelTaskMetadata([ModelComponent.ConformanceReport, ModelComponent.UI], [ModelComponent.UI]);
+    }
+}

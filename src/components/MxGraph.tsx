@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as Collections from 'typescript-collections';
 import {ModelComponent} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
-import {VisualizeComponent} from "../services/ModelTasks";
+import {GetValidationReport, VisualizeComponent} from "../services/ModelTasks";
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout: any;
@@ -717,6 +717,11 @@ class MxGraph extends React.Component<any, any> {
                 changeBuf.forEach((key) => {
                     if (key === ModelComponent.DataGraph) { // datagraph has changed
                         model.tasks.schedule(new VisualizeComponent(ModelComponent.DataGraph, this));
+                        // TODO change this later
+                        model.tasks.processAllTasks();
+
+                        // TODO discuss later when conformance will be called
+                        model.tasks.schedule(new GetValidationReport(this));
                         // TODO change this later
                         model.tasks.processAllTasks();
                     }
