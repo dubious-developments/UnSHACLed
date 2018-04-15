@@ -1,40 +1,39 @@
-import {IndexedFormula, Statement} from "rdflib";
+import { IndexedFormula, Statement } from "rdflib";
+
+type Triple = { subject: string, predicate: string, object: string };
 
 /**
- * A wrapper class for library-specific triple stores.
+ * An mutable wrapper for library-specific triple stores.
  */
 export class Graph {
-    private persistentStore: any;
-    private validationStore: any;
-    private prefixes: {};
+    private data: GraphData;
 
     /**
      * Create a new Graph.
      */
     public constructor() {
-        let N3 = require("n3");
-
-        this.persistentStore = N3.Store();
-        this.validationStore = new IndexedFormula();
-        this.prefixes = {};
+        this.data = new GraphData();
     }
 
     /**
-     * Retrieve the representation of the Graph used for persistence.
-     * @returns {any}
-     */
-    public getPersistentStore() {
-        return this.persistentStore;
-    }
-
-    /**
-     * Runs a function on the validation store.
+     * Runs a function on the N3 graph store.
      * NOTE: the function is not allowed to modify
-     * the validation store.
+     * the N3 store.
+     * @param func The function to apply.
+     */
+    public queryN3Store<T>(func: (store: any) => T): T {
+        // TODO: delete this hack.
+        return func(this.data.n3Store);
+    }
+
+    /**
+     * Runs a function on the graph store.
+     * NOTE: the function is not allowed to modify
+     * the graph store.
      * @param func The function to apply.
      */
     public query<T>(func: (store: any) => T): T {
-        return func(this.validationStore);
+        return func(this.data.store);
     }
 
     /**
@@ -44,48 +43,139 @@ export class Graph {
      * @param object
      */
     public addTriple(subject: string, predicate: string, object: string) {
-        this.persistentStore.addTriple(subject, predicate, object);
-        this.validationStore.add(new Statement(subject, predicate, object, this.validationStore));
+        this.data.addTriple(subject, predicate, object);
     }
 
     /**
      * Remove a triple from the Graph.
-     * @param {string} subject
-     * @param {string} predicate
-     * @param {string} object
+     * @param subject
+     * @param predicate
+     * @param object
      */
     public removeTriple(subject: string, predicate: string, object: string) {
-        this.persistentStore.removeTriple(subject, predicate, object);
-        this.validationStore.remove(new Statement(subject, predicate, object));
+        this.data.removeTriple(subject, predicate, object);
     }
 
     /**
      * Add multiple triples to the Graph.
-     * @param triples
+     * @param triples The triples to add.
      */
-    public addTriples(triples: Array<any>) {
-        this.persistentStore.addTriples(triples);
+    public addTriples(triples: Triple[]) {
+        this.data.addTriples(triples);
+    }
+
+    /**
+     * Remove multiple triples from the Graph.
+     * @param triples The triples to remove.
+     */
+    public removeTriples(triples: Triple[]) {
+        this.data.removeTriples(triples);
+    }
+
+    /**
+     * Retrieve all the prefixes in this Graph.
+     */
+    public getPrefixes(): {} {
+        return this.data.getPrefixes();
+    }
+
+    /**
+     * Add a prefix to this Graph.
+     * @param prefix
+     * @param iri
+     */
+    public addPrefix(prefix: string, iri: string) {
+        this.data.addPrefix(prefix, iri);
+    }
+
+    /**
+     * Add multiple presfixes to this Graph.
+     * @param prefixes
+     */
+    public addPrefixes(prefixes: {}) {
+        this.data.addPrefixes(prefixes);
+    }
+
+    /**
+     * Merges this graph with another graph.
+     * @param other The graph to merge with this graph.
+     */
+    public merge(other: Graph) {
+        this.data.merge(other.data);
+    }
+}
+
+/**
+ * A thin wrapper around a library-specific graph store.
+ */
+class GraphData {
+    /**
+     * The rdflib graph store managed by this class.
+     */
+    public store: any;
+
+    /**
+     * The N3 graph store.
+     */
+    public n3Store: any;
+
+    private prefixes: {};
+
+    public constructor() {
+        let N3 = require("n3");
+        this.n3Store = N3.Store();
+        this.store = new IndexedFormula();
+        this.prefixes = {};
+    }
+
+    /**
+     * Add a triple to the Graph.
+     * @param subject
+     * @param predicate
+     * @param object
+     */
+    public addTriple(subject: string, predicate: string, object: string) {
+        this.n3Store.addTriple(subject, predicate, object);
+        this.store.add(new Statement(subject, predicate, object, this.store));
+    }
+
+    /**
+     * Remove a triple from the Graph.
+     * @param subject
+     * @param predicate
+     * @param object
+     */
+    public removeTriple(subject: string, predicate: string, object: string) {
+        this.n3Store.removeTriple(subject, predicate, object);
+        this.store.remove(new Statement(subject, predicate, object));
+    }
+
+    /**
+     * Add multiple triples to the Graph.
+     * @param triples The triples to add.
+     */
+    public addTriples(triples: Triple[]) {
+        this.n3Store.addTriples(triples);
         triples.forEach(t => {
-            this.validationStore.add(new Statement(t.subject, t.predicate, t.object, this.validationStore));
+            this.store.add(new Statement(t.subject, t.predicate, t.object, this.store));
         });
     }
 
     /**
      * Remove multiple triples from the Graph.
-     * @param {Array<any>} triples
+     * @param triples The triples to remove.
      */
-    public removeTriples(triples: Array<any>) {
-        this.persistentStore.removeTriples(triples);
+    public removeTriples(triples: Triple[]) {
+        this.n3Store.removeTriples(triples);
         triples.forEach(t => {
-            this.validationStore.remove(new Statement(t.subject, t.predicate, t.object));
+            this.store.remove(new Statement(t.subject, t.predicate, t.object));
         });
     }
 
     /**
      * Retrieve all the prefixes in this Graph.
-     * @returns {any}
      */
-    public getPrefixes() {
+    public getPrefixes(): {} {
         return this.prefixes;
     }
 
@@ -95,16 +185,16 @@ export class Graph {
      * @param iri
      */
     public addPrefix(prefix: string, iri: string) {
-        this.persistentStore.addPrefix(prefix, iri);
+        this.n3Store.addPrefix(prefix, iri);
         this.prefixes[prefix] = iri;
     }
 
     /**
      * Add multiple presfixes to this Graph.
-     * @param prefixes
+     * @param prefixes The prefixes to add.
      */
     public addPrefixes(prefixes: {}) {
-        this.persistentStore.addPrefixes(prefixes);
+        this.n3Store.addPrefixes(prefixes);
         Object.keys(prefixes).forEach(k => {
             this.prefixes[k] = prefixes[k];
         });
@@ -112,11 +202,11 @@ export class Graph {
 
     /**
      * Merges this graph with another graph.
-     * @param {Graph} other
+     * @param other The graph data to merge with this graph.
      */
-    public merge(other: Graph) {
+    public merge(other: GraphData) {
+        this.n3Store.addTriples(other.n3Store.getTriples());
         this.addPrefixes(other.getPrefixes());
-        this.persistentStore.addTriples(other.persistentStore.getTriples());
-        this.validationStore.addAll(other.validationStore.match());
+        this.store.addAll(other.store.match());
     }
 }

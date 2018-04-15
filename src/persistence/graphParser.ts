@@ -40,7 +40,7 @@ export class GraphParser implements Parser {
 
             let graph: Graph = data;
             writer.addPrefixes(graph.getPrefixes());
-            writer.addTriples(graph.getPersistentStore().getTriples());
+            writer.addTriples(graph.queryN3Store(store => store.getTriples()));
             writer.end(function (error: any, result: any) {
                 if (andThen) {
                     andThen(result);

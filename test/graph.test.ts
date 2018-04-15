@@ -12,48 +12,56 @@ describe("Graph Class", () => {
             graph.addTriple("http://en.wikipedia.org/wiki/Tony_Benn",
                             "http://purl.org/dc/elements/1.1/title", '"Tony Benn"');
 
-            let triple = graph.getPersistentStore().getTriples()[0];
-            expect(triple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
-            expect(triple.predicate).toEqual("http://purl.org/dc/elements/1.1/title");
-            expect(triple.object).toEqual('"Tony Benn"');
+            graph.queryN3Store(store => {
+                let triple = store.getTriples()[0];
+                expect(triple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
+                expect(triple.predicate).toEqual("http://purl.org/dc/elements/1.1/title");
+                expect(triple.object).toEqual('"Tony Benn"');
+            });
 
             // TEST CASE: removing a triple
             graph.removeTriple("http://en.wikipedia.org/wiki/Tony_Benn",
                                "http://purl.org/dc/elements/1.1/title", '"Tony Benn"');
 
-            expect(graph.getPersistentStore().countTriples()).toEqual(0);
+            graph.queryN3Store(store => {
+                expect(store.countTriples()).toEqual(0);
+            });
 
             // TEST CASE: adding multiple triples
             graph.addTriples([{
                 subject: "http://en.wikipedia.org/wiki/Tony_Benn",
                 predicate: "http://purl.org/dc/elements/1.1/title", object: '"Tony Benn"'
             },
-                {
-                    subject: "http://en.wikipedia.org/wiki/Tony_Benn",
-                    predicate: "http://purl.org/dc/elements/1.1/publisher", object: '"Wikipedia"'
-                }]);
+            {
+                subject: "http://en.wikipedia.org/wiki/Tony_Benn",
+                predicate: "http://purl.org/dc/elements/1.1/publisher", object: '"Wikipedia"'
+            }]);
 
-            let firstTriple = graph.getPersistentStore().getTriples()[0];
-            expect(firstTriple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
-            expect(firstTriple.predicate).toEqual("http://purl.org/dc/elements/1.1/title");
-            expect(firstTriple.object).toEqual('"Tony Benn"');
+            graph.queryN3Store(store => {
+                let firstTriple = store.getTriples()[0];
+                expect(firstTriple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
+                expect(firstTriple.predicate).toEqual("http://purl.org/dc/elements/1.1/title");
+                expect(firstTriple.object).toEqual('"Tony Benn"');
 
-            let secondTriple = graph.getPersistentStore().getTriples()[1];
-            expect(secondTriple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
-            expect(secondTriple.predicate).toEqual("http://purl.org/dc/elements/1.1/publisher");
-            expect(secondTriple.object).toEqual('"Wikipedia"');
+                let secondTriple = store.getTriples()[1];
+                expect(secondTriple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
+                expect(secondTriple.predicate).toEqual("http://purl.org/dc/elements/1.1/publisher");
+                expect(secondTriple.object).toEqual('"Wikipedia"');
+            });
 
             // TEST CASE: removing multiple triples
             graph.removeTriples([{
                 subject: "http://en.wikipedia.org/wiki/Tony_Benn",
                 predicate: "http://purl.org/dc/elements/1.1/title", object: '"Tony Benn"'
             },
-                {
-                    subject: "http://en.wikipedia.org/wiki/Tony_Benn",
-                    predicate: "http://purl.org/dc/elements/1.1/publisher", object: '"Wikipedia"'
-                }]);
+            {
+                subject: "http://en.wikipedia.org/wiki/Tony_Benn",
+                predicate: "http://purl.org/dc/elements/1.1/publisher", object: '"Wikipedia"'
+            }]);
 
-            expect(graph.getPersistentStore().countTriples()).toEqual(0);
+            graph.queryN3Store(store => {
+                expect(store.countTriples()).toEqual(0);
+            });
         });
 
     it("should maintain a persistent store for validation purposes.",
@@ -175,7 +183,7 @@ describe("Graph Class", () => {
 
             graph.merge(other);
 
-            expect(graph.getPersistentStore().countTriples()).toEqual(2);
+            expect(graph.queryN3Store(store => store.countTriples())).toEqual(2);
             expect(graph.query(store => store.length)).toEqual(2);
 
             let key = "rdf";
