@@ -2,7 +2,7 @@ import {Statement} from "rdflib";
 import {ChangeSet, Graph} from "../src/persistence/graph";
 
 describe("Graph Class", () => {
-    it("should maintain a consistent store for persistence purposes.",
+    it("should maintain a consistent N3 store.",
        () => {
             let graph = new Graph();
 
@@ -10,7 +10,7 @@ describe("Graph Class", () => {
             graph.addTriple("http://en.wikipedia.org/wiki/Tony_Benn",
                             "http://purl.org/dc/elements/1.1/title", '"Tony Benn"');
 
-            let triple = graph.getStore().getTriples()[0];
+            let triple = graph.getN3Store().getTriples()[0];
             expect(triple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
             expect(triple.predicate).toEqual("http://purl.org/dc/elements/1.1/title");
             expect(triple.object).toEqual('"Tony Benn"');
@@ -19,7 +19,7 @@ describe("Graph Class", () => {
             graph.updateTriple(triple.subject, triple.predicate, triple.object,
                                {nObject: '"Someone else"'});
 
-            let updatedTriple = graph.getStore().getTriples()[0];
+            let updatedTriple = graph.getN3Store().getTriples()[0];
             expect(updatedTriple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
             expect(updatedTriple.predicate).toEqual("http://purl.org/dc/elements/1.1/title");
             expect(updatedTriple.object).toEqual('"Someone else"');
@@ -28,7 +28,7 @@ describe("Graph Class", () => {
             graph.removeTriple("http://en.wikipedia.org/wiki/Tony_Benn",
                                "http://purl.org/dc/elements/1.1/title", '"Someone else"');
 
-            expect(graph.getStore().countTriples()).toEqual(0);
+            expect(graph.getN3Store().countTriples()).toEqual(0);
 
             // TEST CASE: adding multiple triples
             graph.addTriples([{
@@ -40,12 +40,12 @@ describe("Graph Class", () => {
                     predicate: "http://purl.org/dc/elements/1.1/publisher", object: '"Wikipedia"'
                 }]);
 
-            let firstTriple = graph.getStore().getTriples()[0];
+            let firstTriple = graph.getN3Store().getTriples()[0];
             expect(firstTriple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
             expect(firstTriple.predicate).toEqual("http://purl.org/dc/elements/1.1/title");
             expect(firstTriple.object).toEqual('"Tony Benn"');
 
-            let secondTriple = graph.getStore().getTriples()[1];
+            let secondTriple = graph.getN3Store().getTriples()[1];
             expect(secondTriple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
             expect(secondTriple.predicate).toEqual("http://purl.org/dc/elements/1.1/publisher");
             expect(secondTriple.object).toEqual('"Wikipedia"');
@@ -60,7 +60,76 @@ describe("Graph Class", () => {
                     predicate: "http://purl.org/dc/elements/1.1/publisher", object: '"Wikipedia"'
                 }]);
 
-            expect(graph.getStore().countTriples()).toEqual(0);
+            expect(graph.getN3Store().countTriples()).toEqual(0);
+        });
+
+    it("should maintain a consistent SHACL store.",
+       () => {
+            let graph = new Graph();
+
+            // TEST CASE: adding a triple
+            graph.addTriple("http://en.wikipedia.org/wiki/Tony_Benn",
+                            "http://purl.org/dc/elements/1.1/title", '"Tony Benn"');
+
+            let statement = graph.getSHACLStore().match()[0];
+            let matchingStatement = new Statement("http://en.wikipedia.org/wiki/Tony_Benn",
+                                                  "http://purl.org/dc/elements/1.1/title", '"Tony Benn"',
+                                                  graph.getSHACLStore());
+            expect(statement.equals(matchingStatement)).toEqual(true);
+
+            // TEST CASE: updating a triple
+            graph.updateTriple("http://en.wikipedia.org/wiki/Tony_Benn",
+                               "http://purl.org/dc/elements/1.1/title", '"Tony Benn"',
+                               {nObject: '"Someone else"'});
+
+            let updatedStatement = graph.getSHACLStore().match()[0];
+            matchingStatement = new Statement("http://en.wikipedia.org/wiki/Tony_Benn",
+                                              "http://purl.org/dc/elements/1.1/title", '"Someone else"',
+                                              graph.getSHACLStore());
+            expect(updatedStatement.equals(matchingStatement)).toEqual(true);
+
+            // TEST CASE: removing a triple
+            graph.removeTriple("http://en.wikipedia.org/wiki/Tony_Benn",
+                               "http://purl.org/dc/elements/1.1/title", '"Someone else"');
+
+            expect(graph.getSHACLStore().length).toEqual(0);
+
+            // TEST CASE: adding multiple triples
+            graph.addTriples([{
+                subject: "http://en.wikipedia.org/wiki/Tony_Benn",
+                predicate: "http://purl.org/dc/elements/1.1/title", object: '"Tony Benn"'
+            },
+                {
+                    subject: "http://en.wikipedia.org/wiki/Tony_Benn",
+                    predicate: "http://purl.org/dc/elements/1.1/publisher", object: '"Wikipedia"'
+                }]);
+
+            let firstStatement = graph.getSHACLStore().match()[0];
+            let firstMatchingStatement = new Statement("http://en.wikipedia.org/wiki/Tony_Benn",
+                                                       "http://purl.org/dc/elements/1.1/title", '"Tony Benn"',
+                                                       graph.getSHACLStore());
+            expect(firstStatement.equals(firstMatchingStatement)).toEqual(true);
+
+            let secondStatement = graph.getSHACLStore().match()[1];
+            let secondMatchingStatement = new Statement("http://en.wikipedia.org/wiki/Tony_Benn",
+                                                        "http://purl.org/dc/elements/1.1/publisher", '"Wikipedia"',
+                                                        graph.getSHACLStore());
+            expect(secondStatement.equals(secondMatchingStatement)).toEqual(true);
+
+            // TEST CASE: removing multiple triples
+            graph.removeTriples([{
+                subject: "http://en.wikipedia.org/wiki/Tony_Benn",
+                predicate: "http://purl.org/dc/elements/1.1/title", object: '"Tony Benn"'
+            },
+                {
+                    subject: "http://en.wikipedia.org/wiki/Tony_Benn",
+                    predicate: "http://purl.org/dc/elements/1.1/publisher", object: '"Wikipedia"'
+                }]);
+
+            expect(graph.getSHACLStore().length).toEqual(0);
+
+            // TEST CASE: updating a triple
+
         });
 
     it("should maintain a consistent prefix mapping.",
@@ -99,7 +168,8 @@ describe("Graph Class", () => {
             graph.merge(other);
 
             // the merged graph should contain the other graph's triples and prefixes
-            expect(graph.getStore().countTriples()).toEqual(2);
+            expect(graph.getN3Store().countTriples()).toEqual(2);
+            expect(graph.getSHACLStore().length).toEqual(2);
 
             let key = "rdf";
             expect(graph.getPrefixes()[key]).toEqual("http://www.w3.org/1999/02/22-rdf-syntax-ns#");

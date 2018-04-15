@@ -1,4 +1,6 @@
 import * as Collections from "typescript-collections";
+import $rdf from "rdflib";
+import {Statement} from "rdflib";
 
 /**
  * Return the string representation of a triple.
@@ -29,7 +31,8 @@ export enum ChangeSet {
  */
 export class Graph {
 
-    private store: any;
+    private N3Store: any;
+    private SHACLStore: any;
     private prefixes: {};
 
     private changes: Collections.Dictionary<ChangeSet, Collections.Set<any>>;
@@ -39,7 +42,8 @@ export class Graph {
      */
     public constructor() {
         let N3 = require("n3");
-        this.store = N3.Store();
+        this.N3Store = N3.Store();
+        this.SHACLStore = $rdf.store();
 
         this.changes = new Collections.Dictionary<ChangeSet, Collections.Set<any>>();
 
@@ -50,11 +54,19 @@ export class Graph {
     }
 
     /**
-     * Retrieve the store contained within this graph structure.
+     * Retrieve the N3 store contained within this graph structure.
      * @returns {any}
      */
-    public getStore(): any {
-        return this.store;
+    public getN3Store(): any {
+        return this.N3Store;
+    }
+
+    /**
+     * Retrieve the SHACL store contained within this graph structure.
+     * @returns {any}
+     */
+    public getSHACLStore(): any {
+        return this.SHACLStore;
     }
 
     /**
@@ -92,7 +104,8 @@ export class Graph {
      * @param object
      */
     public addTriple(subject: string, predicate: string, object: string): void {
-        this.store.addTriple(subject, predicate, object);
+        this.N3Store.addTriple(subject, predicate, object);
+        this.SHACLStore.add(new Statement(subject, predicate, object, "."));
         this.updateChanges(ChangeSet.ADD, ChangeSet.REMOVE, subject, predicate, object);
     }
 
@@ -103,7 +116,8 @@ export class Graph {
      * @param {string} object
      */
     public removeTriple(subject: string, predicate: string, object: string): void {
-        this.store.removeTriple(subject, predicate, object);
+        this.N3Store.removeTriple(subject, predicate, object);
+        this.SHACLStore.remove(new Statement(subject, predicate, object));
         this.updateChanges(ChangeSet.REMOVE, ChangeSet.ADD, subject, predicate, object);
     }
 
@@ -112,8 +126,9 @@ export class Graph {
      * @param triples
      */
     public addTriples(triples: Array<any>): void {
-        this.store.addTriples(triples);
+        this.N3Store.addTriples(triples);
         triples.forEach(t => {
+            this.SHACLStore.add(new Statement(t.subject, t.predicate, t.object, "."));
             this.updateChanges(ChangeSet.ADD, ChangeSet.REMOVE, t.subject, t.predicate, t.object);
         });
     }
@@ -123,8 +138,9 @@ export class Graph {
      * @param {Array<any>} triples
      */
     public removeTriples(triples: Array<any>): void {
-        this.store.removeTriples(triples);
+        this.N3Store.removeTriples(triples);
         triples.forEach(t => {
+            this.SHACLStore.remove(new Statement(t.subject, t.predicate, t.object));
             this.updateChanges(ChangeSet.REMOVE, ChangeSet.ADD, t.subject, t.predicate, t.object);
         });
     }
@@ -160,7 +176,7 @@ export class Graph {
      * @param iri
      */
     public addPrefix(prefix: string, iri: string): void {
-        this.store.addPrefix(prefix, iri);
+        this.N3Store.addPrefix(prefix, iri);
         this.prefixes[prefix] = iri;
     }
 
@@ -169,7 +185,7 @@ export class Graph {
      * @param prefixes
      */
     public addPrefixes(prefixes: {}): void {
-        this.store.addPrefixes(prefixes);
+        this.N3Store.addPrefixes(prefixes);
         Object.keys(prefixes).forEach(k => {
             this.prefixes[k] = prefixes[k];
         });
@@ -184,7 +200,8 @@ export class Graph {
         this.addPrefixes(other.getPrefixes());
 
         // do merge of stores.
-        this.store.addTriples(other.store.getTriples());
+        this.N3Store.addTriples(other.N3Store.getTriples());
+        this.SHACLStore.addAll(other.SHACLStore.match());
 
         // do merge of change sets
         let theseChanges = this.changes.getValue(ChangeSet.ADD);
