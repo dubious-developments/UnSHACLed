@@ -53,6 +53,21 @@ export class TimeCapsule<T> {
         private readonly generation: number) {
     }
 
+    /**
+     * Creates a time capsule from a piece of data.
+     * @param data The data to manage.
+     */
+    public static create<T>(data: T): TimeCapsule<T> {
+        let result = new TimeCapsule<T>(
+            new TimeCapsuleState<T>(data),
+            undefined,
+            (state: T) => { },
+            (state: T) => { },
+            0);
+        result.state.currentInstant = result;
+        return result;
+    }
+
     private static findLastCommonAncestor<T>(
         first: TimeCapsule<T>,
         second: TimeCapsule<T>): TimeCapsule<T> {
@@ -76,36 +91,6 @@ export class TimeCapsule<T> {
         }
 
         return first;
-    }
-
-    /**
-     * Creates a time capsule from a piece of data.
-     * @param data The data to manage.
-     */
-    public static create<T>(data: T): TimeCapsule<T> {
-        let result = new TimeCapsule<T>(
-            new TimeCapsuleState<T>(data),
-            undefined,
-            (state: T) => { },
-            (state: T) => { },
-            0);
-        result.state.currentInstant = result;
-        return result;
-    }
-
-    /**
-     * Gets a list of all instant along the path to an ancestor,
-     * including this instant and excluding the ancestor.
-     * @param ancestor An ancestor time instant.
-     */
-    private pathToAncestor(ancestor: TimeCapsule<T>): TimeCapsule<T>[] {
-        let results = new Array<TimeCapsule<T>>();
-        let instant: TimeCapsule<T> = this;
-        while (instant != ancestor) {
-            results.push(instant);
-            instant = instant.parent;
-        }
-        return results;
     }
 
     /**
@@ -162,6 +147,21 @@ export class TimeCapsule<T> {
         this.state.currentInstant = this;
 
         return data;
+    }
+
+    /**
+     * Gets a list of all instant along the path to an ancestor,
+     * including this instant and excluding the ancestor.
+     * @param ancestor An ancestor time instant.
+     */
+    private pathToAncestor(ancestor: TimeCapsule<T>): TimeCapsule<T>[] {
+        let results = new Array<TimeCapsule<T>>();
+        let instant: TimeCapsule<T> = this;
+        while (instant !== ancestor) {
+            results.push(instant);
+            instant = instant.parent;
+        }
+        return results;
     }
 }
 
