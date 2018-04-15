@@ -64,64 +64,77 @@ describe("Graph Class", () => {
             graph.addTriple("http://en.wikipedia.org/wiki/Tony_Benn",
                             "http://purl.org/dc/elements/1.1/title", '"Tony Benn"');
 
-            let statement = graph.getValidationStore().match()[0];
-            let matchingStatement = new Statement("http://en.wikipedia.org/wiki/Tony_Benn",
-                                                  "http://purl.org/dc/elements/1.1/title", '"Tony Benn"',
-                                                  graph.getValidationStore());
-            expect(statement.equals(matchingStatement)).toEqual(true);
+            graph.query(store => {
+                let statement = store.match()[0];
+                let matchingStatement = new Statement(
+                    "http://en.wikipedia.org/wiki/Tony_Benn",
+                    "http://purl.org/dc/elements/1.1/title", '"Tony Benn"',
+                    store);
+                expect(statement.equals(matchingStatement)).toEqual(true);
+            });
 
             // TEST CASE: removing a triple
             graph.removeTriple("http://en.wikipedia.org/wiki/Tony_Benn",
                                "http://purl.org/dc/elements/1.1/title", '"Tony Benn"');
 
-            expect(graph.getValidationStore().length).toEqual(0);
+            expect(graph.query(store => store.length)).toEqual(0);
 
             // TEST CASE: adding multiple triples
             graph.addTriples([{
                 subject: "http://en.wikipedia.org/wiki/Tony_Benn",
                 predicate: "http://purl.org/dc/elements/1.1/title", object: '"Tony Benn"'
             },
-                {
-                    subject: "http://en.wikipedia.org/wiki/Tony_Benn",
-                    predicate: "http://purl.org/dc/elements/1.1/publisher", object: '"Wikipedia"'
-                }]);
+            {
+                subject: "http://en.wikipedia.org/wiki/Tony_Benn",
+                predicate: "http://purl.org/dc/elements/1.1/publisher", object: '"Wikipedia"'
+            }]);
 
-            let firstStatement = graph.getValidationStore().match()[0];
-            let firstMatchingStatement = new Statement("http://en.wikipedia.org/wiki/Tony_Benn",
-                                                       "http://purl.org/dc/elements/1.1/title", '"Tony Benn"',
-                                                       graph.getValidationStore());
-            expect(firstStatement.equals(firstMatchingStatement)).toEqual(true);
+            graph.query(store => {
+                let firstStatement = store.match()[0];
+                let firstMatchingStatement = new Statement(
+                    "http://en.wikipedia.org/wiki/Tony_Benn",
+                    "http://purl.org/dc/elements/1.1/title", '"Tony Benn"',
+                    store);
+                expect(firstStatement.equals(firstMatchingStatement)).toEqual(true);
+            });
 
-            let secondStatement = graph.getValidationStore().match()[1];
-            let secondMatchingStatement = new Statement("http://en.wikipedia.org/wiki/Tony_Benn",
-                                                        "http://purl.org/dc/elements/1.1/publisher", '"Wikipedia"',
-                                                        graph.getValidationStore());
-            expect(secondStatement.equals(secondMatchingStatement)).toEqual(true);
+            graph.query(store => {
+                let secondStatement = store.match()[1];
+                let secondMatchingStatement = new Statement(
+                    "http://en.wikipedia.org/wiki/Tony_Benn",
+                    "http://purl.org/dc/elements/1.1/publisher", '"Wikipedia"',
+                    store);
+                expect(secondStatement.equals(secondMatchingStatement)).toEqual(true);
+            });
 
             // TEST CASE: removing multiple triples
             graph.removeTriples([{
                 subject: "http://en.wikipedia.org/wiki/Tony_Benn",
                 predicate: "http://purl.org/dc/elements/1.1/title", object: '"Tony Benn"'
             },
-                {
-                    subject: "http://en.wikipedia.org/wiki/Tony_Benn",
-                    predicate: "http://purl.org/dc/elements/1.1/publisher", object: '"Wikipedia"'
-                }]);
+            {
+                subject: "http://en.wikipedia.org/wiki/Tony_Benn",
+                predicate: "http://purl.org/dc/elements/1.1/publisher", object: '"Wikipedia"'
+            }]);
 
-            expect(graph.getValidationStore().length).toEqual(0);
+            expect(graph.query(store => store.length)).toEqual(0);
         });
 
     // TODO: This is not an actual test! To be removed when conformance tests are added.
     it("The validation store should be usable for validation.",
        (done) => {
             let parser = new GraphParser();
-            parser.parse(getDataGraph(), "text/turtle", function (data: any) {
-                parser.parse(getShapesGraph(), "text/turtle", function (shapes: any) {
-                    let validator = new SHACLValidator(data.getValidationStore(), shapes.getValidationStore());
-                    validator.updateValidationEngine();
-                    validator.showValidationResults(function (err: any, report: any) {
-                        expect(report.conforms()).toEqual(true);
-                        done();
+            parser.parse(getDataGraph(), "text/turtle", function (data: Graph) {
+                parser.parse(getShapesGraph(), "text/turtle", function (shapes: Graph) {
+                    data.query(dataStore => {
+                        shapes.query(shapesStore => {
+                            let validator = new SHACLValidator(dataStore, shapesStore);
+                            validator.updateValidationEngine();
+                            validator.showValidationResults(function (err: any, report: any) {
+                                expect(report.conforms()).toEqual(true);
+                                done();
+                            });
+                        });
                     });
                 });
             });
@@ -163,7 +176,7 @@ describe("Graph Class", () => {
             graph.merge(other);
 
             expect(graph.getPersistentStore().countTriples()).toEqual(2);
-            expect(graph.getValidationStore().length).toEqual(2);
+            expect(graph.query(store => store.length)).toEqual(2);
 
             let key = "rdf";
             expect(graph.getPrefixes()[key]).toEqual("http://www.w3.org/1999/02/22-rdf-syntax-ns#");

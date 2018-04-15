@@ -94,7 +94,7 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
                 // handle the graph objects correctly
                 if (this.mxGraph) {
                     let graph: Graph = component.getPart(part);
-                    graph.queryValidationStore(
+                    graph.query(
                         store => this.mxGraph.visualizeDataGraph(store));
                 } else {
                     console.log("error: could not find MxGraph");

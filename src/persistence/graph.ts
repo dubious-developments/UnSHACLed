@@ -28,18 +28,12 @@ export class Graph {
     }
 
     /**
-     * Retrieve the representation of the Graph used for validation.
-     * @returns {any}
-     */
-    public getValidationStore() {
-        return this.validationStore;
-    }
-
-    /**
      * Runs a function on the validation store.
+     * NOTE: the function is not allowed to modify
+     * the validation store.
      * @param func The function to apply.
      */
-    public queryValidationStore<T>(func: (store: any) => T): T {
+    public query<T>(func: (store: any) => T): T {
         return func(this.validationStore);
     }
 
