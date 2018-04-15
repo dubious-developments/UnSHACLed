@@ -167,28 +167,6 @@ describe("Graph Class", () => {
             expect(graph.getPrefixes()[firstKey]).toEqual("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
             expect(graph.getPrefixes()[secondKey]).toEqual("http://example.org/stuff/1.0/");
         });
-
-    it("should be able to merge with another graph.",
-       () => {
-            let graph = new Graph();
-            let other = new Graph();
-
-            graph.addPrefix("dc", "http://purl.org/dc/elements/1.1/");
-            graph.addTriple("http://en.wikipedia.org/wiki/Tony_Benn",
-                            "http://purl.org/dc/elements/1.1/title", '"Tony Benn"');
-
-            other.addPrefix("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-            other.addTriple("http://en.wikipedia.org/wiki/Tony_Benn",
-                            "http://purl.org/dc/elements/1.1/publisher", '"Wikipedia"');
-
-            graph.merge(other);
-
-            expect(graph.queryN3Store(store => store.countTriples())).toEqual(2);
-            expect(graph.query(store => store.length)).toEqual(2);
-
-            let key = "rdf";
-            expect(graph.getPrefixes()[key]).toEqual("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-       });
 });
 
 function getDataGraph() {

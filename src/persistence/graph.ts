@@ -1,18 +1,19 @@
 import { IndexedFormula, Statement } from "rdflib";
+import { TimeCapsule } from "../entities/timeCapsule";
 
 type Triple = { subject: string, predicate: string, object: string };
 
 /**
- * An mutable wrapper for library-specific triple stores.
+ * A mutable wrapper for library-specific triple stores.
  */
 export class Graph {
-    private data: GraphData;
+    private immutableVersion: ImmutableGraph;
 
     /**
-     * Create a new Graph.
+     * Creates a new Graph.
      */
     public constructor() {
-        this.data = new GraphData();
+        this.immutableVersion = ImmutableGraph.create();
     }
 
     /**
@@ -23,7 +24,7 @@ export class Graph {
      */
     public queryN3Store<T>(func: (store: any) => T): T {
         // TODO: delete this hack.
-        return func(this.data.n3Store);
+        return this.immutableVersion.queryN3Store<T>(func);
     }
 
     /**
@@ -33,75 +34,211 @@ export class Graph {
      * @param func The function to apply.
      */
     public query<T>(func: (store: any) => T): T {
-        return func(this.data.store);
+        return this.immutableVersion.query<T>(func);
     }
 
     /**
-     * Add a triple to the Graph.
+     * Adds a triple to the Graph.
      * @param subject
      * @param predicate
      * @param object
      */
     public addTriple(subject: string, predicate: string, object: string) {
-        this.data.addTriple(subject, predicate, object);
+        this.immutableVersion = this.immutableVersion.addTriple(
+            subject,
+            predicate,
+            object);
     }
 
     /**
-     * Remove a triple from the Graph.
+     * Removes a triple from the Graph.
      * @param subject
      * @param predicate
      * @param object
      */
     public removeTriple(subject: string, predicate: string, object: string) {
-        this.data.removeTriple(subject, predicate, object);
+        this.immutableVersion = this.immutableVersion.removeTriple(
+            subject,
+            predicate,
+            object);
     }
 
     /**
-     * Add multiple triples to the Graph.
+     * Adds multiple triples to the Graph.
      * @param triples The triples to add.
      */
     public addTriples(triples: Triple[]) {
-        this.data.addTriples(triples);
+        this.immutableVersion = this.immutableVersion.addTriples(triples);
     }
 
     /**
-     * Remove multiple triples from the Graph.
+     * Removes multiple triples from the Graph.
      * @param triples The triples to remove.
      */
     public removeTriples(triples: Triple[]) {
-        this.data.removeTriples(triples);
+        this.immutableVersion = this.immutableVersion.removeTriples(triples);
     }
 
     /**
-     * Retrieve all the prefixes in this Graph.
+     * Retrieves all the prefixes in this Graph.
      */
     public getPrefixes(): {} {
-        return this.data.getPrefixes();
+        return this.immutableVersion.getPrefixes();
     }
 
     /**
-     * Add a prefix to this Graph.
+     * Adds a prefix to this Graph.
      * @param prefix
      * @param iri
      */
     public addPrefix(prefix: string, iri: string) {
-        this.data.addPrefix(prefix, iri);
+        this.immutableVersion = this.immutableVersion.addPrefix(prefix, iri);
     }
 
     /**
-     * Add multiple presfixes to this Graph.
+     * Adds multiple prefixes to this Graph.
      * @param prefixes
      */
     public addPrefixes(prefixes: {}) {
-        this.data.addPrefixes(prefixes);
+        this.immutableVersion = this.immutableVersion.addPrefixes(prefixes);
+    }
+}
+
+/**
+ * An immutable wrapper for library-specific triple stores.
+ */
+export class ImmutableGraph {
+    /**
+     * Creates a new immutable graph.
+     */
+    private constructor(private capsule: TimeCapsule<GraphData>) {
+
     }
 
     /**
-     * Merges this graph with another graph.
-     * @param other The graph to merge with this graph.
+     * Creates a new immutable graph data structure.
      */
-    public merge(other: Graph) {
-        this.data.merge(other.data);
+    public static create(): ImmutableGraph {
+        return new ImmutableGraph(TimeCapsule.create<GraphData>(new GraphData()));
+    }
+
+    /**
+     * Runs a function on the N3 graph store.
+     * NOTE: the function is not allowed to modify
+     * the N3 store.
+     * @param func The function to apply.
+     */
+    public queryN3Store<T>(func: (store: any) => T): T {
+        // TODO: delete this hack.
+        return this.capsule.query<T>(data => func(data.n3Store));
+    }
+
+    /**
+     * Runs a function on the graph store.
+     * NOTE: the function is not allowed to modify
+     * the graph store.
+     * @param func The function to apply.
+     */
+    public query<T>(func: (store: any) => T): T {
+        return this.capsule.query<T>(data => func(data.store));
+    }
+
+    /**
+     * Adds a triple to the graph. Returns a new graph that
+     * contains the triple.
+     * @param subject
+     * @param predicate
+     * @param object
+     */
+    public addTriple(subject: string, predicate: string, object: string): ImmutableGraph {
+        // TODO: what happens if the graph already contains this triple?
+        // It matters for undo.
+        return new ImmutableGraph(
+            this.capsule.modify(
+                data => data.addTriple(subject, predicate, object),
+                data => data.removeTriple(subject, predicate, object)));
+    }
+
+    /**
+     * Removes a triple from the graph. Returns the updated graph.
+     * @param subject
+     * @param predicate
+     * @param object
+     */
+    public removeTriple(subject: string, predicate: string, object: string): ImmutableGraph {
+        // TODO: what happens if the graph does not already contain this triple?
+        // It matters for undo.
+        return new ImmutableGraph(
+            this.capsule.modify(
+                data => data.removeTriple(subject, predicate, object),
+                data => data.addTriple(subject, predicate, object)));
+    }
+
+    /**
+     * Adds multiple triples to the graph. Returns the updated graph.
+     * @param triples The triples to add.
+     */
+    public addTriples(triples: Triple[]): ImmutableGraph {
+
+        // TODO: maybe add the triples in batches?
+        let result: ImmutableGraph = this;
+        for (let triple of triples) {
+            result = result.addTriple(
+                triple.subject,
+                triple.predicate,
+                triple.object);
+        }
+        return result;
+    }
+
+    /**
+     * Removes multiple triples from the graph. Returns the updated graph.
+     * @param triples The triples to remove.
+     */
+    public removeTriples(triples: Triple[]): ImmutableGraph {
+
+        // TODO: maybe remove the triples in batches?
+        let result: ImmutableGraph = this;
+        for (let triple of triples) {
+            result = result.removeTriple(
+                triple.subject,
+                triple.predicate,
+                triple.object);
+        }
+        return result;
+    }
+
+    /**
+     * Retrieves all the prefixes in this graph.
+     */
+    public getPrefixes(): {} {
+        return this.capsule.query(data => data.getPrefixes());
+    }
+
+    /**
+     * Adds a prefix to this graph. Returns the updated graph.
+     * @param prefix
+     * @param iri
+     */
+    public addPrefix(prefix: string, iri: string): ImmutableGraph {
+        // TODO: what do we do if the prefix is already in the graph?
+        return new ImmutableGraph(
+            this.capsule.modify(
+                data => data.addPrefix(prefix, iri),
+                data => data.removePrefix(prefix)));
+    }
+
+    /**
+     * Adds multiple prefixes to this graph. Returns the updated graph.
+     * @param prefixes
+     */
+    public addPrefixes(prefixes: {}): ImmutableGraph {
+        // TODO: maybe add the prefixes in batches?
+        let result: ImmutableGraph = this;
+        for (let key in prefixes) {
+            result = result.addPrefix(key, prefixes[key]);
+        }
+        return result;
     }
 }
 
@@ -129,7 +266,7 @@ class GraphData {
     }
 
     /**
-     * Add a triple to the Graph.
+     * Adds a triple to the Graph.
      * @param subject
      * @param predicate
      * @param object
@@ -151,7 +288,7 @@ class GraphData {
     }
 
     /**
-     * Add multiple triples to the Graph.
+     * Adds multiple triples to the Graph.
      * @param triples The triples to add.
      */
     public addTriples(triples: Triple[]) {
@@ -162,7 +299,7 @@ class GraphData {
     }
 
     /**
-     * Remove multiple triples from the Graph.
+     * Removes multiple triples from the Graph.
      * @param triples The triples to remove.
      */
     public removeTriples(triples: Triple[]) {
@@ -173,14 +310,14 @@ class GraphData {
     }
 
     /**
-     * Retrieve all the prefixes in this Graph.
+     * Retrieves all the prefixes in this Graph.
      */
     public getPrefixes(): {} {
         return this.prefixes;
     }
 
     /**
-     * Add a prefix to this Graph.
+     * Adds a prefix to this Graph.
      * @param prefix
      * @param iri
      */
@@ -190,7 +327,16 @@ class GraphData {
     }
 
     /**
-     * Add multiple presfixes to this Graph.
+     * Removes a prefix from this graph.
+     * @param prefix The prefix to remove.
+     */
+    public removePrefix(prefix: string): any {
+        delete this.n3Store._prefixes[prefix];
+        delete this.prefixes[prefix];
+    }
+
+    /**
+     * Adds multiple prefixes to this Graph.
      * @param prefixes The prefixes to add.
      */
     public addPrefixes(prefixes: {}) {
@@ -198,15 +344,5 @@ class GraphData {
         Object.keys(prefixes).forEach(k => {
             this.prefixes[k] = prefixes[k];
         });
-    }
-
-    /**
-     * Merges this graph with another graph.
-     * @param other The graph data to merge with this graph.
-     */
-    public merge(other: GraphData) {
-        this.n3Store.addTriples(other.n3Store.getTriples());
-        this.addPrefixes(other.getPrefixes());
-        this.store.addAll(other.store.match());
     }
 }
