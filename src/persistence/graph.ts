@@ -36,6 +36,14 @@ export class Graph {
     }
 
     /**
+     * Runs a function on the validation store.
+     * @param func The function to apply.
+     */
+    public queryValidationStore<T>(func: (store: any) => T): T {
+        return func(this.validationStore);
+    }
+
+    /**
      * Add a triple to the Graph.
      * @param subject
      * @param predicate

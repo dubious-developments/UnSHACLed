@@ -5,6 +5,7 @@ import {Navbar} from "../components/navbarWork";
 import { extensionToMIME } from "./extensionToMIME";
 import {Task} from "../entities/task";
 import MxGraph from "../components/MxGraph";
+import { Graph } from "../persistence/graph";
 
 /*
  * Load a file from the model using the fileName
@@ -92,8 +93,9 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
             for (let part of tmp) {
                 // handle the graph objects correctly
                 if (this.mxGraph) {
-                    let store = component.getPart(part).validationStore;
-                    this.mxGraph.visualizeDataGraph(store);
+                    let graph: Graph = component.getPart(part);
+                    graph.queryValidationStore(
+                        store => this.mxGraph.visualizeDataGraph(store));
                 } else {
                     console.log("error: could not find MxGraph");
                 }
