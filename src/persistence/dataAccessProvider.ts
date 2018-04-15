@@ -1,10 +1,12 @@
 import {Model} from "../entities/model";
 import {FileDAO} from "./fileDAO";
+import {ValidationService} from "../conformance/ValidationService";
 
 export class DataAccessProvider {
 
     private static _instance: DataAccessProvider = new DataAccessProvider();
     private fileDAO: FileDAO;
+    private validationService: ValidationService;
 
     // tmp field
     private _model: Model;
@@ -27,7 +29,17 @@ export class DataAccessProvider {
         if (this.fileDAO) {
             return this.fileDAO;
         } else {
-            return new FileDAO(this._model);
+            this.fileDAO = new FileDAO(this._model);
+            return this.fileDAO;
+        }
+    }
+
+    public getValidationService() {
+        if (this.validationService) {
+            return this.validationService;
+        } else {
+            this.validationService = new ValidationService(this._model);
+            return this.validationService;
         }
     }
 }
