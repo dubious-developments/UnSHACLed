@@ -111,10 +111,10 @@ export class TimeCapsule<T> {
     }
 
     /**
-     * Gets the mutable data managed by the time capsule
+     * Acquires the mutable data managed by the time capsule
      * for this instant.
      */
-    public get(): T {
+    public acquire(): T {
         // We need to do the following:
         //
         //   * We need to find the last common ancestor of
@@ -129,7 +129,13 @@ export class TimeCapsule<T> {
         let currentInstant = this.state.currentInstant;
 
         if (currentInstant === this) {
+            this.state.acquisitionCount++;
             return data;
+        }
+
+        if (this.state.acquisitionCount > 0) {
+            throw Error(
+                "Time capsule state has already been acquired by some other instant.");
         }
 
         let ancestor = TimeCapsule.findLastCommonAncestor<T>(
@@ -145,8 +151,36 @@ export class TimeCapsule<T> {
         }
 
         this.state.currentInstant = this;
+        this.state.acquisitionCount++;
 
         return data;
+    }
+
+    /**
+     * Releases the mutable data acquired by calling `acquire`.
+     */
+    public release(): void {
+        if (this.state.acquisitionCount === 0) {
+            throw Error(
+                "Cannot release a state that is not acquired.");
+        }
+        if (this.state.currentInstant !== this) {
+            throw Error(
+                "Cannot release a state that is acquired by some other instant.");
+        }
+        this.state.acquisitionCount--;
+    }
+
+    /**
+     * Applies a function to the data for this time capsule instant.
+     * The time capsule state is automatically acquired and released.
+     */
+    public query<TResult>(func: (data: T) => TResult): TResult {
+
+        let data = this.acquire();
+        let result = func(data);
+        this.release();
+        return result;
     }
 
     /**
@@ -180,6 +214,12 @@ class TimeCapsuleState<T> {
     public currentInstant: TimeCapsule<T>;
 
     /**
+     * Counts the number of times this state has been
+     * acquired by the current instant.
+     */
+    public acquisitionCount: number;
+
+    /**
      * Creates a time capsule state from a piece of data to
      * manage.
      * @param data The data to manage.
@@ -187,5 +227,6 @@ class TimeCapsuleState<T> {
     public constructor(data: T) {
         this.data = data;
         this.currentInstant = undefined;
+        this.acquisitionCount = 0;
     }
 }

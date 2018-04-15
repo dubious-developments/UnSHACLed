@@ -5,23 +5,27 @@ class NumberBox {
     public constructor(public num: number) {
 
     }
+
+    public static open(capsule: TimeCapsule<NumberBox>): number {
+        return capsule.query(data => data.num);
+    }
 }
 
 describe("TimeCapsule Class", () => {
 
     it("can be created", () => {
         let capsule = TimeCapsule.create<NumberBox>(new NumberBox(10));
-        expect(capsule.get().num).toEqual(10);
+        expect(NumberBox.open(capsule)).toEqual(10);
     });
 
     it("supports linear changes", () => {
         let root = TimeCapsule.create<NumberBox>(new NumberBox(10));
         let leaf = root.modify(box => box.num++, box => box.num--);
-        expect(root.get().num).toEqual(10);
-        expect(leaf.get().num).toEqual(11);
-        expect(leaf.get().num).toEqual(11);
-        expect(root.get().num).toEqual(10);
-        expect(leaf.get().num).toEqual(11);
+        expect(NumberBox.open(root)).toEqual(10);
+        expect(NumberBox.open(leaf)).toEqual(11);
+        expect(NumberBox.open(leaf)).toEqual(11);
+        expect(NumberBox.open(root)).toEqual(10);
+        expect(NumberBox.open(leaf)).toEqual(11);
     });
 
     it("supports trees of changes", () => {
@@ -39,7 +43,12 @@ describe("TimeCapsule Class", () => {
         for (let i = 0; i < 5000; i++) {
             let index = Math.floor(instants.length * Math.random());
             let [instant, value] = instants[index];
-            expect(instant.get().num).toEqual(value);
+            expect(NumberBox.open(instant)).toEqual(value);
         }
+    });
+
+    it("supports recursive queries", () => {
+        let root = TimeCapsule.create<NumberBox>(new NumberBox(0));
+        expect(root.query(data => root.query(dataPrime => dataPrime.num))).toEqual(0);
     });
 });
