@@ -95,7 +95,7 @@ export class TimeCapsule<T> {
 
     /**
      * Gets a list of all instant along the path to an ancestor,
-     * including this instant and the ancestor.
+     * including this instant and excluding the ancestor.
      * @param ancestor An ancestor time instant.
      */
     private pathToAncestor(ancestor: TimeCapsule<T>): TimeCapsule<T>[] {
@@ -105,7 +105,6 @@ export class TimeCapsule<T> {
             results.push(instant);
             instant = instant.parent;
         }
-        results.push(ancestor);
         return results;
     }
 
@@ -152,11 +151,11 @@ export class TimeCapsule<T> {
             this,
             currentInstant);
 
-        for (let instant of currentInstant.pathToAncestor(ancestor).slice(1)) {
+        for (let instant of currentInstant.pathToAncestor(ancestor)) {
             instant.undoChange(data);
         }
 
-        for (let instant of this.pathToAncestor(ancestor).reverse().slice(1)) {
+        for (let instant of this.pathToAncestor(ancestor).reverse()) {
             instant.redoChange(data);
         }
 
