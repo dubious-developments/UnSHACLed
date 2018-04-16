@@ -17,7 +17,7 @@ describe("FileDAO Class", () => {
             let comp = new Component();
             let busy = true;
             parser.parse(generateTurtle(), file.type, function(result: any) {
-                comp.setPart(filename, result);
+                comp = comp.withPart(filename, result);
                 model.tasks.schedule(
                     Model.createTask(
                         (data) => {

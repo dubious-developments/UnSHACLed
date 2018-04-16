@@ -1,6 +1,6 @@
-import * as Collections from "typescript-collections";
-import {ModelData} from "../entities/modelData";
-import {ModelComponent} from "../entities/modelTaskMetadata";
+import * as Immutable from "immutable";
+import { ModelData } from "../entities/modelData";
+import { ModelComponent } from "../entities/modelTaskMetadata";
 
 /**
  * A structure that is to be stored inside the Model.
@@ -9,38 +9,40 @@ import {ModelComponent} from "../entities/modelTaskMetadata";
  */
 export class Component {
 
-    private parts: Collections.Dictionary<string, any>;
-
     /**
-     * Create a new Component.
+     * Creates a new component.
+     * @param parts A mapping of part keys to parts.
      */
-    public constructor() {
-        this.parts = new Collections.Dictionary<string, any>();
+    public constructor(
+        private readonly parts?: Immutable.Map<string, any>) {
+        
+        if (!parts) {
+            this.parts = Immutable.Map<string, any>();
+        }
     }
 
     /**
-     * Retrieve all keys.
-     * @returns {string[]}
+     * Retrieves all keys in the component.
      */
-    public getAllKeys() {
+    public getAllKeys(): Immutable.Iterator<string> {
         return this.parts.keys();
     }
 
     /**
-     * Retrieve a part of the component.
-     * @param {string} key
-     * @returns {any}
+     * Retrieves a part of the component.
+     * @param key The key for the part to retrieve.
      */
-    public getPart(key: string) {
-        return this.parts.getValue(key);
+    public getPart(key: string): any {
+        return this.parts.get(key);
     }
 
     /**
-     * Bind a value to a given key.
-     * @param {string} key
-     * @param value
+     * Bind a value to a given key. Returns a component
+     * with the updated (key, value) pair.
+     * @param key The key to bind a value to.
+     * @param value The value to bind to `key`.
      */
-    public setPart(key: string, value: any) {
-        this.parts.setValue(key, value);
+    public withPart(key: string, value: any): Component {
+        return new Component(this.parts.set(key, value));
     }
 }

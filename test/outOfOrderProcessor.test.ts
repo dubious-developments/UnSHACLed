@@ -222,7 +222,7 @@ describe("OutOfOrderProcessor Class", () => {
                     let component = data.getOrCreateComponent(
                         ModelComponent.DataGraph,
                         () => new Component());
-                    component.setPart("key", "Oh hi Mark");
+                    component.withPart("key", "Oh hi Mark");
                     data.setComponent(ModelComponent.DataGraph, component);
                 },
                 [ModelComponent.DataGraph],
@@ -249,7 +249,7 @@ describe("OutOfOrderProcessor Class", () => {
                     let component = data.getOrCreateComponent(
                         ModelComponent.DataGraph,
                         () => new Component());
-                    component.setPart("key", "Oh hi Mark");
+                    component.withPart("key", "Oh hi Mark");
                     data.setComponent(ModelComponent.DataGraph, component);
                 },
                 [ModelComponent.DataGraph],
