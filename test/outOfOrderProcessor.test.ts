@@ -221,8 +221,8 @@ describe("OutOfOrderProcessor Class", () => {
                 data => {
                     let component = data.getOrCreateComponent(
                         ModelComponent.DataGraph,
-                        () => new Component());
-                    component.withPart("key", "Oh hi Mark");
+                        () => new Component<string>());
+                    component = component.withPart("key", "Oh hi Mark");
                     data.setComponent(ModelComponent.DataGraph, component);
                 },
                 [ModelComponent.DataGraph],
@@ -231,7 +231,7 @@ describe("OutOfOrderProcessor Class", () => {
         queue.schedule(
             Model.createTask(
                 data => {
-                    expect(data.getComponent<Component>(ModelComponent.DataGraph)).toBeTruthy();
+                    expect(data.getComponent<Component<string>>(ModelComponent.DataGraph)).toBeTruthy();
                 },
                 [ModelComponent.DataGraph],
                 []));
@@ -248,8 +248,8 @@ describe("OutOfOrderProcessor Class", () => {
                 data => {
                     let component = data.getOrCreateComponent(
                         ModelComponent.DataGraph,
-                        () => new Component());
-                    component.withPart("key", "Oh hi Mark");
+                        () => new Component<string>());
+                    component = component.withPart("key", "Oh hi Mark");
                     data.setComponent(ModelComponent.DataGraph, component);
                 },
                 [ModelComponent.DataGraph],
@@ -260,7 +260,7 @@ describe("OutOfOrderProcessor Class", () => {
         queue.schedule(
             Model.createTask(
                 data => {
-                    expect(data.getComponent<Component>(ModelComponent.DataGraph)).toBeTruthy();
+                    expect(data.getComponent<Component<string>>(ModelComponent.DataGraph)).toBeTruthy();
                 },
                 [ModelComponent.DataGraph],
                 []));

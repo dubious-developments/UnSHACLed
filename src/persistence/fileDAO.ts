@@ -43,7 +43,9 @@ export class FileDAO implements DataAccessObject {
     public find(module: Module) {
         let self = this;
         this.io.readFromFile(module, function (result: any) {
-            self.model.tasks.schedule(new LoadTask(result, module));
+            // TODO: what is `LoadTask`s type argument? It probably shouldn't
+            // be `LoadTask<any>`.
+            self.model.tasks.schedule(new LoadTask<any>(result, module));
             self.model.tasks.processTask(); // TODO: Remove this when we have a scheduler!
         });
     }
@@ -179,7 +181,7 @@ export class FileModule implements Module {
 /**
  * A Task that reads a file and adds its contents as a component to the Model.
  */
-class LoadTask extends Task<ModelData, ModelTaskMetadata> {
+class LoadTask<T> extends Task<ModelData, ModelTaskMetadata> {
 
     /**
      * Create a new LoadTask.
@@ -189,7 +191,7 @@ class LoadTask extends Task<ModelData, ModelTaskMetadata> {
      * @param {FileModule} module
      */
     public constructor(
-        private readonly result: any,
+        private readonly result: T,
         public readonly module: Module) {
 
         super();
@@ -200,9 +202,9 @@ class LoadTask extends Task<ModelData, ModelTaskMetadata> {
      * @param data The data the task takes as input.
      */
     public execute(data: ModelData): void {
-        let component = data.getOrCreateComponent<Component>(
+        let component = data.getOrCreateComponent(
             this.module.getType(),
-            () => new Component());
+            () => new Component<T>());
 
         data.setComponent(
             this.module.getType(),
@@ -242,7 +244,9 @@ class SaveTask extends Task<ModelData, ModelTaskMetadata> {
      * @param data The data the task takes as input.
      */
     public execute(data: ModelData): void {
-        let component = data.getComponent<Component>(this.module.getType());
+        // TODO: what is `Component`s type argument here? It probably
+        // shouldn't be `any`.
+        let component = data.getComponent<Component<any>>(this.module.getType());
         if (component) {
             let part = component.getPart(this.module.getName());
             if (part) {
