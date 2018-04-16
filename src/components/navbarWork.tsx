@@ -82,7 +82,6 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
             let fileDAO = DataAccessProvider.getInstance().getFileDAO();
             if (files) {
                 if (files[0]) {
-                    console.log("check1");
                     fileDAO.find(new FileModule(ModelComponent.SHACLShapesGraph, files[0].name, files[0]));
                 }
             } else {

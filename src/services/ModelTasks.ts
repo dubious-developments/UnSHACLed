@@ -95,7 +95,6 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
     }
 
     public execute(data: ModelData): void {
-        console.log("comp chheck", this.mComponent);
         let component: any = data.getComponent(this.mComponent);
         if (component) {
 
@@ -134,11 +133,10 @@ export class GetValidationReport extends Task<ModelData, ModelTaskMetadata> {
     }
 
     public execute(data: ModelData): void {
-        console.log("check: ", data);
         let component: any = data.getComponent(ModelComponent.ConformanceReport);
         if (component) {
             let tmp = component.getRoot();
-            console.log(tmp);
+            console.log("result in frontend!!!!!!!!!!!!!", tmp);
         } else {
             console.log("Could not find the ModelComponent: ", ModelComponent.ConformanceReport);
         }

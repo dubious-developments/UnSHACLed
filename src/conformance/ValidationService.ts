@@ -84,6 +84,11 @@ class ValidationTask extends Task<ModelData, ModelTaskMetadata> {
      * @param data The data the task takes as input.
      */
     public execute(data: ModelData): void {
+        let component = data.getOrCreateComponent<Component>(
+            ModelComponent.ConformanceReport,
+            () => new Component());
+        data.setComponent(ModelComponent.ConformanceReport, component);
+
         this.validator.validate(data, function(report: ConformanceReport) {
             // add new report to component
             let component = data.getOrCreateComponent<Component>(

@@ -660,18 +660,17 @@ class MxGraph extends React.Component<any, any> {
             let model = DataAccessProvider.getInstance().model;
             model.registerObserver((changeBuf) => {
                 changeBuf.forEach((key) => {
-                    console.log("importaaaant: ", key);
                     if (key === ModelComponent.DataGraph) { // datagraph has changed
-                        console.log("processing data");
                         model.tasks.schedule(new VisualizeComponent(ModelComponent.DataGraph, this));
+                        // TODO change this later
+                        model.tasks.processAllTasks();
                     }
 
                     if (key === ModelComponent.SHACLShapesGraph) {
-                        console.log("processing shapes");
                         model.tasks.schedule(new VisualizeComponent(ModelComponent.SHACLShapesGraph, this));
+                        // TODO change this later
+                        model.tasks.processAllTasks();
                     }
-                    // TODO change this later
-                    model.tasks.processAllTasks();
                 });
                 return [];
             });
