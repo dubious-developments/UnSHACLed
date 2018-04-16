@@ -60,7 +60,6 @@ export class ModelData {
             this.changeBuffer.add(component);
         }
         this.components.setValue(component, value);
-        console.log("impoertaaaaant: ", this.components);
     }
 
     /**

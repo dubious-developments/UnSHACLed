@@ -84,6 +84,8 @@ class ValidationTask extends Task<ModelData, ModelTaskMetadata> {
      * @param data The data the task takes as input.
      */
     public execute(data: ModelData): void {
+        // first set the component here
+        // because setting it in the callback gives weird errors
         let component = data.getOrCreateComponent<Component>(
             ModelComponent.ConformanceReport,
             () => new Component());
@@ -94,6 +96,8 @@ class ValidationTask extends Task<ModelData, ModelTaskMetadata> {
             let component = data.getOrCreateComponent<Component>(
                 ModelComponent.ConformanceReport,
                 () => new Component());
+
+            // TODO this does not seem right (toString()??)
             component.setPart(toString(), report);
 
             // TODO: merge new report into root report
@@ -101,8 +105,6 @@ class ValidationTask extends Task<ModelData, ModelTaskMetadata> {
             // root.merge(report);
             component.setRoot(report);
             data.setComponent(ModelComponent.ConformanceReport, component);
-            console.log("conformance checked");
-            console.log(report);
         });
     }
 

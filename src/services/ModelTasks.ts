@@ -126,8 +126,9 @@ export class GetValidationReport extends Task<ModelData, ModelTaskMetadata> {
 
     /**
      * Create a new VisualizeComponent task from Model
+     * @param {mxGraph} MxGraph
      */
-    public constructor() {
+    public constructor(private mxGraph: MxGraph) {
         super();
 
     }
@@ -135,8 +136,8 @@ export class GetValidationReport extends Task<ModelData, ModelTaskMetadata> {
     public execute(data: ModelData): void {
         let component: any = data.getComponent(ModelComponent.ConformanceReport);
         if (component) {
-            let tmp = component.getRoot();
-            console.log("result in frontend!!!!!!!!!!!!!", tmp);
+            let report = component.getRoot();
+            this.mxGraph.handleConformance(report);
         } else {
             console.log("Could not find the ModelComponent: ", ModelComponent.ConformanceReport);
         }

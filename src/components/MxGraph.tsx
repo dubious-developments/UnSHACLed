@@ -4,6 +4,7 @@ import {ModelComponent} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
 import {GetValidationReport, VisualizeComponent} from "../services/ModelTasks";
 import TimingService from "../services/TimingService";
+import {ConformanceReport} from "../conformance/wrapper/ConformanceReport";
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout: any;
@@ -712,12 +713,26 @@ class MxGraph extends React.Component<any, any> {
     handleUserAction(event) {
         let model = DataAccessProvider.getInstance().model;
 
+        // little hack to pass this to a callback
+        let self = this;
+
         // notify that a user action took place
-        this.timer.userAction(function() {
-            console.log("executing callback");
-            model.tasks.schedule(new GetValidationReport());
+        this.timer.userAction(function(this: MxGraph) {
+            model.tasks.schedule(new GetValidationReport(self));
             model.tasks.processAllTasks();
         });
+    }
+
+    public handleConformance(report: ConformanceReport) {
+        console.log("is conforming?: ", report.getIsConforming());
+        if (report.getIsConforming()) {
+            console.log("no errors");
+        } else {
+            console.log("errors: ");
+            for (let tmp of report.getValidationErrors()) {
+                console.log(tmp.toString());
+            }
+        }
     }
 
     render() {
