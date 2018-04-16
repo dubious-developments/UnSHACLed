@@ -1,7 +1,7 @@
 import * as React from 'react';
-import {Sidebar, Menu, Image, Input, Dropdown} from 'semantic-ui-react';
+import {Sidebar, Menu, Image, Input, Dropdown, List, Button} from 'semantic-ui-react';
 import TreeView from './treeView';
-import { SidebarProps } from './interfaces/interfaces';
+import {SidebarProps} from './interfaces/interfaces';
 
 class SideBar extends React.Component<SidebarProps, any> {
 
@@ -19,13 +19,16 @@ class SideBar extends React.Component<SidebarProps, any> {
         this.state = {
             value: '',
             content: 1,
-            dragid: null
+            dragid: null,
+            templates: [],
+            templateCount: 0
         };
 
         this.handleChange = this.handleChange.bind(this);
         this.handleDropDown = this.handleDropDown.bind(this);
         this.getMenuItemsFiltered = this.getMenuItemsFiltered.bind(this);
         this.DynamicMenu = this.DynamicMenu.bind(this);
+        this.addTemplateEntry = this.addTemplateEntry.bind(this);
     }
 
     getMenuItemsFiltered(kind: string, query: string) {
@@ -92,9 +95,25 @@ class SideBar extends React.Component<SidebarProps, any> {
         });
 
     }
+
+    addTemplateEntry(entryName: any) {
+        let {templateCount} = this.state;
+        this.setState({
+            templateCount: this.state.templateCount + 1,
+            templates: this.state.templates.concat(
+                <Menu.Item
+                    as="a"
+                    content={entryName + templateCount}
+                    key={entryName}
+                />
+            )
+        });
+    }
+
     render() {
         const logo = require('../img/shacl_logo_trans.png');
         const defaultOption = 1;
+        let {templates} = this.state;
         return (
             <Sidebar
                 as={Menu}
@@ -141,13 +160,18 @@ class SideBar extends React.Component<SidebarProps, any> {
                             SHACL
                             <this.DynamicMenu kind="SHACL"/>
                         </Menu.Item>
-{/*                        <Menu.Item>
+                        {/*                        <Menu.Item>
                             General
                             <this.DynamicMenu kind="General"/>
                         </Menu.Item>*/}
                         <Menu.Item>
                             Template
+                            <Button onClick={() => this.addTemplateEntry("Entry ")}> Add Template </Button>
                             <this.DynamicMenu kind="Template"/>
+                            <Menu.Menu>
+                                {templates}
+                            </Menu.Menu>
+
                         </Menu.Item>
                     </div>
                 ) : (
