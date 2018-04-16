@@ -116,9 +116,8 @@ export class GetValidationReport extends Task<ModelData, ModelTaskMetadata> {
 
     /**
      * Create a new VisualizeComponent task from Model
-     * @param {mxGraph} MxGraph
      */
-    public constructor(private mxGraph: MxGraph) {
+    public constructor() {
         super();
 
     }

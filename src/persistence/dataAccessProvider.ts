@@ -8,7 +8,6 @@ export class DataAccessProvider {
     private static _instance: DataAccessProvider = new DataAccessProvider();
     private fileDAO: FileDAO;
     private validationService: ValidationService;
-    private timingService: TimingService;
 
     // tmp field
     private _model: Model;
@@ -16,8 +15,6 @@ export class DataAccessProvider {
     private constructor() {
         // temporarily create model here
         this._model = new Model();
-
-        this.timingService = new TimingService();
 
         // This can not be 'lazy initialized' since the registering of observers happens in the constructor
         this.validationService = new ValidationService(this._model);
@@ -45,8 +42,4 @@ export class DataAccessProvider {
         return this.validationService;
     }
 
-
-    public getTimingService(): TimingService {
-        return this.timingService;
-    }
 }

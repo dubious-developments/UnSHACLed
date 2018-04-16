@@ -3,6 +3,7 @@ import * as Collections from 'typescript-collections';
 import {ModelComponent} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
 import {GetValidationReport, VisualizeComponent} from "../services/ModelTasks";
+import TimingService from "../services/TimingService";
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout: any;
@@ -16,6 +17,8 @@ class MxGraph extends React.Component<any, any> {
     private subjectToBlockDict: Collections.Dictionary<any, Block>;
     private triples: Collections.Set<any>;
     private todoTriples: Collections.Set<any>;
+
+    private timer: TimingService;
 
     constructor(props: string) {
         super(props);
@@ -41,6 +44,8 @@ class MxGraph extends React.Component<any, any> {
         this.subjectToBlockDict = new Collections.Dictionary<any, Block>();
         this.triples = new Collections.Set<any>();
         this.todoTriples = new Collections.Set<any>();
+
+        this.timer = new TimingService();
     }
 
     componentDidMount() {
@@ -720,11 +725,6 @@ class MxGraph extends React.Component<any, any> {
                         model.tasks.schedule(new VisualizeComponent(ModelComponent.DataGraph, this));
                         // TODO change this later
                         model.tasks.processAllTasks();
-
-                        // TODO discuss later when conformance will be called
-                        model.tasks.schedule(new GetValidationReport(this));
-                        // TODO change this later
-                        model.tasks.processAllTasks();
                     }
                 });
                 return [];
@@ -765,11 +765,14 @@ class MxGraph extends React.Component<any, any> {
      * Used for checking if user is actively editing or not
      */
     handleUserAction(event) {
-        console.log("user action");
-        let timer = DataAccessProvider.getInstance().getTimingService();
+        let model = DataAccessProvider.getInstance().model;
 
         // notify that a user action took place
-        timer.userAction();
+        this.timer.userAction(function() {
+            console.log("executing callback");
+            model.tasks.schedule(new GetValidationReport());
+            model.tasks.processAllTasks();
+        });
     }
 
     render() {

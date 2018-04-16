@@ -7,20 +7,19 @@ class TimingService {
     // number of milliseconds user needs to be inactive
     private ms: number = 2000;
 
-    // the function planned to execute after timeout
-    plannedTimeout: any;
+    // the timeout
+    private plannedTimeout: any;
 
-    public userAction(): void {
+    /**
+     * @param f the function to execute when the user becomes idle
+     */
+    public userAction(f: (() => void)): void {
         // remove previous timeouts by user action
         if (this.plannedTimeout) {
             clearTimeout(this.plannedTimeout);
         }
 
-        this.plannedTimeout = setTimeout(this.userIdle, this.ms);
-    }
-
-    public userIdle(): void {
-        console.log("idle");
+        this.plannedTimeout = setTimeout(f, this.ms);
     }
 
 }
