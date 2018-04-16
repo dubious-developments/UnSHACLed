@@ -722,8 +722,7 @@ class MxGraph extends React.Component<any, any> {
             // Function that is executed when the image is dropped on
             // the graph. The cell argument points to the cell under
             // the mousepointer if there is one.
-            var funct = function(gr:any, evt:any, cell:any)
-            {
+            var funct = function (gr: any, evt: any, cell: any) {
                 gr.stopEditing(false);
 
                 var pt = gr.getPointForEvent(evt);
@@ -733,7 +732,11 @@ class MxGraph extends React.Component<any, any> {
                 gr.setSelectionCells(gr.importCells(cells, dx, dy, cell));
             };
             // create sidebar entry
+            var img = document.getElementById("temp");
+            mxUtils.makeDraggable(img, graph, funct);
 
+        } else {
+            console.log("nothing is selected");
         }
 
     }
@@ -798,6 +801,7 @@ class MxGraph extends React.Component<any, any> {
                 }}
             />
                 <Button onClick={this.addTemplate}> Test </Button>
+                <h1 id="temp"> Draggable </h1>
             </div>
         );
     }
