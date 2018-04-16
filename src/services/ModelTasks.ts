@@ -123,6 +123,7 @@ export class GetValidationReport extends Task<ModelData, ModelTaskMetadata> {
     }
 
     public execute(data: ModelData): void {
+        console.log("check: ", data);
         let component: any = data.getComponent(ModelComponent.ConformanceReport);
         if (component) {
             let tmp = component.getRoot();
