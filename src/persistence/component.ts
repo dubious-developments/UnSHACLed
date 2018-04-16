@@ -24,8 +24,8 @@ export class Component<T> {
     /**
      * Retrieves all keys in the component.
      */
-    public getAllKeys(): Immutable.Iterator<string> {
-        return this.parts.keys();
+    public getAllKeys(): string[] {
+        return this.parts.keySeq().toArray();
     }
 
     /**

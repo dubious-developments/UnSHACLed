@@ -6,6 +6,7 @@ import { extensionToMIME } from "./extensionToMIME";
 import {Task} from "../entities/task";
 import MxGraph from "../components/MxGraph";
 import { Graph } from "../persistence/graph";
+import { Component } from "../persistence/component";
 
 /*
  * Load a file from the model using the fileName
@@ -86,14 +87,13 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
     }
 
     public execute(data: ModelData): void {
-        let component: any = data.getComponent(this.mComponent);
+        let component = data.getComponent<Component<Graph>>(this.mComponent);
         if (component) {
 
-            let tmp = component.getAllKeys();
-            for (let part of tmp) {
+            for (let part of component.getAllKeys()) {
                 // handle the graph objects correctly
                 if (this.mxGraph) {
-                    let graph: Graph = component.getPart(part);
+                    let graph = component.getPart(part);
                     graph.query(
                         store => this.mxGraph.visualizeDataGraph(store));
                 } else {
