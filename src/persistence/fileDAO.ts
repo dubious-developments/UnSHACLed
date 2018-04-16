@@ -8,7 +8,7 @@ import { Component } from "./component";
 import { GraphParser } from "./graphParser";
 import { Task } from "../entities/task";
 import {extensionToMIME} from "../services/extensionToMIME";
-import { Graph } from "./graph";
+import { ImmutableGraph, Graph } from "./graph";
 
 /**
  * Provides basic DAO functionality at the file granularity level.
@@ -44,7 +44,7 @@ export class FileDAO implements DataAccessObject {
     public find(module: Module) {
         let self = this;
         this.io.readFromFile(module, function (result: Graph) {
-            self.model.tasks.schedule(new LoadTask<Graph>(result, module));
+            self.model.tasks.schedule(new LoadTask<ImmutableGraph>(result.asImmutable(), module));
             self.model.tasks.processTask(); // TODO: Remove this when we have a scheduler!
         });
     }
@@ -238,11 +238,11 @@ class SaveTask extends Task<ModelData, ModelTaskMetadata> {
      * @param data The data the task takes as input.
      */
     public execute(data: ModelData): void {
-        let component = data.getComponent<Component<Graph>>(this.module.getType());
+        let component = data.getComponent<Component<ImmutableGraph>>(this.module.getType());
         if (component) {
             let part = component.getPart(this.module.getName());
             if (part) {
-                this.io.writeToFile(this.module, part);
+                this.io.writeToFile(this.module, part.toMutable());
             }
         }
     }

@@ -5,7 +5,7 @@ import {Navbar} from "../components/navbarWork";
 import { extensionToMIME } from "./extensionToMIME";
 import {Task} from "../entities/task";
 import MxGraph from "../components/MxGraph";
-import { Graph } from "../persistence/graph";
+import { Graph, ImmutableGraph } from "../persistence/graph";
 import { Component } from "../persistence/component";
 
 /*
@@ -87,7 +87,7 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
     }
 
     public execute(data: ModelData): void {
-        let component = data.getComponent<Component<Graph>>(this.mComponent);
+        let component = data.getComponent<Component<ImmutableGraph>>(this.mComponent);
         if (component) {
 
             for (let part of component.getAllKeys()) {
