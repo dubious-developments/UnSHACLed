@@ -3,6 +3,8 @@ import { TimeCapsule } from "../entities/timeCapsule";
 
 type Triple = { subject: string, predicate: string, object: string };
 
+type PrefixMap = { [prefix: string]: string };
+
 /**
  * A mutable wrapper for library-specific triple stores.
  */
@@ -103,7 +105,7 @@ export class Graph {
     /**
      * Retrieves all the prefixes in this Graph.
      */
-    public getPrefixes(): {} {
+    public getPrefixes(): PrefixMap {
         return this.immutableVersion.getPrefixes();
     }
 
@@ -120,7 +122,7 @@ export class Graph {
      * Adds multiple prefixes to this Graph.
      * @param prefixes
      */
-    public addPrefixes(prefixes: {}) {
+    public addPrefixes(prefixes: PrefixMap) {
         this.immutableVersion = this.immutableVersion.addPrefixes(prefixes);
     }
 }
@@ -262,7 +264,7 @@ export class ImmutableGraph {
     /**
      * Retrieves all the prefixes in this graph.
      */
-    public getPrefixes(): {} {
+    public getPrefixes(): PrefixMap {
 
         return this.capsule.query(data => data.getPrefixes());
     }
@@ -295,7 +297,7 @@ export class ImmutableGraph {
      * Adds multiple prefixes to this graph. Returns the updated graph.
      * @param prefixes
      */
-    public addPrefixes(prefixes: {}): ImmutableGraph {
+    public addPrefixes(prefixes: PrefixMap): ImmutableGraph {
 
         // TODO: maybe add the prefixes in batches?
         let result: ImmutableGraph = this;
@@ -320,7 +322,7 @@ class GraphData {
      */
     public n3Store: any;
 
-    private prefixes: {};
+    private prefixes: PrefixMap;
 
     public constructor() {
         let N3 = require("n3");
@@ -361,7 +363,7 @@ class GraphData {
     /**
      * Retrieves all the prefixes in this Graph.
      */
-    public getPrefixes(): {} {
+    public getPrefixes(): PrefixMap {
         return this.prefixes;
     }
 
