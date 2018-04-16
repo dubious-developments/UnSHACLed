@@ -34,6 +34,7 @@ class MxGraph extends React.Component<any, any> {
         this.getGraphUnderMouse = this.getGraphUnderMouse.bind(this);
         this.makeDragSource = this.makeDragSource.bind(this);
         this.visualizeDataGraph = this.visualizeDataGraph.bind(this);
+        this.handleUserAction = this.handleUserAction.bind(this);
 
         this.nameToStandardCellDict = new Collections.Dictionary<string, any>();
         this.blockToCellDict = new Collections.Dictionary<Block, any>((b) => b.name);
@@ -729,6 +730,10 @@ class MxGraph extends React.Component<any, any> {
                 return [];
             });
 
+            // listen to all click events and key pressed events to check if user is actively editing
+            document.addEventListener("click", this.handleUserAction, true);
+            document.addEventListener("keypress", this.handleUserAction, true);
+
             model.tasks.processAllTasks();
 
             let editor = new mxEditor();
@@ -754,6 +759,17 @@ class MxGraph extends React.Component<any, any> {
             this.initToolBar(editor);
             container.focus();
         }
+    }
+
+    /**
+     * Used for checking if user is actively editing or not
+     */
+    handleUserAction(event) {
+        console.log("user action");
+        let timer = DataAccessProvider.getInstance().getTimingService();
+
+        // notify that a user action took place
+        timer.userAction();
     }
 
     render() {

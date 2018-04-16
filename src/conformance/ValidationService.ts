@@ -95,8 +95,8 @@ class ValidationTask extends Task<ModelData, ModelTaskMetadata> {
             // let root = component.getOrCreateRoot(() => new ConformanceReport());
             // root.merge(report);
             component.setRoot(report);
-            console.log("validation done");
             data.setComponent(ModelComponent.ConformanceReport, component);
+            console.log(report);
         });
     }
 
