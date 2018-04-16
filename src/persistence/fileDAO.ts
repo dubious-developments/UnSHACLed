@@ -76,6 +76,7 @@ class IOFacilitator {
      * @param load
      */
     public readFromFile(module: Module, load: (result: any) => void): void {
+        console.log("check2: ", module.getTarget());
         let parser = this.parsers.getValue(module.getTarget());
         if (!parser) {
             throw new Error("Unsupported target " + module.getTarget());
@@ -208,6 +209,7 @@ class LoadTask extends Task<ModelData, ModelTaskMetadata> {
 
         component.setPart(this.module.getIdentifier(), this.result);
         data.setComponent(this.module.getTarget(), component);
+        console.log("target", this.module.getTarget());
     }
 
     /**
@@ -215,8 +217,8 @@ class LoadTask extends Task<ModelData, ModelTaskMetadata> {
      */
     public get metadata(): ModelTaskMetadata {
         return new ModelTaskMetadata(
-            [ModelComponent.DataGraph, ModelComponent.IO],
-            [ModelComponent.DataGraph, ModelComponent.IO]);
+            [this.module.getTarget(), ModelComponent.IO],
+            [this.module.getTarget(), ModelComponent.IO]);
     }
 }
 
@@ -258,7 +260,7 @@ class SaveTask extends Task<ModelData, ModelTaskMetadata> {
      */
     public get metadata(): ModelTaskMetadata {
         return new ModelTaskMetadata(
-            [ModelComponent.DataGraph, ModelComponent.IO],
+            [this.module.getTarget(), ModelComponent.IO],
             [ModelComponent.IO]);
     }
 }

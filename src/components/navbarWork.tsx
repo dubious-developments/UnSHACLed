@@ -12,7 +12,7 @@ import { ModelComponent } from '../entities/modelTaskMetadata';
 export class Navbar extends React.Component<NavbarWorkProps, {}> {
 
     allowedExtensions = ".n3,.ttl,.rdf";
-    loadedFiles = [];
+    loadedFiles: string[] = [];
 
     constructor(props: NavbarWorkProps) {
         super(props);
@@ -22,7 +22,10 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
         this.saveGraph = this.saveGraph.bind(this);
     }
 
-    public setLoadedFiles(files: any) {
+    public setLoadedFiles(files: string[]) {
+        if (files.length === 0) {
+            console.log("no files found");
+        }
         this.loadedFiles = files;
     }
 
@@ -31,12 +34,21 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
         // this.props.history.push("/login");
     }
 
-    uploadFileButton() {
-        let input = document.getElementById("importGraph");
+    uploadDataGraphButton() {
+        let input = document.getElementById("importDataGraph");
         if (input) {
             input.click();
         } else {
-            console.log("Could not find element 'importGraph'");
+            console.log("Could not find element 'importDataGraph'");
+        }
+    }
+
+    uploadSHACLGraphButton() {
+        let input = document.getElementById("importSHACLGraph");
+        if (input) {
+            input.click();
+        } else {
+            console.log("Could not find element 'importSHACLGraph'");
         }
     }
 
@@ -44,29 +56,47 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
         this.props.callback(!this.props.visible);
     }
 
-    importGraph(e: any) {
-        let input = (document.getElementById("importGraph") as HTMLInputElement);
+    importDataGraph(e: any) {
+        let input = (document.getElementById("importDataGraph") as HTMLInputElement);
 
         if (input) {
             let files = input.files;
             let fileDAO = DataAccessProvider.getInstance().getFileDAO();
             if (files) {
                 if (files[0]) {
-                    // TODO
                     fileDAO.find(new FileModule(ModelComponent.DataGraph, files[0].name, files[0]));
                 }
             } else {
                 console.log("error: no files found");
             }
         } else {
-            console.log("error: could not find importGraph button");
+            console.log("error: could not find importDataGraph button");
+        }
+    }
+
+    importSHACLGraph(e: any) {
+        let input = (document.getElementById("importSHACLGraph") as HTMLInputElement);
+
+        if (input) {
+            let files = input.files;
+            let fileDAO = DataAccessProvider.getInstance().getFileDAO();
+            if (files) {
+                if (files[0]) {
+                    console.log("check1");
+                    fileDAO.find(new FileModule(ModelComponent.SHACLShapesGraph, files[0].name, files[0]));
+                }
+            } else {
+                console.log("error: no files found");
+            }
+        } else {
+            console.log("error: could not find importSHACLGraph button");
         }
     }
 
     // TODO not only load datagraph
     saveGraph(e: any) {
         let model: Model = DataAccessProvider.getInstance().model;
-        model.tasks.schedule(new GetOpenedFilesTask(ModelComponent.DataGraph, this));
+        model.tasks.schedule(new GetOpenedFilesTask([ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph], this));
         model.tasks.processTask();
     }
 
@@ -108,19 +138,6 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
         );
     }
 
-    uploadProjectButton() {
-        let input = document.getElementById("importProject");
-        if (input) {
-            input.click();
-        } else {
-            console.log("error: could not find importProject button");
-        }
-    }
-
-    importProject(e: any) {
-        console.log(e);
-    }
-
     render() {
 
         return (
@@ -144,23 +161,22 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                     <Menu.Item as="a" id="actual size" content={<Icon name='compress'/>}/>
                     <Menu.Item as="a" id="fit" content={<Icon name='expand'/>}/>
 
-                    <Menu.Item as="a" onClick={this.uploadProjectButton}>
-                        Import Project
+                    <Menu.Item as="a" onClick={this.uploadSHACLGraphButton}>
+                        Import SHACL Graph
                         <input
-                            onChange={this.importProject}
+                            onChange={this.importSHACLGraph}
                             type="file"
-                            id="importProject"
+                            id="importSHACLGraph"
                             style={{"display" : "none"}}
-
+                            accept={this.allowedExtensions}
                         />
                     </Menu.Item>
-                    <Menu.Item as="a">Save Project</Menu.Item>
-                    <Menu.Item as="a" onClick={this.uploadFileButton}>
-                        Import Graph
+                    <Menu.Item as="a" onClick={this.uploadDataGraphButton}>
+                        Import Data Graph
                         <input
-                            onChange={this.importGraph}
+                            onChange={this.importDataGraph}
                             type="file"
-                            id="importGraph"
+                            id="importDataGraph"
                             style={{"display" : "none"}}
                             accept={this.allowedExtensions}
                         />

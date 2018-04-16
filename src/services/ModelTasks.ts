@@ -28,7 +28,7 @@ export class LoadFileTask extends Task<ModelData, ModelTaskMetadata> {
             // get MIME based on extension
             var splitted = this.fileName.split(".");
             var blob = new Blob([], {type: extensionToMIME[splitted[splitted.length - 1]]});
-            fileDAO.insert(new FileModule(ModelComponent.DataGraph, this.fileName, blob));
+            fileDAO.insert(new FileModule(this.mComponent, this.fileName, blob));
         }
 
     }
@@ -45,26 +45,36 @@ export class GetOpenedFilesTask extends Task<ModelData, ModelTaskMetadata> {
 
     /**
      * Get the loaded files in the model
-     * @param {c} ModelComponent
+     * @param {components} array of ModelComponents
      * @param {navBar} the frontend component
      */
-    public constructor(private mComponent: ModelComponent, private navBar: Navbar) {
+    public constructor(private components: ModelComponent[], private navBar: Navbar) {
         super();
     }
 
     public execute(data: ModelData): void {
         if (this.navBar) {
-            let component: any = data.getComponent(this.mComponent);
-            if (component) {
-                this.navBar.setLoadedFiles(component.getAllKeys());
+            let res: string[] = [];
+            for (let tmp of this.components) {
+                let component: any = data.getComponent(tmp);
+                if (component) {
+                    for (let key of component.getAllKeys()) {
+                        if (key != "ROOT") {
+                            res.push(key);
+                        }
+                    }
+                }
             }
+            this.navBar.setLoadedFiles(res);
         } else {
             console.log("error: navBar not defined");
         }
     }
 
     public get metadata(): ModelTaskMetadata {
-        return new ModelTaskMetadata([this.mComponent, ModelComponent.IO], [ModelComponent.IO]);
+        let tmp = this.components;
+        tmp.push(ModelComponent.IO);
+        return new ModelTaskMetadata(tmp, [ModelComponent.IO]);
     }
 
 }
@@ -85,6 +95,7 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
     }
 
     public execute(data: ModelData): void {
+        console.log("comp chheck", this.mComponent);
         let component: any = data.getComponent(this.mComponent);
         if (component) {
 
