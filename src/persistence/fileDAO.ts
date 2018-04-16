@@ -8,6 +8,7 @@ import { Component } from "./component";
 import { GraphParser } from "./graphParser";
 import { Task } from "../entities/task";
 import {extensionToMIME} from "../services/extensionToMIME";
+import { Graph } from "./graph";
 
 /**
  * Provides basic DAO functionality at the file granularity level.
@@ -42,10 +43,8 @@ export class FileDAO implements DataAccessObject {
      */
     public find(module: Module) {
         let self = this;
-        this.io.readFromFile(module, function (result: any) {
-            // TODO: what is `LoadTask`s type argument? It probably shouldn't
-            // be `LoadTask<any>`.
-            self.model.tasks.schedule(new LoadTask<any>(result, module));
+        this.io.readFromFile(module, function (result: Graph) {
+            self.model.tasks.schedule(new LoadTask<Graph>(result, module));
             self.model.tasks.processTask(); // TODO: Remove this when we have a scheduler!
         });
     }
@@ -56,26 +55,25 @@ export class FileDAO implements DataAccessObject {
  * Requires a particular parser to modulate between file format and internal representation.
  */
 class IOFacilitator {
-    private parsers: Collections.Dictionary<ModelComponent, Parser>;
+    private parsers: Collections.Dictionary<ModelComponent, Parser<Graph>>;
 
     /**
      * Create a new IOFacilitator.
      */
     public constructor() {
-        this.parsers = new Collections.Dictionary<ModelComponent, Parser>();
+        this.parsers = new Collections.Dictionary<ModelComponent, Parser<Graph>>();
     }
 
-    public registerParser(label: ModelComponent, parser: Parser) {
+    public registerParser(label: ModelComponent, parser: Parser<Graph>) {
         this.parsers.setValue(label, parser);
     }
 
     /**
      * Read from an existing file.
-     * @returns {Graph}
      * @param module
      * @param save
      */
-    public readFromFile(module: Module, save: (result: any) => void) {
+    public readFromFile(module: Module, save: (result: Graph) => void) {
         let parser = this.parsers.getValue(module.getType());
         if (!parser) {
             throw new Error("Cannot read unknown format '" + module.getType() + "'");
@@ -100,7 +98,7 @@ class IOFacilitator {
      * @param module
      * @param data
      */
-    public writeToFile(module: Module, data: any) {
+    public writeToFile(module: Module, data: Graph) {
         let FileSaver = require("file-saver");
         let parser = this.parsers.getValue(module.getType());
         if (!parser) {
@@ -140,7 +138,6 @@ export class FileModule implements Module {
 
     /**
      * Return the designated ModelComponent.
-     * @returns {ModelComponent}
      */
     getType(): ModelComponent {
         return this.type;
@@ -148,7 +145,6 @@ export class FileModule implements Module {
 
     /**
      * Return the filename.
-     * @returns {string}
      */
     getName(): string {
         return this.filename;
@@ -156,7 +152,6 @@ export class FileModule implements Module {
 
     /**
      * Return the Blob representing the file.
-     * @returns {Blob}
      */
     getTarget(): Blob {
         return this.file;
@@ -164,7 +159,6 @@ export class FileModule implements Module {
 
     /**
      * Returns the MIME type
-     * @returns {string}
      */
     getMime(): string {
         let mime = this.file.type;
@@ -244,9 +238,7 @@ class SaveTask extends Task<ModelData, ModelTaskMetadata> {
      * @param data The data the task takes as input.
      */
     public execute(data: ModelData): void {
-        // TODO: what is `Component`s type argument here? It probably
-        // shouldn't be `any`.
-        let component = data.getComponent<Component<any>>(this.module.getType());
+        let component = data.getComponent<Component<Graph>>(this.module.getType());
         if (component) {
             let part = component.getPart(this.module.getName());
             if (part) {
