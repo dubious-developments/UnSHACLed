@@ -3,6 +3,7 @@ import * as Collections from 'typescript-collections';
 import {ModelComponent} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
 import {VisualizeComponent} from "../services/ModelTasks";
+import { Button } from 'semantic-ui-react';
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout: any;
@@ -34,7 +35,7 @@ class MxGraph extends React.Component<any, any> {
         this.getGraphUnderMouse = this.getGraphUnderMouse.bind(this);
         this.makeDragSource = this.makeDragSource.bind(this);
         this.visualizeDataGraph = this.visualizeDataGraph.bind(this);
-
+        this.addTemplate = this.addTemplate.bind(this);
         this.nameToStandardCellDict = new Collections.Dictionary<string, any>();
         this.blockToCellDict = new Collections.Dictionary<Block, any>((b) => b.name);
         this.subjectToBlockDict = new Collections.Dictionary<any, Block>();
@@ -47,6 +48,11 @@ class MxGraph extends React.Component<any, any> {
     }
 
     componentWillReceiveProps(nextprops: any) {
+    }
+
+    componentDidUpdate() {
+        console.log("state adapted");
+        console.log(this.state.graph);
     }
 
     insertCell(grph: any, evt: any, target: any, x: any, y: any) {
@@ -110,6 +116,7 @@ class MxGraph extends React.Component<any, any> {
     }
 
     saveGraph(g: any) {
+        console.log(g);
         this.setState({
             graph: g
         });
@@ -704,6 +711,32 @@ class MxGraph extends React.Component<any, any> {
         ds.createDragElement = mxDragSource.prototype.createDragElement;
     }
 
+    addTemplate() {
+        let {graph} = this.state;
+        
+        if (!graph.isSelectionEmpty()) {
+            // Creates a copy of the selection array to preserve its state
+            var cells = graph.getSelectionCells();
+            var bounds = graph.getView().getBounds(cells);
+
+            // Function that is executed when the image is dropped on
+            // the graph. The cell argument points to the cell under
+            // the mousepointer if there is one.
+            var funct = function(gr:any, evt:any, cell:any)
+            {
+                gr.stopEditing(false);
+
+                var pt = gr.getPointForEvent(evt);
+                var dx = pt.x - bounds.x;
+                var dy = pt.y - bounds.y;
+
+                gr.setSelectionCells(gr.importCells(cells, dx, dy, cell));
+            };
+            // create sidebar entry
+
+        }
+
+    }
     main(container: HTMLElement | null): void {
         // Checks if the browser is supported
         if (!container) {
@@ -754,15 +787,18 @@ class MxGraph extends React.Component<any, any> {
     render() {
         const grid = require('../img/grid.gif');
         return (
+            <div>
             <div
                 id="graphContainer"
                 style={{
                     backgroundImage: `url(${ grid })`,
                     cursor: 'default',
-                    height: '100%',
+                    height: '70%',
                     overflow: 'auto',
                 }}
             />
+                <Button onClick={this.addTemplate}> Test </Button>
+            </div>
         );
     }
 }
