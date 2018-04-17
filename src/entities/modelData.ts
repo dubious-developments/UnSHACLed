@@ -36,7 +36,10 @@ export class ModelData {
      */
     public getComponent<T>(component: ModelComponent): T | undefined {
 
-        if (this.components.containsKey(component)) {
+        if (this.components.containsKey(component)
+            && !this.writeBuffer.contains(component)) {
+
+            // Only update the read buffer if the component wasn't written to before.
             this.readBuffer.add(component);
         }
         return this.components.getValue(component);
