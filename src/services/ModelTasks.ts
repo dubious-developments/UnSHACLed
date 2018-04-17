@@ -15,8 +15,8 @@ export class LoadFileTask extends Task<ModelData, ModelTaskMetadata> {
 
     /**
      * Create a new load file task from Model
-     * @param {mComponent} ModelComponent
-     * @param {fileName} the name of the file
+     * @param mComponent
+     * @param fileName the name of the file
      */
     public constructor(private mComponent: ModelComponent, private fileName: string) {
         super();
@@ -47,8 +47,8 @@ export class GetOpenedFilesTask extends Task<ModelData, ModelTaskMetadata> {
 
     /**
      * Get the loaded files in the model
-     * @param {c} ModelComponent
-     * @param {navBar} the frontend component
+     * @param mComponent
+     * @param navBar the frontend component
      */
     public constructor(private mComponent: ModelComponent, private navBar: Navbar) {
         super();
@@ -78,8 +78,8 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
 
     /**
      * Create a new VisualizeComponent task from Model
-     * @param {mComponent} ModelComponent
-     * @param {mxGraph} MxGraph
+     * @param mComponent
+     * @param mxGraph
      */
     public constructor(private mComponent: ModelComponent, private mxGraph: MxGraph) {
         super();
