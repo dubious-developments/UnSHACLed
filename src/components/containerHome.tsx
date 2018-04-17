@@ -5,7 +5,7 @@ import {Link} from 'react-router-dom';
 class HomeContainer extends React.Component {
 
     render() {
-        const logo = require('../img/shacl_logo_trans.png');
+        const logo = require('../img/logo.svg');
         return (
             <Container text={true}>
 
