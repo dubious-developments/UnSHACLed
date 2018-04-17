@@ -63,13 +63,6 @@ export class ModelData {
     }
 
     /**
-     * temp method to tell the model that a mutable component has changed
-     */
-    public componentHasChanged(component: ModelComponent): void {
-        this.changeBuffer.add(component);
-    }
-
-    /**
      * Drains the model's change buffer.
      */
     public drainChangeBuffer(): Collections.Set<ModelComponent> {

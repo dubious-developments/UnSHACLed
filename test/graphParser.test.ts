@@ -6,21 +6,25 @@ describe("GraphParser Class", () => {
         "containing the (expanded) triples described therein.",
        (done) => {
             let parser = new GraphParser();
-            parser.parse(generateTurtle(), "text/turtle", function(result: any) {
-                expect(result.getPersistentStore().countTriples()).toEqual(2);
+            parser.parse(generateTurtle(), "text/turtle", function(result: Graph) {
+                result.queryN3Store(store => {
+                    expect(store.countTriples()).toEqual(2);
 
-                let firstTriple = result.getPersistentStore().getTriples()[0];
-                expect(firstTriple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
-                expect(firstTriple.predicate).toEqual("http://purl.org/dc/elements/1.1/title");
-                expect(firstTriple.object).toEqual('"Tony Benn"');
+                    let firstTriple = store.getTriples()[0];
+                    expect(firstTriple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
+                    expect(firstTriple.predicate).toEqual("http://purl.org/dc/elements/1.1/title");
+                    expect(firstTriple.object).toEqual('"Tony Benn"');
 
-                let secondTriple = result.getPersistentStore().getTriples()[1];
-                expect(secondTriple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
-                expect(secondTriple.predicate).toEqual("http://purl.org/dc/elements/1.1/publisher");
-                expect(secondTriple.object).toEqual('"Wikipedia"');
+                    let secondTriple = store.getTriples()[1];
+                    expect(secondTriple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
+                    expect(secondTriple.predicate).toEqual("http://purl.org/dc/elements/1.1/publisher");
+                    expect(secondTriple.object).toEqual('"Wikipedia"');
+                });
 
                 parser.clean();
-                expect(parser.getData().getPersistentStore().countTriples()).toEqual(0);
+                parser.getData().queryN3Store(store => {
+                    expect(store.countTriples()).toEqual(0);
+                });
                 done();
             });
        });
@@ -48,7 +52,7 @@ describe("GraphParser Class", () => {
             expect(() => parser.parse(generateTurtle(), "application/rdf+xml", null))
                 .toThrow(Error("Incorrect MimeType application/rdf+xml!"));
 
-            expect(() => parser.serialize(null, "application/rdf+xml", null))
+            expect(() => parser.serialize(new Graph(), "application/rdf+xml", null))
                .toThrow(Error("Incorrect MimeType application/rdf+xml!"));
         });
 });
