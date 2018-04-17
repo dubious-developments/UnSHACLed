@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Segment, Container, Header, List } from 'semantic-ui-react';
+import { Segment, Container, Header, List, Icon} from 'semantic-ui-react';
 import Navbar from '../components/navbarHome';
 
 class Contact extends React.Component<any, any> {
@@ -20,10 +20,28 @@ class Contact extends React.Component<any, any> {
                             <small>
                                 For any further questions, please check out our github repository or send us an e-mail!
                             </small>
+                        </p>
+                        <p>
+                            <List size="tiny">
+                                <List.Item
+                                    as="a"
+                                    href="https://github.com/dubious-developments/UnSHACLed"
+                                    target="_blank"
+                                    icon={
+                                        <Icon
+                                            name="github"
+                                            inverted={true}
+                                        />
+
+                                    }
+                                    content="Github repository"
+                                />
+                            </List>
+                        </p>
                             <List size="tiny">
                                 <List.Item
                                     icon='user'
-                                    content='Baes Jones (Testing Expert)'
+                                    content='Baes Jonas (Testing Expert)'
                                 />
                                 <List.Item
                                     icon='mail'
@@ -104,7 +122,6 @@ class Contact extends React.Component<any, any> {
                                     }
                                 />
                             </List>
-                        </p>
                     </Container>
                 </Segment>
             </div>
