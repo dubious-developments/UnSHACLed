@@ -17,8 +17,8 @@ describe("ValidationService Class", () => {
            parser.parse(getDataGraph(), "text/turtle", function (data: any) {
                parser.clean();
                parser.parse(getShapesGraph(), "text/turtle", function (shapes: any) {
-                   comp1.setPart("test", data);
-                   comp2.setPart("test", shapes);
+                   comp1 = comp1.withPart("test", data);
+                   comp2 = comp2.withPart("test", shapes);
                    model.tasks.schedule(
                        Model.createTask(
                            (mdata) => {

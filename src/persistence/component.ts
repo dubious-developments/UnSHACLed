@@ -1,98 +1,64 @@
-import * as Collections from "typescript-collections";
+import * as Immutable from "immutable";
 
 /**
  * A structure that is to be stored inside the Model.
  * Possibly contains multiple composite parts all mapped to an identifier.
  * An example component might contain multiple data graphs, each of which is associated with a filename.
  */
-export class Component {
+export class Component<T> {
 
+    /**
+     * The root part.
+     * @type {string}
+     */
     private static ROOT: string = "ROOT";
-    private parts: Collections.Dictionary<string, any>;
-    private changed: Collections.Set<any>;
 
     /**
-     * Create a new Component.
+     * A mapping of keys to parts.
      */
-    public constructor() {
-        this.parts = new Collections.Dictionary<string, any>();
-        this.changed = new Collections.Set<any>();
-    }
+    private readonly parts: Immutable.Map<string, T>;
 
     /**
-     * Retrieve all keys.
-     * @returns {string[]}
+     * Creates a new component.
+     * @param parts A mapping of part keys to parts.
      */
-    public getAllKeys() {
-        return this.parts.keys();
-    }
 
-    /**
-     * Retrieve a part of the component.
-     * @param {string} key
-     * @returns {T}
-     */
-    public getPart<T>(key: string): T | undefined {
-        return this.parts.getValue(key);
-    }
-
-    /**
-     * Retrieve a part of the Component,
-     * or in case the Part does not exist create a new part for the given key.
-     * @param {string} key
-     * @param createPart
-     * @returns {any}
-     */
-    public getOrCreatePart<T>(key: string, createPart: () => T): T {
-        let part = this.getPart<T>(key);
-        if (!part) {
-            part = createPart();
-            this.setPart<T>(key, part);
+    public constructor(parts?: Immutable.Map<string, T>) {
+        if (parts) {
+            this.parts = parts;
+        } else {
+            this.parts = Immutable.Map<string, T>();
         }
-        return part;
     }
 
     /**
-     * Bind a value to a given key,
-     * and add this value to the set of changed values.
-     * @param {string} key
-     * @param value
+     * Retrieves all keys in the component.
      */
-    public setPart<T>(key: string, value: T): void {
-        this.parts.setValue(key, value);
-        this.changed.add(value);
+    public getAllKeys(): string[] {
+        return this.parts.keySeq().toArray();
+    }
+
+    /**
+     * Retrieves a part of the component.
+     * @param key The key for the part to retrieve.
+     */
+    public getPart(key: string): T {
+        return this.parts.get(key);
     }
 
     /**
      * Retrieve the root part of this component.
-     * @returns {T | undefined}
+     * @returns T
      */
-    public getRoot<T>(): T | undefined {
+    public getRoot(): T {
         return this.getPart(Component.ROOT);
-    }
-
-    /**
-     * Retrieve the root part of this component or create a new root.
-     * @param {() => Part} createPart
-     * @returns {T}
-     */
-    public getOrCreateRoot<T>(createPart: () => T): T {
-        return this.getOrCreatePart(Component.ROOT, createPart);
-    }
-
-    /**
-     * Set the value of the root part of this component.
-     * @param {T} value
-     */
-    public setRoot<T>(value: T): void {
-        this.setPart(Component.ROOT, value);
     }
 
     /**
      * Retrieve all parts contained in this component.
      */
     public getParts(): any[] {
-        return this.parts.values();
+        return this.parts.valueSeq().toArray();
     }
 
     /**
@@ -103,7 +69,7 @@ export class Component {
         let relevantParts = new Array<any>();
         this.getAllKeys().forEach(k => {
             if (k !== Component.ROOT) {
-                relevantParts.push(this.parts.getValue(k));
+                relevantParts.push(this.parts.get(k));
             }
         });
 
@@ -111,12 +77,22 @@ export class Component {
     }
 
     /**
-     * Retrieve and subsequently clear the changed parts of this component.
-     * @returns {Set<any>}
+     * Bind a value to a given key. Returns a component
+     * with the updated (key, value) pair.
+     * @param key The key to bind a value to.
+     * @param value The value to bind to `key`.
      */
-    public getChanged(): Collections.Set<any> {
-        let changed = this.changed;
-        this.changed = new Collections.Set<any>();
-        return changed;
+    public withPart(key: string, value: T): Component<T> {
+        return new Component<T>(this.parts.set(key, value));
+    }
+
+    /**
+     * Bind a value to the root. Returns a component
+     * with the updated (key, value) pair.
+     * @param key The key to bind a value to.
+     * @param value The value to bind to `key`.
+     */
+    public withRoot(value: T): Component<T> {
+        return new Component<T>(this.parts.set(Component.ROOT, value));
     }
 }

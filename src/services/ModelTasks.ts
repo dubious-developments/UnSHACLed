@@ -5,6 +5,8 @@ import {Navbar} from "../components/navbarWork";
 import { extensionToMIME } from "./extensionToMIME";
 import {Task} from "../entities/task";
 import MxGraph from "../components/MxGraph";
+import { Graph, ImmutableGraph } from "../persistence/graph";
+import { Component } from "../persistence/component";
 
 /*
  * Load a file from the model using the fileName
@@ -13,8 +15,8 @@ export class LoadFileTask extends Task<ModelData, ModelTaskMetadata> {
 
     /**
      * Create a new load file task from Model
-     * @param {mComponent} ModelComponent
-     * @param {fileName} the name of the file
+     * @param mComponent
+     * @param fileName the name of the file
      */
     public constructor(private mComponent: ModelComponent, private fileName: string) {
         super();
@@ -45,8 +47,13 @@ export class GetOpenedFilesTask extends Task<ModelData, ModelTaskMetadata> {
 
     /**
      * Get the loaded files in the model
+<<<<<<< HEAD
      * @param {components} array of ModelComponents
      * @param {navBar} the frontend component
+=======
+     * @param mComponent
+     * @param navBar the frontend component
+>>>>>>> upstream/master
      */
     public constructor(private components: ModelComponent[], private navBar: Navbar) {
         super();
@@ -86,8 +93,8 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
 
     /**
      * Create a new VisualizeComponent task from Model
-     * @param {mComponent} ModelComponent
-     * @param {mxGraph} MxGraph
+     * @param mComponent
+     * @param mxGraph
      */
     public constructor(private mComponent: ModelComponent, private mxGraph: MxGraph) {
         super();
@@ -95,15 +102,15 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
     }
 
     public execute(data: ModelData): void {
-        let component: any = data.getComponent(this.mComponent);
+        let component = data.getComponent<Component<ImmutableGraph>>(this.mComponent);
         if (component) {
 
-            let tmp = component.getAllKeys();
-            for (let part of tmp) {
+            for (let part of component.getAllKeys()) {
                 // handle the graph objects correctly
                 if (this.mxGraph) {
-                    let store = component.getPart(part).getSHACLStore();
-                    this.mxGraph.visualizeDataGraph(store);
+                    let graph = component.getPart(part);
+                    graph.query(
+                        store => this.mxGraph.visualizeDataGraph(store));
                 } else {
                     console.log("error: could not find MxGraph");
                 }

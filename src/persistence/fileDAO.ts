@@ -6,8 +6,8 @@ import { DataAccessObject, Module } from "./dataAccessObject";
 import { Task } from "../entities/task";
 import {Model} from "../entities/model";
 import {ModelData} from "../entities/modelData";
-import {Parser} from "./parser";
 import {extensionToMIME} from "../services/extensionToMIME";
+import { ImmutableGraph, Graph } from "./graph";
 
 /**
  * Provides basic DAO functionality at the file granularity level.
@@ -43,8 +43,8 @@ export class FileDAO implements DataAccessObject {
      */
     public find(module: Module): void {
         let self = this;
-        this.io.readFromFile(module, function (result: any) {
-            self.model.tasks.schedule(new LoadTask(result, module));
+        this.io.readFromFile(module, function (result: Graph) {
+            self.model.tasks.schedule(new LoadTask<ImmutableGraph>(result.asImmutable(), module));
             self.model.tasks.processTask(); // TODO: Remove this when we have a scheduler!
         });
     }
@@ -56,26 +56,26 @@ export class FileDAO implements DataAccessObject {
  */
 class IOFacilitator {
 
-    private parsers: Collections.Dictionary<ModelComponent, Parser>;
+    private parsers: Collections.Dictionary<ModelComponent, Parser<Graph>>;
 
     /**
      * Create a new IOFacilitator.
      */
     public constructor() {
-        this.parsers = new Collections.Dictionary<ModelComponent, Parser>();
+        this.parsers = new Collections.Dictionary<ModelComponent, Parser<Graph>>();
     }
 
-    public registerParser(label: ModelComponent, parser: Parser): void {
+    public registerParser(label: ModelComponent, parser: Parser<Graph>) {
         this.parsers.setValue(label, parser);
     }
 
     /**
      * Read from an existing file.
-     * @returns {Graph}
      * @param module
      * @param load
      */
-    public readFromFile(module: Module, load: (result: any) => void): void {
+
+    public readFromFile(module: Module, load: (result: Graph) => void) {
         let parser = this.parsers.getValue(module.getTarget());
         if (!parser) {
             throw new Error("Unsupported target " + module.getTarget());
@@ -100,7 +100,7 @@ class IOFacilitator {
      * @param module
      * @param data
      */
-    public writeToFile(module: Module, data: any): void {
+    public writeToFile(module: Module, data: Graph) {
         let FileSaver = require("file-saver");
         let parser = this.parsers.getValue(module.getTarget());
         if (!parser) {
@@ -140,7 +140,6 @@ export class FileModule implements Module {
 
     /**
      * Return the designated ModelComponent.
-     * @returns {ModelComponent}
      */
     getTarget(): ModelComponent {
         return this.target;
@@ -148,7 +147,6 @@ export class FileModule implements Module {
 
     /**
      * Return the filename.
-     * @returns {string}
      */
     getIdentifier(): string {
         return this.filename;
@@ -156,7 +154,6 @@ export class FileModule implements Module {
 
     /**
      * Return the Blob representing the file.
-     * @returns {Blob}
      */
     getContent(): Blob {
         return this.file;
@@ -164,7 +161,6 @@ export class FileModule implements Module {
 
     /**
      * Returns the MIME type
-     * @returns {string}
      */
     getMime(): string {
         let mime = this.file.type;
@@ -181,7 +177,7 @@ export class FileModule implements Module {
 /**
  * A Task that reads a file and adds its contents as a component to the Model.
  */
-class LoadTask extends Task<ModelData, ModelTaskMetadata> {
+class LoadTask<T> extends Task<ModelData, ModelTaskMetadata> {
 
     /**
      * Create a new LoadTask.
@@ -191,7 +187,7 @@ class LoadTask extends Task<ModelData, ModelTaskMetadata> {
      * @param {FileModule} module
      */
     public constructor(
-        private readonly result: any,
+        private readonly result: T,
         public readonly module: Module) {
 
         super();
@@ -202,12 +198,13 @@ class LoadTask extends Task<ModelData, ModelTaskMetadata> {
      * @param data The data the task takes as input.
      */
     public execute(data: ModelData): void {
-        let component = data.getOrCreateComponent<Component>(
+        let component = data.getOrCreateComponent(
             this.module.getTarget(),
-            () => new Component());
+            () => new Component<T>());
 
-        component.setPart(this.module.getIdentifier(), this.result);
-        data.setComponent(this.module.getTarget(), component);
+        data.setComponent(
+            this.module.getTarget(),
+            component.withPart(this.module.getIdentifier(), this.result));
     }
 
     /**
@@ -243,13 +240,12 @@ class SaveTask extends Task<ModelData, ModelTaskMetadata> {
      * @param data The data the task takes as input.
      */
     public execute(data: ModelData): void {
-        let component = data.getOrCreateComponent<Component>(
-            this.module.getTarget(),
-            () => new Component());
-
-        let part = component.getPart(this.module.getIdentifier());
-        if (part) {
-            this.io.writeToFile(this.module, part);
+        let component = data.getComponent<Component<ImmutableGraph>>(this.module.getTarget());
+        if (component) {
+            let part = component.getPart(this.module.getIdentifier());
+            if (part) {
+                this.io.writeToFile(this.module, part.toMutable());
+            }
         }
     }
 

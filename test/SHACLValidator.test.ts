@@ -71,10 +71,10 @@ describe("WellDefinedSHACLValidator Class", () => {
                     parser.parse(getPlaygroundData(), "text/turtle", function (data2: any) {
                         parser.clean();
                         parser.parse(getPlaygroundShapes(), "text/turtle", function (shapes2: any) {
-                            comp1.setPart("test1", data1);
-                            comp1.setPart("test2", data2);
-                            comp2.setPart("test1", shapes1);
-                            comp2.setPart("test2", shapes2);
+                            comp1 = comp1.withPart("test1", data1);
+                            comp1 = comp1.withPart("test2", data2);
+                            comp2 = comp2.withPart("test1", shapes1);
+                            comp2 = comp2.withPart("test2", shapes2);
                             model.tasks.schedule(
                                 Model.createTask(
                                     (data) => {

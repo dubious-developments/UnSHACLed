@@ -37,13 +37,13 @@ export class WellDefinedSHACLValidator implements Validator {
      * @param {((report: ValidationReport) => void) | null} andThen
      */
     public validate(data: ModelData, andThen: ((report: ValidationReport) => void) | null): void {
-        let dataComponent = data.getOrCreateComponent<Component>(
+        let dataComponent = data.getOrCreateComponent<Component<Graph>>(
             ModelComponent.DataGraph,
-            () => new Component());
+            () => new Component<Graph>());
 
-        let shapesComponent = data.getOrCreateComponent<Component>(
+        let shapesComponent = data.getOrCreateComponent<Component<Graph>>(
             ModelComponent.SHACLShapesGraph,
-            () => new Component());
+            () => new Component<Graph>());
 
         let dataRoot = new Graph();
         let shapesRoot = new Graph();
@@ -53,16 +53,16 @@ export class WellDefinedSHACLValidator implements Validator {
         // is clearing the change sets of any graph structures
         dataComponent.getCompositeParts().forEach(g => {
             dataRoot.incrementalMerge(g);
-            g.clearChanges(); // crucial for this to keep working
+            g.clearRecentChanges(); // crucial for this to keep working
         });
 
         shapesComponent.getCompositeParts().forEach(g => {
             shapesRoot.incrementalMerge(g);
-            g.clearChanges(); // crucial for this to keep working
+            g.clearRecentChanges(); // crucial for this to keep working
         });
 
-        dataComponent.setRoot(dataRoot);
-        shapesComponent.setRoot(shapesRoot);
+        data.setComponent(ModelComponent.DataGraph, dataComponent.withRoot(dataRoot));
+        data.setComponent(ModelComponent.SHACLShapesGraph, shapesComponent.withRoot(shapesRoot));
 
         // let parser = new GraphParser();
 
