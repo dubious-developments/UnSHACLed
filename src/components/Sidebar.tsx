@@ -20,8 +20,6 @@ class SideBar extends React.Component<SidebarProps, any> {
             value: '',
             content: 1,
             dragid: null,
-            templates: [],
-            templateCount: 0
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -114,7 +112,7 @@ class SideBar extends React.Component<SidebarProps, any> {
     render() {
         const logo = require('../img/shacl_logo_trans.png');
         const defaultOption = 1;
-        let {templates} = this.state;
+        let {templates} = this.props;
         return (
             <Sidebar
                 as={Menu}
@@ -168,7 +166,6 @@ class SideBar extends React.Component<SidebarProps, any> {
                         <Menu.Item id="TemplateMenu">
                             Template
                             <Button
-                                onClick={() => this.addTemplateEntry("Entry ")}
                                 id={"addTemplate"}
                             > Add Template
                             </Button>

@@ -37,13 +37,15 @@ class Workspace extends React.Component<any, any> {
                 "new"
             )
         });
+        console.log("called callback wiht" + childData);
     }
     render() {
         const {menuVisible} = this.state;
         const {dragid} = this.state;
+        const {templates} = this.state;
         return (
             <Sidebar.Pushable style={{width: '100%', height: '100%'}}>
-                <SideBar visible={menuVisible} callback={this.idCallback}/>
+                <SideBar visible={menuVisible} callback={this.idCallback} templates={templates}/>
                 <Sidebar.Pusher style={{height: '100vh', padding: '0em 0em'}}>
                     <Segment basic={true} style={{height: '100vh', padding: '0em 0em'}}>
                         <Navbar visible={menuVisible} callback={this.callBackNavBar}/>
