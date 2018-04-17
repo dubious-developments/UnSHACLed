@@ -387,7 +387,7 @@ class MxGraph extends React.Component<any, any> {
         this.nameToStandardCellDict.setValue('block', block);
 
         let rowObject = new Row();
-        let row = new mxCell(rowObject, new mxGeometry(0, 0, 0, 26), 'row');
+        let row = new mxCell(rowObject, new mxGeometry(0, 0, 0, 26), 'Row');
         row.setVertex(true);
         row.setConnectable(false);
         this.nameToStandardCellDict.setValue('row', row);
@@ -585,14 +585,30 @@ class MxGraph extends React.Component<any, any> {
         graph.getStylesheet().putCellStyle('Data', style);
 
         style = {};
+        style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_SWIMLANE;
+        style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
+        style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
+        style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_TOP;
+        style[mxConstants.STYLE_FILLCOLOR] = '#C10000';
+        style[mxConstants.STYLE_SWIMLANE_FILLCOLOR] = '#ffffff';
+        style[mxConstants.STYLE_STROKECOLOR] = '#C10000';
+        style[mxConstants.STYLE_FONTCOLOR] = '#000000';
         style[mxConstants.STYLE_STROKEWIDTH] = '1';
-        style[mxConstants.STYLE_STROKECOLOR] = '#A1E44D';
-        graph.getStylesheet().putCellStyle('row', style);
+        style[mxConstants.STYLE_STARTSIZE] = '28';
+        style[mxConstants.STYLE_FONTSIZE] = '12';
+        style[mxConstants.STYLE_FONTSTYLE] = 1;
+        style[mxConstants.STYLE_SHADOW] = 1;
+        graph.getStylesheet().putCellStyle('InvalidBlock', style);
 
         style = {};
         style[mxConstants.STYLE_STROKEWIDTH] = '1';
-        style[mxConstants.STYLE_STROKECOLOR] = '#CC0000';
-        graph.getStylesheet().putCellStyle('invalid-row', style);
+        style[mxConstants.STYLE_STROKECOLOR] = '#A1E44D';
+        graph.getStylesheet().putCellStyle('Row', style);
+
+        style = {};
+        style[mxConstants.STYLE_STROKEWIDTH] = '1';
+        style[mxConstants.STYLE_STROKECOLOR] = '#C10000';
+        graph.getStylesheet().putCellStyle('InvalidRow', style);
 
         style = graph.stylesheet.getDefaultEdgeStyle();
         style[mxConstants.STYLE_LABEL_BACKGROUNDCOLOR] = '#FFFFFF';
