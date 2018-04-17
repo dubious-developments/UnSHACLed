@@ -17,6 +17,7 @@ class MxGraph extends React.Component<any, any> {
     private triples: Collections.Set<Triple>;
 
     private cellToTriples: Collections.Dictionary<any, Triple>;
+    private invalidCells: Collections.Set<any>;
 
     constructor(props: string) {
         super(props);
@@ -41,6 +42,7 @@ class MxGraph extends React.Component<any, any> {
         this.subjectToBlockDict = new Collections.Dictionary<string, Block>();
         this.triples = new Collections.Set<Triple>((t) =>  t.subject + " " + t.predicate + " " + t.object);
         this.cellToTriples = new Collections.Dictionary<any, Triple>((c) => c.value.name);
+        this.invalidCells = new Collections.Set<any>();
     }
 
     componentDidMount() {
@@ -756,6 +758,44 @@ class MxGraph extends React.Component<any, any> {
             });
 
         }
+    }
+
+    conformance(report: any) {
+        let invalidCellsToErrorDict = new Collections.DefaultDictionary<any, any>(() => []);
+        // The keys function of a dictionary returns an array instead of a set, so keep an extra set aswell
+        let incInvalidCells = new Collections.Set<any>(); 
+        if (!report.getIsConforming()) {
+            for (let error of report.getValidationErrors()) {
+                let block = this.subjectToBlockDict.getValue(error.dataElement);
+                let cell = this.blockToCellDict.getValue(block);
+                invalidCellsToErrorDict.getValue(cell).push(error); 
+                incInvalidCells.add(cell);
+            }
+        }
+        invalidCellsToErrorDict.forEach((cell, errors) => this.turnCellInvalid(cell, errors));
+
+        this.invalidCells.difference(incInvalidCells);
+        // In invalidCells are now the cells that are no longer invalid
+        this.invalidCells.forEach(cell => {
+            this.turnCellValid(cell);
+        });
+
+        this.invalidCells = incInvalidCells;
+    }
+
+    turnCellInvalid(cell: any, errors: any[]) {
+        // Set style of block
+        cell.setStyle("InvalidBlock");
+
+        // Set style of rows
+        
+    }
+
+    turnCellValid(cell: any) {
+        // Set style of block
+        cell.setStyle(cell.value.blockType);
+
+        // Set style of rows
     }
 
     render() {
