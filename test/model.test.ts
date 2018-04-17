@@ -25,6 +25,44 @@ describe("ModelTaskMetadata Class", () => {
      });
 });
 
+describe("ModelData class", () => {
+    it("has a working write buffer", () => {
+        let data = new ModelData();
+        data.setComponent(ModelComponent.DataGraph, 10);
+        let buffers = data.drainBuffers();
+        expect(buffers.writeBuffer.contains(ModelComponent.DataGraph)).toBeTruthy();
+        expect(buffers.writeBuffer.size()).toEqual(1);
+        expect(data.drainBuffers().writeBuffer.size()).toEqual(0);
+    });
+
+    it("has a working read buffer", () => {
+        let data = new ModelData();
+        data.setComponent(ModelComponent.DataGraph, 10);
+        data.drainBuffers();
+        let value = data.getComponent<number>(ModelComponent.DataGraph);
+        let buffers = data.drainBuffers();
+        expect(buffers.readBuffer.contains(ModelComponent.DataGraph)).toBeTruthy();
+        expect(buffers.writeBuffer.size()).toEqual(0);
+        expect(data.drainBuffers().readBuffer.size()).toEqual(0);
+    });
+
+    it("updates the right buffer from a getOrCreateComponent call", () => {
+        let data = new ModelData();
+        expect(data.getOrCreateComponent(ModelComponent.DataGraph, () => 10))
+            .toEqual(10);
+        let buffers = data.drainBuffers();
+        expect(buffers.writeBuffer.contains(ModelComponent.DataGraph)).toBeTruthy();
+        expect(buffers.writeBuffer.size()).toEqual(1);
+        expect(buffers.readBuffer.size()).toEqual(0);
+        expect(data.getOrCreateComponent(ModelComponent.DataGraph, () => 20))
+            .toEqual(10);
+        buffers = data.drainBuffers();
+        expect(buffers.readBuffer.contains(ModelComponent.DataGraph)).toBeTruthy();
+        expect(buffers.writeBuffer.size()).toEqual(0);
+        expect(buffers.writeBuffer.size()).toEqual(0);
+    });
+});
+
 describe("Model Class", () => {
     it("can be created", () => {
         new Model().registerObserver((changeBuf) => []);
@@ -54,5 +92,52 @@ describe("Model Class", () => {
         model.tasks.processTask();
         expect(model.tasks.isEmpty()).toEqual(false);
         expect(modelData.getComponent<number>(ModelComponent.DataGraph)).toEqual(2);
+    });
+
+    it("catches tasks that read things they aren't supposed to", () => {
+        let modelData = new ModelData();
+        modelData.setComponent(ModelComponent.DataGraph, 42);
+        modelData.drainBuffers();
+        let model = new Model(modelData);
+        model.tasks.schedule(
+            Model.createTask(
+                data => { data.getComponent<number>(ModelComponent.DataGraph); },
+                [],
+                []));
+        expect(() => model.tasks.processAllTasks()).toThrow();
+    });
+
+    it("catches tasks that write things they aren't supposed to", () => {
+        let modelData = new ModelData();
+        let model = new Model(modelData);
+        model.tasks.schedule(
+            Model.createTask(
+                data => { data.setComponent(ModelComponent.DataGraph, 42); },
+                [],
+                []));
+        expect(() => model.tasks.processAllTasks()).toThrow();
+    });
+
+    it("catches tasks that don't write after they promise to do so", () => {
+        let modelData = new ModelData();
+        let model = new Model(modelData);
+        model.tasks.schedule(
+            Model.createTask(
+                data => { },
+                [],
+                [ModelComponent.DataGraph]));
+        expect(() => model.tasks.processAllTasks()).toThrow();
+    });
+
+    it("executes tasks that write after they promised to", () => {
+        let modelData = new ModelData();
+        let model = new Model(modelData);
+        model.tasks.schedule(
+            Model.createTask(
+                data => { data.setComponent(ModelComponent.DataGraph, 42); },
+                [],
+                [ModelComponent.DataGraph]));
+        // The "test" is that this statement doesn't throw.
+        model.tasks.processAllTasks();
     });
 });

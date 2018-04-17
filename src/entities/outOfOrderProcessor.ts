@@ -288,7 +288,14 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
             if (this.latestComponentStateMap.getValue(component) === instruction) {
                 this.latestComponentStateMap.remove(component);
             }
+        });
 
+        let buffers = instruction.data.peekBuffers();
+        buffers.readBuffer.forEach(component => {
+            // Propagate reads to the architecture state's read buffer.
+            this.state.getComponent<any>(component);
+        });
+        buffers.writeBuffer.forEach(component => {
             // Update the architecture state.
             this.state.setComponent<any>(
                 component,

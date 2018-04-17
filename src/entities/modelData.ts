@@ -1,13 +1,15 @@
 import * as Collections from "typescript-collections";
 import { ModelComponent } from "./modelTaskMetadata";
 
+type AccessBuffer = Collections.Set<ModelComponent>;
+type AccessBufferPair = { readBuffer: AccessBuffer, writeBuffer: AccessBuffer };
+
 /**
  * A mutable view of the model.
  */
 export class ModelData {
-    private writeBuffer: Collections.Set<ModelComponent>;
-
-    private readBuffer: Collections.Set<ModelComponent>;
+    private writeBuffer: AccessBuffer;
+    private readBuffer: AccessBuffer;
 
     /**
      * A dictionary that contains all of the model's components.
@@ -75,21 +77,22 @@ export class ModelData {
     }
 
     /**
-     * Drains the model's read buffer.
+     * Drains the model's read, write buffer pair.
      */
-    public drainReadBuffer(): Collections.Set<ModelComponent> {
-        let result = this.readBuffer;
+    public drainBuffers(): AccessBufferPair {
+        let readBuf = this.readBuffer;
+        let writeBuf = this.writeBuffer;
         this.readBuffer = new Collections.Set<ModelComponent>();
-        return result;
+        this.writeBuffer = new Collections.Set<ModelComponent>();
+        return { readBuffer: readBuf, writeBuffer: writeBuf };
     }
 
     /**
-     * Drains the model's write buffer.
+     * Takes a peek at the read, write buffer pair without
+     * modifying them.
      */
-    public drainWriteBuffer(): Collections.Set<ModelComponent> {
-        let result = this.writeBuffer;
-        this.writeBuffer = new Collections.Set<ModelComponent>();
-        return result;
+    public peekBuffers(): AccessBufferPair {
+        return { readBuffer: this.readBuffer, writeBuffer: this.writeBuffer };
     }
 
     /**

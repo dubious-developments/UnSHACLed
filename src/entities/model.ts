@@ -51,8 +51,46 @@ export class Model {
         this.tasks = new OutOfOrderProcessor(
             wellDefinedData,
             task => task,
-            task => task,
-            task => this.notifyObservers(wellDefinedData.drainWriteBuffer()));
+            (task: ModelTask) => task,
+            (task: ModelTask) => {
+                // Drain the read/write buffers.
+                let buffers = wellDefinedData.drainBuffers();
+                
+                // Check that the read/write buffers match the behavior
+                // specified by the task metadata.
+                buffers.readBuffer.forEach(element => {
+                    if (!task.metadata.readsFrom(element)) {
+                        // Looks like the task read from an element that
+                        // it doesn't have access to.
+                        throw Error(
+                            `${task} read from ${element}, which is not in its read set. ` +
+                            `Consider adding ${element} to the read set if the read is intentional.`);
+                    }
+                });
+                buffers.writeBuffer.forEach(element => {
+                    if (!task.metadata.writesTo(element)) {
+                        // Looks like the task write to an element that
+                        // it doesn't have access to.
+                        throw Error(
+                            `${task} wrote to ${element}, which is not in its write set. ` +
+                            `Consider adding ${element} to the write set if the write is intentional.`);
+                    }
+                });
+                task.metadata.writeSet.forEach(element => {
+                    // Components that are written to must either be
+                    // in the read set, in the write buffer, or both.
+                    if (!task.metadata.readSet.contains(element)
+                        && !buffers.writeBuffer.contains(element)) {
+                            throw Error(
+                                `${task} does not write to ${element}, which is in the ` +
+                                `write set but not in the read set. Consider adding ${element} ` +
+                                `to the read set if no write is the intended behavior.`);
+                    }
+                });
+
+                // Notify observers.
+                this.notifyObservers(buffers.writeBuffer);
+            });
         this.observers = [];
     }
 
