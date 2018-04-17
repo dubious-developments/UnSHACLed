@@ -13,9 +13,10 @@ class MxGraph extends React.Component<any, any> {
 
     private nameToStandardCellDict: Collections.Dictionary<string, any>;
     private blockToCellDict: Collections.Dictionary<Block, any>;
-    private subjectToBlockDict: Collections.Dictionary<any, Block>;
-    private triples: Collections.Set<any>;
-    private todoTriples: Collections.Set<any>;
+    private subjectToBlockDict: Collections.Dictionary<string, Block>;
+    private triples: Collections.Set<Triple>;
+
+    private cellTotriples: Collections.Dictionary<any, Triple>;
 
     constructor(props: string) {
         super(props);
@@ -37,9 +38,9 @@ class MxGraph extends React.Component<any, any> {
 
         this.nameToStandardCellDict = new Collections.Dictionary<string, any>();
         this.blockToCellDict = new Collections.Dictionary<Block, any>((b) => b.name);
-        this.subjectToBlockDict = new Collections.Dictionary<any, Block>();
-        this.triples = new Collections.Set<any>();
-        this.todoTriples = new Collections.Set<any>();
+        this.subjectToBlockDict = new Collections.Dictionary<string, Block>();
+        this.triples = new Collections.Set<Triple>((t) =>  t.subject + " " + t.predicate + " " + t.object);
+        this.cellTotriples = new Collections.Dictionary<any, Triple>((c) => c.value.name);
     }
 
     componentDidMount() {
@@ -400,52 +401,32 @@ class MxGraph extends React.Component<any, any> {
         let SH = $rdf.Namespace("http://www.w3.org/ns/shacl#");
         // let XSD = $rdf.Namespace("http://www.w3.org/2001/XMLSchema#");
 
-        let relations = new Collections.Set<any>();
-        relations.add(SH("property").uri);
-        relations.add(SH("node").uri);
-        relations.add(RDF("rest").uri);
-        relations.add(SH("in").uri);
-
         let triples = store.statements;
-        let newTriples = new Collections.Set<any>();
+        let newTriples = new Collections.Set<Triple>((t) =>  t.subject + " " + t.predicate + " " + t.object);
 
         triples.forEach((triple: any) => {
-            if (!this.subjectToBlockDict.containsKey(triple.subject)) {
-                this.subjectToBlockDict.setValue(triple.subject, new Block(triple.subject.value));
+            if (!this.subjectToBlockDict.containsKey(triple.subject.value)) {
+                this.subjectToBlockDict.setValue(triple.subject.value, new Block(triple.subject.value));
             }
-            newTriples.add(triple);
+            newTriples.add(new Triple(triple.subject.value, triple.predicate.value, triple.object.value));
         });
 
         newTriples.difference(this.triples);
         this.triples.union(newTriples);
-        newTriples.union(this.todoTriples);
-        this.todoTriples.clear();
 
         newTriples.forEach((triple: any) => {
             let subject = triple.subject;
             let predicate = triple.predicate;
             let object = triple.object;
             let subjectBlock = this.subjectToBlockDict.getValue(subject);
-            let objectBlock = this.subjectToBlockDict.getValue(object);
-
             if (subjectBlock) {
-                // todo maybe hande arrows just like traits and let the visualisation handle arrows?
-                // todo as this might get complex with editing
-                if (relations.contains(predicate.value)) {
-                    if (objectBlock) {
-                        subjectBlock.arrows.push(new Arrow(predicate.value, objectBlock));
-                    } else {
-                        this.todoTriples.add(triple);
-                    }
-                } else if (predicate.value === RDF("type").uri && object.value === SH("NodeShape").uri) {
+                if (predicate === RDF("type").uri && object === SH("NodeShape").uri) {
                     subjectBlock.blockType = "NodeShape";
-                    subjectBlock.name = subject.value;
-                } else if (predicate.value === SH("path").uri) {
-                    subjectBlock.name = object.value;
+                } else if (predicate === SH("path").uri) {
+                    subjectBlock.name = object;
                     subjectBlock.blockType = "Property";
                 } else {
-                    // todo parse Collections of graphs
-                    subjectBlock.traits.push([predicate.value, object.toString()]);
+                    subjectBlock.traits.push(triple);
                 }
             }
         });
@@ -461,91 +442,53 @@ class MxGraph extends React.Component<any, any> {
 
     visualizeDataGraph(store: any) {
         this.clear();
-
         let {graph} = this.state;
         let blocks = this.parseDataGraphToBlocks(store);
-        blocks.forEach(bl => {
-            this.blockToCellDict.setValue(bl, this.addBlock(graph, bl));
-        });
-
-        blocks.forEach(bl => this.addArrows(graph, bl));
-
-        let layout = new mxStackLayout(graph, false, 35);
-        layout.execute(graph.getDefaultParent());
-    }
-
-    addBlock(graph: any, b: Block) {
         let model = graph.getModel();
-
-        // Gets the default parent for inserting new cells. This
-        // is normally the first child of the root (ie. layer 0).
         let parent = graph.getDefaultParent();
 
-        let v1 = model.cloneCell(this.nameToStandardCellDict.getValue('block'));
-
-        // Adds cells to the model in a single step
-        model.beginUpdate();
-        try {
-            let longestname = 0;
-            b.traits.forEach(trait => {
-                let temprow = model.cloneCell(this.nameToStandardCellDict.getValue('row'));
-                let name = trait[0] + ": " + trait[1];
-                longestname = Math.max(name.length, longestname);
-                temprow.value = {name: name, trait: trait};
-                v1.insert(temprow);
-            });
-
-            b.arrows.forEach(arrow => {
-                longestname = Math.max(arrow.name.length + arrow.to.name.length, longestname);
-            });
-
-            let edgeElements = 0;
-            for (let i = 0; i < model.getChildCount(parent); i++) {
-                if (!model.isEdge(model.getChildAt(parent, i))) {
-                    edgeElements++;
-                }
-            }
-
+        blocks.forEach(b => {
+            let v1 = model.cloneCell(this.nameToStandardCellDict.getValue('block'));
             v1.value = b;
-            if (b.blockType === undefined) {
-                b.blockType = "Data";
-            }
-            v1.style = b.blockType;
-            v1.geometry.width += longestname * 4;
-            graph.addCell(v1, parent);
+            this.blockToCellDict.setValue(b, v1);
+        });
 
-            v1.geometry.alternateBounds =
-                new mxRectangle(0, 0, v1.geometry.width, v1.geometry.height);
-        } finally {
-            // save graph into state
-            // this.saveGraph(graph);
-
-            // Updates the display
-            model.endUpdate();
-        }
-
-        graph.setSelectionCell(v1);
-        return v1;
-    }
-
-    addArrows(graph: any, b: Block) {
-        b.arrows.forEach(arrow => {
-            let model = graph.getModel();
+        blocks.forEach(b => {
             let v1 = this.blockToCellDict.getValue(b);
-            let v2 = this.blockToCellDict.getValue(arrow.to);
-
-            let newRow = model.cloneCell(this.nameToStandardCellDict.getValue('row'));
-            let name = arrow.name + ": " + arrow.to.name;
-            newRow.value = {name: name};
-            v1.insert(newRow);
-
             model.beginUpdate();
             try {
-                graph.insertEdge(graph.getDefaultParent(), null, '', newRow, v2);
+                let longestname = 0;
+                b.traits.forEach(trait => {
+                    let temprow = model.cloneCell(this.nameToStandardCellDict.getValue('row'));
+                    let name = trait.predicate + ": " + trait.object;
+                    longestname = Math.max(name.length, longestname);
+                    temprow.value = {name: name, trait: trait};
+                    v1.insert(temprow);
+
+                    this.cellTotriples.setValue(temprow, trait);
+
+                    let b2 = this.subjectToBlockDict.getValue(trait.object);
+                    if (b2) {
+                        let v2 = this.blockToCellDict.getValue(b2);
+                        graph.insertEdge(graph.getDefaultParent(), null, '', temprow, v2);
+                    }
+                });
+
+                if (b.blockType === undefined) {
+                    b.blockType = "Data";
+                }
+                v1.style = b.blockType;
+                v1.geometry.width += longestname * 4;
+                v1.geometry.alternateBounds = new mxRectangle(0, 0, v1.geometry.width, v1.geometry.height);
+                graph.addCell(v1, parent);
+
             } finally {
                 model.endUpdate();
             }
         });
+
+        let layout = new mxStackLayout(graph, false, 35);
+        layout.execute(graph.getDefaultParent());
     }
 
     configureStylesheet(graph: any) {
@@ -748,6 +691,18 @@ class MxGraph extends React.Component<any, any> {
             this.initDragAndDrop(graph);
             this.initToolBar(editor);
             container.focus();
+
+            graph.addListener(mxEvent.CELLS_REMOVED, (sender: any, evt: any) => {
+                let cells = evt.getProperty("cells");
+
+                for (let i = 0; i < cells.length; i++) {
+                    let triple = this.cellTotriples.getValue(cells[i]);
+                    if (triple) {
+                        console.log(triple);
+                    }
+                }
+            });
+
         }
     }
 
@@ -768,14 +723,12 @@ class MxGraph extends React.Component<any, any> {
 }
 
 class Block {
-    public arrows: Array<Arrow>;
-    public traits: Array<Array<string>>;
+    public traits: Array<Triple>;
     public blockType: string;
     public name: string;
 
     constructor(name?: string) {
         this.name = name || "";
-        this.arrows = [];
         this.traits = [];
     }
 
@@ -784,17 +737,15 @@ class Block {
     }
 }
 
-class Arrow {
-    public name: string;
-    public to: Block;
+class Triple {
+    public subject: string;
+    public predicate: string;
+    public object: string;
 
-    constructor(name: string, to: Block) {
-        this.name = name;
-        this.to = to;
-    }
-
-    clone() {
-        return mxUtils.clone(this);
+    constructor(subject: string, predicate: string, object: string) {
+        this.subject = subject;
+        this.predicate = predicate;
+        this.object = object;
     }
 }
 
