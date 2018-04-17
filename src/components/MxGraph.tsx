@@ -728,25 +728,26 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             console.log(cells[0].value);
             let cellname;
 
-            // handle non-block/block cells differently
-            if (typeof (cells[0].value) === "string") {
-                cellname = cells[0].value;
+            // handle multiple cell selection
+            if (cells.length === 1) {
+                // handle non-block/block cells differently
+                if (typeof (cells[0].value) === "string") {
+                    cellname = cells[0].value;
+                } else {
+                    cellname = cells[0].value.name.split("/").pop();
+                    console.log(cells[0]);
+                    // set all block clear all block values
+                    cells[0].value.traits = [];
+                }
             } else {
-                cellname = cells[0].value.name;
+                cellname = "Multiple components";
             }
-
 
             // Function that is executed when the image is dropped on
             // the graph. The cell argument points to the cell under
             // the mousepointer if there is one.
-            var funct = function (gr: any, evt: any, cell: any) {
-                gr.stopEditing(false);
-
-                var pt = gr.getPointForEvent(evt);
-                var dx = pt.x - bounds.x;
-                var dy = pt.y - bounds.y;
-
-                gr.setSelectionCells(gr.importCells(cells, dx, dy, cell));
+            var funct = function (gr: any, evt: any, target: any, x: any, y: any, cell: any) {
+                gr.setSelectionCells(gr.importCells(cells, x, y, cell));
             };
             // create sidebar entry
             // invoke callback on parent component, which will add entry to sidebar

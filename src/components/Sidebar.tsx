@@ -165,12 +165,17 @@ class SideBar extends React.Component<SidebarProps, any> {
                         </Menu.Item>*/}
                         <Menu.Item id="TemplateMenu">
                             Template
-                            <Button
-                                id={"addTemplate"}
-                            > Add Template
-                            </Button>
                             <this.DynamicMenu kind="Template"/>
+
                             <Menu.Menu>
+                                <Menu.Item>
+                                    <Button
+                                        id={"addTemplate"}
+                                        inverted={true}
+
+                                    > Add template from selection
+                                    </Button>
+                                </Menu.Item>
                                 {templates}
                             </Menu.Menu>
 
