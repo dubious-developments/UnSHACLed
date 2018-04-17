@@ -4,13 +4,14 @@ import {ModelComponent} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
 import {VisualizeComponent} from "../services/ModelTasks";
 import { Button } from 'semantic-ui-react';
+import {MxGraphProps} from "./interfaces/interfaces";
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout: any;
 
 let $rdf = require('rdflib');
 
-class MxGraph extends React.Component<any, any> {
+class MxGraph extends React.Component<MxGraphProps, any>  {
 
     private nameToStandardCellDict: Collections.Dictionary<string, any>;
     private blockToCellDict: Collections.Dictionary<Block, any>;
@@ -18,7 +19,7 @@ class MxGraph extends React.Component<any, any> {
     private triples: Collections.Set<any>;
     private todoTriples: Collections.Set<any>;
 
-    constructor(props: string) {
+    constructor(props: any) {
         super(props);
         this.state = {
             graph: null,
@@ -740,6 +741,10 @@ class MxGraph extends React.Component<any, any> {
         }
 
     }
+
+    addTemplate2() {
+        console.log("Ready to add templates");
+    }
     main(container: HTMLElement | null): void {
         // Checks if the browser is supported
         if (!container) {
@@ -784,6 +789,12 @@ class MxGraph extends React.Component<any, any> {
             this.initDragAndDrop(graph);
             this.initToolBar(editor);
             container.focus();
+            // Get add template button
+            var d2 = document.getElementById("addTemplate");
+            if (d2) {
+                d2.onclick = this.addTemplate2;
+            }
+
         }
     }
 

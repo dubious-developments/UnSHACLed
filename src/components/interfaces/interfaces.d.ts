@@ -25,5 +25,5 @@ export interface SidebarProps {
 
 /* Props definition for mxgraph component */
 export interface MxGraphProps {
-    dragid: string;
+    callback: PropTypes.func;
 }

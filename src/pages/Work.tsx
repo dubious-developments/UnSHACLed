@@ -10,11 +10,13 @@ class Workspace extends React.Component<any, any> {
         super(props);
         this.state = {
             menuVisible: true,
-            dragid: null
+            dragid: null,
+            templates: []
         };
 
         this.callBackNavBar = this.callBackNavBar.bind(this);
         this.idCallback = this.idCallback.bind(this);
+        this.templateCallback = this.templateCallback.bind(this);
     }
 
     callBackNavBar(childData: boolean) {
@@ -29,6 +31,13 @@ class Workspace extends React.Component<any, any> {
         });
     }
 
+    templateCallback(childData: string) {
+        this.setState({
+            templates: this.state.templates.concat(
+                "new"
+            )
+        });
+    }
     render() {
         const {menuVisible} = this.state;
         const {dragid} = this.state;
@@ -38,7 +47,7 @@ class Workspace extends React.Component<any, any> {
                 <Sidebar.Pusher style={{height: '100vh', padding: '0em 0em'}}>
                     <Segment basic={true} style={{height: '100vh', padding: '0em 0em'}}>
                         <Navbar visible={menuVisible} callback={this.callBackNavBar}/>
-                        <MxGraph dragid={dragid}/>
+                        <MxGraph callback={this.templateCallback} />
                     </Segment>
                 </Sidebar.Pusher>
             </Sidebar.Pushable>

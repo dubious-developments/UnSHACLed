@@ -105,6 +105,7 @@ class SideBar extends React.Component<SidebarProps, any> {
                     as="a"
                     content={entryName + templateCount}
                     key={entryName}
+                    id={entryName}
                 />
             )
         });
@@ -164,9 +165,13 @@ class SideBar extends React.Component<SidebarProps, any> {
                             General
                             <this.DynamicMenu kind="General"/>
                         </Menu.Item>*/}
-                        <Menu.Item>
+                        <Menu.Item id="TemplateMenu">
                             Template
-                            <Button onClick={() => this.addTemplateEntry("Entry ")}> Add Template </Button>
+                            <Button
+                                onClick={() => this.addTemplateEntry("Entry ")}
+                                id={"addTemplate"}
+                            > Add Template
+                            </Button>
                             <this.DynamicMenu kind="Template"/>
                             <Menu.Menu>
                                 {templates}
