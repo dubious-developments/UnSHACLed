@@ -5,7 +5,7 @@ import {DataAccessProvider} from "../persistence/dataAccessProvider";
 import {VisualizeComponent} from "../services/ModelTasks";
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
-    mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout: any;
+    mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout, mxCellOverlay, mxImage: any;
 
 let $rdf = require('rdflib');
 
@@ -393,6 +393,38 @@ class MxGraph extends React.Component<any, any> {
         this.nameToStandardCellDict.setValue('row', row);
     }
 
+    addNewRowOverlay(graph:any, cell: any) {
+        // Creates a new overlay in the middle with an image and a tooltip
+        let overlay = new mxCellOverlay(
+            new mxImage('../img/add.png', 24, 24), 'Add a new row', mxConstants.ALIGN_CENTER);
+        overlay.cursor = 'hand';
+
+        let model = graph.getModel();
+        let instance = this;
+
+        // Installs a handler for clicks on the overlay
+        overlay.addListener(mxEvent.CLICK, function(sender: any, event: any) {
+            graph.clearSelection();
+            model.beginUpdate();
+            try {
+                let temprow = model.cloneCell(instance.nameToStandardCellDict.getValue('row'));
+                temprow.value = {name: "", trait: "null"};
+                let parent = cell.getParent();
+                
+                instance.addNewRowOverlay(graph, temprow);
+                graph.removeCellOverlay(cell);
+                parent.insert(temprow);
+                graph.view.refresh(parent);
+            } finally {
+                // Updates the display
+                model.endUpdate();
+            }
+        });
+
+        // Sets the overlay for the cell in the graph
+        graph.addCellOverlay(cell, overlay);
+    }
+
     parseDataGraphToBlocks(store: any) {
         // let DASH = $rdf.Namespace("http://datashapes.org/dash#");
         let RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
@@ -481,7 +513,6 @@ class MxGraph extends React.Component<any, any> {
                 v1.geometry.width += longestname * 4;
                 v1.geometry.alternateBounds = new mxRectangle(0, 0, v1.geometry.width, v1.geometry.height);
                 graph.addCell(v1, parent);
-
             } finally {
                 model.endUpdate();
             }
