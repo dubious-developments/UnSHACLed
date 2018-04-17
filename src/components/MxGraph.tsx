@@ -3,7 +3,7 @@ import * as Collections from 'typescript-collections';
 import {ModelComponent} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
 import {VisualizeComponent} from "../services/ModelTasks";
-import { Button } from 'semantic-ui-react';
+import {Button} from 'semantic-ui-react';
 import {MxGraphProps} from "./interfaces/interfaces";
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
@@ -11,7 +11,7 @@ declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometr
 
 let $rdf = require('rdflib');
 
-class MxGraph extends React.Component<MxGraphProps, any>  {
+class MxGraph extends React.Component<MxGraphProps, any> {
 
     private nameToStandardCellDict: Collections.Dictionary<string, any>;
     private blockToCellDict: Collections.Dictionary<Block, any>;
@@ -716,7 +716,8 @@ class MxGraph extends React.Component<MxGraphProps, any>  {
 
     addTemplate() {
         let {graph} = this.state;
-        
+        let {templateCount} = this.state;
+
         if (!graph.isSelectionEmpty()) {
             // Creates a copy of the selection array to preserve its state
             var cells = graph.getSelectionCells();
@@ -735,7 +736,13 @@ class MxGraph extends React.Component<MxGraphProps, any>  {
                 gr.setSelectionCells(gr.importCells(cells, dx, dy, cell));
             };
             // create sidebar entry
-            var img = document.getElementById("temp");
+            // invoke callback on parent component, which will add entry to sidebar
+            this.props.callback("Cell", templateCount);
+            // increment state counter
+            this.setState({
+                templateCount: templateCount + 1
+            });
+            var img = document.getElementById("Cell" + templateCount);
             mxUtils.makeDraggable(img, graph, funct);
 
         } else {
@@ -748,12 +755,13 @@ class MxGraph extends React.Component<MxGraphProps, any>  {
         let {templateCount} = this.state;
         console.log("Ready to add templates");
         // invoke callback on parent component
-        this.props.callback("Cell name" + templateCount);
+        this.props.callback("Cell name", templateCount);
         // increment state counter
         this.setState({
             templateCount: templateCount + 1
         });
     }
+
     main(container: HTMLElement | null): void {
         // Checks if the browser is supported
         if (!container) {
@@ -801,7 +809,7 @@ class MxGraph extends React.Component<MxGraphProps, any>  {
             // Get add template button
             var d2 = document.getElementById("addTemplate");
             if (d2) {
-                d2.onclick = this.addTemplate2;
+                d2.onclick = this.addTemplate;
             }
 
         }
@@ -810,19 +818,15 @@ class MxGraph extends React.Component<MxGraphProps, any>  {
     render() {
         const grid = require('../img/grid.gif');
         return (
-            <div>
             <div
                 id="graphContainer"
                 style={{
                     backgroundImage: `url(${ grid })`,
                     cursor: 'default',
-                    height: '70%',
+                    height: '100%',
                     overflow: 'auto',
                 }}
             />
-                <Button onClick={this.addTemplate}> Test </Button>
-                <h1 id="temp"> Draggable </h1>
-            </div>
         );
     }
 }

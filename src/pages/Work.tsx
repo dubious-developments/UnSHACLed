@@ -2,7 +2,7 @@ import * as React from 'react';
 import Navbar from '../components/navbarWork';
 import SideBar from '../components/Sidebar';
 import MxGraph from '../components/MxGraph';
-import { Sidebar, Segment } from 'semantic-ui-react';
+import { Sidebar, Segment, Menu } from 'semantic-ui-react';
 
 class Workspace extends React.Component<any, any> {
 
@@ -31,13 +31,23 @@ class Workspace extends React.Component<any, any> {
         });
     }
 
-    templateCallback(childData: string) {
+    /*
+      Callback function to set content of template sidebar entry according
+      to click events from the mxGraph component, templates is passed to the child
+      component Sidebar, which is a sibling component of mxGraph.
+     */
+    templateCallback(name: string, count: any) {
         this.setState({
             templates: this.state.templates.concat(
-                "new"
+                <Menu.Item
+                    as="a"
+                    content={name}
+                    key={name + count}
+                    id={name + count}
+                />
             )
         });
-        console.log("called callback wiht" + childData);
+        console.log("called callback wiht" + name);
     }
     render() {
         const {menuVisible} = this.state;
