@@ -38,7 +38,7 @@ describe("ValidationService Class", () => {
            }
 
            model.registerObserver((changeBuf) => {
-               expect(changeBuf.contains(ModelComponent.ConformanceReport)).toEqual(true);
+               expect(changeBuf.contains(ModelComponent.ValidationReport)).toEqual(true);
                done();
                return [];
            });

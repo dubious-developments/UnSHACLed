@@ -1,11 +1,12 @@
 import * as Collections from "typescript-collections";
+import SHACLValidator from "../conformance/shacl/index.js";
 import {Validator} from "./Validator";
 import {ModelData} from "../entities/model";
 import {ModelComponent} from "../entities/modelTaskMetadata";
 import {Component} from "../persistence/component";
 import {Graph} from "../persistence/graph";
 import {GraphParser} from "../persistence/graphParser";
-import {ConformanceReport} from "./wrapper/ConformanceReport";
+import {ValidationReport} from "./wrapper/ValidationReport";
 
 /**
  * A wrapper class around the shacl.js library.
@@ -36,7 +37,7 @@ export class WellDefinedSHACLValidator implements Validator {
      * @param {ModelData} data
      * @param {((report: ValidationReport) => void) | null} andThen
      */
-    public validate(data: ModelData, andThen: ((report: ConformanceReport) => void) | null): void {
+    public validate(data: ModelData, andThen: ((report: ValidationReport) => void) | null): void {
         let dataComponent = data.getOrCreateComponent<Component>(
             ModelComponent.DataGraph,
             () => new Component());
@@ -57,6 +58,7 @@ export class WellDefinedSHACLValidator implements Validator {
         let parser = new GraphParser();
 
         let self = this;
+        // TODO: make sure that this double serialization is no longer necessary
         parser.serialize(dataRoot, "text/turtle", function(datastring: string) {
             parser.serialize(shapesRoot, "text/turtle", function (shapesstring: string) {
                 self.doValidation(datastring, shapesstring, andThen);
@@ -70,9 +72,13 @@ export class WellDefinedSHACLValidator implements Validator {
      * @param shapes
      * @param {((report: ValidationReport) => void) | null} andThen
      */
-    public doValidation(data: string, shapes: string, andThen: ((report: ConformanceReport) => void) | null): void {
-        let report = new ConformanceReport();
-        report.conforms(data, "text/turtle", shapes, "text/turtle", andThen);
+    public doValidation(data: string, shapes: string, andThen: ((report: ValidationReport) => void) | null): void {
+        let validator = new SHACLValidator();
+        validator.validate(data, 'text/turtle', shapes, 'text/turtle', function (error: any, report: any) {
+            if (andThen) {
+                andThen(new ValidationReport(report));
+            }
+        });
     }
 
     /**

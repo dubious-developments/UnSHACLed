@@ -105,7 +105,7 @@ export class Graph {
      */
     public addTriple(subject: string, predicate: string, object: string): void {
         this.N3Store.addTriple(subject, predicate, object);
-        this.SHACLStore.add(new Statement(subject, predicate, object, "."));
+        this.SHACLStore.add(new Statement(subject, predicate, object, this.SHACLStore));
         this.updateChanges(ChangeSet.ADD, ChangeSet.REMOVE, subject, predicate, object);
     }
 
@@ -128,7 +128,7 @@ export class Graph {
     public addTriples(triples: Array<any>): void {
         this.N3Store.addTriples(triples);
         triples.forEach(t => {
-            this.SHACLStore.add(new Statement(t.subject, t.predicate, t.object, "."));
+            this.SHACLStore.add(new Statement(t.subject, t.predicate, t.object, this.SHACLStore));
             this.updateChanges(ChangeSet.ADD, ChangeSet.REMOVE, t.subject, t.predicate, t.object);
         });
     }

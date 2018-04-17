@@ -8,7 +8,7 @@ import { Model } from '../entities/model';
 import { DataAccessProvider } from '../persistence/dataAccessProvider';
 import {LoadFileTask, GetOpenedFilesTask, GetValidationReportNavbar} from '../services/ModelTasks';
 import { ModelComponent } from '../entities/modelTaskMetadata';
-import {ConformanceReport, ValidationError} from "../conformance/wrapper/ConformanceReport";
+import {ValidationReport, ValidationError} from "../conformance/wrapper/ValidationReport";
 
 export class Navbar extends React.Component<NavbarWorkProps, {}> {
 
@@ -16,7 +16,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
     loadedFiles: string[] = [];
 
     // temp var
-    report: ConformanceReport;
+    report: ValidationReport;
 
     constructor(props: NavbarWorkProps) {
         super(props);
@@ -38,7 +38,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
     }
 
     // TODO temp method
-    public setReport(r: ConformanceReport) {
+    public setReport(r: ValidationReport) {
         this.report = r;
     }
 

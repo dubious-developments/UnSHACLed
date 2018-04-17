@@ -59,7 +59,7 @@ export class GetOpenedFilesTask extends Task<ModelData, ModelTaskMetadata> {
                 let component: any = data.getComponent(tmp);
                 if (component) {
                     for (let key of component.getAllKeys()) {
-                        if (key != "ROOT") {
+                        if (key !== "ROOT") {
                             res.push(key);
                         }
                     }
@@ -134,18 +134,18 @@ export class GetValidationReport extends Task<ModelData, ModelTaskMetadata> {
     }
 
     public execute(data: ModelData): void {
-        let component: any = data.getComponent(ModelComponent.ConformanceReport);
+        let component: any = data.getComponent(ModelComponent.ValidationReport);
         if (component) {
             let report = component.getRoot();
             this.mxGraph.handleConformance(report);
         } else {
-            console.log("Could not find the ModelComponent: ", ModelComponent.ConformanceReport);
+            console.log("Could not find the ModelComponent: ", ModelComponent.ValidationReport);
         }
 
     }
 
     public get metadata(): ModelTaskMetadata {
-        return new ModelTaskMetadata([ModelComponent.ConformanceReport, ModelComponent.UI], [ModelComponent.UI]);
+        return new ModelTaskMetadata([ModelComponent.ValidationReport, ModelComponent.UI], [ModelComponent.UI]);
     }
 }
 
@@ -164,7 +164,7 @@ export class GetValidationReportNavbar extends Task<ModelData, ModelTaskMetadata
     }
 
     public execute(data: ModelData): void {
-        let component: any = data.getComponent(ModelComponent.ConformanceReport);
+        let component: any = data.getComponent(ModelComponent.ValidationReport);
         if (component) {
             let report = component.getRoot();
             if (this.navBar) {
@@ -173,12 +173,12 @@ export class GetValidationReportNavbar extends Task<ModelData, ModelTaskMetadata
                 console.log("Error, component navBar not found: ", this.navBar);
             }
         } else {
-            console.log("Could not find the ModelComponent: ", ModelComponent.ConformanceReport);
+            console.log("Could not find the ModelComponent: ", ModelComponent.ValidationReport);
         }
 
     }
 
     public get metadata(): ModelTaskMetadata {
-        return new ModelTaskMetadata([ModelComponent.ConformanceReport, ModelComponent.UI], [ModelComponent.UI]);
+        return new ModelTaskMetadata([ModelComponent.ValidationReport, ModelComponent.UI], [ModelComponent.UI]);
     }
 }

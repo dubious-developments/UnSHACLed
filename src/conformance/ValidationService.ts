@@ -5,7 +5,7 @@ import {Validator} from "./Validator";
 import {ModelComponent, ModelTaskMetadata} from "../entities/modelTaskMetadata";
 import {Task} from "../entities/task";
 import {Component} from "../persistence/component";
-import {ConformanceReport} from "./wrapper/ConformanceReport";
+import {ValidationReport} from "./wrapper/ValidationReport";
 
 /**
  * A ValidationService is a managing entity, governing various registered validators.
@@ -87,24 +87,18 @@ class ValidationTask extends Task<ModelData, ModelTaskMetadata> {
         // first set the component here
         // because setting it in the callback gives weird errors
         let component = data.getOrCreateComponent<Component>(
-            ModelComponent.ConformanceReport,
+            ModelComponent.ValidationReport,
             () => new Component());
-        data.setComponent(ModelComponent.ConformanceReport, component);
 
-        this.validator.validate(data, function(report: ConformanceReport) {
-            // add new report to component
-            let component = data.getOrCreateComponent<Component>(
-                ModelComponent.ConformanceReport,
-                () => new Component());
-
-            // TODO this does not seem right (toString()??)
+        this.validator.validate(data, function(report: ValidationReport) {
+            // We use toString() to save the report with the type of validator that generated the report
             component.setPart(toString(), report);
 
             // TODO: merge new report into root report
             // let root = component.getOrCreateRoot(() => new ConformanceReport());
             // root.merge(report);
             component.setRoot(report);
-            data.setComponent(ModelComponent.ConformanceReport, component);
+            data.setComponent(ModelComponent.ValidationReport, component);
         });
     }
 
@@ -114,6 +108,6 @@ class ValidationTask extends Task<ModelData, ModelTaskMetadata> {
     public get metadata(): ModelTaskMetadata {
         return new ModelTaskMetadata(
             this.validator.getTypesForValidation(),
-            [ModelComponent.ConformanceReport]);
+            [ModelComponent.ValidationReport]);
     }
 }

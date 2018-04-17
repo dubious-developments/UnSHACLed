@@ -1,5 +1,5 @@
 import {WellDefinedSHACLValidator} from "../src/conformance/SHACLValidator";
-import {ConformanceReport} from "../src/conformance/wrapper/ConformanceReport";
+import {ValidationReport} from "../src/conformance/wrapper/ValidationReport";
 import {Model} from "../src/entities/model";
 import {ModelComponent} from "../src/entities/modelTaskMetadata";
 import {GraphParser} from "../src/persistence/graphParser";
@@ -10,8 +10,8 @@ describe("WellDefinedSHACLValidator Class", () => {
        (done) => {
             let validator = new WellDefinedSHACLValidator();
             validator.doValidation(getConformingDataGraph(), getShapesGraph(),
-                                   function (report: ConformanceReport) {
-                    expect(report.getIsConforming()).toBe(true);
+                                   function (report: ValidationReport) {
+                    expect(report.isConforming()).toBe(true);
                     done();
                 });
         });
@@ -20,8 +20,8 @@ describe("WellDefinedSHACLValidator Class", () => {
        (done) => {
             let validator = new WellDefinedSHACLValidator();
             validator.doValidation(getNonConformingDataGraph(), getShapesGraph(),
-                                   function (report: ConformanceReport) {
-                    expect(report.getIsConforming()).toBe(false);
+                                   function (report: ValidationReport) {
+                    expect(report.isConforming()).toBe(false);
                     done();
                 });
         });
@@ -30,8 +30,8 @@ describe("WellDefinedSHACLValidator Class", () => {
        (done) => {
             let validator = new WellDefinedSHACLValidator();
             validator.doValidation(getPlaygroundData(), getPlaygroundShapes(),
-                                   function (report: ConformanceReport) {
-                    expect(report.getIsConforming()).toBe(false);
+                                   function (report: ValidationReport) {
+                    expect(report.isConforming()).toBe(false);
                     done();
                 });
         });
@@ -76,13 +76,13 @@ describe("WellDefinedSHACLValidator Class", () => {
                             model.tasks.schedule(
                                 Model.createTask(
                                     (data) => {
-                                        validator.validate(data, function (report: ConformanceReport) {
-                                            expect(report.getIsConforming()).toBe(false);
+                                        validator.validate(data, function (report: ValidationReport) {
+                                            expect(report.isConforming()).toBe(false);
                                             done();
                                         });
                                     },
                                     [],
-                                    [ModelComponent.ConformanceReport]));
+                                    [ModelComponent.ValidationReport]));
                             model.tasks.processTask();
                         });
                     });
