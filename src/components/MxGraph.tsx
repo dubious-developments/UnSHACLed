@@ -522,6 +522,7 @@ class MxGraph extends React.Component<any, any> {
 
         let layout = new mxStackLayout(graph, false, 35);
         layout.execute(graph.getDefaultParent());
+        console.log(graph.getDefaultParent());
     }
 
     configureStylesheet(graph: any) {
@@ -788,7 +789,26 @@ class MxGraph extends React.Component<any, any> {
         cell.setStyle("InvalidBlock");
 
         // Set style of rows
-        
+        cell.children.forEach(rowCell => {
+            let found = false;
+            for (let error of errors) {
+                if (error.shapeProperty === rowCell.value.predicate) {
+                    rowCell.setStyle("InvalidRow");
+                    rowCell.value.errorMessage = `
+                        Error: ${error.message}\n\n
+                        Constraint: ${error.shapeConstraint}\n
+                        Originating property: ${error.shapeProperty}.`;
+
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                rowCell.setStyle("Row");
+                rowCell.value.errorMessage = null;
+            }
+        });
     }
 
     turnCellValid(cell: any) {
@@ -796,6 +816,10 @@ class MxGraph extends React.Component<any, any> {
         cell.setStyle(cell.value.blockType);
 
         // Set style of rows
+        cell.children.forEach(rowCell => {
+            rowCell.setStyle("Row");
+            rowCell.value.errorMessage = null;
+        });
     }
 
     render() {
