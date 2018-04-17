@@ -382,6 +382,17 @@ class MxGraph extends React.Component<any, any> {
 
     }
 
+    configureTooltips(graph: any) {
+        // Installs a custom global tooltip
+        graph.setTooltips(true);
+        graph.getTooltip = function(state: any) {
+            let cell = state.cell;            
+            // If the cell is invalid, then it will have an error message
+            // thus display this message, else just show the label
+            return cell.value.errorMessage || graph.getLabel(cell);
+        };
+    }
+
     initStandardCells() {
         let blockObject = new Block();
         let block = new mxCell(blockObject, new mxGeometry(0, 0, 250, 28));
@@ -522,7 +533,6 @@ class MxGraph extends React.Component<any, any> {
 
         let layout = new mxStackLayout(graph, false, 35);
         layout.execute(graph.getDefaultParent());
-        console.log(graph.getDefaultParent());
     }
 
     configureStylesheet(graph: any) {
@@ -740,6 +750,7 @@ class MxGraph extends React.Component<any, any> {
             this.configureStylesheet(graph);
             this.configureCells(editor, graph);
             this.configureLabels(graph);
+            this.configureTooltips(graph);
             this.initStandardCells();
             this.saveGraph(graph);
             this.initiateDragPreview();
