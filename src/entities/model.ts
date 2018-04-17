@@ -52,7 +52,7 @@ export class Model {
             wellDefinedData,
             task => task,
             task => task,
-            task => this.notifyObservers(wellDefinedData.drainChangeBuffer()));
+            task => this.notifyObservers(wellDefinedData.drainWriteBuffer()));
         this.observers = [];
     }
 

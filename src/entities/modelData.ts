@@ -5,7 +5,9 @@ import { ModelComponent } from "./modelTaskMetadata";
  * A mutable view of the model.
  */
 export class ModelData {
-    private changeBuffer: Collections.Set<ModelComponent>;
+    private writeBuffer: Collections.Set<ModelComponent>;
+
+    private readBuffer: Collections.Set<ModelComponent>;
 
     /**
      * A dictionary that contains all of the model's components.
@@ -18,7 +20,9 @@ export class ModelData {
      */
     public constructor(
         components?: Collections.Dictionary<ModelComponent, any>) {
-        this.changeBuffer = new Collections.Set<ModelComponent>();
+
+        this.writeBuffer = new Collections.Set<ModelComponent>();
+        this.readBuffer = new Collections.Set<ModelComponent>();
         if (components) {
             this.components = components;
         } else {
@@ -31,6 +35,10 @@ export class ModelData {
      * @param component The component to retrieve.
      */
     public getComponent<T>(component: ModelComponent): T | undefined {
+
+        if (this.components.containsKey(component)) {
+            this.readBuffer.add(component);
+        }
         return this.components.getValue(component);
     }
 
@@ -42,6 +50,7 @@ export class ModelData {
      * if it doesn't exist already.
      */
     public getOrCreateComponent<T>(component: ModelComponent, createComponent: () => T): T {
+
         let result = this.getComponent<T>(component);
         if (result === undefined) {
             result = createComponent();
@@ -57,17 +66,26 @@ export class ModelData {
     public setComponent<T>(component: ModelComponent, value: T): void {
 
         if (value !== this.components.getValue(component)) {
-            this.changeBuffer.add(component);
+            this.writeBuffer.add(component);
         }
         this.components.setValue(component, value);
     }
 
     /**
-     * Drains the model's change buffer.
+     * Drains the model's read buffer.
      */
-    public drainChangeBuffer(): Collections.Set<ModelComponent> {
-        let result = this.changeBuffer;
-        this.changeBuffer = new Collections.Set<ModelComponent>();
+    public drainReadBuffer(): Collections.Set<ModelComponent> {
+        let result = this.readBuffer;
+        this.readBuffer = new Collections.Set<ModelComponent>();
+        return result;
+    }
+
+    /**
+     * Drains the model's write buffer.
+     */
+    public drainWriteBuffer(): Collections.Set<ModelComponent> {
+        let result = this.writeBuffer;
+        this.writeBuffer = new Collections.Set<ModelComponent>();
         return result;
     }
 
