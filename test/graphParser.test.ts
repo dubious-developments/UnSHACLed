@@ -52,7 +52,7 @@ describe("GraphParser Class", () => {
             expect(() => parser.parse(generateTurtle(), "application/rdf+xml", null))
                 .toThrow(Error("Incorrect MimeType application/rdf+xml!"));
 
-            expect(() => parser.serialize(null, "application/rdf+xml", null))
+            expect(() => parser.serialize(new Graph(), "application/rdf+xml", null))
                .toThrow(Error("Incorrect MimeType application/rdf+xml!"));
         });
 });

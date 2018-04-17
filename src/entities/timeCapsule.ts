@@ -47,7 +47,7 @@ export class TimeCapsule<T> {
      */
     private constructor(
         private readonly state: TimeCapsuleState<T>,
-        private readonly parent: TimeCapsule<T>,
+        private readonly parent: TimeCapsule<T> | null,
         private readonly undoChange: (state: T) => void,
         private readonly redoChange: (state: T) => void,
         private readonly generation: number) {
@@ -60,12 +60,19 @@ export class TimeCapsule<T> {
     public static create<T>(data: T): TimeCapsule<T> {
         let result = new TimeCapsule<T>(
             new TimeCapsuleState<T>(data),
-            undefined,
-            undefined,
-            undefined,
+            null,
+            TimeCapsule.discard,
+            TimeCapsule.discard,
             0);
         result.state.currentInstant = result;
         return result;
+    }
+
+    /**
+     * A function that takes an argument and simply drops it.
+     * @param arg The argument to ignore.
+     */
+    public static discard<T>(arg: T): void {
     }
 
     private static findLastCommonAncestor<T>(
@@ -75,10 +82,10 @@ export class TimeCapsule<T> {
         // Step one: find an ancestor for `first` and `second`
         // with generation `min(first.generation, second.generation)`.
         while (first.generation > second.generation) {
-            first = first.parent;
+            first = <TimeCapsule<T>> first.parent;
         }
         while (second.generation > first.generation) {
-            second = second.parent;
+            second = <TimeCapsule<T>> second.parent;
         }
 
         // Step two: walk the ancestor tree of `first` and `second`
@@ -86,8 +93,8 @@ export class TimeCapsule<T> {
         // last common ancestor because `first === second` implies
         // `first.parent === second.parent`.
         while (first !== second) {
-            first = first.parent;
-            second = second.parent;
+            first = <TimeCapsule<T>> first.parent;
+            second = <TimeCapsule<T>> second.parent;
         }
 
         return first;
@@ -140,9 +147,9 @@ export class TimeCapsule<T> {
 
         let ancestor = TimeCapsule.findLastCommonAncestor<T>(
             this,
-            currentInstant);
+            <TimeCapsule<T>> currentInstant);
 
-        for (let instant of currentInstant.pathToAncestor(ancestor)) {
+        for (let instant of (<TimeCapsule<T>> currentInstant).pathToAncestor(ancestor)) {
             instant.undoChange(data);
         }
 
@@ -193,7 +200,7 @@ export class TimeCapsule<T> {
         let instant: TimeCapsule<T> = this;
         while (instant !== ancestor) {
             results.push(instant);
-            instant = instant.parent;
+            instant = <TimeCapsule<T>> instant.parent;
         }
         return results;
     }
@@ -211,7 +218,7 @@ class TimeCapsuleState<T> {
     /**
      * The current instant the time capsule is in.
      */
-    public currentInstant: TimeCapsule<T>;
+    public currentInstant: TimeCapsule<T> | null;
 
     /**
      * Counts the number of times this state has been
@@ -226,7 +233,7 @@ class TimeCapsuleState<T> {
      */
     public constructor(data: T) {
         this.data = data;
-        this.currentInstant = undefined;
+        this.currentInstant = null;
         this.acquisitionCount = 0;
     }
 }

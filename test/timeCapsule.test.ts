@@ -11,7 +11,12 @@ class NumberBox {
     }
 }
 
-describe("TimeCapsule Class", () => {
+describe("TimeCapsule class", () => {
+
+    it("has a working discard function", () => {
+        // This function should literally just do nothing.
+        TimeCapsule.discard<number>(42);
+    });
 
     it("can be created", () => {
         let capsule = TimeCapsule.create<NumberBox>(new NumberBox(10));
