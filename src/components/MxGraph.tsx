@@ -16,7 +16,7 @@ class MxGraph extends React.Component<any, any> {
     private subjectToBlockDict: Collections.Dictionary<string, Block>;
     private triples: Collections.Set<Triple>;
 
-    private cellTotriples: Collections.Dictionary<any, Triple>;
+    private cellToTriples: Collections.Dictionary<any, Triple>;
 
     constructor(props: string) {
         super(props);
@@ -40,7 +40,7 @@ class MxGraph extends React.Component<any, any> {
         this.blockToCellDict = new Collections.Dictionary<Block, any>((b) => b.name);
         this.subjectToBlockDict = new Collections.Dictionary<string, Block>();
         this.triples = new Collections.Set<Triple>((t) =>  t.subject + " " + t.predicate + " " + t.object);
-        this.cellTotriples = new Collections.Dictionary<any, Triple>((c) => c.value.name);
+        this.cellToTriples = new Collections.Dictionary<any, Triple>((c) => c.value.name);
     }
 
     componentDidMount() {
@@ -497,7 +497,7 @@ class MxGraph extends React.Component<any, any> {
                     temprow.value = {name: name, trait: trait};
                     v1.insert(temprow);
 
-                    this.cellTotriples.setValue(temprow, trait);
+                    this.cellToTriples.setValue(temprow, trait);
 
                     let b2 = this.subjectToBlockDict.getValue(trait.object);
                     if (b2) {
@@ -727,7 +727,7 @@ class MxGraph extends React.Component<any, any> {
                 let cells = evt.getProperty("cells");
 
                 for (let i = 0; i < cells.length; i++) {
-                    let triple = this.cellTotriples.getValue(cells[i]);
+                    let triple = this.cellToTriples.getValue(cells[i]);
                     if (triple) {
                         console.log(triple);
                     }
