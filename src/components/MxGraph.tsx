@@ -717,11 +717,24 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     addTemplate() {
         let {graph} = this.state;
         let {templateCount} = this.state;
+        // TODO prevent multiple cell selection
+        // TODO positioning??
 
         if (!graph.isSelectionEmpty()) {
             // Creates a copy of the selection array to preserve its state
             var cells = graph.getSelectionCells();
             var bounds = graph.getView().getBounds(cells);
+            console.log(cells);
+            console.log(cells[0].value);
+            let cellname;
+
+            // handle non-block/block cells differently
+            if (typeof (cells[0].value) === "string") {
+                cellname = cells[0].value;
+            } else {
+                cellname = cells[0].value.name;
+            }
+
 
             // Function that is executed when the image is dropped on
             // the graph. The cell argument points to the cell under
@@ -737,13 +750,14 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             };
             // create sidebar entry
             // invoke callback on parent component, which will add entry to sidebar
-            this.props.callback("Cell", templateCount);
+            this.props.callback(cellname, templateCount);
             // increment state counter
             this.setState({
                 templateCount: templateCount + 1
             });
-            var img = document.getElementById("Cell" + templateCount);
-            mxUtils.makeDraggable(img, graph, funct);
+            let preview = null;
+            var drag = document.getElementById(cellname + templateCount);
+            mxUtils.makeDraggable(drag, graph, funct);
 
         } else {
             console.log("nothing is selected");
