@@ -215,8 +215,8 @@ class LoadTask extends Task<ModelData, ModelTaskMetadata> {
      */
     public get metadata(): ModelTaskMetadata {
         return new ModelTaskMetadata(
-            [ModelComponent.DataGraph, ModelComponent.IO],
-            [ModelComponent.DataGraph, ModelComponent.IO]);
+            [this.module.getTarget(), ModelComponent.IO],
+            [this.module.getTarget(), ModelComponent.IO]);
     }
 }
 
@@ -258,7 +258,7 @@ class SaveTask extends Task<ModelData, ModelTaskMetadata> {
      */
     public get metadata(): ModelTaskMetadata {
         return new ModelTaskMetadata(
-            [ModelComponent.DataGraph, ModelComponent.IO],
+            [this.module.getTarget(), ModelComponent.IO],
             [ModelComponent.IO]);
     }
 }

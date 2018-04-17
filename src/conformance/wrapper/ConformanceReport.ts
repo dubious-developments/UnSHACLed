@@ -4,7 +4,7 @@
 import SHACLValidator from "../../conformance/shacl/index.js";
 
 
-class ValidationError{
+export class ValidationError{
 
     private message: string;
     private shapeProperty: string;
@@ -27,7 +27,7 @@ class ValidationError{
         this.dataElement = dataElement;
     }
 
-    toString(){
+    public toString(): string{
         return "The data value: " + this.dataElement + ", does not conform because: " + this.shapeProperty +
             "does not oblige to: " + this.shapeConstraint;
     }
@@ -59,14 +59,12 @@ export class ConformanceReport{
         this.isConforming = false;
     }
 
-
-
     public conforms(data: string, dataType: string, shapes: string, shapesType: string,
                     andThen: ((report: any) => void) | null): void{
         let validator = new SHACLValidator();
         let that = this;
         validator.validate(data, dataType, shapes, shapesType, function (e: any, report: any) {
-            if(report.conforms() == true){
+            if(report.conforms()){
                 that.isConforming = true;
                 that.validationErrors = new Array(0);
             }
@@ -85,15 +83,7 @@ export class ConformanceReport{
             if (andThen) {
                 andThen(that);
             }
-            //console.log(
-            //    "Error = " +
-            //    that.validationErrors[0].getMessage() + "\n" +
-            //    that.validationErrors[0].getDataElement() + "\n" +
-            //    that.validationErrors[0].getShapeConstraint() + "\n" +
-            //    that.validationErrors[0].getShapeProperty()
-            //);
         });
-        //console.log(this.isConforming);
     }
 
     public getIsConforming():boolean{
@@ -104,12 +94,10 @@ export class ConformanceReport{
         return this.validationErrors;
     }
 
-
     public toString(){
-
         for (let error of this.validationErrors) {
             console.log(error.toString());
         }
-
     }
+
 }

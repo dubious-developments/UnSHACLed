@@ -43,7 +43,7 @@ export class Graph {
     public constructor() {
         let N3 = require("n3");
         this.N3Store = N3.Store();
-        this.SHACLStore = $rdf.store();
+        this.SHACLStore = $rdf.graph();
 
         this.changes = new Collections.Dictionary<ChangeSet, Collections.Set<any>>();
 

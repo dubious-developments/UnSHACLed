@@ -28,7 +28,7 @@ export class LoadFileTask extends Task<ModelData, ModelTaskMetadata> {
             // get MIME based on extension
             var splitted = this.fileName.split(".");
             var blob = new Blob([], {type: extensionToMIME[splitted[splitted.length - 1]]});
-            fileDAO.insert(new FileModule(ModelComponent.DataGraph, this.fileName, blob));
+            fileDAO.insert(new FileModule(this.mComponent, this.fileName, blob));
         }
 
     }
@@ -45,26 +45,36 @@ export class GetOpenedFilesTask extends Task<ModelData, ModelTaskMetadata> {
 
     /**
      * Get the loaded files in the model
-     * @param {c} ModelComponent
+     * @param {components} array of ModelComponents
      * @param {navBar} the frontend component
      */
-    public constructor(private mComponent: ModelComponent, private navBar: Navbar) {
+    public constructor(private components: ModelComponent[], private navBar: Navbar) {
         super();
     }
 
     public execute(data: ModelData): void {
         if (this.navBar) {
-            let component: any = data.getComponent(this.mComponent);
-            if (component) {
-                this.navBar.setLoadedFiles(component.getAllKeys());
+            let res: string[] = [];
+            for (let tmp of this.components) {
+                let component: any = data.getComponent(tmp);
+                if (component) {
+                    for (let key of component.getAllKeys()) {
+                        if (key != "ROOT") {
+                            res.push(key);
+                        }
+                    }
+                }
             }
+            this.navBar.setLoadedFiles(res);
         } else {
             console.log("error: navBar not defined");
         }
     }
 
     public get metadata(): ModelTaskMetadata {
-        return new ModelTaskMetadata([this.mComponent, ModelComponent.IO], [ModelComponent.IO]);
+        let tmp = this.components;
+        tmp.push(ModelComponent.IO);
+        return new ModelTaskMetadata(tmp, [ModelComponent.IO]);
     }
 
 }
@@ -106,5 +116,69 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
 
     public get metadata(): ModelTaskMetadata {
         return new ModelTaskMetadata([this.mComponent, ModelComponent.UI], [ModelComponent.UI]);
+    }
+}
+
+/*
+ * Load the validationReport from the Model
+ */
+export class GetValidationReport extends Task<ModelData, ModelTaskMetadata> {
+
+    /**
+     * Create a new VisualizeComponent task from Model
+     * @param {mxGraph} MxGraph
+     */
+    public constructor(private mxGraph: MxGraph) {
+        super();
+
+    }
+
+    public execute(data: ModelData): void {
+        let component: any = data.getComponent(ModelComponent.ConformanceReport);
+        if (component) {
+            let report = component.getRoot();
+            this.mxGraph.handleConformance(report);
+        } else {
+            console.log("Could not find the ModelComponent: ", ModelComponent.ConformanceReport);
+        }
+
+    }
+
+    public get metadata(): ModelTaskMetadata {
+        return new ModelTaskMetadata([ModelComponent.ConformanceReport, ModelComponent.UI], [ModelComponent.UI]);
+    }
+}
+
+/*
+ * TODO Temp task to show conformance errors in navbar
+ */
+export class GetValidationReportNavbar extends Task<ModelData, ModelTaskMetadata> {
+
+    /**
+     * Create a new VisualizeComponent task from Model
+     * @param {navbar} NavBar
+     */
+    public constructor(private navBar: Navbar) {
+        super();
+
+    }
+
+    public execute(data: ModelData): void {
+        let component: any = data.getComponent(ModelComponent.ConformanceReport);
+        if (component) {
+            let report = component.getRoot();
+            if (this.navBar) {
+                this.navBar.setReport(report);
+            } else {
+                console.log("Error, component navBar not found: ", this.navBar);
+            }
+        } else {
+            console.log("Could not find the ModelComponent: ", ModelComponent.ConformanceReport);
+        }
+
+    }
+
+    public get metadata(): ModelTaskMetadata {
+        return new ModelTaskMetadata([ModelComponent.ConformanceReport, ModelComponent.UI], [ModelComponent.UI]);
     }
 }

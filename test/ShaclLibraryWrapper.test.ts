@@ -1,5 +1,3 @@
-import {ShaclWrapper} from "../src/conformance/wrapper/ShaclLibraryWrapper"
-
 import { ConformanceReport } from "../src/conformance/wrapper/ConformanceReport";
 
 /*
@@ -7,107 +5,123 @@ import { ConformanceReport } from "../src/conformance/wrapper/ConformanceReport"
  */
 
 describe("ShaclLibraryWrapper Class", () => {
-    it("Given shapes and conforming data, returns a report with conforming message.",
+    it("Given shapes and conforming data, returns a report that confirms conformance.",
        (done) => {
-            console.log('test 1 conformance');
-            let validationWrapper = new ShaclWrapper();
-            validationWrapper.unshacledValidate(getConformingDataGraph(), '' , getShapesGraph(), '');
-            done();
-       });
 
-    it("Given shapes and 1 non-conforming line of data, returns a report with non-conforming problem data.",
-       (done) => {
-            console.log('test 2 non-conformance');
-            let validationWrapper = new ShaclWrapper();
-            validationWrapper.unshacledValidate(getNonConformingDataGraph(), '' , getShapesGraph(), '');
-            done();
-       });
-
-    it("Given shapes and 1 non-conforming line of data, returns a report with non-conforming problem data.",
-        (done) => {
-            console.log('test 3 non-conformance');
-            let validationWrapper = new ShaclWrapper();
-            validationWrapper.unshacledValidate(getNonConformingDataGraphWrongSsnFormat(), '' , getShapesGraph(), '');
-            done();
-        });
-
-    it("Given shapes and 2 non-conforming lines of data, returns a report with non-conforming problem data.",
-        (done) => {
-            console.log('test 4 non-conformance');
-            let validationWrapper = new ShaclWrapper();
-            validationWrapper.unshacledValidate(getNonConformingDataGraph2Mistakes(), '' , getShapesGraph(), '');
-            done();
-        });
-
-    it("Given shapes and 2 non-conforming lines of data, returns a report with non-conforming problem data.",
-        (done) => {
-            console.log('test 5 non-conformance');
+            //let startTime = new Date().getTime();
             let conformanceReport = new ConformanceReport();
-            conformanceReport.conforms(getNonConformingDataGraph2Mistakes(), "text/turtle" , getShapesGraph(),
+            conformanceReport.conforms(getConformingDataGraph(), "text/turtle" , getShapesGraph(), "text/turtle",
+                function(report: any){
+                    expect(report.getIsConforming()).toEqual(true);
+                    /**
+                    * let endTime = new Date().getTime();
+                    * console.log("time = " + (endTime - startTime) + "");
+                    */
+                     done();
+                });
+       });
+
+    it("Given shapes and 1 non-conforming line of data (multiple SSN's for one person (Bob), while" +
+        " only 1 SSN is allowed. Returns a report with non-conforming problem data.",
+       (done) => {
+
+            //let startTime = new Date().getTime();
+
+           let conformanceReport = new ConformanceReport();
+            conformanceReport.conforms(getNonConformingDataGraphDoubleSsn(), "text/turtle" , getShapesGraph(),
                 "text/turtle", function(report: any){
-                    console.log(
-                        report.getValidationErrors().length + "mistakes. \n"
-                    );
-                    console.log(
-                        report.getValidationErrors()[0].getMessage() + "\n" +
-                        report.getValidationErrors()[0].getDataElement() + "\n" +
-                        report.getValidationErrors()[0].getShapeConstraint() + "\n" +
-                        report.getValidationErrors()[0].getShapeProperty()
-                    );
+                    expect(report.getIsConforming()).toEqual(false);
+
+                    expect(report.getValidationErrors().length).toEqual(1);
+
+
+                    expect(report.getValidationErrors()[0].getShapeProperty()).toEqual("http://example.com/ns#ssn");
+
+                    expect(report.getValidationErrors()[0].getDataElement()).toEqual("http://example.com/ns#Bob");
+
+                    expect(report.getValidationErrors()[0].getMessage()).toEqual("More than 1 values");
+
+                    expect(report.getValidationErrors()[0].getShapeConstraint())
+                        .toEqual("http://www.w3.org/ns/shacl#MaxCountConstraintComponent");
+
+                    /**
+                    * let endTime = new Date().getTime();
+                    * console.log("time test 2 = " + (endTime - startTime) + "");
+                    */
+
+                    done();
+                });
+       });
+
+    it("Given shapes and 1 non-conforming line of data (SSN is wrongly formatted) for one person (Bob)." +
+       ". Returns a report with the non-conforming problem data.",
+        (done) => {
+            //let startTime = new Date().getTime();
+
+            let conformanceReport = new ConformanceReport();
+            conformanceReport.conforms(getNonConformingDataGraphWrongSsnFormat(), "text/turtle" , getShapesGraph(),
+                "text/turtle", function(report: any){
+                    expect(report.getIsConforming()).toEqual(false);
+
+                    expect(report.getValidationErrors().length).toEqual(1);
+
+
+                    expect(report.getValidationErrors()[0].getShapeProperty()).toEqual("http://example.com/ns#ssn");
+
+                    expect(report.getValidationErrors()[0].getDataElement()).toEqual("http://example.com/ns#Bob");
+
+                    expect(report.getValidationErrors()[0].getMessage())
+                        .toEqual("Value does not match pattern \"^\\d{3}-\\d{2}-\\d{4}$\"");
+
+                    expect(report.getValidationErrors()[0].getShapeConstraint())
+                        .toEqual("http://www.w3.org/ns/shacl#PatternConstraintComponent");
+
+                    /**
+                     * let endTime = new Date().getTime();
+                     * console.log("time test 2 = " + (endTime - startTime) + "");
+                     */
+
                     done();
                 });
         });
 
-//
+    it("Given shapes and 2 non-conforming lines of data `(wrong SSN format and multiple SSN 's, returns a report with non-conforming problem data.",
+        (done) => {
+            let conformanceReport = new ConformanceReport();
+            conformanceReport.conforms(getNonConformingDataGraph2Mistakes(), "text/turtle" , getShapesGraph(),
+                "text/turtle", function(report: any){
+                    expect(report.getIsConforming()).toEqual(false);
+                    expect(report.getValidationErrors().length).toEqual(2);
+
+
+                    expect(report.getValidationErrors()[0].getShapeProperty()).toEqual("http://example.com/ns#ssn");
+
+                    expect(report.getValidationErrors()[0].getDataElement()).toEqual("http://example.com/ns#Bob");
+
+                    expect(report.getValidationErrors()[0].getMessage()).toEqual("More than 1 values");
+
+                    expect(report.getValidationErrors()[0].getShapeConstraint())
+                        .toEqual("http://www.w3.org/ns/shacl#MaxCountConstraintComponent");
+
+
+                    expect(report.getValidationErrors()[1].getShapeProperty()).toEqual("http://example.com/ns#ssn");
+
+                    expect(report.getValidationErrors()[1].getDataElement()).toEqual("http://example.com/ns#Bob");
+
+                    expect(report.getValidationErrors()[1].getMessage())
+                        .toEqual("Value does not match pattern \"^\\d{3}-\\d{2}-\\d{4}$\"");
+
+                    expect(report.getValidationErrors()[1].getShapeConstraint())
+                        .toEqual("http://www.w3.org/ns/shacl#PatternConstraintComponent");
+
+
+                    done();
+                });
+        });
 });
 
 
 
-/*
-function getDataGraph() {
-    return 'ex:Alice' +
-        'a ex:Person ;' +
-        'ex:ssn "987-65-432A" .';
-}
-
-function getNonConformingDataGraph() {
-    return 'ex:Alice' +
-        'a ex:Person ;' +
-        'ex:ssn "987-65-4A" .';
-}
-
-function getShapesGraph() {
-    return 'ex:PersonShape ' +
-        'a sh:NodeShape ;' +
-        'sh:targetClass ex:Person ;' +
-        'sh:property [' +
-        'sh:path ex:ssn ;' +
-        'sh:maxCount 1 ;' +
-        'sh:datatype xsd:string ;' +
-        'sh:pattern "^\\d{3}-\\d{2}-\\d{4}$" ;' +
-        '] ;' +
-        'sh:property [                 # _:b2' +
-        'sh:path ex:worksFor ;' +
-        'sh:class ex:Company ;' +
-        'sh:nodeKind sh:IRI ;' +
-        '] ;' +
-        'sh:closed true ;' +
-        'sh:ignoredProperties ( rdf:type ) .';
-}
- */
-
-/*
-function getConformingDataGraph() {
-    return '@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.\n' +
-        '@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.\n' +
-        '@prefix sh: <http://www.w3.org/ns/shacl#>.\n' +
-        '@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.\n' +
-        '@prefix ex: <http://example.com/ns#>.\n' +
-        'ex:Alice\n' +
-        'a ex:Person ;\n' +
-        'ex:ssn "987-65-432A" .';
-}
-*/
 
 function getConformingDataGraph() {
     return '@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.\n' +
@@ -121,7 +135,7 @@ function getConformingDataGraph() {
 }
 
 
-function getNonConformingDataGraph() {
+function getNonConformingDataGraphDoubleSsn() {
     return '@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.\n' +
         '@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.\n' +
         '@prefix sh: <http://www.w3.org/ns/shacl#>.\n' +
@@ -180,47 +194,3 @@ function getNonConformingDataGraph2Mistakes() {
         'ex:ssn "124-35/677A" .';
 
 }
-
-
-
-
-/*
- describe("WellDefinedSHACLValidator Class", () => {
- it("should perform correct validation for conforming data.",
- (done) => {
- // let validator = new WellDefinedSHACLValidator();
- // validator.doValidation(getConformingDataGraph(), getShapesGraph(),
- //                        function (report: ValidationReport) {
- //         expect(report.isConforming()).toBe(true);
- //         done();
- //     });
-
- let validator = new SHACLValidator();
- validator.validate(getConformingDataGraph(), 'text/turtle', getShapesGraph(),
- 'text/turtle', function (error: any, report: any) {
- expect(report.conforms()).toBe(true);
- done();
- });
-
- });
-
- it("should perform correct validation for non-conforming data.",
- (done) => {
- // let validator = new WellDefinedSHACLValidator();
- // validator.doValidation(getNonConformingDataGraph(), getShapesGraph(),
- //                        function (report: ValidationReport) {
- //         expect(report.isConforming()).toBe(false);
- //         done();
- //     });
-
- let report;
- let validator = new SHACLValidator();
- validator.validate(getNonConformingDataGraph(), 'text/turtle', getShapesGraph(),
- 'text/turtle', function (error: any, r: any) {
- expect(report.conforms()).toBe(false);
- done();
- });
-
- });
- });
- */

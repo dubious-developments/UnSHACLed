@@ -80,6 +80,7 @@ module.exports = function(config) {
                 // karma-detect-browser advertises it.
                 let undesirables = ["PhantomJS", "IE", "Edge"];
                 if (!process.env.CI) {
+                    //undesirables.push("Chrome");
                     undesirables.push("Chrome");
                 }
 
