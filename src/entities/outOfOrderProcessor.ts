@@ -293,8 +293,6 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
             this.state.setComponent<any>(
                 component,
                 instruction.data.getComponent<any>(component));
-
-            this.state.componentHasChanged(component);
         });
     }
 
