@@ -5,6 +5,7 @@ import {DataAccessProvider} from "../persistence/dataAccessProvider";
 import {GetValidationReport, VisualizeComponent} from "../services/ModelTasks";
 import TimingService from "../services/TimingService";
 import {ConformanceReport} from "../conformance/wrapper/ConformanceReport";
+import {List} from 'semantic-ui-react';
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout: any;
@@ -724,6 +725,7 @@ class MxGraph extends React.Component<any, any> {
     }
 
     public handleConformance(report: ConformanceReport) {
+
         console.log("is conforming?: ", report.getIsConforming());
         if (report.getIsConforming()) {
             console.log("no errors");

@@ -4,7 +4,7 @@
 import SHACLValidator from "../../conformance/shacl/index.js";
 
 
-class ValidationError{
+export class ValidationError{
 
     private message: string;
     private shapeProperty: string;

@@ -148,3 +148,37 @@ export class GetValidationReport extends Task<ModelData, ModelTaskMetadata> {
         return new ModelTaskMetadata([ModelComponent.ConformanceReport, ModelComponent.UI], [ModelComponent.UI]);
     }
 }
+
+/*
+ * TODO Temp task to show conformance errors in navbar
+ */
+export class GetValidationReportNavbar extends Task<ModelData, ModelTaskMetadata> {
+
+    /**
+     * Create a new VisualizeComponent task from Model
+     * @param {navbar} NavBar
+     */
+    public constructor(private navBar: Navbar) {
+        super();
+
+    }
+
+    public execute(data: ModelData): void {
+        let component: any = data.getComponent(ModelComponent.ConformanceReport);
+        if (component) {
+            let report = component.getRoot();
+            if (this.navBar) {
+                this.navBar.setReport(report);
+            } else {
+                console.log("Error, component navBar not found: ", this.navBar);
+            }
+        } else {
+            console.log("Could not find the ModelComponent: ", ModelComponent.ConformanceReport);
+        }
+
+    }
+
+    public get metadata(): ModelTaskMetadata {
+        return new ModelTaskMetadata([ModelComponent.ConformanceReport, ModelComponent.UI], [ModelComponent.UI]);
+    }
+}

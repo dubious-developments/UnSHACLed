@@ -6,13 +6,17 @@ import { NavbarWorkProps } from './interfaces/interfaces';
 import { FileModule } from '../persistence/fileDAO';
 import { Model } from '../entities/model';
 import { DataAccessProvider } from '../persistence/dataAccessProvider';
-import { LoadFileTask, GetOpenedFilesTask } from '../services/ModelTasks';
+import {LoadFileTask, GetOpenedFilesTask, GetValidationReportNavbar} from '../services/ModelTasks';
 import { ModelComponent } from '../entities/modelTaskMetadata';
+import {ConformanceReport, ValidationError} from "../conformance/wrapper/ConformanceReport";
 
 export class Navbar extends React.Component<NavbarWorkProps, {}> {
 
     allowedExtensions = ".n3,.ttl,.rdf";
     loadedFiles: string[] = [];
+
+    // temp var
+    report: ConformanceReport;
 
     constructor(props: NavbarWorkProps) {
         super(props);
@@ -20,6 +24,10 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
         this.setLoadedFiles = this.setLoadedFiles.bind(this);
         this.OpenedFiles = this.OpenedFiles.bind(this);
         this.saveGraph = this.saveGraph.bind(this);
+
+        this.ConformanceErrors = this.ConformanceErrors.bind(this);
+        this.getConformanceErrors = this.getConformanceErrors.bind(this);
+        this.setReport = this.setReport.bind(this);
     }
 
     public setLoadedFiles(files: string[]) {
@@ -27,6 +35,11 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
             console.log("no files found");
         }
         this.loadedFiles = files;
+    }
+
+    // TODO temp method
+    public setReport(r: ConformanceReport) {
+        this.report = r;
     }
 
     logoutButton(event: any) {
@@ -92,11 +105,17 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
         }
     }
 
-    // TODO not only load datagraph
     saveGraph(e: any) {
         let model: Model = DataAccessProvider.getInstance().model;
         model.tasks.schedule(new GetOpenedFilesTask([ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph], this));
-        model.tasks.processTask();
+        model.tasks.processAllTasks();
+    }
+
+    // temp method
+    getConformanceErrors(e: any) {
+        let model: Model = DataAccessProvider.getInstance().model;
+        model.tasks.schedule(new GetValidationReportNavbar(this));
+        model.tasks.processAllTasks();
     }
 
     getFileFromPopup(e: any) {
@@ -131,6 +150,40 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
         return (
             <div>
                 <label>Files that are currently opened in the editor: </label>
+                <br />
+                <List items={items} />
+            </div>
+        );
+    }
+
+    /*
+    * Temp method for showing conformance errors
+    * TODO later show conformance errors in mxGraph
+    */
+    ConformanceErrors(props: any) {
+        if (! this.report) {
+            return <label>No conformance report generated yet</label>
+        }
+
+        let items: any[] = [];
+        let tmp: ValidationError[] = this.report.getValidationErrors();
+        for (let i = 0; i < tmp.length; i++) {
+            let cur = tmp[i].toString();
+            // TODO in the future handle the object better instead of just calling toString()
+            items.push(
+                <li key={cur}>
+                    {cur}
+                </li>
+            );
+        }
+
+        if (items.length === 0) {
+            return <label>No conformance errors </label> ;
+        }
+
+        return (
+            <div>
+                <label>Conformance errors: </label>
                 <br />
                 <List items={items} />
             </div>
@@ -181,13 +234,21 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                         />
                     </Menu.Item>
 
-                        <Popup
-                            trigger={<Menu.Item as="a" onClick={this.saveGraph}>Save Graph</Menu.Item>}
-                            on="click"
-                            inverted={false}
-                        >
-                            <this.OpenedFiles />
-                        </Popup>
+                    <Popup
+                        trigger={<Menu.Item as="a" onClick={this.saveGraph}>Save Graph</Menu.Item>}
+                        on="click"
+                        inverted={false}
+                    >
+                        <this.OpenedFiles />
+                    </Popup>
+
+                    <Popup
+                        trigger={<Menu.Item as="a" onClick={this.getConformanceErrors}>Conformance errors</Menu.Item>}
+                        on="click"
+                        inverted={false}
+                    >
+                        <this.ConformanceErrors />
+                    </Popup>
 
                     <Menu.Item
                         as="a"
