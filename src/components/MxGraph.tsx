@@ -589,6 +589,11 @@ class MxGraph extends React.Component<any, any> {
         style[mxConstants.STYLE_STROKECOLOR] = '#A1E44D';
         graph.getStylesheet().putCellStyle('row', style);
 
+        style = {};
+        style[mxConstants.STYLE_STROKEWIDTH] = '1';
+        style[mxConstants.STYLE_STROKECOLOR] = '#CC0000';
+        graph.getStylesheet().putCellStyle('invalid-row', style);
+
         style = graph.stylesheet.getDefaultEdgeStyle();
         style[mxConstants.STYLE_LABEL_BACKGROUNDCOLOR] = '#FFFFFF';
         style[mxConstants.STYLE_STROKEWIDTH] = '2';
