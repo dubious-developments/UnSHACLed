@@ -192,7 +192,7 @@ export class Graph {
     }
 
     /**
-     * Merges this graph with another graph.
+     * Merge this graph with another graph.
      * @param {Graph} other
      */
     public merge(other: Graph): void {
@@ -222,6 +222,25 @@ export class Graph {
     }
 
     /**
+     * Perform a merge operation based on the other graph's recent changes.
+     * @param {Graph} other
+     */
+    public incrementalMerge(other: Graph): void {
+        // do merge of prefixes
+        this.addPrefixes(other.getPrefixes());
+
+        // do merge based on change sets
+        let toAdd = other.getChanges().getValue(ChangeSet.ADD);
+        if (toAdd) {
+            this.addTriples(toAdd.toArray());
+        }
+        let toRemove = other.getChanges().getValue(ChangeSet.REMOVE);
+        if (toRemove) {
+            this.removeTriples(toRemove.toArray());
+        }
+    }
+
+    /**
      * Update changes.
      * @param focus
      * @param other
@@ -235,7 +254,6 @@ export class Graph {
         let otherSet = this.changes.getValue(other);
         if (focusSet) {
             // add change to the relevant set
-            // makes use of the shacl.js representation
             focusSet.add({subject: subject, predicate: predicate, object: object});
             if (otherSet) {
                 // performs a bidirectional difference operation:

@@ -1,6 +1,4 @@
 import * as Collections from "typescript-collections";
-import {ModelData} from "../entities/modelData";
-import {ModelComponent} from "../entities/modelTaskMetadata";
 
 /**
  * A structure that is to be stored inside the Model.
@@ -95,6 +93,21 @@ export class Component {
      */
     public getParts(): any[] {
         return this.parts.values();
+    }
+
+    /**
+     * Retrieve all parts, barring the root.
+     * @returns {any[]}
+     */
+    public getCompositeParts(): any[] {
+        let relevantParts = new Array<any>();
+        this.getAllKeys().forEach(k => {
+            if (k !== Component.ROOT) {
+                relevantParts.push(this.parts.getValue(k));
+            }
+        });
+
+        return relevantParts;
     }
 
     /**

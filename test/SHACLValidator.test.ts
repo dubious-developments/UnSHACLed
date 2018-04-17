@@ -8,32 +8,50 @@ import {Component} from "../src/persistence/component";
 describe("WellDefinedSHACLValidator Class", () => {
     it("should perform correct validation for conforming data.",
        (done) => {
-            let validator = new WellDefinedSHACLValidator();
-            validator.doValidation(getConformingDataGraph(), getShapesGraph(),
-                                   function (report: ValidationReport) {
-                    expect(report.isConforming()).toBe(true);
-                    done();
-                });
+           let parser = new GraphParser();
+           let validator = new WellDefinedSHACLValidator();
+           parser.parse(getConformingDataGraph(), "text/turtle", function (data: any) {
+               parser.clean();
+               parser.parse(getShapesGraph(), "text/turtle", function (shapes: any) {
+                   validator.doValidation(data, shapes,
+                                          function (report: ValidationReport) {
+                           expect(report.isConforming()).toBe(true);
+                           done();
+                       });
+               });
+           });
         });
 
     it("should perform correct validation for non-conforming data.",
        (done) => {
-            let validator = new WellDefinedSHACLValidator();
-            validator.doValidation(getNonConformingDataGraph(), getShapesGraph(),
-                                   function (report: ValidationReport) {
-                    expect(report.isConforming()).toBe(false);
-                    done();
-                });
+           let parser = new GraphParser();
+           let validator = new WellDefinedSHACLValidator();
+           parser.parse(getNonConformingDataGraph(), "text/turtle", function (data: any) {
+               parser.clean();
+               parser.parse(getShapesGraph(), "text/turtle", function (shapes: any) {
+                   validator.doValidation(data, shapes,
+                                          function (report: ValidationReport) {
+                           expect(report.isConforming()).toBe(false);
+                           done();
+                       });
+               });
+           });
         });
 
     it("should perform correct validation for playground data.",
        (done) => {
-            let validator = new WellDefinedSHACLValidator();
-            validator.doValidation(getPlaygroundData(), getPlaygroundShapes(),
-                                   function (report: ValidationReport) {
-                    expect(report.isConforming()).toBe(false);
-                    done();
-                });
+           let parser = new GraphParser();
+           let validator = new WellDefinedSHACLValidator();
+           parser.parse(getPlaygroundData(), "text/turtle", function (data: any) {
+               parser.clean();
+               parser.parse(getPlaygroundShapes(), "text/turtle", function (shapes: any) {
+                   validator.doValidation(data, shapes,
+                                          function (report: ValidationReport) {
+                           expect(report.isConforming()).toBe(false);
+                           done();
+                       });
+               });
+           });
         });
 
     it("should validate correctly (i.e. validation should integrate with " +

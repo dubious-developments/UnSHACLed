@@ -223,4 +223,46 @@ describe("Graph Class", () => {
             }
 
         });
+
+    it("should be able to merge with another graph based on change sets.",
+       () => {
+           let graph = new Graph();
+           let other = new Graph();
+
+           graph.addPrefix("dc", "http://purl.org/dc/elements/1.1/");
+           graph.addTriple("http://en.wikipedia.org/wiki/Tony_Benn",
+                           "http://purl.org/dc/elements/1.1/title", '"Tony Benn"');
+
+           other.addPrefix("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+           other.addTriple("http://en.wikipedia.org/wiki/Tony_Benn",
+                           "http://purl.org/dc/elements/1.1/publisher", '"Wikipedia"');
+
+           graph.incrementalMerge(other);
+
+           // the merged graph should contain the other graph's triples and prefixes
+           expect(graph.getN3Store().countTriples()).toEqual(2);
+           expect(graph.getSHACLStore().length).toEqual(2);
+
+           let key = "rdf";
+           expect(graph.getPrefixes()[key]).toEqual("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+
+           // the merged graph should also contain the other graph's changes
+           let changes = graph.getChanges().getValue(ChangeSet.ADD);
+           if (changes) {
+               expect(changes.contains({
+                   subject: "http://en.wikipedia.org/wiki/Tony_Benn",
+                   predicate: "http://purl.org/dc/elements/1.1/publisher", object: '"Wikipedia"'})).toEqual(true);
+           }
+
+           other.clearChanges();
+
+           other.addTriple("http://en.wikipedia.org/wiki/Tony_Benn",
+                           "http://purl.org/dc/elements/1.1/creator", '"Some Guy On the Internet"');
+
+           graph.incrementalMerge(other);
+
+           // the incremental merge should only have added recent additions
+           expect(graph.getN3Store().countTriples()).toEqual(3);
+           expect(graph.getSHACLStore().length).toEqual(3);
+        });
 });
