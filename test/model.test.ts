@@ -140,4 +140,19 @@ describe("Model Class", () => {
         // The "test" is that this statement doesn't throw.
         model.tasks.processAllTasks();
     });
+
+    it("does not mistake read-after-write for a read", () => {
+        let modelData = new ModelData();
+        let model = new Model(modelData);
+        model.tasks.schedule(
+            Model.createTask(
+                data => {
+                    data.setComponent(ModelComponent.DataGraph, 42);
+                    data.getComponent<number>(ModelComponent.DataGraph);
+                },
+                [],
+                [ModelComponent.DataGraph]));
+        // The "test" is that this statement doesn't throw.
+        model.tasks.processAllTasks();
+    });
 });
