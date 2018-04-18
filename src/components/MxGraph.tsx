@@ -38,7 +38,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.makeDragSource = this.makeDragSource.bind(this);
         this.visualizeDataGraph = this.visualizeDataGraph.bind(this);
         this.addTemplate = this.addTemplate.bind(this);
-        this.addTemplate2 = this.addTemplate2.bind(this);
         this.nameToStandardCellDict = new Collections.Dictionary<string, any>();
         this.blockToCellDict = new Collections.Dictionary<Block, any>((b) => b.name);
         this.subjectToBlockDict = new Collections.Dictionary<any, Block>();
@@ -765,17 +764,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             this.props.setLabel(true);
         }
 
-    }
-
-    addTemplate2() {
-        let {templateCount} = this.state;
-        console.log("Ready to add templates");
-        // invoke callback on parent component
-        this.props.callback("Cell name", templateCount);
-        // increment state counter
-        this.setState({
-            templateCount: templateCount + 1
-        });
     }
 
     main(container: HTMLElement | null): void {
