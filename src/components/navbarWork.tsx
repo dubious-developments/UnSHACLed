@@ -133,8 +133,14 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                     }}
                 >
                     {/* Toolbar icons */}
-                    <Menu.Item as="a" onClick={this.iconClick} content={<Icon name='content'/>}/>
-                    <Menu.Item as="a" id="delete" content={<Icon name='trash'/>}/>
+                    <Popup
+                        trigger={<Menu.Item as="a" id="delete" content={<Icon name='trash'/>}/>}
+                        content='Delete selected component(s) from graph'
+                        size="mini"
+                        position='bottom left'
+                        inverted={true}
+                    />
+
                     <Menu.Item as="a" id="undo" content={<Icon name='reply'/>}/>
                     <Menu.Item as="a" id="redo" content={<Icon name='share'/>}/>
                     <Menu.Item as="a" id="camera" content={<Icon name='camera'/>}/>
