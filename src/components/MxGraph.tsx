@@ -759,9 +759,10 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             let preview = null;
             var drag = document.getElementById(cellname + templateCount);
             mxUtils.makeDraggable(drag, graph, funct);
-
+            this.props.setLabel(false);
         } else {
             console.log("nothing is selected");
+            this.props.setLabel(true);
         }
 
     }

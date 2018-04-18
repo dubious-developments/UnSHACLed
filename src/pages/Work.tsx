@@ -11,12 +11,15 @@ class Workspace extends React.Component<any, any> {
         this.state = {
             menuVisible: true,
             dragid: null,
-            templates: []
+            // TODO enable search for this
+            templates: [],
+            errorLabel: false
         };
 
         this.callBackNavBar = this.callBackNavBar.bind(this);
         this.idCallback = this.idCallback.bind(this);
         this.templateCallback = this.templateCallback.bind(this);
+        this.setLabel = this.setLabel.bind(this);
     }
 
     callBackNavBar(childData: boolean) {
@@ -49,17 +52,24 @@ class Workspace extends React.Component<any, any> {
         });
         console.log("called callback wiht" + name);
     }
+
+    setLabel(val: boolean) {
+        this.setState({
+            errorLabel : val
+        });
+    }
     render() {
         const {menuVisible} = this.state;
         const {dragid} = this.state;
         const {templates} = this.state;
+        const {errorLabel} = this.state;
         return (
             <Sidebar.Pushable style={{width: '100%', height: '100%'}}>
-                <SideBar visible={menuVisible} callback={this.idCallback} templates={templates}/>
+                <SideBar visible={menuVisible} callback={this.idCallback} templates={templates} showLabel={errorLabel}/>
                 <Sidebar.Pusher style={{height: '100vh', padding: '0em 0em'}}>
                     <Segment basic={true} style={{height: '100vh', padding: '0em 0em'}}>
                         <Navbar visible={menuVisible} callback={this.callBackNavBar}/>
-                        <MxGraph callback={this.templateCallback} />
+                        <MxGraph callback={this.templateCallback} setLabel={this.setLabel}/>
                     </Segment>
                 </Sidebar.Pusher>
             </Sidebar.Pushable>

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Sidebar, Menu, Image, Input, Dropdown, List, Button} from 'semantic-ui-react';
+import {Sidebar, Menu, Image, Input, Dropdown, List, Button, Label} from 'semantic-ui-react';
 import TreeView from './treeView';
 import {SidebarProps} from './interfaces/interfaces';
 
@@ -175,6 +175,15 @@ class SideBar extends React.Component<SidebarProps, any> {
 
                                     > Add template from selection
                                     </Button>
+                                    {this.props.showLabel ?
+                                    <Label
+                                        basic={true}
+                                        color='red'
+                                        pointing={true}
+                                    >
+                                        Nothing is selected!
+                                    </Label> : null
+                                    }
                                 </Menu.Item>
                                 {templates}
                             </Menu.Menu>
