@@ -162,7 +162,9 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
     */
     ConformanceErrors(props: any) {
         if (! this.report) {
-            return <label>No conformance report generated yet</label>
+            return (
+                <label>No conformance report generated yet</label>
+            );
         }
 
         let items: any[] = [];

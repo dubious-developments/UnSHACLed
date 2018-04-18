@@ -571,15 +571,24 @@ class GraphData {
      * Retrieve additions.
      */
     public getAdditions(): Collections.Set<Triple> {
-        return this.changes.getValue(ChangeSet.ADD);
+        let additions = this.changes.getValue(ChangeSet.ADD);
+        if (additions) {
+            return additions;
+        } else {
+            return new Collections.Set<Triple>();
+        }
     }
 
     /**
      * Retrieve removals.
      */
     public getRemovals(): Collections.Set<Triple> {
-        return this.changes.getValue(ChangeSet.REMOVE);
-    }
+        let removals = this.changes.getValue(ChangeSet.REMOVE);
+        if (removals) {
+            return removals;
+        } else {
+            return new Collections.Set<Triple>();
+        }    }
 
     /**
      * Clear change history.

@@ -726,7 +726,7 @@ class MxGraph extends React.Component<any, any> {
     /**
      * Used for checking if user is actively editing or not
      */
-    handleUserAction(event) {
+    handleUserAction(event: any) {
         let model = DataAccessProvider.getInstance().model;
 
         // little hack to pass this to a callback

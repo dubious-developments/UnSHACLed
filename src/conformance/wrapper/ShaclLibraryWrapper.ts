@@ -17,7 +17,7 @@ export class ShaclWrapper {
             if (report.conforms() === false) {
                 report.results().forEach(function (result: any) {
                     console.log(result.message() + "\n" + result.path() + "\n" + result.sourceConstraintComponent()
-                        +"\n" + result.focusNode() + "\n" + result.severity() + '\n' + result.sourceShape());
+                        + "\n" + result.focusNode() + "\n" + result.severity() + '\n' + result.sourceShape());
                     console.log(" - Severity: " + result.severity() + " for " + result.sourceConstraintComponent());
                 });
             }
