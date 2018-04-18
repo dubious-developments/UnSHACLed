@@ -1,7 +1,8 @@
 import * as Collections from "typescript-collections";
+import * as Immutable from "immutable";
 import { ModelComponent } from "./modelTaskMetadata";
 
-type AccessBuffer = Collections.Set<ModelComponent>;
+type AccessBuffer = Immutable.Set<ModelComponent>;
 type AccessBufferPair = { readBuffer: AccessBuffer, writeBuffer: AccessBuffer };
 
 /**
@@ -23,8 +24,8 @@ export class ModelData {
     public constructor(
         components?: Collections.Dictionary<ModelComponent, any>) {
 
-        this.writeBuffer = new Collections.Set<ModelComponent>();
-        this.readBuffer = new Collections.Set<ModelComponent>();
+        this.writeBuffer = Immutable.Set<ModelComponent>();
+        this.readBuffer = Immutable.Set<ModelComponent>();
         if (components) {
             this.components = components;
         } else {
@@ -42,7 +43,7 @@ export class ModelData {
             && !this.writeBuffer.contains(component)) {
 
             // Only update the read buffer if the component wasn't written to before.
-            this.readBuffer.add(component);
+            this.readBuffer = this.readBuffer.add(component);
         }
         return this.components.getValue(component);
     }
@@ -71,7 +72,7 @@ export class ModelData {
     public setComponent<T>(component: ModelComponent, value: T): void {
 
         if (value !== this.components.getValue(component)) {
-            this.writeBuffer.add(component);
+            this.writeBuffer = this.writeBuffer.add(component);
         }
         this.components.setValue(component, value);
     }
@@ -82,8 +83,8 @@ export class ModelData {
     public drainBuffers(): AccessBufferPair {
         let readBuf = this.readBuffer;
         let writeBuf = this.writeBuffer;
-        this.readBuffer = new Collections.Set<ModelComponent>();
-        this.writeBuffer = new Collections.Set<ModelComponent>();
+        this.readBuffer = Immutable.Set<ModelComponent>();
+        this.writeBuffer = Immutable.Set<ModelComponent>();
         return { readBuffer: readBuf, writeBuffer: writeBuf };
     }
 

@@ -291,11 +291,11 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
         });
 
         let buffers = instruction.data.peekBuffers();
-        buffers.readBuffer.forEach(component => {
+        buffers.readBuffer.toArray().forEach(component => {
             // Propagate reads to the architecture state's read buffer.
             this.state.getComponent<any>(component);
         });
-        buffers.writeBuffer.forEach(component => {
+        buffers.writeBuffer.toArray().forEach(component => {
             // Update the architecture state.
             this.state.setComponent<any>(
                 component,

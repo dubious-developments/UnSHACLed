@@ -31,8 +31,8 @@ describe("ModelData class", () => {
         data.setComponent(ModelComponent.DataGraph, 10);
         let buffers = data.drainBuffers();
         expect(buffers.writeBuffer.contains(ModelComponent.DataGraph)).toBeTruthy();
-        expect(buffers.writeBuffer.size()).toEqual(1);
-        expect(data.drainBuffers().writeBuffer.size()).toEqual(0);
+        expect(buffers.writeBuffer.size).toEqual(1);
+        expect(data.drainBuffers().writeBuffer.size).toEqual(0);
     });
 
     it("has a working read buffer", () => {
@@ -42,8 +42,8 @@ describe("ModelData class", () => {
         let value = data.getComponent<number>(ModelComponent.DataGraph);
         let buffers = data.drainBuffers();
         expect(buffers.readBuffer.contains(ModelComponent.DataGraph)).toBeTruthy();
-        expect(buffers.writeBuffer.size()).toEqual(0);
-        expect(data.drainBuffers().readBuffer.size()).toEqual(0);
+        expect(buffers.writeBuffer.size).toEqual(0);
+        expect(data.drainBuffers().readBuffer.size).toEqual(0);
     });
 
     it("updates the right buffer from a getOrCreateComponent call", () => {
@@ -52,14 +52,14 @@ describe("ModelData class", () => {
             .toEqual(10);
         let buffers = data.drainBuffers();
         expect(buffers.writeBuffer.contains(ModelComponent.DataGraph)).toBeTruthy();
-        expect(buffers.writeBuffer.size()).toEqual(1);
-        expect(buffers.readBuffer.size()).toEqual(0);
+        expect(buffers.writeBuffer.size).toEqual(1);
+        expect(buffers.readBuffer.size).toEqual(0);
         expect(data.getOrCreateComponent(ModelComponent.DataGraph, () => 20))
             .toEqual(10);
         buffers = data.drainBuffers();
         expect(buffers.readBuffer.contains(ModelComponent.DataGraph)).toBeTruthy();
-        expect(buffers.writeBuffer.size()).toEqual(0);
-        expect(buffers.writeBuffer.size()).toEqual(0);
+        expect(buffers.writeBuffer.size).toEqual(0);
+        expect(buffers.writeBuffer.size).toEqual(0);
     });
 });
 
