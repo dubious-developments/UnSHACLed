@@ -6,29 +6,47 @@ import { extensionToMIME } from "./extensionToMIME";
 import {Task} from "../entities/task";
 import MxGraph from "../components/MxGraph";
 
-/*
- * Load a file from the model using the fileName
+/**
+ * First search the component which belongs to the fileName
+ * Then load a file from the model using the fileName
  */
 export class LoadFileTask extends Task<ModelData, ModelTaskMetadata> {
 
+    private mComponent: ModelComponent;
+
     /**
      * Create a new load file task from Model
-     * @param {mComponent} ModelComponent
+     * @param {components} ModelComponent[] the filename should be in one of the components
      * @param {fileName} the name of the file
      */
-    public constructor(private mComponent: ModelComponent, private fileName: string) {
+    public constructor(private components: ModelComponent[], private fileName: string) {
         super();
 
     }
 
     public execute(data: ModelData): void {
-        let component: any = data.getComponent(this.mComponent);
-        if (component) {
-            var fileDAO: FileDAO = DataAccessProvider.getInstance().getFileDAO();
-            // get MIME based on extension
-            var splitted = this.fileName.split(".");
-            var blob = new Blob([], {type: extensionToMIME[splitted[splitted.length - 1]]});
-            fileDAO.insert(new FileModule(this.mComponent, this.fileName, blob));
+        // first search for the component which contains the fileName
+        for (let mComponent of this.components) {
+            let comp: any = data.getComponent(mComponent);
+            if (comp) {
+                if (comp.getAllKeys().includes(this.fileName)) {
+                    // found the ModelComponent
+                    this.mComponent = mComponent;
+                    break;
+                }
+            }
+        }
+
+        // now store the file if the ModelComponent is found
+        if (this.mComponent in ModelComponent) {
+            let component = data.getComponent(this.mComponent);
+            if (component) {
+                var fileDAO: FileDAO = DataAccessProvider.getInstance().getFileDAO();
+                // get MIME based on extension
+                var splitted = this.fileName.split(".");
+                var blob = new Blob([], {type: extensionToMIME[splitted[splitted.length - 1]]});
+                fileDAO.insert(new FileModule(this.mComponent, this.fileName, blob));
+            }
         }
 
     }

@@ -111,7 +111,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
         model.tasks.processAllTasks();
     }
 
-    // temp method
+    // TODO temp method
     getConformanceErrors(e: any) {
         let model: Model = DataAccessProvider.getInstance().model;
         model.tasks.schedule(new GetValidationReportNavbar(this));
@@ -122,7 +122,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
         let fileName = (e.target || e.srcElement).innerHTML;
         console.log(fileName);
         let model: Model = DataAccessProvider.getInstance().model;
-        model.tasks.schedule(new LoadFileTask(ModelComponent.DataGraph, fileName));
+        model.tasks.schedule(new LoadFileTask([ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph], fileName));
         model.tasks.processTask();
     }
 
