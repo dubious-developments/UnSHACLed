@@ -1,10 +1,10 @@
+import { Set } from "typescript-collections";
+import * as Immutable from "immutable";
 import { Model, ModelData } from "../src/entities/model";
 import { ModelTaskMetadata, ModelComponent } from "../src/entities/modelTaskMetadata";
-import { Set } from "typescript-collections";
 import { Task, OpaqueTask } from "../src/entities/task";
 
-let graphReadSet = new Set<ModelComponent>();
-graphReadSet.add(ModelComponent.DataGraph);
+let graphReadSet = Immutable.Set<ModelComponent>([ModelComponent.DataGraph]);
 let graphWriteSet = new Set<ModelComponent>();
 graphWriteSet.add(ModelComponent.DataGraph);
 let graphTweakMetadata = new ModelTaskMetadata(graphReadSet, graphWriteSet);
