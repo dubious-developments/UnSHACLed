@@ -110,7 +110,7 @@ class SideBar extends React.Component<SidebarProps, any> {
     }
 
     render() {
-        const logo = require('../img/logo.svg');
+        const logo = require('../img/logo.png');
         const defaultOption = 1;
         let {templates} = this.props;
         return (

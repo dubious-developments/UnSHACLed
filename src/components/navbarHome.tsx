@@ -10,7 +10,7 @@ class Navbar extends React.Component<any, any> {
     }
 
     render() {
-        const logo = require('../img/logo.svg');
+        const logo = require('../img/logo.png');
         return (
             <Menu
                 inverted={true}
