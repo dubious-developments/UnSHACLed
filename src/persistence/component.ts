@@ -10,13 +10,19 @@ import { ModelComponent } from "../entities/modelTaskMetadata";
 export class Component<T> {
 
     /**
+     * A mapping of keys to parts.
+     */
+    private readonly parts: Immutable.Map<string, T>;
+
+    /**
      * Creates a new component.
      * @param parts A mapping of part keys to parts.
      */
-    public constructor(
-        private readonly parts?: Immutable.Map<string, T>) {
+    public constructor(parts?: Immutable.Map<string, T>) {
         
-        if (!parts) {
+        if (parts) {
+            this.parts = parts;
+        } else {
             this.parts = Immutable.Map<string, T>();
         }
     }
