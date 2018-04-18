@@ -7,6 +7,7 @@ import { PriorityGenerator } from "../src/entities/priorityPartitionedQueue";
 import { TaskProcessor } from "../src/entities/taskProcessor";
 import { SimpleTaskRewriter } from "../src/entities/taskRewriter";
 import { ModelTask } from "../src/entities/taskInstruction";
+import { Component } from "../src/persistence/component";
 
 function processNonEmpty<TData, TMetadata>(
     queue: TaskProcessor<TData, TMetadata>): void {
@@ -209,6 +210,62 @@ describe("OutOfOrderProcessor Class", () => {
         // Task queue will be empty if the rewriter did its job.
         expect(queue.isEmpty()).toEqual(true);
         expect(modelData.getComponent<number>(ModelComponent.DataGraph)).toEqual(3);
+    });
+
+    it("feeds output to subsequent tasks", () => {
+        let modelData = new ModelData();
+        let queue = new OutOfOrderProcessor(modelData);
+
+        queue.schedule(
+            Model.createTask(
+                data => {
+                    let component = data.getOrCreateComponent(
+                        ModelComponent.DataGraph,
+                        () => new Component<string>());
+                    component = component.withPart("key", "Oh hi Mark");
+                    data.setComponent(ModelComponent.DataGraph, component);
+                },
+                [ModelComponent.DataGraph],
+                [ModelComponent.DataGraph]));
+
+        queue.schedule(
+            Model.createTask(
+                data => {
+                    expect(data.getComponent<Component<string>>(ModelComponent.DataGraph)).toBeTruthy();
+                },
+                [ModelComponent.DataGraph],
+                []));
+
+        queue.processAllTasks();
+    });
+
+    it("to update the architecture state", () => {
+        let modelData = new ModelData();
+        let queue = new OutOfOrderProcessor(modelData);
+
+        queue.schedule(
+            Model.createTask(
+                data => {
+                    let component = data.getOrCreateComponent(
+                        ModelComponent.DataGraph,
+                        () => new Component<string>());
+                    component = component.withPart("key", "Oh hi Mark");
+                    data.setComponent(ModelComponent.DataGraph, component);
+                },
+                [ModelComponent.DataGraph],
+                [ModelComponent.DataGraph]));
+
+        queue.processAllTasks();
+
+        queue.schedule(
+            Model.createTask(
+                data => {
+                    expect(data.getComponent<Component<string>>(ModelComponent.DataGraph)).toBeTruthy();
+                },
+                [ModelComponent.DataGraph],
+                []));
+
+        queue.processAllTasks();
     });
 });
 

@@ -1,46 +1,54 @@
-import * as Collections from "typescript-collections";
-import {ModelData} from "../entities/modelData";
-import {ModelComponent} from "../entities/modelTaskMetadata";
+import * as Immutable from "immutable";
+import { ModelData } from "../entities/modelData";
+import { ModelComponent } from "../entities/modelTaskMetadata";
 
 /**
  * A structure that is to be stored inside the Model.
  * Possibly contains multiple composite parts all mapped to an identifier.
  * An example component might contain multiple data graphs, each of which is associated with a filename.
  */
-export class Component {
-
-    private parts: Collections.Dictionary<string, any>;
+export class Component<T> {
 
     /**
-     * Create a new Component.
+     * A mapping of keys to parts.
      */
-    public constructor() {
-        this.parts = new Collections.Dictionary<string, any>();
+    private readonly parts: Immutable.Map<string, T>;
+
+    /**
+     * Creates a new component.
+     * @param parts A mapping of part keys to parts.
+     */
+    public constructor(parts?: Immutable.Map<string, T>) {
+        
+        if (parts) {
+            this.parts = parts;
+        } else {
+            this.parts = Immutable.Map<string, T>();
+        }
     }
 
     /**
-     * Retrieve all keys.
-     * @returns {string[]}
+     * Retrieves all keys in the component.
      */
-    public getAllKeys() {
-        return this.parts.keys();
+    public getAllKeys(): string[] {
+        return this.parts.keySeq().toArray();
     }
 
     /**
-     * Retrieve a part of the component.
-     * @param {string} key
-     * @returns {any}
+     * Retrieves a part of the component.
+     * @param key The key for the part to retrieve.
      */
-    public getPart(key: string) {
-        return this.parts.getValue(key);
+    public getPart(key: string): T {
+        return this.parts.get(key);
     }
 
     /**
-     * Bind a value to a given key.
-     * @param {string} key
-     * @param value
+     * Bind a value to a given key. Returns a component
+     * with the updated (key, value) pair.
+     * @param key The key to bind a value to.
+     * @param value The value to bind to `key`.
      */
-    public setPart(key: string, value: any) {
-        this.parts.setValue(key, value);
+    public withPart(key: string, value: T): Component<T> {
+        return new Component<T>(this.parts.set(key, value));
     }
 }
