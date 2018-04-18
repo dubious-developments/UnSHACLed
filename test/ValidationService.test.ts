@@ -13,7 +13,12 @@ describe("ValidationService Class", () => {
            let comp1 = new Component();
            let comp2 = new Component();
 
-           let busy = true;
+           model.registerObserver((changeBuf) => {
+               expect(changeBuf.contains(ModelComponent.ValidationReport)).toEqual(true);
+               done();
+               return [];
+           });
+
            parser.parse(getDataGraph(), "text/turtle", function (data: any) {
                parser.clean();
                parser.parse(getShapesGraph(), "text/turtle", function (shapes: any) {
@@ -24,26 +29,13 @@ describe("ValidationService Class", () => {
                            (mdata) => {
                                mdata.setComponent(ModelComponent.DataGraph, comp1);
                                mdata.setComponent(ModelComponent.SHACLShapesGraph, comp2);
-                               busy = false;
                            },
                            [],
                            [ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph]));
-                   model.tasks.processTask();
+                   model.tasks.processAllTasks();
                });
            });
-
-           // this is pretty horrible and there probably exists a better way of doing this,
-           // but at the moment I can't seem to think of one
-           while (busy) {
-           }
-
-           model.registerObserver((changeBuf) => {
-               expect(changeBuf.contains(ModelComponent.ValidationReport)).toEqual(true);
-               done();
-               return [];
-           });
-
-        });
+       });
 });
 
 function getDataGraph() {

@@ -7,56 +7,56 @@ import {Component} from "../src/persistence/component";
 
 describe("WellDefinedSHACLValidator Class", () => {
     it("should perform correct validation for conforming data.",
-       (done) => {
-           let parser = new GraphParser();
-           let validator = new WellDefinedSHACLValidator();
-           parser.parse(getConformingDataGraph(), "text/turtle", function (data: any) {
-               parser.clean();
-               parser.parse(getShapesGraph(), "text/turtle", function (shapes: any) {
-                   validator.doValidation(data, shapes,
-                                          function (report: ValidationReport) {
-                           expect(report.isConforming()).toBe(true);
-                           done();
-                       });
-               });
-           });
+        (done) => {
+            let parser = new GraphParser();
+            let validator = new WellDefinedSHACLValidator();
+            parser.parse(getConformingDataGraph(), "text/turtle", function (data: any) {
+                parser.clean();
+                parser.parse(getShapesGraph(), "text/turtle", function (shapes: any) {
+                    validator.doValidation(data, shapes,
+                        function (report: ValidationReport) {
+                            expect(report.isConforming()).toBe(true);
+                            done();
+                        });
+                });
+            });
         });
 
     it("should perform correct validation for non-conforming data.",
-       (done) => {
-           let parser = new GraphParser();
-           let validator = new WellDefinedSHACLValidator();
-           parser.parse(getNonConformingDataGraph(), "text/turtle", function (data: any) {
-               parser.clean();
-               parser.parse(getShapesGraph(), "text/turtle", function (shapes: any) {
-                   validator.doValidation(data, shapes,
-                                          function (report: ValidationReport) {
-                           expect(report.isConforming()).toBe(false);
-                           done();
-                       });
-               });
-           });
+        (done) => {
+            let parser = new GraphParser();
+            let validator = new WellDefinedSHACLValidator();
+            parser.parse(getNonConformingDataGraph(), "text/turtle", function (data: any) {
+                parser.clean();
+                parser.parse(getShapesGraph(), "text/turtle", function (shapes: any) {
+                    validator.doValidation(data, shapes,
+                        function (report: ValidationReport) {
+                            expect(report.isConforming()).toBe(false);
+                            done();
+                        });
+                });
+            });
         });
 
     it("should perform correct validation for playground data.",
-       (done) => {
-           let parser = new GraphParser();
-           let validator = new WellDefinedSHACLValidator();
-           parser.parse(getPlaygroundData(), "text/turtle", function (data: any) {
-               parser.clean();
-               parser.parse(getPlaygroundShapes(), "text/turtle", function (shapes: any) {
-                   validator.doValidation(data, shapes,
-                                          function (report: ValidationReport) {
-                           expect(report.isConforming()).toBe(false);
-                           done();
-                       });
-               });
-           });
+        (done) => {
+            let parser = new GraphParser();
+            let validator = new WellDefinedSHACLValidator();
+            parser.parse(getPlaygroundData(), "text/turtle", function (data: any) {
+                parser.clean();
+                parser.parse(getPlaygroundShapes(), "text/turtle", function (shapes: any) {
+                    validator.doValidation(data, shapes,
+                        function (report: ValidationReport) {
+                            expect(report.isConforming()).toBe(false);
+                            done();
+                        });
+                });
+            });
         });
 
     it("should validate correctly (i.e. validation should integrate with " +
         "the Model).",
-       (done) => {
+        (done) => {
             let validator = new WellDefinedSHACLValidator();
             let model = new Model();
             let parser = new GraphParser();
@@ -66,43 +66,39 @@ describe("WellDefinedSHACLValidator Class", () => {
             let busy = true;
             parser.parse(getConformingDataGraph(), "text/turtle", function (data1: any) {
                 parser.clean();
-                parser.parse(getShapesGraph(), "text/turtle", function (shapes1: any) {
+                parser.parse(getNonConformingDataGraph(), "text/turtle", function (data2: any) {
                     parser.clean();
-                    parser.parse(getPlaygroundData(), "text/turtle", function (data2: any) {
-                        parser.clean();
-                        parser.parse(getPlaygroundShapes(), "text/turtle", function (shapes2: any) {
-                            comp1 = comp1.withPart("test1", data1);
-                            comp1 = comp1.withPart("test2", data2);
-                            comp2 = comp2.withPart("test1", shapes1);
-                            comp2 = comp2.withPart("test2", shapes2);
-                            model.tasks.schedule(
-                                Model.createTask(
-                                    (data) => {
-                                        data.setComponent(ModelComponent.DataGraph, comp1);
-                                        data.setComponent(ModelComponent.SHACLShapesGraph, comp2);
-                                        busy = false;
-                                    },
-                                    [],
-                                    [ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph]));
-                            model.tasks.processTask();
+                    parser.parse(getShapesGraph(), "text/turtle", function (shapes: any) {
+                        comp1 = comp1.withPart("test1", data1);
+                        comp1 = comp1.withPart("test2", data2);
+                        comp2 = comp2.withPart("test", shapes);
+                        model.tasks.schedule(
+                            Model.createTask(
+                                (data) => {
+                                    data.setComponent(ModelComponent.DataGraph, comp1);
+                                    data.setComponent(ModelComponent.SHACLShapesGraph, comp2);
+                                    busy = false;
+                                },
+                                [],
+                                [ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph]));
+                        model.tasks.processAllTasks();
 
-                            // this is pretty horrible and there probably exists a better way of doing this,
-                            // but at the moment I can't seem to think of one
-                            while (busy) {
-                            }
+                        // this is pretty horrible and there probably exists a better way of doing this,
+                        // but at the moment I can't seem to think of one
+                        while (busy) {
+                        }
 
-                            model.tasks.schedule(
-                                Model.createTask(
-                                    (data) => {
-                                        validator.validate(data, function (report: ValidationReport) {
-                                            expect(report.isConforming()).toBe(false);
-                                            done();
-                                        });
-                                    },
-                                    [],
-                                    [ModelComponent.ValidationReport]));
-                            model.tasks.processTask();
-                        });
+                        model.tasks.schedule(
+                            Model.createTask(
+                                (data) => {
+                                    validator.validate(data, function (report: ValidationReport) {
+                                        expect(report.isConforming()).toBe(false);
+                                        done();
+                                    });
+                                },
+                                [],
+                                [ModelComponent.ValidationReport]));
+                        model.tasks.processAllTasks();
                     });
                 });
             });

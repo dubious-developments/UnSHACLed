@@ -6,6 +6,7 @@ import {ModelComponent} from "../entities/modelTaskMetadata";
 import {Component} from "../persistence/component";
 import {Graph} from "../persistence/graph";
 import {ValidationReport} from "./wrapper/ValidationReport";
+import {GraphParser} from "../persistence/graphParser";
 
 /**
  * A wrapper class around the shacl.js library.
@@ -45,8 +46,16 @@ export class WellDefinedSHACLValidator implements Validator {
             ModelComponent.SHACLShapesGraph,
             () => new Component<Graph>());
 
-        let dataRoot = new Graph();
-        let shapesRoot = new Graph();
+        if (!dataComponent.getRoot()) {
+            dataComponent = dataComponent.withRoot(new Graph());
+        }
+
+        if (!shapesComponent.getRoot()) {
+            shapesComponent = shapesComponent.withRoot(new Graph());
+        }
+
+        let dataRoot = dataComponent.getRoot();
+        let shapesRoot = shapesComponent.getRoot();
 
         // perform a more intelligent merge, using change sets
         // WARNING: this approach assumes (rightly, at the moment) that no other component
@@ -64,15 +73,6 @@ export class WellDefinedSHACLValidator implements Validator {
         data.setComponent(ModelComponent.DataGraph, dataComponent.withRoot(dataRoot));
         data.setComponent(ModelComponent.SHACLShapesGraph, shapesComponent.withRoot(shapesRoot));
 
-        // let parser = new GraphParser();
-
-        // let self = this;
-        // parser.serialize(dataRoot, "text/turtle", function(datastring: string) {
-        //     parser.serialize(shapesRoot, "text/turtle", function (shapesstring: string) {
-        //         self.doValidation(datastring, shapesstring, andThen);
-        //     });
-        // });
-
         this.doValidation(dataRoot, shapesRoot, andThen);
     }
 
@@ -83,11 +83,17 @@ export class WellDefinedSHACLValidator implements Validator {
      * @param {((report: ValidationReport) => void) | null} andThen
      */
     public doValidation(data: Graph, shapes: Graph, andThen: ((report: ValidationReport) => void) | null): void {
-        let validator = new SHACLValidator();
-        validator.doInternalValidation(data, shapes, function (error: any, report: any) {
-            if (andThen) {
-                andThen(new ValidationReport(report));
-            }
+        let parser = new GraphParser();
+        parser.serialize(data, 'text/turtle', function(dataText: string) {
+            parser.serialize(shapes, 'text/turtle', function(shapesText: string) {
+                let validator = new SHACLValidator();
+                validator.validate(dataText, 'text/turtle', shapesText, 'text/turtle',
+                                   function (error: any, report: any) {
+                    if (andThen) {
+                        andThen(new ValidationReport(report));
+                    }
+                });
+            });
         });
     }
 

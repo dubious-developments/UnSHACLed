@@ -258,37 +258,6 @@ SHACLValidator.prototype.validate = function (data, dataMediaType, shapes, shape
 };
 
 /**
- * Do validation without parsing.
- */
-SHACLValidator.prototype.doInternalValidation = function(data, shapes, cb) {
-
-    var handleError = function (ex) {
-        error(ex);
-    };
-
-    var that = this;
-    that.$data = new RDFLibGraph(data);
-    that.$shapes = new RDFLibGraph(shapes);
-    that.$shapes.loadGraph(shaclFile, "http://shacl.org", "text/turtle", function () {
-        that.$shapes.loadGraph(dashFile, "http://datashapes.org/dash", "text/turtle", function () {
-            that.shapesGraph = new ShapesGraph(that);
-            that.shapesGraph.loadJSLibraries(function (err) {
-                if (err) {
-                    cb(err, null);
-                } else {
-                    that.updateValidationEngine();
-                    try {
-                        that.showValidationResults(cb);
-                    } catch (e) {
-                        cb(e, null);
-                    }
-                }
-            });
-        });
-    }, handleError);
-};
-
-/**
  * Saves a cached version of a remote JS file used during validation
  * @param url URL of the library to cache
  * @param localFile path to a local version of the file identified by url

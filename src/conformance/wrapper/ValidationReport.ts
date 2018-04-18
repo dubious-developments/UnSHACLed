@@ -50,8 +50,8 @@ export class ValidationError {
 
 export class ValidationReport {
 
-   private conforming: boolean;
-   private validationErrors: ValidationError[];
+    private conforming: boolean;
+    private validationErrors: ValidationError[];
 
     public constructor(report: any) {
         if (report.conforms()) {
@@ -59,15 +59,14 @@ export class ValidationReport {
             this.validationErrors = new Array(0);
         } else {
             this.conforming = false;
-            var counter = 0;
-            var numberOfErrors = report.results().length;
-            this.validationErrors = new Array(numberOfErrors);
+            this.validationErrors = new Array(report.results().length);
+
+            let counter = 0;
             let self = this;
             report.results().forEach(function (result: any) {
-                let validationError = new ValidationError(result.message(), result.path(),
-                                                          result.sourceConstraintComponent(), result.focusNode());
-                self.validationErrors[counter] = validationError;
-                counter++;
+                self.validationErrors[counter++] =
+                    new ValidationError(result.message(), result.path(),
+                                        result.sourceConstraintComponent(), result.focusNode());
             });
         }
     }

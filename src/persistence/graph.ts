@@ -570,14 +570,14 @@ class GraphData {
     /**
      * Retrieve additions.
      */
-    public getAdditions(): Collections.Set<Triple> | undefined {
+    public getAdditions(): Collections.Set<Triple> {
         return this.changes.getValue(ChangeSet.ADD);
     }
 
     /**
      * Retrieve removals.
      */
-    public getRemovals(): Collections.Set<Triple> | undefined {
+    public getRemovals(): Collections.Set<Triple> {
         return this.changes.getValue(ChangeSet.REMOVE);
     }
 

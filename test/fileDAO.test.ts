@@ -7,7 +7,7 @@ import { Graph, ImmutableGraph } from "../src/persistence/graph";
 
 describe("FileDAO Class", () => {
     it("should create a new file.",
-       () => {
+       (done) => {
             let label = ModelComponent.DataGraph;
             let filename = "insert.ttl";
             let file = new Blob([]); // blob is unnecessary for saving to file
@@ -38,6 +38,7 @@ describe("FileDAO Class", () => {
                 // as this would require rummaging the user's file system
                 let dao = new FileDAO(model);
                 dao.insert(module);
+                done();
             });
         });
 
