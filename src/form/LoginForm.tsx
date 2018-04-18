@@ -108,7 +108,7 @@ class LoginForm extends React.Component<any, any> {
 
     handleClick(event: any) {
         Auth.login();
-        if (this.state.username === "" || this.state.password === "") {
+        if (this.state.username === "Admin" || this.state.password === "Admin10") {
             console.log("invalid");
         } else {
             this.props.history.push("/user");
