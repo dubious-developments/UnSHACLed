@@ -165,10 +165,47 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                         inverted={true}
                     />
 
-                    <Menu.Item as="a" id="zoom in" content={<Icon name='search'  style={{paddingRight: '1em'}}/>}/>
-                    <Menu.Item as="a" id="zoom out" content={<Icon name='search' style={{paddingRight: '1em'}}/>} />
-                    <Menu.Item as="a" id="actual size" content={<Icon name='compress'/>}/>
-                    <Menu.Item as="a" id="fit" content={<Icon name='expand'/>}/>
+                    <Popup
+                        trigger={
+                            <Menu.Item
+                                as="a"
+                                id="zoom in"
+                                content={<Icon name='search' style={{paddingRight: '1em'}}/>}
+                            />}
+                        content='Zoom in'
+                        size="mini"
+                        position='bottom left'
+                        inverted={true}
+                    />
+
+                    <Popup
+                        trigger={
+                            <Menu.Item
+                                as="a"
+                                id="zoom out"
+                                content={<Icon name='search' style={{paddingRight: '1em'}}/>}
+                            />}
+                        content='Zoom out'
+                        size="mini"
+                        position='bottom left'
+                        inverted={true}
+                    />
+
+                    <Popup
+                        trigger={<Menu.Item as="a" id="actual size" content={<Icon name='compress'/>}/>}
+                        content='Set current graph to actual size'
+                        size="mini"
+                        position='bottom left'
+                        inverted={true}
+                    />
+
+                    <Popup
+                        trigger={<Menu.Item as="a" id="fit" content={<Icon name='expand'/>}/>}
+                        content='Make graph fit the screen'
+                        size="mini"
+                        position='bottom left'
+                        inverted={true}
+                    />
 
                     <Menu.Item as="a" onClick={this.uploadProjectButton}>
                         Import Project

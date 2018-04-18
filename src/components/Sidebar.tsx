@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Sidebar, Menu, Image, Input, Dropdown, List, Button, Label} from 'semantic-ui-react';
+import {Sidebar, Menu, Image, Input, Dropdown, List, Button, Label, Popup} from 'semantic-ui-react';
 import TreeView from './treeView';
 import {SidebarProps} from './interfaces/interfaces';
 
@@ -155,40 +155,56 @@ class SideBar extends React.Component<SidebarProps, any> {
                             />
                         </Menu.Item>
 
-                        <Menu.Item>
-                            SHACL
-                            <this.DynamicMenu kind="SHACL"/>
-                        </Menu.Item>
+                        <Popup
+                            trigger={
+                                <Menu.Item>
+                                    SHACL
+                                    <this.DynamicMenu kind="SHACL"/>
+                                </Menu.Item>
+                            }
+                            content='Drag and drop a component of your choice to the graph.'
+                            size="mini"
+                            position='right center'
+                            inverted={true}
+                        />
+
                         {/*                        <Menu.Item>
                             General
                             <this.DynamicMenu kind="General"/>
                         </Menu.Item>*/}
-                        <Menu.Item id="TemplateMenu">
-                            Template
-                            <this.DynamicMenu kind="Template"/>
+                        <Popup
+                            trigger={
+                                <Menu.Item id="TemplateMenu">
+                                    Template
+                                    <this.DynamicMenu kind="Template"/>
 
-                            <Menu.Menu>
-                                <Menu.Item>
-                                    <Button
-                                        id={"addTemplate"}
-                                        inverted={true}
+                                    <Menu.Menu>
+                                        <Menu.Item>
+                                            <Button
+                                                id={"addTemplate"}
+                                                inverted={true}
 
-                                    > Add template from selection
-                                    </Button>
-                                    {this.props.showLabel ?
-                                    <Label
-                                        basic={true}
-                                        color='red'
-                                        pointing={true}
-                                    >
-                                        Nothing is selected!
-                                    </Label> : null
-                                    }
+                                            > Add template from selection
+                                            </Button>
+                                            {this.props.showLabel ?
+                                            <Label
+                                                basic={true}
+                                                color='red'
+                                                pointing={true}
+                                            >
+                                                Nothing is selected!
+                                            </Label> : null
+                                            }
+                                        </Menu.Item>
+                                        {templates}
+                                    </Menu.Menu>
                                 </Menu.Item>
-                                {templates}
-                            </Menu.Menu>
-
-                        </Menu.Item>
+                            }
+                            content='Drag and drop a component of your choice to the graph.'
+                            size="mini"
+                            position='right center'
+                            inverted={true}
+                        />
                     </div>
                 ) : (
                     <Menu.Item>
