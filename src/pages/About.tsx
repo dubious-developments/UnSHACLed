@@ -51,7 +51,6 @@ class About extends React.Component<any, any> {
                         </p>
                     </Container>
 
-
                     <Container text={true} style={{marginTop: '2em'}} textAlign="left">
                         <Header as='h3' color="teal">Features</Header>
                         <p>

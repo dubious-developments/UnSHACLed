@@ -22,7 +22,7 @@ export interface SidebarProps {
     visible: boolean;
     callback: PropTypes.func;
     templates: any;
-    showLabel: any
+    showLabel: any;
 }
 
 /* Props definition for mxgraph component */
