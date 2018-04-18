@@ -141,9 +141,30 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                         inverted={true}
                     />
 
-                    <Menu.Item as="a" id="undo" content={<Icon name='reply'/>}/>
-                    <Menu.Item as="a" id="redo" content={<Icon name='share'/>}/>
-                    <Menu.Item as="a" id="camera" content={<Icon name='camera'/>}/>
+                    <Popup
+                        trigger={<Menu.Item as="a" id="undo" content={<Icon name='reply'/>}/>}
+                        content='Undo last action'
+                        size="mini"
+                        position='bottom left'
+                        inverted={true}
+                    />
+
+                    <Popup
+                        trigger={<Menu.Item as="a" id="redo" content={<Icon name='share'/>}/>}
+                        content='Redo last action'
+                        size="mini"
+                        position='bottom left'
+                        inverted={true}
+                    />
+
+                    <Popup
+                        trigger={<Menu.Item as="a" id="camera" content={<Icon name='camera'/>}/>}
+                        content='Generate snap shot of current graph'
+                        size="mini"
+                        position='bottom left'
+                        inverted={true}
+                    />
+
                     <Menu.Item as="a" id="zoom in" content={<Icon name='search'  style={{paddingRight: '1em'}}/>}/>
                     <Menu.Item as="a" id="zoom out" content={<Icon name='search' style={{paddingRight: '1em'}}/>} />
                     <Menu.Item as="a" id="actual size" content={<Icon name='compress'/>}/>
