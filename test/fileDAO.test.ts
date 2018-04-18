@@ -3,6 +3,7 @@ import { ModelTaskMetadata, ModelComponent } from "../src/entities/modelTaskMeta
 import { FileDAO, FileModule } from "../src/persistence/fileDAO";
 import { GraphParser } from "../src/persistence/graphParser";
 import { Component } from "../src/persistence/component";
+import { Graph, ImmutableGraph } from "../src/persistence/graph";
 
 describe("FileDAO Class", () => {
     it("should create a new file.",
@@ -14,10 +15,10 @@ describe("FileDAO Class", () => {
 
             let model = new Model();
             let parser = new GraphParser();
-            let comp = new Component();
+            let comp = new Component<ImmutableGraph>();
             let busy = true;
-            parser.parse(generateTurtle(), file.type, function(result: any) {
-                comp.setPart(filename, result);
+            parser.parse(generateTurtle(), file.type, function(result: Graph) {
+                comp = comp.withPart(filename, result.asImmutable());
                 model.tasks.schedule(
                     Model.createTask(
                         (data) => {
