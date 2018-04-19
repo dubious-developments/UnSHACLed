@@ -111,10 +111,13 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
     public schedule(task: Task<ModelData, ModelTaskMetadata>): void {
         // Create a new instruction.
 
-        let instruction = new TaskInstruction(task, this.state.clone());
+        let metadata = task.metadata;
+        let instruction = new TaskInstruction(
+            task,
+            this.state.clone(metadata.readSet, metadata.writeSet));
 
         // Turn the instruction's read set into a dependency set.
-        task.metadata.readSet.toArray().forEach(component => {
+        metadata.readSet.toArray().forEach(component => {
             let dependency = this.latestComponentStateMap.getValue(component);
             if (dependency) {
                 if (this.finishedInstructionMap.containsKey(dependency)) {
@@ -130,7 +133,7 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
         });
 
         // Use the instruction's write set to update the latest component state map.
-        task.metadata.writeSet.toArray().forEach(component => {
+        metadata.writeSet.toArray().forEach(component => {
             this.latestComponentStateMap.setValue(component, instruction);
         });
 

@@ -20,9 +20,15 @@ export class ModelData {
     /**
      * Creates a data container for the model.
      * @param components A mapping of component types to their values.
+     * @param readSet The set of all model components that the model data
+     * is allowed to read from.
+     * @param writeSet The set of all model components that the model data
+     * is allowed to write to.
      */
     public constructor(
-        components?: Collections.Dictionary<ModelComponent, any>) {
+        components?: Collections.Dictionary<ModelComponent, any>,
+        public readonly readSet?: AccessBuffer,
+        public readonly writeSet?: AccessBuffer) {
 
         this.writeBuffer = Immutable.Set<ModelComponent>();
         this.readBuffer = Immutable.Set<ModelComponent>();
@@ -38,6 +44,26 @@ export class ModelData {
      * @param component The component to retrieve.
      */
     public getComponent<T>(component: ModelComponent): T | undefined {
+
+        if (this.readSet
+            && !this.readSet.contains(component)
+            && !this.writeBuffer.contains(component)) {
+
+            // Looks like the task is writing to an element that
+            // it doesn't have access to.
+            throw Error(
+                `Intercepted a read from '${component}', which is not in the read set. ` +
+                `Consider adding '${component}' to the read set if the read is intentional.`);
+        }
+        return this.getComponentUnchecked(component);
+    }
+
+    /**
+     * Gets a particular component of this model. Elides the legality
+     * check associated with this operation.
+     * @param component The component to retrieve.
+     */
+    public getComponentUnchecked<T>(component: ModelComponent): T | undefined {
 
         if (this.components.containsKey(component)
             && !this.writeBuffer.contains(component)) {
@@ -72,8 +98,30 @@ export class ModelData {
     public setComponent<T>(component: ModelComponent, value: T): void {
 
         if (value !== this.components.getValue(component)) {
+            if (this.writeSet && !this.writeSet.contains(component)) {
+                // Looks like the task wrote to an element that
+                // it doesn't have access to.
+                throw Error(
+                    `Intercepted a write to '${component}', which is not in the write set. ` +
+                    `Consider adding '${component}' to the write set if the write is intentional.`);
+            }
+
+            this.setComponentUnchecked(component, value);
+        }
+    }
+
+    /**
+     * Sets a particular component of this model. Elides the legality check
+     * associated with this operation.
+     */
+    public setComponentUnchecked<T>(component: ModelComponent, value: T): void {
+
+        if (value !== this.components.getValue(component)) {
+
+            // Record the write in the write buffer.
             this.writeBuffer = this.writeBuffer.add(component);
         }
+
         this.components.setValue(component, value);
     }
 
@@ -99,12 +147,16 @@ export class ModelData {
     /**
      * Creates a shallow copy of this model data's components.
      * Note that the change buffer is not copied.
+     * @param readSet The set of all model components that the
+     * cloned model data is allowed to read from.
+     * @param writeSet The set of all model components that the
+     * model data is allowed to write to.
      */
-    public clone(): ModelData {
+    public clone(readSet?: AccessBuffer, writeSet?: AccessBuffer): ModelData {
         let componentCopy = new Collections.Dictionary<ModelComponent, any>();
         this.components.forEach((key, value) => {
             componentCopy.setValue(key, value);
         });
-        return new ModelData(componentCopy);
+        return new ModelData(componentCopy, readSet, writeSet);
     }
 }
