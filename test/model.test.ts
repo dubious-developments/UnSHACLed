@@ -3,6 +3,7 @@ import * as Immutable from "immutable";
 import { Model, ModelData } from "../src/entities/model";
 import { ModelTaskMetadata, ModelComponent } from "../src/entities/modelTaskMetadata";
 import { Task, OpaqueTask } from "../src/entities/task";
+import { InOrderProcessor } from "../src/entities/taskProcessor";
 
 let graphReadSet = Immutable.Set<ModelComponent>([ModelComponent.DataGraph]);
 let graphWriteSet = new Set<ModelComponent>();
@@ -154,5 +155,29 @@ describe("Model Class", () => {
                 [ModelComponent.DataGraph]));
         // The "test" is that this statement doesn't throw.
         model.tasks.processAllTasks();
+    });
+
+    it("catches in-order tasks that read things they aren't supposed to in an unchecked way", () => {
+        let modelData = new ModelData();
+        modelData.setComponent(ModelComponent.DataGraph, 42);
+        modelData.drainBuffers();
+        let model = new Model(modelData);
+        model.tasks.schedule(
+            Model.createTask(
+                data => { data.getComponentUnchecked<number>(ModelComponent.DataGraph); },
+                [],
+                []));
+        expect(() => model.tasks.processAllTasks()).toThrow();
+    });
+
+    it("catches tasks that write things they aren't supposed to in an unchecked way", () => {
+        let modelData = new ModelData();
+        let model = new Model(modelData);
+        model.tasks.schedule(
+            Model.createTask(
+                data => { data.setComponentUnchecked(ModelComponent.DataGraph, 42); },
+                [],
+                []));
+        expect(() => model.tasks.processAllTasks()).toThrow();
     });
 });
