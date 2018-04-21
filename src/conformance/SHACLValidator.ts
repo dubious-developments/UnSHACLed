@@ -4,7 +4,7 @@ import {Validator} from "./Validator";
 import {ModelData} from "../entities/model";
 import {ModelComponent} from "../entities/modelTaskMetadata";
 import {Component} from "../persistence/component";
-import {Graph} from "../persistence/graph";
+import {Graph, ImmutableGraph} from "../persistence/graph";
 import {ValidationReport} from "./wrapper/ValidationReport";
 import {GraphParser} from "../persistence/graphParser";
 
@@ -38,40 +38,46 @@ export class WellDefinedSHACLValidator implements Validator {
      * @param {((report: ValidationReport) => void) | null} andThen
      */
     public validate(data: ModelData, andThen: ((report: ValidationReport) => void) | null): void {
-        let dataComponent = data.getOrCreateComponent<Component<Graph>>(
+        let dataComponent = data.getOrCreateComponent<Component<ImmutableGraph>>(
             ModelComponent.DataGraph,
-            () => new Component<Graph>());
+            () => new Component<ImmutableGraph>());
 
-        let shapesComponent = data.getOrCreateComponent<Component<Graph>>(
+        let shapesComponent = data.getOrCreateComponent<Component<ImmutableGraph>>(
             ModelComponent.SHACLShapesGraph,
-            () => new Component<Graph>());
+            () => new Component<ImmutableGraph>());
 
         if (!dataComponent.getRoot()) {
-            dataComponent = dataComponent.withRoot(new Graph());
+            dataComponent = dataComponent.withRoot((new Graph()).asImmutable());
         }
 
         if (!shapesComponent.getRoot()) {
-            shapesComponent = shapesComponent.withRoot(new Graph());
+            shapesComponent = shapesComponent.withRoot((new Graph()).asImmutable());
         }
 
-        let dataRoot = dataComponent.getRoot();
-        let shapesRoot = shapesComponent.getRoot();
+        let dataRoot = dataComponent.getRoot().toMutable();
+        let shapesRoot = shapesComponent.getRoot().toMutable();
 
         // perform a more intelligent merge, using change sets
         // WARNING: this approach assumes (rightly, at the moment) that no other component
         // is clearing the change sets of any graph structures
-        dataComponent.getCompositeParts().forEach(g => {
-            dataRoot.incrementalMerge(g);
-            g.clearRecentChanges(); // crucial for this to keep working
+        dataComponent.getCompositeParts().forEach(p => {
+            let key = p[0];
+            let graph = p[1].toMutable();
+            dataRoot.incrementalMerge(graph);
+            graph.clearRecentChanges(); // crucial for this to keep working
+            dataComponent = dataComponent.withPart(key, graph.asImmutable());
         });
 
-        shapesComponent.getCompositeParts().forEach(g => {
-            shapesRoot.incrementalMerge(g);
-            g.clearRecentChanges(); // crucial for this to keep working
+        shapesComponent.getCompositeParts().forEach(p => {
+            let key = p[0];
+            let graph = p[1].toMutable();
+            shapesRoot.incrementalMerge(graph);
+            graph.clearRecentChanges(); // crucial for this to keep working
+            shapesComponent = shapesComponent.withPart(key, graph.asImmutable());
         });
 
-        data.setComponent(ModelComponent.DataGraph, dataComponent.withRoot(dataRoot));
-        data.setComponent(ModelComponent.SHACLShapesGraph, shapesComponent.withRoot(shapesRoot));
+        data.setComponent(ModelComponent.DataGraph, dataComponent.withRoot(dataRoot.asImmutable()));
+        data.setComponent(ModelComponent.SHACLShapesGraph, shapesComponent.withRoot(shapesRoot.asImmutable()));
 
         this.doValidation(dataRoot, shapesRoot, andThen);
     }

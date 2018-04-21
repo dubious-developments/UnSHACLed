@@ -55,7 +55,6 @@ export class GraphParser implements Parser<Graph> {
      * @param {string} mime
      * @param andThen
      */
-
     public parse(content: string, mime: string, andThen: ((result: Graph) => void) | null): void {
         if (this.mimeTypes.contains(mime)) {
             let N3 = require("n3");

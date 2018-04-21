@@ -65,11 +65,11 @@ export class Component<T> {
      * Retrieve all parts, barring the root.
      * @returns {any[]}
      */
-    public getCompositeParts(): T[] {
-        let relevantParts = new Array<T>();
+    public getCompositeParts(): [string, T][] {
+        let relevantParts = new Array<[string, T]>();
         this.getAllKeys().forEach(k => {
             if (k !== Component.ROOT) {
-                relevantParts.push(this.parts.get(k));
+                relevantParts.push([k, this.parts.get(k)]);
             }
         });
 

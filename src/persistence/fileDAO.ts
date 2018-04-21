@@ -1,3 +1,5 @@
+/// <reference path="./Parser.ts"/>
+
 import * as Collections from "typescript-collections";
 import { ModelTaskMetadata, ModelComponent } from "../entities/modelTaskMetadata";
 import {Component} from "./component";
@@ -34,7 +36,7 @@ export class FileDAO implements DataAccessObject {
      */
     public insert(module: Module) {
         this.model.tasks.schedule(new SaveTask(this.io, module));
-        this.model.tasks.processTask(); // TODO: Remove this when we have a scheduler!
+        this.model.tasks.processTask(); // TODO: Do this in the frontend!
     }
 
     /**
@@ -44,8 +46,8 @@ export class FileDAO implements DataAccessObject {
     public find(module: Module): void {
         let self = this;
         this.io.readFromFile(module, function (result: Graph) {
-            self.model.tasks.schedule(new LoadTask<ImmutableGraph>(result.asImmutable(), module));
-            self.model.tasks.processTask(); // TODO: Remove this when we have a scheduler!
+            self.model.tasks.schedule(new LoadTask(result.asImmutable(), module));
+            self.model.tasks.processTask(); // TODO: Do this in the frontend!
         });
     }
 }
@@ -177,7 +179,7 @@ export class FileModule implements Module {
 /**
  * A Task that reads a file and adds its contents as a component to the Model.
  */
-class LoadTask<T> extends Task<ModelData, ModelTaskMetadata> {
+class LoadTask extends Task<ModelData, ModelTaskMetadata> {
 
     /**
      * Create a new LoadTask.
@@ -187,7 +189,7 @@ class LoadTask<T> extends Task<ModelData, ModelTaskMetadata> {
      * @param {FileModule} module
      */
     public constructor(
-        private readonly result: T,
+        private readonly result: ImmutableGraph,
         public readonly module: Module) {
 
         super();
@@ -200,7 +202,7 @@ class LoadTask<T> extends Task<ModelData, ModelTaskMetadata> {
     public execute(data: ModelData): void {
         let component = data.getOrCreateComponent(
             this.module.getTarget(),
-            () => new Component<T>());
+            () => new Component<ImmutableGraph>());
 
         data.setComponent(
             this.module.getTarget(),
