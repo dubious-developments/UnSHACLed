@@ -57,7 +57,7 @@ export class Component<T> {
     /**
      * Retrieve all parts contained in this component.
      */
-    public getParts(): any[] {
+    public getParts(): T[] {
         return this.parts.valueSeq().toArray();
     }
 
@@ -65,8 +65,8 @@ export class Component<T> {
      * Retrieve all parts, barring the root.
      * @returns {any[]}
      */
-    public getCompositeParts(): any[] {
-        let relevantParts = new Array<any>();
+    public getCompositeParts(): T[] {
+        let relevantParts = new Array<T>();
         this.getAllKeys().forEach(k => {
             if (k !== Component.ROOT) {
                 relevantParts.push(this.parts.get(k));
