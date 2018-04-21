@@ -27,7 +27,7 @@ export class ValidationService {
 
         let self = this;
         model.registerObserver(function(changeBuffer: Collections.Set<ModelComponent>) {
-            let tasks = new Array<any>();
+            let tasks = new Array<ValidationTask>();
             let relevantValidators = new Collections.Set<Validator>();
             // return a task for every relevant validator
             changeBuffer.forEach(c => {
@@ -35,7 +35,7 @@ export class ValidationService {
                 if (validators = self.validators.getValue(c)) {
                     validators.forEach(v => {
                         if (!relevantValidators.contains(v)) {
-                            tasks.push(new ValidationTask(v));
+                            tasks.push(new ValidationTask(v, self.model));
                             relevantValidators.add(v);
                         }
                     });
@@ -71,9 +71,11 @@ class ValidationTask extends Task<ModelData, ModelTaskMetadata> {
     /**
      * Create a new ValidationTask.
      * @param {Validator} validator
+     * @param model
      */
     public constructor(
-        private readonly validator: Validator) {
+        private readonly validator: Validator,
+        private readonly model: Model) {
         super();
     }
 
@@ -84,14 +86,10 @@ class ValidationTask extends Task<ModelData, ModelTaskMetadata> {
      * @param data The data the task takes as input.
      */
     public execute(data: ModelData): void {
-        // first set the component here
-        // because setting it in the callback gives weird errors
-        let component = data.getOrCreateComponent<Component<ValidationReport>>(
-            ModelComponent.ValidationReport,
-            () => new Component());
-
+        let self = this;
         this.validator.validate(data, function (report: ValidationReport) {
-            data.setComponent(ModelComponent.ValidationReport, component.withRoot(report));
+            // schedules a new task that will finish the validation process
+            self.model.tasks.schedule(new CompleteValidationTask(report));
         });
     }
 
@@ -101,6 +99,44 @@ class ValidationTask extends Task<ModelData, ModelTaskMetadata> {
     public get metadata(): ModelTaskMetadata {
         return new ModelTaskMetadata(
             this.validator.getTypesForValidation(),
+            []);
+    }
+}
+
+/**
+ * A task that finishes the validation process initiated by a validation task.
+ */
+class CompleteValidationTask extends Task<ModelData, ModelTaskMetadata> {
+
+    /**
+     * Create a new CompleteValidationTask.
+     * @param report
+     */
+    public constructor(
+        private readonly report: ValidationReport) {
+        super();
+    }
+
+    /**
+     * Execute this task.
+     * Finishes validation by storing the report in the model.
+     * @param data The data the task takes as input.
+     */
+    public execute(data: ModelData): void {
+        let component = data.getOrCreateComponent<Component<ValidationReport>>(
+            ModelComponent.ValidationReport,
+            () => new Component());
+
+        data.setComponent(ModelComponent.ValidationReport, component.withRoot(this.report));
+    }
+
+    /**
+     * Retrieve the metadata for this task.
+     */
+    public get metadata(): ModelTaskMetadata {
+        return new ModelTaskMetadata(
+            [],
             [ModelComponent.ValidationReport]);
     }
+
 }
