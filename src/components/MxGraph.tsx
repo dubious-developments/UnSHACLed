@@ -22,7 +22,7 @@ class MxGraph extends React.Component<any, any> {
 
     private timer: TimingService;
 
-    constructor(props: string) {
+    constructor(props: any) {
         super(props);
         this.state = {
             graph: null,
