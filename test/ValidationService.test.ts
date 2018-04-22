@@ -16,8 +16,7 @@ describe("ValidationService Class", () => {
 
            model.registerObserver((changeBuf) => {
                setTimeout(function () {
-                   expect(changeBuf.contains(ModelComponent.ValidationReport)).toEqual(true);
-                   done();
+                   model.tasks.processAllTasks();
                },         2000);
                return [];
            });
@@ -36,6 +35,12 @@ describe("ValidationService Class", () => {
                            [],
                            [ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph]));
                    model.tasks.processAllTasks();
+
+                   model.registerObserver((changeBuf) => {
+                       expect(changeBuf.contains(ModelComponent.ValidationReport)).toBe(true);
+                       done();
+                       return [];
+                   });
                });
            });
        });
