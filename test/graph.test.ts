@@ -1,7 +1,5 @@
-import SHACLValidator from "../src/conformance/shacl";
 import {Statement} from "rdflib";
 import {Graph, ImmutableGraph} from "../src/persistence/graph";
-import {GraphParser} from "../src/persistence/graphParser";
 
 describe("Graph Class", () => {
     it("can add a triple twice", () => {
@@ -192,9 +190,21 @@ describe("Graph Class", () => {
                 expect(triple.object).toEqual('"Tony Benn"');
             });
 
+            // TEST CASE: updating a triple
+            graph.updateTriple("http://en.wikipedia.org/wiki/Tony_Benn",
+                               "http://purl.org/dc/elements/1.1/title", '"Tony Benn"',
+                               {nObject: '"Someone else"'});
+
+            graph.queryN3Store(store => {
+               let triple = store.getTriples()[0];
+               expect(triple.subject).toEqual("http://en.wikipedia.org/wiki/Tony_Benn");
+               expect(triple.predicate).toEqual("http://purl.org/dc/elements/1.1/title");
+               expect(triple.object).toEqual('"Someone else"');
+           });
+
             // TEST CASE: removing a triple
             graph.removeTriple("http://en.wikipedia.org/wiki/Tony_Benn",
-                               "http://purl.org/dc/elements/1.1/title", '"Tony Benn"');
+                               "http://purl.org/dc/elements/1.1/title", '"Someone else"');
 
             graph.queryN3Store(store => {
                 expect(store.countTriples()).toEqual(0);
@@ -237,7 +247,7 @@ describe("Graph Class", () => {
             });
         });
 
-    it("should maintain a persistent store for validation purposes.",
+    it("should maintain a consistent rdflib store.",
        () => {
             let graph = new Graph();
 
@@ -254,9 +264,23 @@ describe("Graph Class", () => {
                 expect(statement.equals(matchingStatement)).toEqual(true);
             });
 
+            // TEST CASE: updating a triple
+            graph.updateTriple("http://en.wikipedia.org/wiki/Tony_Benn",
+                               "http://purl.org/dc/elements/1.1/title", '"Tony Benn"',
+                               {nObject: '"Someone else"'});
+
+            graph.query(store => {
+               let statement = store.match()[0];
+               let matchingStatement = new Statement(
+                   "http://en.wikipedia.org/wiki/Tony_Benn",
+                   "http://purl.org/dc/elements/1.1/title", '"Someone else"',
+                   store);
+               expect(statement.equals(matchingStatement)).toEqual(true);
+           });
+
             // TEST CASE: removing a triple
             graph.removeTriple("http://en.wikipedia.org/wiki/Tony_Benn",
-                               "http://purl.org/dc/elements/1.1/title", '"Tony Benn"');
+                               "http://purl.org/dc/elements/1.1/title", '"Someone else"');
 
             expect(graph.query(store => store.length)).toEqual(0);
 
@@ -301,26 +325,6 @@ describe("Graph Class", () => {
             expect(graph.query(store => store.length)).toEqual(0);
         });
 
-    // TODO: This is not an actual test! To be removed when conformance tests are added.
-    it("The validation store should be usable for validation.",
-       (done) => {
-            let parser = new GraphParser();
-            parser.parse(getDataGraph(), "text/turtle", function (data: Graph) {
-                parser.parse(getShapesGraph(), "text/turtle", function (shapes: Graph) {
-                    data.query(dataStore => {
-                        shapes.query(shapesStore => {
-                            let validator = new SHACLValidator(dataStore, shapesStore);
-                            validator.updateValidationEngine();
-                            validator.showValidationResults(function (err: any, report: any) {
-                                expect(report.conforms()).toEqual(true);
-                                done();
-                            });
-                        });
-                    });
-                });
-            });
-        });
-
     it("should maintain a consistent prefix mapping.",
        () => {
             let graph = new Graph();
@@ -340,29 +344,75 @@ describe("Graph Class", () => {
             expect(graph.getPrefixes()[firstKey]).toEqual("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
             expect(graph.getPrefixes()[secondKey]).toEqual("http://example.org/stuff/1.0/");
         });
+
+    it("should maintain a consistent reflection of changes made to the graph structure.",
+       () => {
+            let graph = new Graph();
+            graph.addTriple("http://en.wikipedia.org/wiki/Tony_Benn",
+                            "http://purl.org/dc/elements/1.1/title", '"Tony Benn"');
+
+            let additions = graph.getLatestAdditions();
+            expect(additions.contains({
+                    subject: "http://en.wikipedia.org/wiki/Tony_Benn",
+                    predicate: "http://purl.org/dc/elements/1.1/title", object: '"Tony Benn"'})).toEqual(true);
+
+            graph.removeTriple("http://en.wikipedia.org/wiki/Tony_Benn",
+                               "http://purl.org/dc/elements/1.1/title", '"Tony Benn"');
+
+            // antithetical operations should cancel each other out
+            expect(graph.hasRecentlyChanged()).toEqual(false);
+
+            graph.addTriple("http://en.wikipedia.org/wiki/Tony_Benn",
+                            "http://purl.org/dc/elements/1.1/publisher", '"Wikipedia"');
+
+            expect(graph.hasRecentlyChanged()).toEqual(true);
+
+            graph.clearRecentChanges();
+
+            expect(graph.hasRecentlyChanged()).toEqual(false);
+
+            graph.removeTriple("http://en.wikipedia.org/wiki/Tony_Benn",
+                               "http://purl.org/dc/elements/1.1/publisher", '"Wikipedia"');
+
+            // this time the removal is registered as a change, as no inverse addition has preceded it
+            let removals = graph.getLatestRemovals();
+            expect(removals.contains({
+                    subject: "http://en.wikipedia.org/wiki/Tony_Benn",
+                    predicate: "http://purl.org/dc/elements/1.1/publisher", object: '"Wikipedia"'})).toEqual(true);
+
+        });
+
+    it("should be able to merge with another graph based on internal change sets.",
+       () => {
+           let graph = new Graph();
+           let other = new Graph();
+
+           graph.addPrefix("dc", "http://purl.org/dc/elements/1.1/");
+           graph.addTriple("http://en.wikipedia.org/wiki/Tony_Benn",
+                           "http://purl.org/dc/elements/1.1/title", '"Tony Benn"');
+
+           other.addPrefix("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+           other.addTriple("http://en.wikipedia.org/wiki/Tony_Benn",
+                           "http://purl.org/dc/elements/1.1/publisher", '"Wikipedia"');
+
+           graph.incrementalMerge(other);
+
+           // the merged graph should contain the other graph's triples and prefixes
+           expect(graph.queryN3Store(store => store.countTriples())).toEqual(2);
+           expect(graph.query(store => store.length)).toEqual(2);
+
+           let key = "rdf";
+           expect(graph.getPrefixes()[key]).toEqual("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+
+           other.clearRecentChanges();
+
+           other.addTriple("http://en.wikipedia.org/wiki/Tony_Benn",
+                           "http://purl.org/dc/elements/1.1/creator", '"Some Guy On the Internet"');
+
+           graph.incrementalMerge(other);
+
+           // the incremental merge should only have added recent additions
+           expect(graph.queryN3Store(store => store.countTriples())).toEqual(3);
+           expect(graph.query(store => store.length)).toEqual(3);
+        });
 });
-
-function getDataGraph() {
-    return 'ex:Alice' +
-        'a ex:Person ;' +
-        'ex:ssn "987-65-432A" .';
-}
-
-function getShapesGraph() {
-    return 'ex:PersonShape ' +
-        'a sh:NodeShape ;' +
-        'sh:targetClass ex:Person ;' +
-        'sh:property [' +
-        'sh:path ex:ssn ;' +
-        'sh:maxCount 1 ;' +
-        'sh:datatype xsd:string ;' +
-        'sh:pattern "^\\d{3}-\\d{2}-\\d{4}$" ;' +
-        '] ;' +
-        'sh:property [                 # _:b2' +
-        'sh:path ex:worksFor ;' +
-        'sh:class ex:Company ;' +
-        'sh:nodeKind sh:IRI ;' +
-        '] ;' +
-        'sh:closed true ;' +
-        'sh:ignoredProperties ( rdf:type ) .';
-}

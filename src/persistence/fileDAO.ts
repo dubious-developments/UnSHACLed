@@ -1,12 +1,13 @@
-/// <reference path="./dataAccessObject.d.ts"/>
-/// <reference path="./parser.d.ts"/>
+/// <reference path="./parser.ts"/>
 
 import * as Collections from "typescript-collections";
-import { Model, ModelData, ModelTask } from "../entities/model";
 import { ModelTaskMetadata, ModelComponent } from "../entities/modelTaskMetadata";
-import { Component } from "./component";
+import {Component} from "./component";
 import { GraphParser } from "./graphParser";
+import { DataAccessObject, Module } from "./dataAccessObject";
 import { Task } from "../entities/task";
+import {Model} from "../entities/model";
+import {ModelData} from "../entities/modelData";
 import {extensionToMIME} from "../services/extensionToMIME";
 import { ImmutableGraph, Graph } from "./graph";
 
@@ -26,6 +27,7 @@ export class FileDAO implements DataAccessObject {
 
         // register parsers
         this.io.registerParser(ModelComponent.DataGraph, new GraphParser());
+        this.io.registerParser(ModelComponent.SHACLShapesGraph, new GraphParser());
     }
 
     /**
@@ -34,18 +36,18 @@ export class FileDAO implements DataAccessObject {
      */
     public insert(module: Module) {
         this.model.tasks.schedule(new SaveTask(this.io, module));
-        this.model.tasks.processTask(); // TODO: Remove this when we have a scheduler!
+        this.model.tasks.processTask(); // TODO: Do this in the frontend!
     }
 
     /**
      * Load an existing file.
      * @param module
      */
-    public find(module: Module) {
+    public find(module: Module): void {
         let self = this;
         this.io.readFromFile(module, function (result: Graph) {
-            self.model.tasks.schedule(new LoadTask<ImmutableGraph>(result.asImmutable(), module));
-            self.model.tasks.processTask(); // TODO: Remove this when we have a scheduler!
+            self.model.tasks.schedule(new LoadTask(result.asImmutable(), module));
+            self.model.tasks.processTask(); // TODO: Do this in the frontend!
         });
     }
 }
@@ -55,6 +57,7 @@ export class FileDAO implements DataAccessObject {
  * Requires a particular parser to modulate between file format and internal representation.
  */
 class IOFacilitator {
+
     private parsers: Collections.Dictionary<ModelComponent, Parser<Graph>>;
 
     /**
@@ -71,12 +74,13 @@ class IOFacilitator {
     /**
      * Read from an existing file.
      * @param module
-     * @param save
+     * @param load
      */
-    public readFromFile(module: Module, save: (result: Graph) => void) {
-        let parser = this.parsers.getValue(module.getType());
+
+    public readFromFile(module: Module, load: (result: Graph) => void) {
+        let parser = this.parsers.getValue(module.getTarget());
         if (!parser) {
-            throw new Error("Cannot read unknown format '" + module.getType() + "'");
+            throw new Error("Unsupported target " + module.getTarget());
         }
 
         let wellDefinedParser = parser;
@@ -85,11 +89,11 @@ class IOFacilitator {
         // every time a portion is loaded, parse this portion of content
         // and aggregate the result (this happens internally).
         function onLoadFunction(evt: any) {
-            wellDefinedParser.parse(evt.target.result, module.getMime(), save);
+            wellDefinedParser.parse(evt.target.result, module.getMime(), load);
         }
 
         let reader = new FileReader();
-        reader.readAsText(module.getTarget());
+        reader.readAsText(module.getContent());
         reader.onload = onLoadFunction;
     }
 
@@ -100,17 +104,17 @@ class IOFacilitator {
      */
     public writeToFile(module: Module, data: Graph) {
         let FileSaver = require("file-saver");
-        let parser = this.parsers.getValue(module.getType());
+        let parser = this.parsers.getValue(module.getTarget());
         if (!parser) {
-            throw new Error("Cannot serialize to unknown format '" + module.getType() + "'");
+            throw new Error("Unsupported target " + module.getTarget());
         }
 
         parser.serialize(
             data, module.getMime(),
             function (result: string) {
                 // write to file
-                let file = new File([result], module.getName());
-                FileSaver.saveAs(file);
+                let file = new Blob([result], {type: module.getMime()});
+                FileSaver.saveAs(file, module.getIdentifier());
             });
     }
 }
@@ -120,18 +124,18 @@ class IOFacilitator {
  * Contains all the necessary information to carry out a persistence operation.
  */
 export class FileModule implements Module {
-    private type: ModelComponent;
+    private target: ModelComponent;
     private filename: string;
     private file: Blob;
 
     /**
      * Create a new FileModule.
-     * @param {ModelComponent} type
+     * @param {ModelComponent} target
      * @param {string} filename
      * @param {Blob} file
      */
-    public constructor(type: ModelComponent, filename: string, file: Blob) {
-        this.type = type;
+    public constructor(target: ModelComponent, filename: string, file: Blob) {
+        this.target = target;
         this.filename = filename;
         this.file = file;
     }
@@ -139,21 +143,21 @@ export class FileModule implements Module {
     /**
      * Return the designated ModelComponent.
      */
-    getType(): ModelComponent {
-        return this.type;
+    getTarget(): ModelComponent {
+        return this.target;
     }
 
     /**
      * Return the filename.
      */
-    getName(): string {
+    getIdentifier(): string {
         return this.filename;
     }
 
     /**
      * Return the Blob representing the file.
      */
-    getTarget(): Blob {
+    getContent(): Blob {
         return this.file;
     }
 
@@ -165,8 +169,8 @@ export class FileModule implements Module {
         // this happens when file type can not be determined
         if (mime === "") {
             // set the type using the extension
-            var splitted = this.filename.split(".");
-            mime = extensionToMIME[splitted[splitted.length - 1]];
+            let split = this.filename.split(".");
+            mime = extensionToMIME[split[split.length - 1]];
         }
         return mime;
     }
@@ -175,7 +179,7 @@ export class FileModule implements Module {
 /**
  * A Task that reads a file and adds its contents as a component to the Model.
  */
-class LoadTask<T> extends Task<ModelData, ModelTaskMetadata> {
+class LoadTask extends Task<ModelData, ModelTaskMetadata> {
 
     /**
      * Create a new LoadTask.
@@ -185,7 +189,7 @@ class LoadTask<T> extends Task<ModelData, ModelTaskMetadata> {
      * @param {FileModule} module
      */
     public constructor(
-        private readonly result: T,
+        private readonly result: ImmutableGraph,
         public readonly module: Module) {
 
         super();
@@ -197,12 +201,12 @@ class LoadTask<T> extends Task<ModelData, ModelTaskMetadata> {
      */
     public execute(data: ModelData): void {
         let component = data.getOrCreateComponent(
-            this.module.getType(),
-            () => new Component<T>());
+            this.module.getTarget(),
+            () => new Component<ImmutableGraph>());
 
         data.setComponent(
-            this.module.getType(),
-            component.withPart(this.module.getName(), this.result));
+            this.module.getTarget(),
+            component.withPart(this.module.getIdentifier(), this.result));
     }
 
     /**
@@ -210,8 +214,8 @@ class LoadTask<T> extends Task<ModelData, ModelTaskMetadata> {
      */
     public get metadata(): ModelTaskMetadata {
         return new ModelTaskMetadata(
-            [ModelComponent.DataGraph, ModelComponent.IO],
-            [ModelComponent.DataGraph, ModelComponent.IO]);
+            [this.module.getTarget(), ModelComponent.IO],
+            [this.module.getTarget(), ModelComponent.IO]);
     }
 }
 
@@ -238,9 +242,9 @@ class SaveTask extends Task<ModelData, ModelTaskMetadata> {
      * @param data The data the task takes as input.
      */
     public execute(data: ModelData): void {
-        let component = data.getComponent<Component<ImmutableGraph>>(this.module.getType());
+        let component = data.getComponent<Component<ImmutableGraph>>(this.module.getTarget());
         if (component) {
-            let part = component.getPart(this.module.getName());
+            let part = component.getPart(this.module.getIdentifier());
             if (part) {
                 this.io.writeToFile(this.module, part.toMutable());
             }
@@ -252,7 +256,7 @@ class SaveTask extends Task<ModelData, ModelTaskMetadata> {
      */
     public get metadata(): ModelTaskMetadata {
         return new ModelTaskMetadata(
-            [ModelComponent.DataGraph, ModelComponent.IO],
+            [this.module.getTarget(), ModelComponent.IO],
             [ModelComponent.IO]);
     }
 }

@@ -1,5 +1,3 @@
-/// <reference path="./parser.d.ts"/>
-
 import * as Collections from "typescript-collections";
 import {Graph} from "./graph";
 
@@ -91,7 +89,7 @@ export class GraphParser implements Parser<Graph> {
     /**
      * Clean whatever is contained by this GraphParser.
      */
-    public clean() {
+    public clean(): void {
         this.graph = new Graph();
     }
 }

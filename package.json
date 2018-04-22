@@ -1,4 +1,5 @@
 {
+  "_comment": "rdflib used to be version 0.16.7",
   "name": "dp2",
   "version": "0.1.0",
   "private": true,
@@ -16,7 +17,7 @@
     "jsonld": "^0.4.5",
     "material-ui": "^0.20.0",
     "n3": "^0.11.2",
-    "rdflib": "^0.16.7",
+    "rdflib": "^0.15",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-router-dom": "^4.2.2",
