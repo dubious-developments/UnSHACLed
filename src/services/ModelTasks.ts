@@ -5,7 +5,7 @@ import {Navbar} from "../components/navbarWork";
 import { extensionToMIME } from "./extensionToMIME";
 import {Task} from "../entities/task";
 import MxGraph from "../components/MxGraph";
-import { Graph, ImmutableGraph } from "../persistence/graph";
+import { ImmutableGraph } from "../persistence/graph";
 import { Component } from "../persistence/component";
 
 /**
@@ -18,8 +18,8 @@ export class LoadFileTask extends Task<ModelData, ModelTaskMetadata> {
 
     /**
      * Create a new load file task from Model
-     * @param {components} ModelComponent[] the filename should be in one of the components
-     * @param {fileName} the name of the file
+     * @param components
+     * @param fileName
      */
     public constructor(private components: ModelComponent[], private fileName: string) {
         super();
@@ -43,10 +43,10 @@ export class LoadFileTask extends Task<ModelData, ModelTaskMetadata> {
         if (this.mComponent in ModelComponent) {
             let component = data.getComponent(this.mComponent);
             if (component) {
-                var fileDAO: FileDAO = DataAccessProvider.getInstance().getFileDAO();
+                let fileDAO: FileDAO = DataAccessProvider.getInstance().getFileDAO();
                 // get MIME based on extension
-                var splitted = this.fileName.split(".");
-                var blob = new Blob([], {type: extensionToMIME[splitted[splitted.length - 1]]});
+                let splitted = this.fileName.split(".");
+                let blob = new Blob([], {type: extensionToMIME[splitted[splitted.length - 1]]});
                 fileDAO.insert(new FileModule(this.mComponent, this.fileName, blob));
             }
         }
@@ -65,8 +65,8 @@ export class GetOpenedFilesTask extends Task<ModelData, ModelTaskMetadata> {
 
     /**
      * Get the loaded files in the model
-     * @param {components} array of ModelComponents
-     * @param {navBar} the frontend component
+     * @param components
+     * @param navBar
      */
     public constructor(private components: ModelComponent[], private navBar: Navbar) {
         super();
@@ -146,7 +146,7 @@ export class GetValidationReport extends Task<ModelData, ModelTaskMetadata> {
 
     /**
      * Create a new VisualizeComponent task from Model
-     * @param {mxGraph} MxGraph
+     * @param mxGraph
      */
     public constructor(private mxGraph: MxGraph) {
         super();
@@ -176,7 +176,7 @@ export class GetValidationReportNavbar extends Task<ModelData, ModelTaskMetadata
 
     /**
      * Create a new VisualizeComponent task from Model
-     * @param {navbar} NavBar
+     * @param navBar
      */
     public constructor(private navBar: Navbar) {
         super();
