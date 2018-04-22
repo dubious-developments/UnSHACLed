@@ -1,5 +1,3 @@
-/// <reference path="./parser.d.ts"/>
-
 import * as Collections from "typescript-collections";
 import {Graph} from "./graph";
 
@@ -57,7 +55,7 @@ export class GraphParser implements Parser<Graph> {
      * @param {string} mime
      * @param andThen
      */
-    public parse(content: string, mime: string, andThen: ((result: any) => void) | null): void {
+    public parse(content: string, mime: string, andThen: ((result: Graph) => void) | null): void {
         if (this.mimeTypes.contains(mime)) {
             let N3 = require("n3");
             let parser = N3.Parser({ format: mime });
@@ -91,7 +89,7 @@ export class GraphParser implements Parser<Graph> {
     /**
      * Clean whatever is contained by this GraphParser.
      */
-    public clean() {
+    public clean(): void {
         this.graph = new Graph();
     }
 }

@@ -1,6 +1,4 @@
 import * as Immutable from "immutable";
-import { ModelData } from "../entities/modelData";
-import { ModelComponent } from "../entities/modelTaskMetadata";
 
 /**
  * A structure that is to be stored inside the Model.
@@ -8,6 +6,12 @@ import { ModelComponent } from "../entities/modelTaskMetadata";
  * An example component might contain multiple data graphs, each of which is associated with a filename.
  */
 export class Component<T> {
+
+    /**
+     * The root part.
+     * @type {string}
+     */
+    private static ROOT: string = "ROOT";
 
     /**
      * A mapping of keys to parts.
@@ -18,8 +22,8 @@ export class Component<T> {
      * Creates a new component.
      * @param parts A mapping of part keys to parts.
      */
+
     public constructor(parts?: Immutable.Map<string, T>) {
-        
         if (parts) {
             this.parts = parts;
         } else {
@@ -43,6 +47,36 @@ export class Component<T> {
     }
 
     /**
+     * Retrieve the root part of this component.
+     * @returns T
+     */
+    public getRoot(): T {
+        return this.getPart(Component.ROOT);
+    }
+
+    /**
+     * Retrieve all parts contained in this component.
+     */
+    public getParts(): T[] {
+        return this.parts.valueSeq().toArray();
+    }
+
+    /**
+     * Retrieve all parts, barring the root.
+     * @returns {any[]}
+     */
+    public getCompositeParts(): [string, T][] {
+        let relevantParts = new Array<[string, T]>();
+        this.getAllKeys().forEach(k => {
+            if (k !== Component.ROOT) {
+                relevantParts.push([k, this.parts.get(k)]);
+            }
+        });
+
+        return relevantParts;
+    }
+
+    /**
      * Bind a value to a given key. Returns a component
      * with the updated (key, value) pair.
      * @param key The key to bind a value to.
@@ -50,5 +84,15 @@ export class Component<T> {
      */
     public withPart(key: string, value: T): Component<T> {
         return new Component<T>(this.parts.set(key, value));
+    }
+
+    /**
+     * Bind a value to the root. Returns a component
+     * with the updated (key, value) pair.
+     * @param key The key to bind a value to.
+     * @param value The value to bind to `key`.
+     */
+    public withRoot(value: T): Component<T> {
+        return new Component<T>(this.parts.set(Component.ROOT, value));
     }
 }

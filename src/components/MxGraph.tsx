@@ -2,7 +2,10 @@ import * as React from 'react';
 import * as Collections from 'typescript-collections';
 import {ModelComponent} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
-import {VisualizeComponent} from "../services/ModelTasks";
+import {GetValidationReport, VisualizeComponent} from "../services/ModelTasks";
+import TimingService from "../services/TimingService";
+import {ValidationReport} from "../conformance/wrapper/ValidationReport";
+import {List} from 'semantic-ui-react';
 import {Button} from 'semantic-ui-react';
 import {MxGraphProps} from "./interfaces/interfaces";
 
@@ -17,8 +20,9 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     private blockToCellDict: Collections.Dictionary<Block, any>;
     private subjectToBlockDict: Collections.Dictionary<string, Block>;
     private triples: Collections.Set<Triple>;
-
     private cellTotriples: Collections.Dictionary<any, Triple>;
+
+    private timer: TimingService;
 
     constructor(props: any) {
         super(props);
@@ -38,12 +42,16 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.getGraphUnderMouse = this.getGraphUnderMouse.bind(this);
         this.makeDragSource = this.makeDragSource.bind(this);
         this.visualizeDataGraph = this.visualizeDataGraph.bind(this);
+        this.handleUserAction = this.handleUserAction.bind(this);
         this.addTemplate = this.addTemplate.bind(this);
+      
         this.nameToStandardCellDict = new Collections.Dictionary<string, any>();
         this.blockToCellDict = new Collections.Dictionary<Block, any>((b) => b.name);
         this.subjectToBlockDict = new Collections.Dictionary<string, Block>();
-        this.triples = new Collections.Set<Triple>();
         this.cellTotriples = new Collections.Dictionary<any, Triple>((c) => c.value.name);
+        this.triples = new Collections.Set<Triple>((t) =>  t.subject + " " + t.predicate + " " + t.object);
+
+        this.timer = new TimingService();
     }
 
     componentDidMount() {
@@ -725,9 +733,19 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                         // TODO change this later
                         model.tasks.processAllTasks();
                     }
+
+                    if (key === ModelComponent.SHACLShapesGraph) {
+                        model.tasks.schedule(new VisualizeComponent(ModelComponent.SHACLShapesGraph, this));
+                        // TODO change this later
+                        model.tasks.processAllTasks();
+                    }
                 });
                 return [];
             });
+
+            // listen to all click events and key pressed events to check if user is actively editing
+            document.addEventListener("click", this.handleUserAction, true);
+            document.addEventListener("keypress", this.handleUserAction, true);
 
             model.tasks.processAllTasks();
 
@@ -771,6 +789,35 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 }
             });
 
+        }
+    }
+
+    /**
+     * Used for checking if user is actively editing or not
+     */
+    handleUserAction(event: any) {
+        let model = DataAccessProvider.getInstance().model;
+
+        // little hack to pass this to a callback
+        let self = this;
+
+        // notify that a user action took place
+        this.timer.userAction(function(this: MxGraph) {
+            model.tasks.schedule(new GetValidationReport(self));
+            model.tasks.processAllTasks();
+        });
+    }
+
+    public handleConformance(report: ValidationReport) {
+
+        console.log("is conforming?: ", report.isConforming());
+        if (report.isConforming()) {
+            console.log("no errors");
+        } else {
+            console.log("errors: ");
+            for (let tmp of report.getValidationErrors()) {
+                console.log(tmp.toString());
+            }
         }
     }
 

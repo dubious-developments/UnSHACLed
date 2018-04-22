@@ -18,7 +18,18 @@ export enum ModelComponent {
     /**
      * A pseudo-component for UI access.
      */
-    UI
+    UI,
+
+    /**
+     * The shapes graph component used for SHACL validation.
+     */
+    SHACLShapesGraph,
+
+    /**
+     * The validation report indicating which nodes
+     * of the datagraph are conforming to active constraints.
+     */
+    ValidationReport
 }
 
 /**
