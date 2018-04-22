@@ -1,4 +1,4 @@
-/// <reference path="./Parser.ts"/>
+/// <reference path="./parser.ts"/>
 
 import * as Collections from "typescript-collections";
 import { ModelTaskMetadata, ModelComponent } from "../entities/modelTaskMetadata";
@@ -169,7 +169,7 @@ export class FileModule implements Module {
         // this happens when file type can not be determined
         if (mime === "") {
             // set the type using the extension
-            var split = this.filename.split(".");
+            let split = this.filename.split(".");
             mime = extensionToMIME[split[split.length - 1]];
         }
         return mime;

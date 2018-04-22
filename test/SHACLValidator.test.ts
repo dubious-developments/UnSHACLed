@@ -4,15 +4,16 @@ import {Model} from "../src/entities/model";
 import {ModelComponent} from "../src/entities/modelTaskMetadata";
 import {GraphParser} from "../src/persistence/graphParser";
 import {Component} from "../src/persistence/component";
+import {Graph, ImmutableGraph} from "../src/persistence/graph";
 
 describe("WellDefinedSHACLValidator Class", () => {
     it("should perform correct validation for conforming data.",
        (done) => {
             let parser = new GraphParser();
             let validator = new WellDefinedSHACLValidator();
-            parser.parse(getConformingDataGraph(), "text/turtle", function (data: any) {
+            parser.parse(getConformingDataGraph(), "text/turtle", function (data: Graph) {
                 parser.clean();
-                parser.parse(getShapesGraph(), "text/turtle", function (shapes: any) {
+                parser.parse(getShapesGraph(), "text/turtle", function (shapes: Graph) {
                     validator.doValidation(data, shapes,
                                            function (report: ValidationReport) {
                             expect(report.isConforming()).toBe(true);
@@ -26,9 +27,9 @@ describe("WellDefinedSHACLValidator Class", () => {
        (done) => {
             let parser = new GraphParser();
             let validator = new WellDefinedSHACLValidator();
-            parser.parse(getNonConformingDataGraph(), "text/turtle", function (data: any) {
+            parser.parse(getNonConformingDataGraph(), "text/turtle", function (data: Graph) {
                 parser.clean();
-                parser.parse(getShapesGraph(), "text/turtle", function (shapes: any) {
+                parser.parse(getShapesGraph(), "text/turtle", function (shapes: Graph) {
                     validator.doValidation(data, shapes,
                                            function (report: ValidationReport) {
                             expect(report.isConforming()).toBe(false);
@@ -42,9 +43,9 @@ describe("WellDefinedSHACLValidator Class", () => {
        (done) => {
             let parser = new GraphParser();
             let validator = new WellDefinedSHACLValidator();
-            parser.parse(getPlaygroundData(), "text/turtle", function (data: any) {
+            parser.parse(getPlaygroundData(), "text/turtle", function (data: Graph) {
                 parser.clean();
-                parser.parse(getPlaygroundShapes(), "text/turtle", function (shapes: any) {
+                parser.parse(getPlaygroundShapes(), "text/turtle", function (shapes: Graph) {
                     validator.doValidation(data, shapes,
                                            function (report: ValidationReport) {
                             expect(report.isConforming()).toBe(false);
@@ -60,18 +61,18 @@ describe("WellDefinedSHACLValidator Class", () => {
             let validator = new WellDefinedSHACLValidator();
             let model = new Model();
             let parser = new GraphParser();
-            let comp1 = new Component();
-            let comp2 = new Component();
+            let comp1 = new Component<ImmutableGraph>();
+            let comp2 = new Component<ImmutableGraph>();
 
             let busy = true;
-            parser.parse(getConformingDataGraph(), "text/turtle", function (data1: any) {
+            parser.parse(getConformingDataGraph(), "text/turtle", function (data1: Graph) {
                 parser.clean();
-                parser.parse(getNonConformingDataGraph(), "text/turtle", function (data2: any) {
+                parser.parse(getNonConformingDataGraph(), "text/turtle", function (data2: Graph) {
                     parser.clean();
-                    parser.parse(getShapesGraph(), "text/turtle", function (shapes: any) {
-                        comp1 = comp1.withPart("test1", data1);
-                        comp1 = comp1.withPart("test2", data2);
-                        comp2 = comp2.withPart("test", shapes);
+                    parser.parse(getShapesGraph(), "text/turtle", function (shapes: Graph) {
+                        comp1 = comp1.withPart("test1", data1.asImmutable());
+                        comp1 = comp1.withPart("test2", data2.asImmutable());
+                        comp2 = comp2.withPart("test", shapes.asImmutable());
                         model.tasks.schedule(
                             Model.createTask(
                                 (data) => {
