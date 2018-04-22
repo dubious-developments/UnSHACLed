@@ -6,13 +6,15 @@ import {GetValidationReport, VisualizeComponent} from "../services/ModelTasks";
 import TimingService from "../services/TimingService";
 import {ValidationReport} from "../conformance/wrapper/ValidationReport";
 import {List} from 'semantic-ui-react';
+import {Button} from 'semantic-ui-react';
+import {MxGraphProps} from "./interfaces/interfaces";
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout: any;
 
 let $rdf = require('rdflib');
 
-class MxGraph extends React.Component<any, any> {
+class MxGraph extends React.Component<MxGraphProps, any> {
 
     private nameToStandardCellDict: Collections.Dictionary<string, any>;
     private blockToCellDict: Collections.Dictionary<Block, any>;
@@ -29,7 +31,8 @@ class MxGraph extends React.Component<any, any> {
             test: "Shape",
             preview: null,
             dragElement: null,
-            dragElList: ["Shape", "Node Shape", "Property Shape", "Address", "Person"]
+            dragElList: ["Shape", "Node Shape", "Property Shape", "Address", "Person"],
+            templateCount: 0
         };
         this.handleLoad = this.handleLoad.bind(this);
         this.saveGraph = this.saveGraph.bind(this);
@@ -40,7 +43,8 @@ class MxGraph extends React.Component<any, any> {
         this.makeDragSource = this.makeDragSource.bind(this);
         this.visualizeDataGraph = this.visualizeDataGraph.bind(this);
         this.handleUserAction = this.handleUserAction.bind(this);
-
+        this.addTemplate = this.addTemplate.bind(this);
+      
         this.nameToStandardCellDict = new Collections.Dictionary<string, any>();
         this.blockToCellDict = new Collections.Dictionary<Block, any>((b) => b.name);
         this.subjectToBlockDict = new Collections.Dictionary<string, Block>();
@@ -55,6 +59,11 @@ class MxGraph extends React.Component<any, any> {
     }
 
     componentWillReceiveProps(nextprops: any) {
+    }
+
+    componentDidUpdate() {
+        console.log("state adapted");
+        console.log(this.state.graph);
     }
 
     insertCell(grph: any, evt: any, target: any, x: any, y: any) {
@@ -118,6 +127,7 @@ class MxGraph extends React.Component<any, any> {
     }
 
     saveGraph(g: any) {
+        console.log(g);
         this.setState({
             graph: g
         });
@@ -654,6 +664,59 @@ class MxGraph extends React.Component<any, any> {
         ds.createDragElement = mxDragSource.prototype.createDragElement;
     }
 
+    addTemplate() {
+        let {graph} = this.state;
+        let {templateCount} = this.state;
+        // TODO prevent multiple cell selection
+        // TODO positioning??
+
+        if (!graph.isSelectionEmpty()) {
+            // Creates a copy of the selection array to preserve its state
+            var cells = graph.getSelectionCells();
+            var bounds = graph.getView().getBounds(cells);
+            console.log(cells);
+            console.log(cells[0].value);
+            let cellname;
+
+            // handle multiple cell selection
+            if (cells.length === 1) {
+                // handle non-block/block cells differently
+                if (typeof (cells[0].value) === "string") {
+                    cellname = cells[0].value;
+                } else {
+                    cellname = cells[0].value.name.split("/").pop();
+                    console.log(cells[0]);
+                    // set all block clear all block values
+                    cells[0].value.traits = [];
+                }
+            } else {
+                cellname = "Multiple components";
+            }
+
+            // Function that is executed when the image is dropped on
+            // the graph. The cell argument points to the cell under
+            // the mousepointer if there is one.
+            var funct = function (gr: any, evt: any, target: any, x: any, y: any, cell: any) {
+                gr.setSelectionCells(gr.importCells(cells, x, y, cell));
+            };
+            // create sidebar entry
+            // invoke callback on parent component, which will add entry to sidebar
+            this.props.callback(cellname, templateCount);
+            // increment state counter
+            this.setState({
+                templateCount: templateCount + 1
+            });
+            let preview = null;
+            var drag = document.getElementById(cellname + templateCount);
+            mxUtils.makeDraggable(drag, graph, funct);
+            this.props.setLabel(false);
+        } else {
+            console.log("nothing is selected");
+            this.props.setLabel(true);
+        }
+
+    }
+
     main(container: HTMLElement | null): void {
         // Checks if the browser is supported
         if (!container) {
@@ -708,7 +771,13 @@ class MxGraph extends React.Component<any, any> {
             this.initDragAndDrop(graph);
             this.initToolBar(editor);
             container.focus();
-
+          
+            // Get add template button
+            var d2 = document.getElementById("addTemplate");
+            if (d2) {
+                d2.onclick = this.addTemplate;
+            }
+          
             graph.addListener(mxEvent.CELLS_REMOVED, (sender: any, evt: any) => {
                 let cells = evt.getProperty("cells");
 
