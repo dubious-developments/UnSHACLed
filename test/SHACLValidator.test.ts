@@ -97,7 +97,7 @@ describe("WellDefinedSHACLValidator Class", () => {
                                         done();
                                     });
                                 },
-                                [],
+                                [ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph],
                                 [ModelComponent.ValidationReport]));
                         model.tasks.processAllTasks();
                     });
