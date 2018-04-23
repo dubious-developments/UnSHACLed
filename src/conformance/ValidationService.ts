@@ -1,11 +1,12 @@
 import * as Collections from "typescript-collections";
-import {Model, ModelData} from "../entities/model";
-import {WellDefinedSHACLValidator} from "./SHACLValidator";
-import {Validator} from "./Validator";
-import {ModelComponent, ModelTaskMetadata} from "../entities/modelTaskMetadata";
-import {Task} from "../entities/task";
-import {Component} from "../persistence/component";
-import {ValidationReport} from "./wrapper/ValidationReport";
+import * as Immutable from "immutable";
+import { Model, ModelData } from "../entities/model";
+import { WellDefinedSHACLValidator } from "./SHACLValidator";
+import { Validator } from "./Validator";
+import { ModelComponent, ModelTaskMetadata } from "../entities/modelTaskMetadata";
+import { Task } from "../entities/task";
+import { Component } from "../persistence/component";
+import { ValidationReport } from "./wrapper/ValidationReport";
 
 /**
  * A ValidationService is a managing entity, governing various registered validators.
@@ -26,11 +27,11 @@ export class ValidationService {
         this.registerValidator(new WellDefinedSHACLValidator());
 
         let self = this;
-        model.registerObserver(function(changeBuffer: Collections.Set<ModelComponent>) {
+        model.registerObserver(function (changeBuffer: Immutable.Set<ModelComponent>) {
             let tasks = new Array<ValidationTask>();
             let relevantValidators = new Collections.Set<Validator>();
             // return a task for every relevant validator
-            changeBuffer.forEach(c => {
+            changeBuffer.toArray().forEach(c => {
                 let validators;
                 if (validators = self.validators.getValue(c)) {
                     validators.forEach(v => {
