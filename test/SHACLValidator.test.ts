@@ -1,21 +1,21 @@
-import {WellDefinedSHACLValidator} from "../src/conformance/SHACLValidator";
-import {ValidationReport} from "../src/conformance/wrapper/ValidationReport";
-import {Model} from "../src/entities/model";
-import {ModelComponent} from "../src/entities/modelTaskMetadata";
-import {GraphParser} from "../src/persistence/graphParser";
-import {Component} from "../src/persistence/component";
-import {Graph, ImmutableGraph} from "../src/persistence/graph";
+import { WellDefinedSHACLValidator } from "../src/conformance/SHACLValidator";
+import { ValidationReport } from "../src/conformance/wrapper/ValidationReport";
+import { Model } from "../src/entities/model";
+import { ModelComponent } from "../src/entities/modelTaskMetadata";
+import { GraphParser } from "../src/persistence/graphParser";
+import { Component } from "../src/persistence/component";
+import { Graph, ImmutableGraph } from "../src/persistence/graph";
 
 describe("WellDefinedSHACLValidator Class", () => {
     it("should perform correct validation for conforming data.",
-       (done) => {
+        (done) => {
             let parser = new GraphParser();
             let validator = new WellDefinedSHACLValidator();
             parser.parse(getConformingDataGraph(), "text/turtle", function (data: Graph) {
                 parser.clean();
                 parser.parse(getShapesGraph(), "text/turtle", function (shapes: Graph) {
                     validator.doValidation(data, shapes,
-                                           function (report: ValidationReport) {
+                        function (report: ValidationReport) {
                             expect(report.isConforming()).toBe(true);
                             done();
                         });
@@ -24,14 +24,14 @@ describe("WellDefinedSHACLValidator Class", () => {
         });
 
     it("should perform correct validation for non-conforming data.",
-       (done) => {
+        (done) => {
             let parser = new GraphParser();
             let validator = new WellDefinedSHACLValidator();
             parser.parse(getNonConformingDataGraph(), "text/turtle", function (data: Graph) {
                 parser.clean();
                 parser.parse(getShapesGraph(), "text/turtle", function (shapes: Graph) {
                     validator.doValidation(data, shapes,
-                                           function (report: ValidationReport) {
+                        function (report: ValidationReport) {
                             expect(report.isConforming()).toBe(false);
                             done();
                         });
@@ -40,14 +40,14 @@ describe("WellDefinedSHACLValidator Class", () => {
         });
 
     it("should perform correct validation for playground data.",
-       (done) => {
+        (done) => {
             let parser = new GraphParser();
             let validator = new WellDefinedSHACLValidator();
             parser.parse(getPlaygroundData(), "text/turtle", function (data: Graph) {
                 parser.clean();
                 parser.parse(getPlaygroundShapes(), "text/turtle", function (shapes: Graph) {
                     validator.doValidation(data, shapes,
-                                           function (report: ValidationReport) {
+                        function (report: ValidationReport) {
                             expect(report.isConforming()).toBe(false);
                             done();
                         });
@@ -57,7 +57,7 @@ describe("WellDefinedSHACLValidator Class", () => {
 
     it("should validate correctly (i.e. validation should integrate with " +
         "the Model).",
-       (done) => {
+        (done) => {
             let validator = new WellDefinedSHACLValidator();
             let model = new Model();
             let parser = new GraphParser();
@@ -98,7 +98,9 @@ describe("WellDefinedSHACLValidator Class", () => {
                                     });
                                 },
                                 [ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph],
-                                [ModelComponent.ValidationReport]));
+                                [ModelComponent.DataGraph,
+                                 ModelComponent.SHACLShapesGraph
+                                ]));
                         model.tasks.processAllTasks();
                     });
                 });

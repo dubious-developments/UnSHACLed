@@ -100,7 +100,7 @@ class ValidationTask extends Task<ModelData, ModelTaskMetadata> {
     public get metadata(): ModelTaskMetadata {
         return new ModelTaskMetadata(
             this.validator.getTypesForValidation(),
-            []);
+            this.validator.getTypesForValidation());
     }
 }
 
