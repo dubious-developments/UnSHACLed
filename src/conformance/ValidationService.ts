@@ -51,7 +51,7 @@ export class ValidationService {
      * @param {Validator} validator
      */
     public registerValidator(validator: Validator): void {
-        validator.getTypesForValidation().forEach(type => {
+        validator.getTypesForValidation().toArray().forEach(type => {
             let relevantSet = this.validators.getValue(type);
             if (!relevantSet) {
                 relevantSet = new Collections.Set<Validator>();
