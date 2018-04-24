@@ -136,7 +136,7 @@ class CompleteValidationTask extends Task<ModelData, ModelTaskMetadata> {
      */
     public get metadata(): ModelTaskMetadata {
         return new ModelTaskMetadata(
-            [],
+            [ModelComponent.ValidationReport],
             [ModelComponent.ValidationReport]);
     }
 
