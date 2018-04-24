@@ -1,34 +1,35 @@
 import * as Collections from "typescript-collections";
+import * as Immutable from "immutable";
 import SHACLValidator from "../conformance/shacl/index.js";
-import {Validator} from "./Validator";
-import {ModelData} from "../entities/model";
-import {ModelComponent} from "../entities/modelTaskMetadata";
-import {Component} from "../persistence/component";
-import {Graph, ImmutableGraph} from "../persistence/graph";
-import {ValidationReport} from "./wrapper/ValidationReport";
-import {GraphParser} from "../persistence/graphParser";
+import { Validator } from "./Validator";
+import { ModelData } from "../entities/model";
+import { ModelComponent } from "../entities/modelTaskMetadata";
+import { Component } from "../persistence/component";
+import { Graph, ImmutableGraph } from "../persistence/graph";
+import { ValidationReport } from "./wrapper/ValidationReport";
+import { GraphParser } from "../persistence/graphParser";
 
 /**
  * A wrapper class around the shacl.js library.
  */
 export class WellDefinedSHACLValidator implements Validator {
 
-    private types: Collections.Set<ModelComponent>;
+    private types: Immutable.Set<ModelComponent>;
 
     /**
      * Create a new WellDefinedSHACLValidator.
      */
     public constructor() {
-        this.types = new Collections.Set<ModelComponent>();
-        this.types.add(ModelComponent.DataGraph);
-        this.types.add(ModelComponent.SHACLShapesGraph);
+        this.types = Immutable.Set<ModelComponent>([
+            ModelComponent.DataGraph,
+            ModelComponent.SHACLShapesGraph
+        ]);
     }
 
     /**
      * Retrieve the types relevant for this validator.
-     * @returns {Set<ModelComponent>}
      */
-    public getTypesForValidation(): Collections.Set<ModelComponent> {
+    public getTypesForValidation(): Immutable.Set<ModelComponent> {
         return this.types;
     }
 
@@ -90,24 +91,23 @@ export class WellDefinedSHACLValidator implements Validator {
      */
     public doValidation(data: Graph, shapes: Graph, andThen: ((report: ValidationReport) => void) | null): void {
         let parser = new GraphParser();
-        parser.serialize(data, 'text/turtle', function(dataText: string) {
-            parser.serialize(shapes, 'text/turtle', function(shapesText: string) {
+        parser.serialize(data, 'text/turtle', function (dataText: string) {
+            parser.serialize(shapes, 'text/turtle', function (shapesText: string) {
                 let validator = new SHACLValidator();
                 validator.validate(dataText, 'text/turtle', shapesText, 'text/turtle',
-                                   function (error: any, report: any) {
-                    if (andThen) {
-                        andThen(new ValidationReport(report));
-                    }
-                });
+                    function (error: any, report: any) {
+                        if (andThen) {
+                            andThen(new ValidationReport(report));
+                        }
+                    });
             });
         });
     }
 
     /**
      * Return an identifier for this type of validator.
-     * @returns {string}
      */
-    public toString() {
+    public toString(): string {
         return "SHACLValidator";
     }
 }

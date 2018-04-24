@@ -1,4 +1,5 @@
 import * as Collections from "typescript-collections";
+import * as Immutable from "immutable";
 import { InOrderProcessor, TaskProcessor } from "./taskProcessor";
 import { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";
 import { ModelData } from "./modelData";
@@ -13,7 +14,7 @@ export { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";
  * A model observer: a function that takes a change set as input
  * and produces a list of tasks to process as output.
  */
-type ModelObserver = (changeBuffer: Collections.Set<ModelComponent>) => Array<ModelTask>;
+type ModelObserver = (changeBuffer: Immutable.Set<ModelComponent>) => Array<ModelTask>;
 
 /**
  * Models the data handled by the UnSHACLed application.
@@ -51,8 +52,46 @@ export class Model {
         this.tasks = new OutOfOrderProcessor(
             wellDefinedData,
             task => task,
-            task => task,
-            task => this.notifyObservers(wellDefinedData.drainChangeBuffer()));
+            (task: ModelTask) => task,
+            (task: ModelTask) => {
+                // Drain the read/write buffers.
+                let buffers = wellDefinedData.drainBuffers();
+                
+                // Check that the read/write buffers match the behavior
+                // specified by the task metadata.
+                buffers.readBuffer.toArray().forEach(element => {
+                    if (!task.metadata.readsFrom(element)) {
+                        // Looks like the task read from an element that
+                        // it doesn't have access to.
+                        throw Error(
+                            `${task} read from ${element}, which is not in its read set. ` +
+                            `Consider adding ${element} to the read set if the read is intentional.`);
+                    }
+                });
+                buffers.writeBuffer.toArray().forEach(element => {
+                    if (!task.metadata.writesTo(element)) {
+                        // Looks like the task write to an element that
+                        // it doesn't have access to.
+                        throw Error(
+                            `${task} wrote to ${element}, which is not in its write set. ` +
+                            `Consider adding ${element} to the write set if the write is intentional.`);
+                    }
+                });
+                task.metadata.writeSet.toArray().forEach(element => {
+                    // Components that are written to must either be
+                    // in the read set, in the write buffer, or both.
+                    if (!task.metadata.readSet.contains(element)
+                        && !buffers.writeBuffer.contains(element)) {
+                            throw Error(
+                                `${task} does not write to ${element}, which is in the ` +
+                                `write set but not in the read set. Consider adding ${element} ` +
+                                `to the read set if no write is the intended behavior.`);
+                    }
+                });
+
+                // Notify observers.
+                this.notifyObservers(buffers.writeBuffer);
+            });
         this.observers = [];
     }
 
@@ -86,7 +125,7 @@ export class Model {
         this.observers.push(observer);
     }
 
-    private notifyObservers(changeBuffer: Collections.Set<ModelComponent>): void {
+    private notifyObservers(changeBuffer: Immutable.Set<ModelComponent>): void {
         this.observers.forEach(element => {
             element(changeBuffer).forEach(newTask => {
                 this.tasks.schedule(newTask);
