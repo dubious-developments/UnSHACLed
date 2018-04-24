@@ -13,13 +13,14 @@ import {ValidationReport} from "./wrapper/ValidationReport";
 export class ValidationService {
 
     private model: Model;
+    private buffer: TaskCompletionBuffer;
     private validators: Collections.Dictionary<ModelComponent, Collections.Set<Validator>>;
 
     /**
      * Create a new ValidationService.
      * @param {Model} model
      */
-    constructor(model: Model) {
+    public constructor(model: Model) {
         this.model = model;
         this.validators = new Collections.Dictionary<ModelComponent, Collections.Set<Validator>>();
 
@@ -35,7 +36,7 @@ export class ValidationService {
                 if (validators = self.validators.getValue(c)) {
                     validators.forEach(v => {
                         if (!relevantValidators.contains(v)) {
-                            tasks.push(new ValidationTask(v, self.model));
+                            tasks.push(new ValidationTask(v, self.model, self.buffer));
                             relevantValidators.add(v);
                         }
                     });
@@ -59,7 +60,119 @@ export class ValidationService {
             this.validators.setValue(type, relevantSet);
         });
     }
+}
 
+/**
+ * A buffer containing pending tasks that are in need of completion.
+ * This class serializes the completions of these pending tasks, meaning that the completions
+ * will be performed in the same that the pending tasks themselves entered the buffer.
+ */
+class TaskCompletionBuffer {
+
+    private queue: Collections.PriorityQueue<PendingTask>;
+
+    /**
+     * Create a new TaskCompletionBuffer.
+     */
+    public constructor() {
+        this.queue = new Collections.PriorityQueue<PendingTask>(function(a: PendingTask, b: PendingTask) {
+            if (a.getTimeStamp() < b.getTimeStamp()) {
+                return -1;
+            } else if (a.getTimeStamp() > b.getTimeStamp()) {
+                return 1;
+            }
+            return 0;
+        });
+    }
+
+    /**
+     * Adds a new pending task to the buffer and returns a function that can be called at
+     * the opportune moment to complete the pending task.
+     * @param {(task: Task<ModelData, ModelTaskMetadata>) => void} onComplete
+     * @returns {(task: Task<ModelData, ModelTaskMetadata>) => void}
+     */
+    public waitForCompletion(onComplete: (task: Task<ModelData, ModelTaskMetadata>) => void):
+               (task: Task<ModelData, ModelTaskMetadata>) => void {
+        let pending = new PendingTask();
+        this.queue.add(pending);
+        let self = this;
+        return function(task: Task<ModelData, ModelTaskMetadata>) {
+            // marks the pending task as ready for completion
+            pending.prepareForCompletion(task, onComplete);
+
+            // completes as many tasks as possible
+            let head;
+            while ((head = self.queue.peek()) && !head.isPending()) {
+                head.complete();
+                self.queue.dequeue();
+            }
+        };
+    }
+}
+
+/**
+ * A task pending completion.
+ */
+class PendingTask {
+
+    private pending: boolean;
+    private timestamp: number;
+
+    /**
+     * The task responsible for completing this pending task.
+     */
+    private task: Task<ModelData, ModelTaskMetadata>;
+
+    /**
+     * The function that will complete this pending task.
+     */
+    private onComplete: (task: Task<ModelData, ModelTaskMetadata>) => void;
+
+    /**
+     * Create a new PendingTask.
+     */
+    public constructor() {
+        this.pending = true;
+        this.timestamp = Date.now();
+    }
+
+    /**
+     * Check whether the task is still pending.
+     * @returns {boolean}
+     */
+    public isPending(): boolean {
+        return this.pending;
+    }
+
+    /**
+     * Prepare this pending task for completion, i.e. mark as no longer pending and provide
+     * the task and function that will be used to complete this task.
+     * @param {Task<ModelData, ModelTaskMetadata>} task
+     * @param {(task: Task<ModelData, ModelTaskMetadata>) => void} onComplete
+     */
+    public prepareForCompletion(task: Task<ModelData, ModelTaskMetadata>,
+                                onComplete: (task: Task<ModelData, ModelTaskMetadata>) => void): void {
+        this.pending = false;
+        this.task = task;
+        this.onComplete = onComplete;
+    }
+
+    /**
+     * Retrieve the time at which this task was created.
+     * @returns {number}
+     */
+    public getTimeStamp(): number {
+        return this.timestamp;
+    }
+
+    /**
+     * When this task is ready for completion, complete the task.
+     */
+    public complete() {
+        if (!this.isPending()) {
+            this.onComplete(this.task);
+        }
+    }
 }
 
 /**
@@ -72,10 +185,12 @@ class ValidationTask extends Task<ModelData, ModelTaskMetadata> {
      * Create a new ValidationTask.
      * @param {Validator} validator
      * @param model
+     * @param buffer
      */
     public constructor(
         private readonly validator: Validator,
-        private readonly model: Model) {
+        private readonly model: Model,
+        private readonly buffer: TaskCompletionBuffer) {
         super();
     }
 
@@ -87,9 +202,13 @@ class ValidationTask extends Task<ModelData, ModelTaskMetadata> {
      */
     public execute(data: ModelData): void {
         let self = this;
-        this.validator.validate(data, function (report: ValidationReport) {
+        let complete = this.buffer.waitForCompletion(function(task: Task<ModelData, ModelTaskMetadata>) {
             // schedules a new task that will finish the validation process
-            self.model.tasks.schedule(new CompleteValidationTask(report));
+            self.model.tasks.schedule(task);
+        });
+
+        this.validator.validate(data, function (report: ValidationReport) {
+            complete(new CompleteValidationTask(report));
         });
     }
 
