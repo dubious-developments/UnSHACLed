@@ -68,7 +68,7 @@ export class ValidationService {
  * This class serializes the completions of these pending tasks, meaning that the completions
  * will be performed in the same that the pending tasks themselves entered the buffer.
  */
-class TaskCompletionBuffer {
+export class TaskCompletionBuffer {
 
     private queue: Collections.PriorityQueue<PendingTask>;
 
@@ -77,9 +77,10 @@ class TaskCompletionBuffer {
      */
     public constructor() {
         this.queue = new Collections.PriorityQueue<PendingTask>(function(a: PendingTask, b: PendingTask) {
-            if (a.getTimeStamp() < b.getTimeStamp()) {
+            // having a "larger" timestamp means having a lower priority
+            if (a.getTimeStamp() > b.getTimeStamp()) {
                 return -1;
-            } else if (a.getTimeStamp() > b.getTimeStamp()) {
+            } else if (a.getTimeStamp() < b.getTimeStamp()) {
                 return 1;
             }
             return 0;
@@ -114,7 +115,7 @@ class TaskCompletionBuffer {
 /**
  * A task pending completion.
  */
-class PendingTask {
+export class PendingTask {
 
     private pending: boolean;
     private timestamp: number;
@@ -134,7 +135,7 @@ class PendingTask {
      */
     public constructor() {
         this.pending = true;
-        this.timestamp = Date.now();
+        this.timestamp = performance.timing.navigationStart + performance.now();
     }
 
     /**

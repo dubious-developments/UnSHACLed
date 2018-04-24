@@ -1,11 +1,43 @@
-import {Model} from "../src/entities/model";
+import {Model, ModelData} from "../src/entities/model";
 import {GraphParser} from "../src/persistence/graphParser";
 import {Component} from "../src/persistence/component";
-import {ValidationService} from "../src/conformance/ValidationService";
-import {ModelComponent} from "../src/entities/modelTaskMetadata";
+import {TaskCompletionBuffer, ValidationService} from "../src/conformance/ValidationService";
+import {ModelComponent, ModelTaskMetadata} from "../src/entities/modelTaskMetadata";
 import {Graph, ImmutableGraph} from "../src/persistence/graph";
+import {Task} from "../src/entities/task";
+
+describe("TaskCompletionBuffer Class", () => {
+    it("should perform in-order completion.",
+        (done) => {
+        let buffer = new TaskCompletionBuffer();
+        let completed = new Array<Task<ModelData, ModelTaskMetadata>>();
+        let onComplete = function(task: Task<ModelData, ModelTaskMetadata>) {
+            completed.push(task);
+        };
+
+        let complete1 = buffer.waitForCompletion(onComplete);
+        let complete2 = buffer.waitForCompletion(onComplete);
+
+        // task 1 is marked for completion after task 2
+        setTimeout(function() {
+            complete1(new EmptyTask(1));
+        }, 2000);
+
+        setTimeout(function() {
+            complete2(new EmptyTask(2));
+        }, 1000);
+
+        setTimeout(function() {
+            // task 1 has completed before task 2
+            expect((<EmptyTask> completed[0]).getNr()).toEqual(1);
+            expect((<EmptyTask> completed[1]).getNr()).toEqual(2);
+            done();
+        }, 3000);
+    });
+});
 
 describe("ValidationService Class", () => {
+
     // TODO: fix this broken test. It always times out. Had to comment
     // it out.
     //
@@ -48,6 +80,27 @@ describe("ValidationService Class", () => {
     //        });
     //    });
 });
+
+class EmptyTask extends Task<ModelData, ModelTaskMetadata> {
+
+    public constructor(private readonly nr: number) {
+        super();
+    }
+
+    public getNr() {
+        return this.nr;
+    }
+
+    public execute(data: ModelData): void {
+    }
+
+    public get metadata(): ModelTaskMetadata {
+        return new ModelTaskMetadata(
+            [],
+            []);
+    }
+
+}
 
 function getDataGraph() {
     return '@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.\n' +
