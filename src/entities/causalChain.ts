@@ -11,8 +11,10 @@ import {ModelComponent} from "./modelTaskMetadata";
  *
  * Adding new entities to the causal chain occurs in two phases. First, we try to
  * introduce the entity into the staging area. This is where we check for potential
- * periodicity. After a given round (a time step in the causal chain),
- *
+ * periodicity. After a given round (a time step in the causal chain), all staged entities
+ * are integrated into the chain. At this point we also check whether there has been a break in
+ * causality for any of the entities at the tail of the chain. If so, then all paths leading to
+ * these entities must be severed.
  */
 export class CausalChain<S, T> {
 
@@ -80,8 +82,9 @@ export class CausalChain<S, T> {
         this.tails.forEach(link => {
             // there has been a break in the causality
             // so this link needs to be severed
+            // as far as we can
             if (link.following.isEmpty()) {
-                link.sever(link);
+                link.sever();
                 forRemoval.add(link);
             }
         });
@@ -246,15 +249,20 @@ export class Link<S, T> {
 
     /**
      * Sever the current link up to a given link.
+     * If there is no stopping point, then we sever as much as possible.
      * @param {Link<S, T>} upTo
      */
-    public sever(upTo: Link<S, T>): void {
+    public sever(upTo?: Link<S, T>): void {
         this.preceding.forEach(ancestor => {
             ancestor.following.remove(this);
             // if ancestor is reachable from severance origin,
             // then continue severance along that path
-            if (ancestor.hasSimilarAncestor(upTo)) {
-                ancestor.sever(upTo);
+            if (upTo !== undefined) {
+                if (ancestor.hasSimilarAncestor(upTo)) {
+                    ancestor.sever(upTo);
+                }
+            } else {
+                ancestor.sever(); // sever as much as possible
             }
         });
     }
