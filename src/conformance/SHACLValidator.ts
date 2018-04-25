@@ -1,4 +1,3 @@
-import * as Collections from "typescript-collections";
 import * as Immutable from "immutable";
 import SHACLValidator from "../conformance/shacl/index.js";
 import { Validator } from "./Validator";

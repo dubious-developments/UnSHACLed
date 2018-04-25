@@ -1,4 +1,4 @@
-import {Model, ModelData} from "../src/entities/model";
+import {Model, ModelData, ModelObserver} from "../src/entities/model";
 import {GraphParser} from "../src/persistence/graphParser";
 import {Component} from "../src/persistence/component";
 import {TaskCompletionBuffer, ValidationService} from "../src/conformance/ValidationService";
@@ -37,48 +37,44 @@ describe("TaskCompletionBuffer Class", () => {
 });
 
 describe("ValidationService Class", () => {
+    it("should add a new conformance report to model data.",
+       (done) => {
+           let model = new Model();
+           let service = new ValidationService(model);
+           let parser = new GraphParser();
+           let comp1 = new Component<ImmutableGraph>();
+           let comp2 = new Component<ImmutableGraph>();
 
-    // TODO: fix this broken test. It always times out. Had to comment
-    // it out.
-    //
-    // it("should add a new conformance report to model data.",
-    //    (done) => {
-    //        let model = new Model();
-    //        let service = new ValidationService(model);
-    //        let parser = new GraphParser();
-    //        let comp1 = new Component<ImmutableGraph>();
-    //        let comp2 = new Component<ImmutableGraph>();
+           model.registerObserver(new ModelObserver((changeBuf) => {
+               setTimeout(function () {
+                   model.tasks.processAllTasks();
+               },         2000);
+               return [];
+           }));
 
-    //        model.registerObserver((changeBuf) => {
-    //            setTimeout(function () {
-    //                model.tasks.processAllTasks();
-    //            },         2000);
-    //            return [];
-    //        });
+           parser.parse(getDataGraph(), "text/turtle", function (data: Graph) {
+               parser.clean();
+               parser.parse(getShapesGraph(), "text/turtle", function (shapes: Graph) {
+                   comp1 = comp1.withPart("test", data.asImmutable());
+                   comp2 = comp2.withPart("test", shapes.asImmutable());
+                   model.tasks.schedule(
+                       Model.createTask(
+                           (mdata) => {
+                               mdata.setComponent(ModelComponent.DataGraph, comp1);
+                               mdata.setComponent(ModelComponent.SHACLShapesGraph, comp2);
+                           },
+                           [],
+                           [ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph]));
+                   model.tasks.processAllTasks();
 
-    //        parser.parse(getDataGraph(), "text/turtle", function (data: Graph) {
-    //            parser.clean();
-    //            parser.parse(getShapesGraph(), "text/turtle", function (shapes: Graph) {
-    //                comp1 = comp1.withPart("test", data.asImmutable());
-    //                comp2 = comp2.withPart("test", shapes.asImmutable());
-    //                model.tasks.schedule(
-    //                    Model.createTask(
-    //                        (mdata) => {
-    //                            mdata.setComponent(ModelComponent.DataGraph, comp1);
-    //                            mdata.setComponent(ModelComponent.SHACLShapesGraph, comp2);
-    //                        },
-    //                        [],
-    //                        [ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph]));
-    //                model.tasks.processAllTasks();
-
-    //                model.registerObserver((changeBuf) => {
-    //                    expect(changeBuf.contains(ModelComponent.ValidationReport)).toBe(true);
-    //                    done();
-    //                    return [];
-    //                });
-    //            });
-    //        });
-    //    });
+                   model.registerObserver(new ModelObserver((changeBuf) => {
+                       expect(changeBuf.contains(ModelComponent.ValidationReport)).toBe(true);
+                       done();
+                       return [];
+                   }));
+               });
+           });
+       });
 });
 
 class EmptyTask extends Task<ModelData, ModelTaskMetadata> {

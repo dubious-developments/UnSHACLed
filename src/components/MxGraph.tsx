@@ -8,6 +8,7 @@ import {ValidationReport} from "../conformance/wrapper/ValidationReport";
 import {List} from 'semantic-ui-react';
 import {Button} from 'semantic-ui-react';
 import {MxGraphProps} from "./interfaces/interfaces";
+import {ModelObserver} from "../entities/model";
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout: any;
@@ -726,7 +727,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         } else {
 
             let model = DataAccessProvider.getInstance().model;
-            model.registerObserver((changeBuf) => {
+            model.registerObserver(new ModelObserver((changeBuf) => {
                 changeBuf.forEach((key) => {
                     if (key === ModelComponent.DataGraph) { // datagraph has changed
                         model.tasks.schedule(new VisualizeComponent(ModelComponent.DataGraph, this));
@@ -741,7 +742,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                     }
                 });
                 return [];
-            });
+            }));
 
             // listen to all click events and key pressed events to check if user is actively editing
             document.addEventListener("click", this.handleUserAction, true);

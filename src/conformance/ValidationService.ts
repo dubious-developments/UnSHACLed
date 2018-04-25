@@ -1,6 +1,6 @@
 import * as Collections from "typescript-collections";
 import * as Immutable from "immutable";
-import { Model, ModelData } from "../entities/model";
+import {Model, ModelData, ModelObserver} from "../entities/model";
 import { WellDefinedSHACLValidator } from "./SHACLValidator";
 import { Validator } from "./Validator";
 import { ModelComponent, ModelTaskMetadata } from "../entities/modelTaskMetadata";
@@ -23,12 +23,14 @@ export class ValidationService {
      */
     public constructor(model: Model) {
         this.model = model;
+        this.buffer = new TaskCompletionBuffer();
         this.validators = new Collections.Dictionary<ModelComponent, Collections.Set<Validator>>();
 
         this.registerValidator(new WellDefinedSHACLValidator());
 
         let self = this;
-        model.registerObserver(function (changeBuffer: Immutable.Set<ModelComponent>) {
+        model.registerObserver(new ModelObserver(
+            function (changeBuffer: Immutable.Set<ModelComponent>) {
             let tasks = new Array<ValidationTask>();
             let relevantValidators = new Collections.Set<Validator>();
             // return a task for every relevant validator
@@ -44,7 +46,7 @@ export class ValidationService {
                 }
             });
             return tasks;
-        });
+        }));
     }
 
     /**
@@ -66,7 +68,7 @@ export class ValidationService {
 /**
  * A buffer containing pending tasks that are in need of completion.
  * This class serializes the completions of these pending tasks, meaning that the completions
- * will be performed in the same that the pending tasks themselves entered the buffer.
+ * will be performed in the same order that the pending tasks themselves entered the buffer.
  */
 export class TaskCompletionBuffer {
 
@@ -168,7 +170,7 @@ export class PendingTask {
     }
 
     /**
-     * When this task is ready for completion, complete the task.
+     * If this task is ready for completion, complete the task.
      */
     public complete() {
         if (!this.isPending()) {
