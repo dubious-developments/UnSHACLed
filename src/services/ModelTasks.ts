@@ -54,7 +54,8 @@ export class LoadFileTask extends Task<ModelData, ModelTaskMetadata> {
     }
 
     public get metadata(): ModelTaskMetadata {
-        return new ModelTaskMetadata([this.mComponent, ModelComponent.UI], [ModelComponent.UI]);
+        return new ModelTaskMetadata([ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph, ModelComponent.UI],
+            [ModelComponent.UI]);
     }
 }
 

@@ -3,18 +3,18 @@ import * as Immutable from "immutable";
 import {ModelComponent} from "./modelTaskMetadata";
 
 /**
- * A causal chain is complex interconnection of links. Each link has a number of
+ * A causal chain is a complex interconnection of links. Each link has a number of
  * incoming links and a number of outgoing links. The chain keeps track of causal relations
- * between entities of type T. By keeping track of these causal relationships, loops can be
- * avoided, i.e. entities causing themselves to reoccur, thereby potentially creating an
- * infinite loop of recurrence.
+ * between events of type T. By keeping track of these causal relationships, loops
+ * (i.e. events causing themselves to reoccur, thereby potentially creating an
+ * infinite loop of recurrence) can be detected and summarily avoided.
  *
- * Adding new entities to the causal chain occurs in two phases. First, we try to
- * introduce the entity into the staging area. This is where we check for potential
- * periodicity. After a given round (a time step in the causal chain), all staged entities
+ * Adding new events to the causal chain occurs in two phases. First, we try to
+ * introduce the event into the staging area. This is where we check for potential
+ * periodicity. After a given round (a time step in the causal chain), all staged events
  * are integrated into the chain. At this point we also check whether there has been a break in
- * causality for any of the entities at the tail of the chain. If so, then all paths leading to
- * these entities must be severed.
+ * causality for any of the events at the tail end of the chain. If so, then all paths leading to
+ * these events must be severed.
  */
 export class CausalChain<S, T> {
 
@@ -30,25 +30,25 @@ export class CausalChain<S, T> {
     }
 
     /**
-     * Stage an entity for integration into the chain.
-     * Returns whether or not the entity can be integrated.
-     * @param {T} node
+     * Stage an event for integration into the chain.
+     * Returns whether or not the event can be integrated.
+     * @param {T} event
      * @param {Immutable.Set<ModelComponent>} incoming
      * @param {Immutable.Set<ModelComponent>} outgoing
      * @returns {boolean}
      */
-    public stage(node: T,
+    public stage(event: T,
                  incoming: Immutable.Set<S>,
                  outgoing: Immutable.Set<S>): boolean {
 
         let periodic = false;
-        let newLink = new Link<S, T>(node, incoming, outgoing);
+        let newLink = new Link<S, T>(event, incoming, outgoing);
         // try to find a link to connect with from among the tails
         this.tails.forEach(link => {
             if (link) {
                 let success = link.linkTo(newLink);
                 if (success) {
-                    console.log(link.getEntity() + " will be linked to " + newLink.getEntity());
+                    console.log(link.getEvent() + " will be linked to " + newLink.getEvent());
                     let ancestor;
                     if (ancestor = newLink.hasSimilarAncestor(newLink)) {
                         console.log("Similar ancestor found.");
@@ -73,7 +73,7 @@ export class CausalChain<S, T> {
     }
 
     /**
-     * Fully integrate the staged entities into the chain, thereby
+     * Fully integrate the staged events into the chain, thereby
      * updating the tails and clearing the staging area for the
      * next integration round.
      */
@@ -96,10 +96,10 @@ export class CausalChain<S, T> {
         this.stagingArea.forEach(link => {
             // make sure that the newly added tail is in fact a tail
             link.antecedent.forEach(ancestor => {
-                console.log("ancestor " + ancestor.getEntity() + " will be removed.");
+                console.log("ancestor " + ancestor.getEvent() + " will be removed.");
                 this.tails.remove(ancestor);
             });
-            console.log(link.getEntity() + " is a new tail.");
+            console.log(link.getEvent() + " is a new tail.");
             this.tails.add(link);
         });
 
@@ -107,7 +107,7 @@ export class CausalChain<S, T> {
     }
 
     /**
-     * Retrieve the entities residing in the tail.
+     * Retrieve the events residing in the tail.
      * @returns {Set<Link<S, T>>}
      */
     public getTails(): Collections.Set<Link<S, T>> {
@@ -124,10 +124,10 @@ export class CausalChain<S, T> {
         this.tails.forEach(link => {
             chain += "[";
             link.antecedent.forEach(ancestor => {
-                chain += "(" + ancestor.toString() + ", " + ancestor.getEntity() + ")";
+                chain += "(" + ancestor.toString() + ", " + ancestor.getEvent() + ")";
             });
             chain += "] => (";
-            chain += link.toString() + ", " + link.getEntity();
+            chain += link.toString() + ", " + link.getEvent();
             chain += ")\n";
         });
 
@@ -136,8 +136,8 @@ export class CausalChain<S, T> {
 }
 
 /**
- * A link in a causal chain, representing an entity of type T,
- * caused by events of type S and causing events also of type S.
+ * A link in a causal chain, representing an event of type T,
+ * with causes of type S and effects also of type S.
  *  TODO: At the moment, there is no recycling of identifiers,
  *  so this number will grow ad infinitum.
  */
@@ -150,11 +150,11 @@ export class Link<S, T> {
 
     /**
      * Create a new Link.
-     * @param {T} entity
+     * @param event
      * @param before
      * @param after
      */
-    public constructor(private readonly entity: T,
+    public constructor(private readonly event: T,
                        private readonly before: Immutable.Set<S>,
                        private readonly after: Immutable.Set<S>) {
         this.identifier = Link.counter;
@@ -196,11 +196,11 @@ export class Link<S, T> {
     }
 
     /**
-     * Retrieve the entity represented by this chain.
+     * Retrieve the event represented by this link.
      * @returns {T}
      */
-    public getEntity(): T {
-        return this.entity;
+    public getEvent(): T {
+        return this.event;
     }
 
     /**
@@ -228,13 +228,13 @@ export class Link<S, T> {
     }
 
     /**
-     * Find an ancestor of this link with an entity identical to that of a given link.
+     * Find an ancestor of this link with an event identical to that of a given link.
      * Returns the found ancestor, if possible.
      * @param {Link<S, T>} toMatch
      * @returns {Link<S, T> | undefined}
      */
     public hasSimilarAncestor(toMatch: Link<S, T>): Link<S, T> | undefined {
-        if (this.getEntity() === toMatch.getEntity() && this.identifier !== toMatch.identifier) {
+        if (this.getEvent() === toMatch.getEvent() && this.identifier !== toMatch.identifier) {
             return this;
         }
 
