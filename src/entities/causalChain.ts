@@ -38,8 +38,8 @@ export class CausalChain<S, T> {
      * @returns {boolean}
      */
     public stage(node: T,
-               incoming: Immutable.Set<S>,
-               outgoing: Immutable.Set<S>): boolean {
+                 incoming: Immutable.Set<S>,
+                 outgoing: Immutable.Set<S>): boolean {
 
         let periodic = false;
         let newLink = new Link<S, T>(node, incoming, outgoing);
@@ -83,7 +83,7 @@ export class CausalChain<S, T> {
             // there has been a break in the causality
             // so this link needs to be severed
             // as far as we can
-            if (link.following.isEmpty()) {
+            if (link.incident.isEmpty()) {
                 link.sever();
                 forRemoval.add(link);
             }
@@ -95,7 +95,7 @@ export class CausalChain<S, T> {
 
         this.stagingArea.forEach(link => {
             // make sure that the newly added tail is in fact a tail
-            link.preceding.forEach(ancestor => {
+            link.antecedent.forEach(ancestor => {
                 console.log("ancestor " + ancestor.getEntity() + " will be removed.");
                 this.tails.remove(ancestor);
             });
@@ -123,7 +123,7 @@ export class CausalChain<S, T> {
         let chain = "";
         this.tails.forEach(link => {
             chain += "[";
-            link.preceding.forEach(ancestor => {
+            link.antecedent.forEach(ancestor => {
                 chain += "(" + ancestor.toString() + ", " + ancestor.getEntity() + ")";
             });
             chain += "] => (";
@@ -138,59 +138,61 @@ export class CausalChain<S, T> {
 /**
  * A link in a causal chain, representing an entity of type T,
  * caused by events of type S and causing events also of type S.
+ *  TODO: At the moment, there is no recycling of identifiers,
+ *  so this number will grow ad infinitum.
  */
 export class Link<S, T> {
 
     private static counter: number = 0;
     private identifier: number;
-    private previous: Collections.Set<Link<S, T>>;
-    private next: Collections.Set<Link<S, T>>;
+    private ingress: Collections.Set<Link<S, T>>;
+    private egress: Collections.Set<Link<S, T>>;
 
     /**
      * Create a new Link.
      * @param {T} entity
-     * @param {Immutable.Set<S>} ingress
-     * @param {Immutable.Set<S>} egress
+     * @param before
+     * @param after
      */
     public constructor(private readonly entity: T,
-                       private readonly ingress: Immutable.Set<S>,
-                       private readonly egress: Immutable.Set<S>) {
+                       private readonly before: Immutable.Set<S>,
+                       private readonly after: Immutable.Set<S>) {
         this.identifier = Link.counter;
         Link.counter++;
-        this.previous = new Collections.Set<Link<S, T>>();
-        this.next = new Collections.Set<Link<S, T>>();
+        this.ingress = new Collections.Set<Link<S, T>>();
+        this.egress = new Collections.Set<Link<S, T>>();
     }
 
     /**
      * The causes.
      * @returns {Immutable.Set<S>}
      */
-    public get incoming(): Immutable.Set<S> {
-        return this.ingress;
+    public get causes(): Immutable.Set<S> {
+        return this.before;
     }
 
     /**
      * The effects.
      * @returns {Immutable.Set<S>}
      */
-    public get outgoing(): Immutable.Set<S> {
-        return this.egress;
+    public get effects(): Immutable.Set<S> {
+        return this.after;
     }
 
     /**
      * The causally antecedent links.
      * @returns {Set<Link<S, T>>}
      */
-    public get preceding(): Collections.Set<Link<S, T>> {
-        return this.previous;
+    public get antecedent(): Collections.Set<Link<S, T>> {
+        return this.ingress;
     }
 
     /**
-     * The incident links.
+     * The causally incident links.
      * @returns {Set<Link<S, T>>}
      */
-    public get following(): Collections.Set<Link<S, T>> {
-        return this.next;
+    public get incident(): Collections.Set<Link<S, T>> {
+        return this.egress;
     }
 
     /**
@@ -204,21 +206,21 @@ export class Link<S, T> {
     /**
      * Link this chain to another chain,
      * which will then exhibit causal incidence.
-     * Returns whether or not the linking was successful.
+     * Returns whether or not the act of linking was successful.
      * @param {Link<S, T>} other
      * @returns {boolean}
      */
     public linkTo(other: Link<S, T>): boolean {
         let reachable = false;
-        this.outgoing.forEach(c => {
-            if (c !== undefined && other.incoming.contains(c)) {
+        this.effects.forEach(c => {
+            if (c !== undefined && other.causes.contains(c)) {
                 reachable = true;
             }
         });
 
         if (reachable) {
-            this.next.add(other);
-            other.previous.add(this);
+            this.incident.add(other);
+            other.antecedent.add(this);
             return true;
         }
 
@@ -226,7 +228,7 @@ export class Link<S, T> {
     }
 
     /**
-     * Find an ancestor of this link with an entity similar to that of a given link.
+     * Find an ancestor of this link with an entity identical to that of a given link.
      * Returns the found ancestor, if possible.
      * @param {Link<S, T>} toMatch
      * @returns {Link<S, T> | undefined}
@@ -237,7 +239,7 @@ export class Link<S, T> {
         }
 
         let match;
-        this.preceding.forEach(link => {
+        this.antecedent.forEach(link => {
             match = link.hasSimilarAncestor(toMatch);
             if (match) {
                 return;
@@ -249,19 +251,26 @@ export class Link<S, T> {
 
     /**
      * Sever the current link up to a given link.
-     * If there is no stopping point, then we sever as much as possible.
+     * If there is no stopping point, then sever as much as possible.
+     * Severing can never lead to new tail nodes being introduced: a link
+     * without incident links will always be severed, i.e. we only stop breaking
+     * the chain when we reach a link that branches off into different directions.
      * @param {Link<S, T>} upTo
      */
     public sever(upTo?: Link<S, T>): void {
-        this.preceding.forEach(ancestor => {
-            ancestor.following.remove(this);
+        this.antecedent.forEach(ancestor => {
+            ancestor.incident.remove(this);
             // if ancestor is reachable from severance origin,
             // then continue severance along that path
             if (upTo !== undefined) {
-                if (ancestor.hasSimilarAncestor(upTo)) {
+                // when we reach the goal, keep
+                // going as far back as possible
+                if (this === upTo) {
+                    ancestor.sever();
+                } else if (ancestor.hasSimilarAncestor(upTo)) {
                     ancestor.sever(upTo);
                 }
-            } else {
+            } else if (ancestor.incident.isEmpty()) {
                 ancestor.sever(); // sever as much as possible
             }
         });
