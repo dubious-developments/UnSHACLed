@@ -1,6 +1,5 @@
 import * as Collections from "typescript-collections";
 import * as Immutable from "immutable";
-import {ModelComponent} from "./modelTaskMetadata";
 
 /**
  * A causal chain is a complex interconnection of links. Each link has a number of
@@ -13,8 +12,8 @@ import {ModelComponent} from "./modelTaskMetadata";
  * introduce the event into the staging area. This is where we check for potential
  * periodicity. After a given round (a time step in the causal chain), all staged events
  * are integrated into the chain. At this point we also check whether there has been a break in
- * causality for any of the events at the tail end of the chain. If so, then all paths leading to
- * these events must be severed.
+ * causality for any of the events at the tail end of the chain. If so, then all paths leading
+ * (unidirectionally) to these events must be severed.
  */
 export class CausalChain<S, T> {
 
@@ -33,30 +32,26 @@ export class CausalChain<S, T> {
      * Stage an event for integration into the chain.
      * Returns whether or not the event can be integrated.
      * @param {T} event
-     * @param {Immutable.Set<ModelComponent>} incoming
-     * @param {Immutable.Set<ModelComponent>} outgoing
+     * @param {Immutable.Set<ModelComponent>} before
+     * @param {Immutable.Set<ModelComponent>} after
      * @returns {boolean}
      */
     public stage(event: T,
-                 incoming: Immutable.Set<S>,
-                 outgoing: Immutable.Set<S>): boolean {
+                 before: Immutable.Set<S>,
+                 after: Immutable.Set<S>): boolean {
 
         let periodic = false;
-        let newLink = new Link<S, T>(event, incoming, outgoing);
+        let newLink = new Link<S, T>(event, before, after);
         // try to find a link to connect with from among the tails
         this.tails.forEach(link => {
             if (link) {
                 let success = link.linkTo(newLink);
                 if (success) {
-                    console.log(link.getEvent() + " will be linked to " + newLink.getEvent());
                     let ancestor;
-                    if (ancestor = newLink.hasSimilarAncestor(newLink)) {
-                        console.log("Similar ancestor found.");
+                    while (ancestor = newLink.hasSimilarAncestor(newLink)) {
                         // if periodicity is detected, sever the link
-                        newLink.sever(ancestor);
-                        periodic = periodic || true;
-                    } else {
-                        periodic = periodic || false;
+                        newLink.severLinks(ancestor);
+                        periodic = true;
                     }
                 }
             }
@@ -84,7 +79,7 @@ export class CausalChain<S, T> {
             // so this link needs to be severed
             // as far as we can
             if (link.incident.isEmpty()) {
-                link.sever();
+                link.severLinks();
                 forRemoval.add(link);
             }
         });
@@ -96,10 +91,8 @@ export class CausalChain<S, T> {
         this.stagingArea.forEach(link => {
             // make sure that the newly added tail is in fact a tail
             link.antecedent.forEach(ancestor => {
-                console.log("ancestor " + ancestor.getEvent() + " will be removed.");
                 this.tails.remove(ancestor);
             });
-            console.log(link.getEvent() + " is a new tail.");
             this.tails.add(link);
         });
 
@@ -234,15 +227,16 @@ export class Link<S, T> {
      * @returns {Link<S, T> | undefined}
      */
     public hasSimilarAncestor(toMatch: Link<S, T>): Link<S, T> | undefined {
-        if (this.getEvent() === toMatch.getEvent() && this.identifier !== toMatch.identifier) {
-            return this;
-        }
-
         let match;
-        this.antecedent.forEach(link => {
-            match = link.hasSimilarAncestor(toMatch);
-            if (match) {
+        this.antecedent.forEach(ancestor => {
+            if (ancestor.getEvent() === toMatch.getEvent()) {
+                match = ancestor;
                 return;
+            } else {
+                match = ancestor.hasSimilarAncestor(toMatch);
+                if (match) {
+                    return;
+                }
             }
         });
 
@@ -250,30 +244,45 @@ export class Link<S, T> {
     }
 
     /**
-     * Sever the current link up to a given link.
+     * Sever up to a given link.
      * If there is no stopping point, then sever as much as possible.
      * Severing can never lead to new tail nodes being introduced: a link
      * without incident links will always be severed, i.e. we only stop breaking
      * the chain when we reach a link that branches off into different directions.
      * @param {Link<S, T>} upTo
      */
-    public sever(upTo?: Link<S, T>): void {
+    public severLinks(upTo?: Link<S, T>): void {
         this.antecedent.forEach(ancestor => {
-            ancestor.incident.remove(this);
-            // if ancestor is reachable from severance origin,
-            // then continue severance along that path
             if (upTo !== undefined) {
-                // when we reach the goal, keep
-                // going as far back as possible
-                if (this === upTo) {
-                    ancestor.sever();
-                } else if (ancestor.hasSimilarAncestor(upTo)) {
-                    ancestor.sever(upTo);
+                this.severLink(ancestor);
+                if (ancestor.identifier !== upTo.identifier) {
+                    if (ancestor.hasSimilarAncestor(upTo)) {
+                        ancestor.severLink(upTo);
+                    }
+                } else {
+                    if (ancestor.incident.isEmpty()) {
+                        ancestor.severLinks();
+                    }
                 }
-            } else if (ancestor.incident.isEmpty()) {
-                ancestor.sever(); // sever as much as possible
+            } else {
+                // if no target is defined
+                // go as deep as possible (i.e. until a branching link is encountered)
+                this.severLink(ancestor);
+                if (ancestor.incident.isEmpty()) {
+                    ancestor.severLinks();
+                }
             }
         });
+    }
+
+    /**
+     * Severs the connection between this link and an ancestor link.
+     * Does nothing when the given link is not an ancestor of the current link.
+     * @param {Link<S, T>} ancestor
+     */
+    public severLink(ancestor: Link<S, T>): void {
+        ancestor.incident.remove(this);
+        this.antecedent.remove(ancestor);
     }
 
     /**
