@@ -48,7 +48,7 @@ export class CausalChain<S, T> {
                 let success = link.linkTo(newLink);
                 if (success) {
                     let ancestor;
-                    while (ancestor = newLink.hasSimilarAncestor(newLink)) {
+                    if (ancestor = newLink.hasSimilarAncestor(newLink)) {
                         // if periodicity is detected, sever the link
                         newLink.severLinks(ancestor);
                         periodic = true;
