@@ -29,8 +29,8 @@ export class ModelObserver {
         return this.identifier;
     }
 
-    public getObserver(): (changeBuffer: Immutable.Set<ModelComponent>) => Array<ModelTask> {
-        return this.observer;
+    public observe(changeBuffer: Immutable.Set<ModelComponent>): Array<ModelTask> {
+        return this.observer(changeBuffer);
     }
 }
 
@@ -142,13 +142,18 @@ export class Model {
      * a task completes and may queue additional tasks based on the changes
      * made to components.
      */
-    public registerObserver(observer: ModelObserver): void {
-        this.observers.push(observer);
+    public registerObserver(observer: ModelObserver
+        | ((changeBuffer: Immutable.Set<ModelComponent>) => Array<ModelTask>)): void {
+        if (observer instanceof ModelObserver) {
+            this.observers.push(observer);
+        } else {
+            this.observers.push(new ModelObserver(observer));
+        }
     }
 
     private notifyObservers(changeBuffer: Immutable.Set<ModelComponent>): void {
         this.observers.forEach(element => {
-            element.getObserver()(changeBuffer).forEach(newTask => {
+            element.observe(changeBuffer).forEach(newTask => {
                 if (!this.chain.stage(element.getID(), newTask.metadata.readSet, newTask.metadata.writeSet)) {
                     this.tasks.schedule(newTask);
                 }

@@ -80,12 +80,9 @@ export class TaskCompletionBuffer {
     public constructor() {
         this.queue = new Collections.PriorityQueue<PendingTask>(function(a: PendingTask, b: PendingTask) {
             // having a "larger" timestamp means having a lower priority
-            if (a.getTimeStamp() > b.getTimeStamp()) {
-                return -1;
-            } else if (a.getTimeStamp() < b.getTimeStamp()) {
-                return 1;
-            }
-            return 0;
+            return Collections.util.reverseCompareFunction(Collections.util.defaultCompare)(
+                a.getTimeStamp(),
+                b.getTimeStamp());
         });
     }
 

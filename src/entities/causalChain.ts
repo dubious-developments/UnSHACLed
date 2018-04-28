@@ -116,11 +116,9 @@ export class CausalChain<S, T> {
         this.tails.forEach(link => {
             chain += "[";
             link.antecedent.forEach(ancestor => {
-                chain += "(" + ancestor.toString() + ", " + ancestor.getEvent() + ")";
+                chain += `(${ancestor}, ${ancestor.getEvent()})`;
             });
-            chain += "] => (";
-            chain += link.toString() + ", " + link.getEvent();
-            chain += ")\n";
+            chain += `] => (${link}, ${link.getEvent()})\n`;
         });
 
         return chain;
@@ -223,7 +221,7 @@ export class Link<S, T> {
      * Find an ancestor of this link with an event identical to that of a given link.
      * Returns whether a similar ancestor was found.
      * @param {Link<S, T>} toMatch
-     * @returns {Link<S, T> | undefined}
+     * @returns {boolean}
      */
     public hasSimilarAncestor(toMatch: Link<S, T>): boolean {
         let matchFound = false;
@@ -258,6 +256,6 @@ export class Link<S, T> {
      * @returns {string}
      */
     public toString(): string {
-        return "" + this.identifier;
+        return this.identifier.toString();
     }
 }
