@@ -1,6 +1,6 @@
 import { Set } from "typescript-collections";
 import * as Immutable from "immutable";
-import { Model, ModelData } from "../src/entities/model";
+import {Model, ModelData, ModelObserver} from "../src/entities/model";
 import { ModelTaskMetadata, ModelComponent } from "../src/entities/modelTaskMetadata";
 import { Task, OpaqueTask } from "../src/entities/task";
 import { InOrderProcessor } from "../src/entities/taskProcessor";
@@ -66,7 +66,7 @@ describe("ModelData class", () => {
 
 describe("Model Class", () => {
     it("can be created", () => {
-        new Model().registerObserver((changeBuf) => []);
+        new Model().registerObserver(new ModelObserver((changeBuf) => []));
     });
 
     it("should notify observers", () => {
@@ -81,17 +81,18 @@ describe("Model Class", () => {
                     <number> data.getComponent<number>(ModelComponent.DataGraph) + 1),
             graphTweakMetadata);
 
-        model.registerObserver((changeBuf) => {
+        model.registerObserver(new ModelObserver((changeBuf) => {
             expect(changeBuf.contains(ModelComponent.DataGraph)).toEqual(true);
             return [task];
-        });
+        }));
 
         model.tasks.schedule(task);
 
         model.tasks.processTask();
         expect(model.tasks.isEmpty()).toEqual(false);
         model.tasks.processTask();
-        expect(model.tasks.isEmpty()).toEqual(false);
+        // expect(model.tasks.isEmpty()).toEqual(false);
+        expect(model.tasks.isEmpty()).toEqual(true); // cycle cut short
         expect(modelData.getComponent<number>(ModelComponent.DataGraph)).toEqual(2);
     });
 

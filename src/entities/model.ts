@@ -6,6 +6,7 @@ import { ModelData } from "./modelData";
 import { Task, OpaqueTask } from "./task";
 import { ModelTask, OpaqueModelTask } from "./taskInstruction";
 import { OutOfOrderProcessor } from "./outOfOrderProcessor";
+import {CausalChain} from "./causalChain";
 export { ModelData } from "./modelData";
 export { ModelTask, OpaqueModelTask } from "./taskInstruction";
 export { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";
@@ -14,7 +15,24 @@ export { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";
  * A model observer: a function that takes a change set as input
  * and produces a list of tasks to process as output.
  */
-type ModelObserver = (changeBuffer: Immutable.Set<ModelComponent>) => Array<ModelTask>;
+export class ModelObserver {
+
+    private static counter: number = 0;
+    private identifier: number;
+
+    public constructor(private readonly observer: (changeBuffer: Immutable.Set<ModelComponent>) => Array<ModelTask>) {
+        this.identifier =
+        ModelObserver.counter++;
+    }
+
+    public getID(): number {
+        return this.identifier;
+    }
+
+    public observe(changeBuffer: Immutable.Set<ModelComponent>): Array<ModelTask> {
+        return this.observer(changeBuffer);
+    }
+}
 
 /**
  * Models the data handled by the UnSHACLed application.
@@ -36,6 +54,8 @@ export class Model {
     public readonly tasks: TaskProcessor<ModelData, ModelTaskMetadata>;
 
     private observers: ModelObserver[];
+
+    private chain: CausalChain<ModelComponent, number>;
 
     /**
      * Creates a model.
@@ -93,6 +113,7 @@ export class Model {
                 this.notifyObservers(buffers.writeBuffer);
             });
         this.observers = [];
+        this.chain = new CausalChain<ModelComponent, number>();
     }
 
     /**
@@ -121,15 +142,23 @@ export class Model {
      * a task completes and may queue additional tasks based on the changes
      * made to components.
      */
-    public registerObserver(observer: ModelObserver): void {
-        this.observers.push(observer);
+    public registerObserver(observer: ModelObserver
+        | ((changeBuffer: Immutable.Set<ModelComponent>) => Array<ModelTask>)): void {
+        if (observer instanceof ModelObserver) {
+            this.observers.push(observer);
+        } else {
+            this.observers.push(new ModelObserver(observer));
+        }
     }
 
     private notifyObservers(changeBuffer: Immutable.Set<ModelComponent>): void {
         this.observers.forEach(element => {
-            element(changeBuffer).forEach(newTask => {
-                this.tasks.schedule(newTask);
+            element.observe(changeBuffer).forEach(newTask => {
+                if (!this.chain.stage(element.getID(), newTask.metadata.readSet, newTask.metadata.writeSet)) {
+                    this.tasks.schedule(newTask);
+                }
             });
         });
+        this.chain.finalize();
     }
 }

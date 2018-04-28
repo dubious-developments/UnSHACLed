@@ -1,4 +1,4 @@
-import { Model } from "../src/entities/model";
+import {Model, ModelObserver} from "../src/entities/model";
 import { ModelComponent } from "../src/entities/modelTaskMetadata";
 import { FileDAO, FileModule } from "../src/persistence/fileDAO";
 import { GraphParser } from "../src/persistence/graphParser";
@@ -50,11 +50,11 @@ describe("FileDAO Class", () => {
            let module = new FileModule(label, filename, file);
 
            let model = new Model();
-           model.registerObserver((changeBuf) => {
+           model.registerObserver(new ModelObserver((changeBuf) => {
                expect(changeBuf.contains(ModelComponent.DataGraph)).toEqual(true);
                done();
                return [];
-           });
+           }));
 
            let dao = new FileDAO(model);
            dao.find(module);
