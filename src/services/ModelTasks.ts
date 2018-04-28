@@ -125,6 +125,10 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
                     let graph = component.getPart(part);
                     graph.query(
                         store => this.mxGraph.visualizeDataGraph(store));
+
+                    // fit the graph again
+                    this.mxGraph.fitGraph();
+
                 } else {
                     console.log("error: could not find MxGraph");
                 }
@@ -141,7 +145,7 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
 }
 
 /*
- * Load the validationReport from the Model
+ * Load the validationReport from the Model and show it in mxGraph
  */
 export class GetValidationReport extends Task<ModelData, ModelTaskMetadata> {
 
@@ -158,7 +162,9 @@ export class GetValidationReport extends Task<ModelData, ModelTaskMetadata> {
         let component: any = data.getComponent(ModelComponent.ValidationReport);
         if (component) {
             let report = component.getRoot();
-            this.mxGraph.handleConformance(report);
+            if (this.mxGraph) {
+                this.mxGraph.handleConformance(report);
+            }
         } else {
             console.log("Could not find the ModelComponent: ", ModelComponent.ValidationReport);
         }

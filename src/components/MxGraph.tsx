@@ -17,6 +17,8 @@ let $rdf = require('rdflib');
 
 class MxGraph extends React.Component<MxGraphProps, any> {
 
+    private editor: any;
+
     private nameToStandardCellDict: Collections.Dictionary<string, any>;
     private blockToCellDict: Collections.Dictionary<Block, any>;
     private subjectToBlockDict: Collections.Dictionary<string, Block>;
@@ -45,6 +47,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.visualizeDataGraph = this.visualizeDataGraph.bind(this);
         this.handleUserAction = this.handleUserAction.bind(this);
         this.addTemplate = this.addTemplate.bind(this);
+        this.fitGraph = this.fitGraph.bind(this);
       
         this.nameToStandardCellDict = new Collections.Dictionary<string, any>();
         this.blockToCellDict = new Collections.Dictionary<Block, any>((b) => b.name);
@@ -718,6 +721,10 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
     }
 
+    public fitGraph() {
+        this.editor.execute("fit");
+    }
+
     main(container: HTMLElement | null): void {
         // Checks if the browser is supported
         if (!container) {
@@ -751,6 +758,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             model.tasks.processAllTasks();
 
             let editor = new mxEditor();
+            this.editor = editor;
 
             // Creates the graph inside the given container
             editor.setGraphContainer(container);
