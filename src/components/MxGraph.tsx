@@ -9,6 +9,7 @@ import {List} from 'semantic-ui-react';
 import {Button} from 'semantic-ui-react';
 import {MxGraphProps} from "./interfaces/interfaces";
 import {ModelObserver} from "../entities/model";
+import {PrefixMap} from "../persistence/graph";
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout: any;
@@ -414,14 +415,14 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.nameToStandardCellDict.setValue('row', row);
     }
 
-    parseDataGraphToBlocks(store: any) {
+    parseDataGraphToBlocks(store: any, prefixes: PrefixMap) {
         // let DASH = $rdf.Namespace("http://datashapes.org/dash#");
         let RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
         // let RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
         // let SCHEMA = $rdf.Namespace("http://schema.org/");
         let SH = $rdf.Namespace("http://www.w3.org/ns/shacl#");
         // let XSD = $rdf.Namespace("http://www.w3.org/2001/XMLSchema#");
-
+        // console.log(prefixes);
         let triples = store.statements;
         let newTriples = new Collections.Set<Triple>();
 
@@ -461,10 +462,10 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.blockToCellDict.clear();
     }
 
-    visualizeDataGraph(store: any) {
+    visualizeDataGraph(store: any, prefixes: PrefixMap) {
         this.clear();
         let {graph} = this.state;
-        let blocks = this.parseDataGraphToBlocks(store);
+        let blocks = this.parseDataGraphToBlocks(store, prefixes);
         let model = graph.getModel();
         let parent = graph.getDefaultParent();
 

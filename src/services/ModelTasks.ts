@@ -7,6 +7,7 @@ import {Task} from "../entities/task";
 import MxGraph from "../components/MxGraph";
 import { ImmutableGraph } from "../persistence/graph";
 import { Component } from "../persistence/component";
+import SideBar from "../components/Sidebar";
 
 /**
  * First search the component which belongs to the fileName
@@ -124,7 +125,9 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
                 if (this.mxGraph) {
                     let graph = component.getPart(part);
                     graph.query(
-                        store => this.mxGraph.visualizeDataGraph(store));
+                        store => this.mxGraph.visualizeDataGraph(store, graph.getPrefixes()));
+
+                    SideBar.setPrefixes(graph.getPrefixes());
 
                     // fit the graph again
                     this.mxGraph.fitGraph();

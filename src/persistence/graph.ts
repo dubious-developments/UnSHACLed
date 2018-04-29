@@ -5,7 +5,7 @@ import { TimeCapsule } from "../entities/timeCapsule";
 
 type Triple = { subject: string, predicate: string, object: string };
 
-type PrefixMap = { [prefix: string]: string };
+export type PrefixMap = { [prefix: string]: string };
 
 /**
  * A mutable wrapper for library-specific triple stores.
