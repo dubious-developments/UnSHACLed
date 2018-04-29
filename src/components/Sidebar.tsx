@@ -168,7 +168,13 @@ class SideBar extends React.Component<SidebarProps, any> {
                     }
                 </Menu.Item>
                 {/* Sidebar accordion submenu */}
-                <Accordion inverted={true} exclusive={false} fluid={true} panels={rootPanels}/>
+                <Accordion
+                    defaultActiveIndex={[0, 2]}
+                    inverted={true}
+                    exclusive={false}
+                    fluid={true}
+                    panels={rootPanels}
+                />
             </Sidebar>
 
         );
