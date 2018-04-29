@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Menu, Icon, Popup, List} from 'semantic-ui-react';
+import { Menu, Icon, Popup, List, Segment} from 'semantic-ui-react';
 import Auth from '../services/Auth';
 import { Link, withRouter } from 'react-router-dom';
 import { NavbarWorkProps } from './interfaces/interfaces';
@@ -198,10 +198,35 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
             <div>
                 <Menu
                     inverted={true}
-                    size="large"
+                    size="small"
+                    style={{
+                        borderRadius: 0,
+                        margin:-2,
+                        padding:0
+                    }}
+                    borderless={true}
+                >
+                    <Menu.Item>
+                        File
+                    </Menu.Item>
+                    <Menu.Item>
+                        Edit
+                    </Menu.Item>
+                    <Menu.Item>
+                        View
+                    </Menu.Item>
+                    <Menu.Item>
+                        Help
+                    </Menu.Item>
+                </Menu>
+                <Menu
+                    inverted={true}
+                    size="small"
                     icon={true}
                     style={{
                         borderRadius: 0,
+                        margin:0,
+                        padding:0
                     }}
                 >
                     {/* Toolbar icons */}
