@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Sidebar, Menu, Image, Input, Button, Label, Popup} from 'semantic-ui-react';
+import {Sidebar, Menu, Image, Input, Button, Label, Accordion} from 'semantic-ui-react';
 import {SidebarProps} from './interfaces/interfaces';
 
 class SideBar extends React.Component<SidebarProps, any> {
@@ -114,7 +114,7 @@ class SideBar extends React.Component<SidebarProps, any> {
     render() {
         const logo = require('../img/logo.png');
         // const defaultOption = 1;
-        let {templates} = this.props;
+        // let {templates} = this.props;
         return (
             <Sidebar
                 as={Menu}
@@ -132,68 +132,49 @@ class SideBar extends React.Component<SidebarProps, any> {
                     <Image src={logo} size="mini" centered={true}/>
                 </Menu.Item>
 
-                        <Menu.Item style={{ backgroundColor: "#3d3e3f"}}>
-                            <Input
-                                onChange={this.handleChange}
-                                type="text"
-                                value={this.state.value}
-                                placeholder="Search components . . ."
-                                inverted={true}
-                                transparent={true}
-                                icon="search"
-                            />
-                        </Menu.Item>
+                <Menu.Item style={{backgroundColor: "#3d3e3f"}}>
+                    <Input
+                        onChange={this.handleChange}
+                        type="text"
+                        value={this.state.value}
+                        placeholder="Search components . . ."
+                        inverted={true}
+                        transparent={true}
+                        icon="search"
+                    />
+                </Menu.Item>
 
-                        <Popup
-                            trigger={
-                                <Menu.Item>
-                                    SHACL
-                                    <this.DynamicMenu kind="SHACL"/>
-                                </Menu.Item>
-                            }
-                            content='Drag and drop a component of your choice to the graph.'
-                            size="mini"
-                            position='right center'
-                            inverted={true}
-                        />
+                <Menu.Item>
+                    <Button
+                        id={"addTemplate"}
+                        inverted={true}
 
-                        {/*                        <Menu.Item>
-                            General
-                            <this.DynamicMenu kind="General"/>
-                        </Menu.Item>*/}
-                        <Popup
-                            trigger={
-                                <Menu.Item id="TemplateMenu">
-                                    Template
-                                    <this.DynamicMenu kind="Template"/>
+                    > Add template from selection
+                    </Button>
+                    {this.props.showLabel ?
+                        <Label
+                            basic={true}
+                            color='red'
+                            pointing={true}
+                        >
+                            Nothing is selected!
+                        </Label> : null
+                    }
+                </Menu.Item>
 
-                                    <Menu.Menu>
-                                        <Menu.Item>
-                                            <Button
-                                                id={"addTemplate"}
-                                                inverted={true}
+                <Accordion inverted={true} exclusive={false} fluid={true}>
+                    <Accordion.Title
+                        content='SHACL'
+                        index={0}
+                    />
+                    <Accordion.Content content={<this.DynamicMenu kind="SHACL"/>} active={true}/>
 
-                                            > Add template from selection
-                                            </Button>
-                                            {this.props.showLabel ?
-                                            <Label
-                                                basic={true}
-                                                color='red'
-                                                pointing={true}
-                                            >
-                                                Nothing is selected!
-                                            </Label> : null
-                                            }
-                                        </Menu.Item>
-                                        {templates}
-                                    </Menu.Menu>
-                                </Menu.Item>
-                            }
-                            content='Drag and drop a component of your choice to the graph.'
-                            size="mini"
-                            position='right center'
-                            inverted={true}
-                        />
+                    <Accordion.Title
+                        content='Template'
+                        index={1}
+                    />
+                    <Accordion.Content content={<this.DynamicMenu kind="SHACL"/>} active={true}/>
+                </Accordion>
             </Sidebar>
 
         );
