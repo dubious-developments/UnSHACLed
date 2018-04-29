@@ -1,22 +1,27 @@
 import * as React from 'react';
-import {Menu, Input, Popup} from 'semantic-ui-react';
-import {SidebarProps} from './interfaces/interfaces';
+import {Menu, Icon, Popup} from 'semantic-ui-react';
+import {ToolbarIconProps} from './interfaces/interfaces';
 
-class ToolbarIcon extends React.Component<SidebarProps, any> {
+/*
+    Component used to create toolbar icon items
+    Requires several props from the parent, which can be found in interfaces.d.ts
+
+ */
+class ToolbarIcon extends React.Component<ToolbarIconProps, any> {
 
     constructor(props: any) {
         super(props);
-
-        this.state = {
-        };
-
     }
 
     render() {
         return (
-            <div>
-                Test
-            </div>
+            <Popup
+                trigger={<Menu.Item as="a" id={this.props.t_id} content={<Icon name={this.props.icon_name}/>}/>}
+                content={this.props.p_content}
+                size={this.props.p_size}
+                position={this.props.p_position}
+                inverted={true}
+            />
         );
     }
 }

@@ -36,6 +36,7 @@ export interface ToolbarIconProps {
     /* Pop Up */
     p_size: any; // size of the pop-up
     p_position: any; // position of the pop-up
+    p_content: any; // content of pop-up
     /* Trigger for the pop-up (always a Menu.Item) */
     t_id: any; // id of the menu item (trigger)
     icon_name: any; // name of the used icon within the menu item (trigger)

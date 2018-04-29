@@ -9,6 +9,7 @@ import { DataAccessProvider } from '../persistence/dataAccessProvider';
 import {LoadFileTask, GetOpenedFilesTask, GetValidationReportNavbar} from '../services/ModelTasks';
 import { ModelComponent } from '../entities/modelTaskMetadata';
 import {ValidationReport, ValidationError} from "../conformance/wrapper/ValidationReport";
+import  ToolbarIcon  from './ToolbarIcon';
 
 export class Navbar extends React.Component<NavbarWorkProps, {}> {
 
@@ -259,12 +260,13 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                 >
                     {/* Toolbar icons */}
                     <Menu.Item as="a" onClick={this.iconClick} content={<Icon name='content'/>}/>
-                    <Popup
-                        trigger={<Menu.Item as="a" id="delete" content={<Icon name='trash'/>}/>}
-                        content='Delete selected component(s) from graph'
-                        size="mini"
-                        position='bottom left'
-                        inverted={true}
+
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Delete selected component(s) from graph"}
+                        t_id={"delete"}
+                        icon_name={"trash"}
                     />
 
                     <Popup
