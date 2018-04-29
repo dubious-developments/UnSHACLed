@@ -32,7 +32,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             test: "Shape",
             preview: null,
             dragElement: null,
-            dragElList: ["Shape", "Node Shape", "Property Shape", "Address", "Person"],
+            dragElList: ["Shape", "Node Shape", "Property Shape"],
             templateCount: 0
         };
         this.handleLoad = this.handleLoad.bind(this);

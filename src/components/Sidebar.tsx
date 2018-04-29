@@ -10,7 +10,7 @@ class SideBar extends React.Component<SidebarProps, any> {
     ];
     static SHACLMenuItems = ["Shape", "Node Shape", "Property Shape"];
     static GeneralMenuItems = ["Arrow", "Rectangle"];
-    static TemplateMenuItems = ["Address", "Person"];
+    static TemplateMenuItems;
 
     constructor(props: any) {
         super(props);
@@ -20,6 +20,9 @@ class SideBar extends React.Component<SidebarProps, any> {
             content: 1,
             dragid: null,
         };
+
+        /* bind template menu to props */
+        SideBar.TemplateMenuItems = this.props.templates;
 
         this.handleChange = this.handleChange.bind(this);
         this.handleDropDown = this.handleDropDown.bind(this);
@@ -191,7 +194,6 @@ class SideBar extends React.Component<SidebarProps, any> {
                             position='right center'
                             inverted={true}
                         />
-                }
             </Sidebar>
 
         );
