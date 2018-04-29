@@ -18,7 +18,7 @@ class SideBar extends React.Component<SidebarProps, any> {
         this.state = {
             value: '',
             content: 1,
-            dragid: null,
+            dragid: null
         };
 
         /* bind template menu to props */
@@ -114,7 +114,12 @@ class SideBar extends React.Component<SidebarProps, any> {
     render() {
         const logo = require('../img/logo.png');
         // const defaultOption = 1;
-        // let {templates} = this.props;
+        let {templates} = this.props;
+        const rootPanels = [
+            { title: 'SHACL', content: { content: <this.DynamicMenu kind="SHACL"/>, key: 'content-1' } },
+            { title: 'Template', content: { content: templates, key: 'content-2' } },
+        ];
+
         return (
             <Sidebar
                 as={Menu}
@@ -128,10 +133,11 @@ class SideBar extends React.Component<SidebarProps, any> {
                 }}
                 id="sideBarID"
             >
+                {/* Sidebar Logo */}
                 <Menu.Item style={{height: '5em'}}>
                     <Image src={logo} size="mini" centered={true}/>
                 </Menu.Item>
-
+                {/* Sidebar search box */}
                 <Menu.Item style={{backgroundColor: "#3d3e3f"}}>
                     <Input
                         onChange={this.handleChange}
@@ -143,7 +149,7 @@ class SideBar extends React.Component<SidebarProps, any> {
                         icon="search"
                     />
                 </Menu.Item>
-
+                {/* Sidebar template button */}
                 <Menu.Item>
                     <Button
                         id={"addTemplate"}
@@ -161,20 +167,8 @@ class SideBar extends React.Component<SidebarProps, any> {
                         </Label> : null
                     }
                 </Menu.Item>
-
-                <Accordion inverted={true} exclusive={false} fluid={true}>
-                    <Accordion.Title
-                        content='SHACL'
-                        index={0}
-                    />
-                    <Accordion.Content content={<this.DynamicMenu kind="SHACL"/>} active={true}/>
-
-                    <Accordion.Title
-                        content='Template'
-                        index={1}
-                    />
-                    <Accordion.Content content={<this.DynamicMenu kind="SHACL"/>} active={true}/>
-                </Accordion>
+                {/* Sidebar accordion submenu */}
+                <Accordion inverted={true} exclusive={false} fluid={true} panels={rootPanels}/>
             </Sidebar>
 
         );
