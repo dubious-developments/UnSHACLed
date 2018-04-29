@@ -200,7 +200,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                 {/* General Toolbar */}
                 <Menu
                     inverted={true}
-                    size="small"
+                    size="tiny"
                     style={{
                         borderRadius: 0,
                         margin:0,
@@ -208,6 +208,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                     }}
                     borderless={true}
                 >
+                    <Menu.Item as="a" onClick={this.iconClick} content={<Icon name='content'/>}/>
                     <Menu.Item>
                         File
                     </Menu.Item>
@@ -249,7 +250,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                 {/* Toolbar icons menu */}
                 <Menu
                     inverted={true}
-                    size="tiny"
+                    size="mini"
                     icon={true}
                     borderless={true}
                     style={{
@@ -259,7 +260,6 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                     }}
                 >
                     {/* Toolbar icons */}
-                    <Menu.Item as="a" onClick={this.iconClick} content={<Icon name='content'/>}/>
 
                     <ToolbarIcon
                         p_size={"mini"}
@@ -269,70 +269,60 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                         icon_name={"trash"}
                     />
 
-                    <Popup
-                        trigger={<Menu.Item as="a" id="undo" content={<Icon name='reply'/>}/>}
-                        content='Undo last action'
-                        size="mini"
-                        position='bottom left'
-                        inverted={true}
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Undo last action"}
+                        t_id={"undo"}
+                        icon_name={"reply"}
                     />
 
-                    <Popup
-                        trigger={<Menu.Item as="a" id="redo" content={<Icon name='share'/>}/>}
-                        content='Redo last action'
-                        size="mini"
-                        position='bottom left'
-                        inverted={true}
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Redo last action"}
+                        t_id={"redo"}
+                        icon_name={"share"}
                     />
 
-                    <Popup
-                        trigger={<Menu.Item as="a" id="camera" content={<Icon name='camera'/>}/>}
-                        content='Generate snap shot of current graph'
-                        size="mini"
-                        position='bottom left'
-                        inverted={true}
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Generate snap shot of current graph"}
+                        t_id={"camera"}
+                        icon_name={"camera"}
                     />
 
-                    <Popup
-                        trigger={
-                            <Menu.Item
-                                as="a"
-                                id="zoom in"
-                                content={<Icon name='search' style={{paddingRight: '1em'}}/>}
-                            />}
-                        content='Zoom in'
-                        size="mini"
-                        position='bottom left'
-                        inverted={true}
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Zoom in"}
+                        t_id={"zoom in"}
+                        icon_name={"search"}
                     />
 
-                    <Popup
-                        trigger={
-                            <Menu.Item
-                                as="a"
-                                id="zoom out"
-                                content={<Icon name='search' style={{paddingRight: '1em'}}/>}
-                            />}
-                        content='Zoom out'
-                        size="mini"
-                        position='bottom left'
-                        inverted={true}
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Zoom out"}
+                        t_id={"zoom out"}
+                        icon_name={"search"}
                     />
 
-                    <Popup
-                        trigger={<Menu.Item as="a" id="actual size" content={<Icon name='compress'/>}/>}
-                        content='Set current graph to actual size'
-                        size="mini"
-                        position='bottom left'
-                        inverted={true}
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Set current graph to actual size"}
+                        t_id={"actual size"}
+                        icon_name={"compress"}
                     />
 
-                    <Popup
-                        trigger={<Menu.Item as="a" id="fit" content={<Icon name='expand'/>}/>}
-                        content='Make graph fit the screen'
-                        size="mini"
-                        position='bottom left'
-                        inverted={true}
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Make graph fit the screen"}
+                        t_id={"fit"}
+                        icon_name={"expand"}
                     />
 
                     <Menu.Item as="a" onClick={this.uploadSHACLGraphButton}>
