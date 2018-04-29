@@ -196,12 +196,13 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
 
         return (
             <div>
+                {/* General Toolbar */}
                 <Menu
                     inverted={true}
                     size="small"
                     style={{
                         borderRadius: 0,
-                        margin:-2,
+                        margin:0,
                         padding:0
                     }}
                     borderless={true}
@@ -218,11 +219,38 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                     <Menu.Item>
                         Help
                     </Menu.Item>
+                    <Menu.Item
+                        as="a"
+                        href="https://github.com/dubious-developments/UnSHACLed"
+                        target="_blank"
+                        icon={
+                            <Icon
+                                name="github"
+                                inverted={true}
+                            />
+                        }
+                    />
+                    <Menu.Item
+                        as="a"
+                        target="_blank"
+                        href="https://github.com/dubious-developments/UnSHACLed/wiki/Release-notes"
+                    >
+                        v0.3
+                    </Menu.Item>
+                    <Menu.Item
+                        as={Link}
+                        to="/login"
+                        onClick={(event) => this.logoutButton(event)}
+                    >
+                        Logout
+                    </Menu.Item>
                 </Menu>
+                {/* Toolbar icons menu */}
                 <Menu
                     inverted={true}
-                    size="small"
+                    size="tiny"
                     icon={true}
+                    borderless={true}
                     style={{
                         borderRadius: 0,
                         margin:0,
@@ -342,31 +370,6 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                         <this.ConformanceErrors />
                     </Popup>
 
-                    <Menu.Item
-                        as="a"
-                        href="https://github.com/dubious-developments/UnSHACLed"
-                        target="_blank"
-                        icon={
-                            <Icon
-                                name="github"
-                                inverted={true}
-                            />
-                        }
-                    />
-                    <Menu.Item
-                        as="a"
-                        target="_blank"
-                        href="https://github.com/dubious-developments/UnSHACLed/wiki/Release-notes"
-                    >
-                        v0.3
-                    </Menu.Item>
-                    <Menu.Item
-                        as={Link}
-                        to="/login"
-                        onClick={(event) => this.logoutButton(event)}
-                    >
-                        Logout
-                    </Menu.Item>
                 </Menu>
             </div>
         );
