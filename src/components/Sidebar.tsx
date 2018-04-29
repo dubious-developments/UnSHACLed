@@ -130,20 +130,7 @@ class SideBar extends React.Component<SidebarProps, any> {
                     <Image src={logo} size="mini" centered={true}/>
                 </Menu.Item>
 
-                <Menu.Item>
-                    <Dropdown
-                        defaultValue={defaultOption}
-                        options={SideBar.sidebarOptions}
-                        fluid={true}
-                        direction="left"
-                        onChange={this.handleDropDown}
-                        as="h5"
-                        pointing="top right"
-                    />
-                </Menu.Item>
-                {this.state.content === defaultOption ? (
-                    <div>
-                        <Menu.Item>
+                        <Menu.Item style={{ backgroundColor: "#3d3e3f"}}>
                             <Input
                                 onChange={this.handleChange}
                                 type="text"
@@ -205,12 +192,6 @@ class SideBar extends React.Component<SidebarProps, any> {
                             position='right center'
                             inverted={true}
                         />
-                    </div>
-                ) : (
-                    <Menu.Item>
-                        <TreeView/>
-                    </Menu.Item>
-                )
                 }
             </Sidebar>
 
