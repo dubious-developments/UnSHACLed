@@ -1,13 +1,13 @@
 import * as React from 'react';
 import {Menu, Popup, Grid, Header, Divider, Image} from 'semantic-ui-react';
-import {ToolbarIconProps} from './interfaces/interfaces';
+import {SidebarPopupProps} from './interfaces/interfaces';
 
 /*
     Component used to create pop-up for draggable elements within the sidebar
     Requires several props from the parent, which can be found in interfaces.d.ts
 
  */
-class SidebarPopup extends React.Component<ToolbarIconProps, any> {
+class SidebarPopup extends React.Component<SidebarPopupProps, any> {
 
     constructor(props: any) {
         super(props);
@@ -25,7 +25,7 @@ class SidebarPopup extends React.Component<ToolbarIconProps, any> {
             >
                 <Grid centered={true} divided={true}>
                     <Grid.Column textAlign='center'>
-                        <Header as='h4'> {this.props.headertitle} </Header>
+                        <Header as='h4'> {this.props.header_title} </Header>
                         <Divider/>
                         <Image
                             src={logo}

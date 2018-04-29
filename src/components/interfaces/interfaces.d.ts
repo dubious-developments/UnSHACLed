@@ -41,3 +41,12 @@ export interface ToolbarIconProps {
     t_id: any; // id of the menu item (trigger)
     icon_name: any; // name of the used icon within the menu item (trigger)
 }
+
+/* Props definition for SidebarPopup component */
+export interface SidebarPopupProps {
+    /* Pop Up */
+    p_size: any; // size of the pop-up
+    p_position: any; // position of the pop-up
+    header_title: any; // title of the grid
+    trigger: any; // trigger for the pop-op
+}
