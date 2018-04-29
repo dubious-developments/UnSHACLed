@@ -1,6 +1,5 @@
 import * as React from 'react';
-import {Sidebar, Menu, Image, Input, Dropdown, List, Button, Label, Popup} from 'semantic-ui-react';
-import TreeView from './treeView';
+import {Sidebar, Menu, Image, Input, Button, Label, Popup} from 'semantic-ui-react';
 import {SidebarProps} from './interfaces/interfaces';
 
 class SideBar extends React.Component<SidebarProps, any> {
@@ -111,7 +110,7 @@ class SideBar extends React.Component<SidebarProps, any> {
 
     render() {
         const logo = require('../img/logo.png');
-        const defaultOption = 1;
+        // const defaultOption = 1;
         let {templates} = this.props;
         return (
             <Sidebar
