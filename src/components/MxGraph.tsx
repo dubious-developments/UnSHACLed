@@ -215,12 +215,12 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         };
 
         /**
-         * Guesses autoTranslate to avoid another repaint (see below).
-         * Works if only the scale of the graph changes or if pages
-         * are visible and the visible pages do not change.
+         * THIS FUNCTION CAUSED AUTOFOCUS BUG !!!!
          */
-        let graphViewValidate = graph.view.validate;
+
+        /*let graphViewValidate = graph.view.validate;
         graph.view.validate = function () {
+            console.log("graphViewValidate");
             if (this.graph.container !== null && mxUtils.hasScrollbars(this.graph.container)) {
                 let pad = this.graph.getPagePadding();
                 let size = this.graph.getPageSize();
@@ -232,7 +232,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             }
 
             graphViewValidate.apply(this, arguments);
-        };
+        };*/
 
         let graphSizeDidChange = graph.sizeDidChange;
         graph.sizeDidChange = function () {
@@ -772,7 +772,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             this.initDragAndDrop(graph);
             this.initToolBar(editor);
             container.focus();
-          
+
             // Get add template button
             var d2 = document.getElementById("addTemplate");
             if (d2) {
