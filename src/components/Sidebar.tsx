@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {Sidebar, Menu, Image, Input, Button, Label, Accordion} from 'semantic-ui-react';
 import {SidebarProps} from './interfaces/interfaces';
+import SidebarPopup from './sidebarPopup';
 
 class SideBar extends React.Component<SidebarProps, any> {
 
@@ -67,11 +68,18 @@ class SideBar extends React.Component<SidebarProps, any> {
         for (let i = 0; i < res.length; i++) {
             let key = kind + i;
             items.push(
-                <Menu.Item
-                    as="a"
-                    id={res[i]}
-                    content={res[i]}
-                    key={key}
+                <SidebarPopup
+                    p_size={"mini"}
+                    p_position={"right center"}
+                    header_title={res[i]}
+                    trigger={
+                        <Menu.Item
+                            as="a"
+                            id={res[i]}
+                            content={res[i]}
+                            key={key}
+                        />
+                    }
                 />
             );
         }

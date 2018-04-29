@@ -17,7 +17,6 @@ class SidebarPopup extends React.Component<SidebarPopupProps, any> {
         return (
             <Popup
                 trigger={this.props.trigger}
-                flowing={true}
                 hoverable={true}
                 size={this.props.p_size}
                 position={this.props.p_position}
@@ -28,7 +27,7 @@ class SidebarPopup extends React.Component<SidebarPopupProps, any> {
                         <Header as='h4'> {this.props.header_title} </Header>
                         <Divider/>
                         <Image
-                            src={logo}
+                            src={"placeholder"}
                             size="mini"
                             centered={true}
                         />
