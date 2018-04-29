@@ -7,7 +7,8 @@ class SideBar extends React.Component<SidebarProps, any> {
 
     static sidebarOptions = [
         {key: 1, text: 'Add Components', value: 1},
-        {key: 2, text: 'Project structure', value: 2}
+        {key: 2, text: 'Prefixes', value: 2},
+        {key: 3, text: 'Project structure', value: 3}
     ];
     static SHACLMenuItems = ["Shape", "Node Shape", "Property Shape"];
     static GeneralMenuItems = ["Arrow", "Rectangle"];
@@ -141,7 +142,7 @@ class SideBar extends React.Component<SidebarProps, any> {
                         pointing="top right"
                     />
                 </Menu.Item>
-                {this.state.content === defaultOption ? (
+                {this.state.content === defaultOption && (
                     <div>
                         <Menu.Item>
                             <Input
@@ -206,7 +207,13 @@ class SideBar extends React.Component<SidebarProps, any> {
                             inverted={true}
                         />
                     </div>
-                ) : (
+                )
+                }
+                {this.state.content === 2 &&(
+                    <label>Edit Prefixes</label>
+                )
+                }
+                {this.state.content === 3 &&(
                     <Menu.Item>
                         <TreeView/>
                     </Menu.Item>
