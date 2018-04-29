@@ -260,39 +260,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                     }}
                 >
                     {/* Toolbar icons */}
-
-                    <ToolbarIcon
-                        p_size={"mini"}
-                        p_position={"bottom left"}
-                        p_content={"Delete selected component(s) from graph"}
-                        t_id={"delete"}
-                        icon_name={"trash"}
-                    />
-
-                    <ToolbarIcon
-                        p_size={"mini"}
-                        p_position={"bottom left"}
-                        p_content={"Undo last action"}
-                        t_id={"undo"}
-                        icon_name={"reply"}
-                    />
-
-                    <ToolbarIcon
-                        p_size={"mini"}
-                        p_position={"bottom left"}
-                        p_content={"Redo last action"}
-                        t_id={"redo"}
-                        icon_name={"share"}
-                    />
-
-                    <ToolbarIcon
-                        p_size={"mini"}
-                        p_position={"bottom left"}
-                        p_content={"Generate snap shot of current graph"}
-                        t_id={"camera"}
-                        icon_name={"camera"}
-                    />
-
+                    {/* Zoom in */}
                     <ToolbarIcon
                         p_size={"mini"}
                         p_position={"bottom left"}
@@ -300,7 +268,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                         t_id={"zoom in"}
                         icon_name={"search"}
                     />
-
+                    {/* Zoom out */}
                     <ToolbarIcon
                         p_size={"mini"}
                         p_position={"bottom left"}
@@ -308,7 +276,39 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                         t_id={"zoom out"}
                         icon_name={"search"}
                     />
-
+                    {/* Undo */}
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Undo last action"}
+                        t_id={"undo"}
+                        icon_name={"reply"}
+                    />
+                    {/* Redo */}
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Redo last action"}
+                        t_id={"redo"}
+                        icon_name={"share"}
+                    />
+                    {/* Delete */}
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Delete selected component(s) from graph"}
+                        t_id={"delete"}
+                        icon_name={"trash"}
+                    />
+                    {/* snapshot */}
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Generate snap shot of current graph"}
+                        t_id={"camera"}
+                        icon_name={"camera"}
+                    />
+                    {/* set size */}
                     <ToolbarIcon
                         p_size={"mini"}
                         p_position={"bottom left"}
@@ -316,7 +316,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                         t_id={"actual size"}
                         icon_name={"compress"}
                     />
-
+                    {/* fit size */}
                     <ToolbarIcon
                         p_size={"mini"}
                         p_position={"bottom left"}
