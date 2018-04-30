@@ -50,3 +50,11 @@ export interface SidebarPopupProps {
     header_title: any; // title of the grid
     trigger: any; // trigger for the pop-op
 }
+
+/* Props definition for Legend component */
+export interface LegendProps {
+    header_title: any; // title besides the checkbox
+    colors: any; // array of colors representing the color for each legend entry
+    entries: any; // array of text entries for the each legend entry
+    /* Colors and text at same array index make up one legend entry ! */
+}

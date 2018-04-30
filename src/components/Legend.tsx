@@ -1,12 +1,12 @@
 import * as React from 'react';
 import {List, Icon, Popup, Header, Checkbox} from 'semantic-ui-react';
-
+import {LegendProps} from './interfaces/interfaces';
 /*
     Component used to create a legend
     Requires several props from the parent, which can be found in interfaces.d.ts
 
  */
-class ToolbarIcon extends React.Component<any, any> {
+class Legend extends React.Component<LegendProps, any> {
 
     constructor(props: any) {
         super(props);
@@ -61,4 +61,4 @@ class ToolbarIcon extends React.Component<any, any> {
     }
 }
 
-export default ToolbarIcon;
+export default Legend;
