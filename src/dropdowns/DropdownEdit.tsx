@@ -13,7 +13,7 @@ class DropdownEdit extends React.Component<any, any> {
 
     render() {
         return (
-            <Dropdown text='Edit'>
+            <Dropdown text='Edit' pointing="top left">
                 <Dropdown.Menu>
                     <Dropdown.Item icon='reply' text='Undo'/>
                     <Dropdown.Item icon='share' text='Redo'/>

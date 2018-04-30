@@ -13,7 +13,7 @@ class DropdownView extends React.Component<any, any> {
 
     render() {
         return (
-            <Dropdown text='Edit'>
+            <Dropdown text='View' pointing="top left">
                 <Dropdown.Menu>
                     <Dropdown.Item icon='zoom' text='Zoom in'/>
                     <Dropdown.Item icon='zoom' text='Zoom out'/>

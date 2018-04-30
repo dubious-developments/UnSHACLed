@@ -11,6 +11,9 @@ import {ModelComponent} from '../entities/modelTaskMetadata';
 import {ValidationReport, ValidationError} from "../conformance/wrapper/ValidationReport";
 import ToolbarIcon from './ToolbarIcon';
 import DropdownFile from '../dropdowns/DropdownFile';
+import DropdownEdit from '../dropdowns/DropdownEdit';
+import DropdownView from '../dropdowns/DropdownView';
+import DropdownHelp from '../dropdowns/DropdownHelp';
 
 export class Navbar extends React.Component<NavbarWorkProps, {}> {
 
@@ -222,6 +225,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                     borderless={true}
                 >
                     <Menu.Item as="a" onClick={this.iconClick} content={<Icon name='content'/>}/>
+                    {/* Toolbar 'File' */}
                     <Menu.Item>
                         <DropdownFile opened_files={<this.OpenedFiles/>} import_cb={this.fileCallback}/>
                         {/* Import SHACL Graph input*/}
@@ -241,15 +245,19 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                             accept={this.allowedExtensions}
                         />
                     </Menu.Item>
+                    {/* Toolbar 'Edit' */}
                     <Menu.Item>
-                        Edit
+                        <DropdownEdit/>
                     </Menu.Item>
+                    {/* Toolbar 'View' */}
                     <Menu.Item>
-                        View
+                        <DropdownView/>
                     </Menu.Item>
+                    {/* Toolbar 'Help' */}
                     <Menu.Item>
-                        Help
+                        <DropdownHelp/>
                     </Menu.Item>
+                    {/* Toolbar 'Github repo' */}
                     <Menu.Item
                         as="a"
                         href="https://github.com/dubious-developments/UnSHACLed"
@@ -261,6 +269,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                             />
                         }
                     />
+                    {/* Toolbar 'Github release notes' */}
                     <Menu.Item
                         as="a"
                         target="_blank"
@@ -268,6 +277,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                     >
                         v0.3
                     </Menu.Item>
+                    {/* Toolbar logout */}
                     <Menu.Item
                         as={Link}
                         to="/login"

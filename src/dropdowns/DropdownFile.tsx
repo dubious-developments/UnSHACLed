@@ -14,7 +14,7 @@ class DropdownFile extends React.Component<DropdownFileProps, any> {
 
     render() {
         return (
-            <Dropdown text='File'>
+            <Dropdown text='File' pointing="top left">
                 <Dropdown.Menu>
                     <Dropdown.Item text='New'/>
                     <Dropdown
