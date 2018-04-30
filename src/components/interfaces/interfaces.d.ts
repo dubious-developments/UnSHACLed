@@ -58,3 +58,9 @@ export interface LegendProps {
     entries: any; // array of text entries for the each legend entry
     /* Colors and text at same array index make up one legend entry ! */
 }
+
+/* Props definition for DropdownFile component */
+export interface DropdownFileProps {
+    opened_files: any; // currently opened files
+    import_cb: PropTypes.func; // callback function to parent for importing either a shacl or data graph
+}

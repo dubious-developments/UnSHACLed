@@ -1,12 +1,12 @@
 import * as React from 'react';
 import {Dropdown} from 'semantic-ui-react';
-
+import {DropdownFileProps} from '../components/interfaces/interfaces';
 /*
     Component used to create a dropdown component for the file toolbar option
     Requires several props from the parent, which can be found in interfaces.d.ts
 
  */
-class DropdownFile extends React.Component<any, any> {
+class DropdownFile extends React.Component<DropdownFileProps, any> {
 
     constructor(props: any) {
         super(props);
