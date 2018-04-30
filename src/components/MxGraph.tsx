@@ -484,7 +484,9 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 let longestname = 0;
                 b.traits.forEach(trait => {
                     let temprow = model.cloneCell(this.nameToStandardCellDict.getValue('row'));
-                    let name = this.replacePrefixes(trait.predicate, prefixes) + " :  " + this.replacePrefixes(trait.object, prefixes);
+                    let name = this.replacePrefixes(trait.predicate, prefixes)
+                        + " :  "
+                        + this.replacePrefixes(trait.object, prefixes);
                     // let name = trait.predicate + " :  " + trait.object;
                     longestname = Math.max(name.length, longestname);
                     temprow.value = {name: name, trait: trait};

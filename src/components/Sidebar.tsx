@@ -15,7 +15,7 @@ class SideBar extends React.Component<SidebarProps, any> {
     static GeneralMenuItems = ["Arrow", "Rectangle"];
     static TemplateMenuItems = ["Address", "Person"];
 
-    static prefixes : PrefixMap;
+    static prefixes: PrefixMap;
 
     constructor(props: any) {
         super(props);
@@ -31,7 +31,7 @@ class SideBar extends React.Component<SidebarProps, any> {
         this.getMenuItemsFiltered = this.getMenuItemsFiltered.bind(this);
         this.DynamicMenu = this.DynamicMenu.bind(this);
         this.addTemplateEntry = this.addTemplateEntry.bind(this);
-        this.PrefixMenu= this.PrefixMenu.bind(this);
+        this.PrefixMenu = this.PrefixMenu.bind(this);
     }
 
     static setPrefixes(prefixes: PrefixMap) {
@@ -239,13 +239,13 @@ class SideBar extends React.Component<SidebarProps, any> {
                     </div>
                 )
                 }
-                {this.state.content === 2 &&(
+                {this.state.content === 2 && (
                     <Menu.Item>
                         <this.PrefixMenu />
                     </Menu.Item>
                 )
                 }
-                {this.state.content === 3 &&(
+                {this.state.content === 3 && (
                     <Menu.Item>
                         <TreeView/>
                     </Menu.Item>
