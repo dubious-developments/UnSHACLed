@@ -122,7 +122,7 @@ class SideBar extends React.Component<SidebarProps, any> {
         let items = Array<JSX.Element>();
 
         Object.keys(SideBar.prefixes).forEach(key => {
-            let line = key + ": " + SideBar.prefixes[key]
+            let line = key + ": " + SideBar.prefixes[key];
             items.push(
                 <Menu.Item
                     as="a"
