@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Popup, Grid, Header, Divider, Image} from 'semantic-ui-react';
+import {Popup, Segment, Header, Divider, Image} from 'semantic-ui-react';
 import {SidebarPopupProps} from './interfaces/interfaces';
 
 /*
@@ -14,6 +14,9 @@ class SidebarPopup extends React.Component<SidebarPopupProps, any> {
     }
 
     render() {
+        let str = "Shape";
+        const preview = require('../img/' + str + '.png');
+        console.log(preview);
         return (
             <Popup
                 trigger={this.props.trigger}
@@ -21,18 +24,19 @@ class SidebarPopup extends React.Component<SidebarPopupProps, any> {
                 size={this.props.p_size}
                 position={this.props.p_position}
                 inverted={true}
+                style={{
+                    padding:'0'
+                }}
             >
-                <Grid centered={true} divided={true}>
-                    <Grid.Column textAlign='center'>
-                        <Header as='h4'> {this.props.header_title} </Header>
-                        <Divider/>
-                        <Image
-                            src={"placeholder"}
-                            size="mini"
-                            centered={true}
-                        />
-                    </Grid.Column>
-                </Grid>
+                <Segment basic={true} compact={true} textAlign="center">
+                    <Header as='h4'> {this.props.header_title} </Header>
+                    <Divider/>
+                    <Image
+                        src={preview}
+                        size="tiny"
+                        centered={true}
+                    />
+                </Segment>
             </Popup>
         );
     }
