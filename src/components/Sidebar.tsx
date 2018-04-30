@@ -76,12 +76,12 @@ class SideBar extends React.Component<SidebarProps, any> {
                     p_size={"mini"}
                     p_position={"right center"}
                     header_title={res[i]}
+                    key={key}
                     trigger={
                         <Menu.Item
                             as="a"
                             id={res[i]}
                             content={res[i]}
-                            key={key}
                         />
                     }
                 />
