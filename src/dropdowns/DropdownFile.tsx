@@ -23,8 +23,8 @@ class DropdownFile extends React.Component<DropdownFileProps, any> {
                         className='link item'
                     >
                         <Dropdown.Menu>
-                            <Dropdown.Item> SHACL Graph </Dropdown.Item>
-                            <Dropdown.Item> Data Graph</Dropdown.Item>
+                            <Dropdown.Item onClick={() => this.props.import_cb("shacl")}> SHACL Graph </Dropdown.Item>
+                            <Dropdown.Item onClick={() => this.props.import_cb("data")}> Data Graph</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown>
                     <Dropdown.Item text='Save local graph'/>

@@ -30,6 +30,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
         this.ConformanceErrors = this.ConformanceErrors.bind(this);
         this.getConformanceErrors = this.getConformanceErrors.bind(this);
         this.setReport = this.setReport.bind(this);
+        this.fileCallback = this.fileCallback.bind(this);
     }
 
     public setLoadedFiles(files: string[]) {
@@ -194,6 +195,17 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
         );
     }
 
+    /* Function used as a callback from the child componente for the file dropdown option */
+    fileCallback (childData: any) {
+        if (childData === "shacl") {
+            this.uploadSHACLGraphButton();
+        } else if (childData === "data") {
+            this.uploadDataGraphButton();
+
+        }
+        console.log(childData);
+    }
+
     render() {
 
         return (
@@ -211,7 +223,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                 >
                     <Menu.Item as="a" onClick={this.iconClick} content={<Icon name='content'/>}/>
                     <Menu.Item>
-                        <DropdownFile/>
+                        <DropdownFile opened_files={"files"} import_cb={this.fileCallback}/>
                     </Menu.Item>
                     <Menu.Item>
                         Edit
