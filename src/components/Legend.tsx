@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {List, Icon, Popup, Header, Checkbox} from 'semantic-ui-react';
+import {List, Icon, Header, Checkbox} from 'semantic-ui-react';
 import {LegendProps} from './interfaces/interfaces';
 
 /*
@@ -13,16 +13,24 @@ class Legend extends React.Component<LegendProps, any> {
         super(props);
 
         this.state = {
-            entries: []
+            entries: [] ,
+            visible: false
         };
 
         this.fillList = this.fillList.bind(this);
+        this.onCheck = this.onCheck.bind(this);
+
     }
 
     componentDidMount() {
         this.fillList();
     }
 
+    onCheck () {
+        this.setState({
+            visible: !this.state.visible
+        });
+    }
     fillList() {
         console.log('filing list');
         var legend = [] as any[];
@@ -31,10 +39,13 @@ class Legend extends React.Component<LegendProps, any> {
             for (let i in this.props.colors) {
                 /* Create List entry and push to array */
                 legend.push(
-                    <List.Item key={i}>
+                    <List.Item key={i} >
                         <Icon style={{color: this.props.colors[i]}} name="square"/>
                         <List.Content>
-                            <List.Header> {this.props.entries[i]} </List.Header>
+                            <List.Header
+                                style={{ fontWeight:'lighter', color:'#848585'}}
+                            > {this.props.entries[i]}
+                            </List.Header>
                         </List.Content>
 
                     </List.Item>
@@ -51,6 +62,7 @@ class Legend extends React.Component<LegendProps, any> {
 
     render() {
         let {entries} = this.state;
+        let {visible} = this.state;
         return (
             <div>
                 <Header
@@ -60,17 +72,14 @@ class Legend extends React.Component<LegendProps, any> {
                     size="tiny"
                     style={{verticalAlign: 'middle', fontWeight: 'lighter'}}
                 />
-                <Popup
-                    trigger={<Checkbox/>}
-                    content={
-                        <List
-                            verticalAlign='middle'
-                            items={entries}
-                        />
-                    }
-                    on='click'
-                    position='right center'
-                />
+                <Checkbox onClick={this.onCheck}/>
+                { visible === true &&
+                    <List
+                        inverted={true}
+                        verticalAlign='middle'
+                        items={entries}
+                    />
+                }
             </div>
 
         );
