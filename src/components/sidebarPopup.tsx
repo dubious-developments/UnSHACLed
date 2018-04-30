@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Menu, Popup, Grid, Header, Divider, Image} from 'semantic-ui-react';
+import { Popup, Grid, Header, Divider, Image} from 'semantic-ui-react';
 import {SidebarPopupProps} from './interfaces/interfaces';
 
 /*

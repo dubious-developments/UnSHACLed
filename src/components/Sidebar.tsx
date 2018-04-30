@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Sidebar, Menu, Image, Input, Button, Label, Accordion} from 'semantic-ui-react';
+import {Sidebar, Menu, Image, Input, Button, Label, Accordion, Checkbox, Header} from 'semantic-ui-react';
 import {SidebarProps} from './interfaces/interfaces';
 import SidebarPopup from './sidebarPopup';
 
@@ -124,8 +124,8 @@ class SideBar extends React.Component<SidebarProps, any> {
         // const defaultOption = 1;
         let {templates} = this.props;
         const rootPanels = [
-            { title: 'SHACL', content: { content: <this.DynamicMenu kind="SHACL"/>, key: 'content-1' } },
-            { title: 'Template', content: { content: templates, key: 'content-2' } },
+            {title: 'SHACL', content: {content: <this.DynamicMenu kind="SHACL"/>, key: 'content-1'}},
+            {title: 'Template', content: {content: templates, key: 'content-2'}},
         ];
 
         return (
@@ -183,6 +183,21 @@ class SideBar extends React.Component<SidebarProps, any> {
                     fluid={true}
                     panels={rootPanels}
                 />
+                <Menu.Item
+                    style={{
+                        bottom: 0,
+                        position: 'absolute',
+                    }}
+                >
+                    <Header
+                        inverted={true}
+                        content="Show Legend"
+                        floated="left"
+                        size="tiny"
+                        style={{verticalAlign: 'middle', fontWeight:'lighter'}}
+                    />
+                    <Checkbox/>
+                </Menu.Item>
             </Sidebar>
 
         );
