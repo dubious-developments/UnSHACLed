@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Dropdown} from 'semantic-ui-react';
+import {Dropdown, Popup} from 'semantic-ui-react';
 import {DropdownFileProps} from '../components/interfaces/interfaces';
 /*
     Component used to create a dropdown component for the file toolbar option
@@ -27,7 +27,14 @@ class DropdownFile extends React.Component<DropdownFileProps, any> {
                             <Dropdown.Item onClick={() => this.props.import_cb("data")}> Data Graph</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown>
-                    <Dropdown.Item text='Save local graph'/>
+                    <Popup
+                        trigger={<Dropdown.Item text='Save local graph'/>}
+                        on="hover"
+                        inverted={false}
+                        hoverable={true}
+                        position="right center"
+                        content={this.props.opened_files}
+                    />
                     <Dropdown.Divider/>
                     <Dropdown.Item icon='github' text='Open graph from account' />
                     <Dropdown.Item icon='github' text='Save graph to account'/>

@@ -223,7 +223,23 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                 >
                     <Menu.Item as="a" onClick={this.iconClick} content={<Icon name='content'/>}/>
                     <Menu.Item>
-                        <DropdownFile opened_files={"files"} import_cb={this.fileCallback}/>
+                        <DropdownFile opened_files={<this.OpenedFiles/>} import_cb={this.fileCallback}/>
+                        {/* Import SHACL Graph input*/}
+                        <input
+                            onChange={this.importSHACLGraph}
+                            type="file"
+                            id="importSHACLGraph"
+                            style={{"display": "none"}}
+                            accept={this.allowedExtensions}
+                        />
+                        {/* Import Data graph input*/}
+                        <input
+                            onChange={this.importDataGraph}
+                            type="file"
+                            id="importDataGraph"
+                            style={{"display": "none"}}
+                            accept={this.allowedExtensions}
+                        />
                     </Menu.Item>
                     <Menu.Item>
                         Edit
@@ -337,27 +353,6 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                         t_id={"fit"}
                         icon_name={"expand"}
                     />
-
-                    <Menu.Item as="a" onClick={this.uploadSHACLGraphButton}>
-                        Import SHACL Graph
-                        <input
-                            onChange={this.importSHACLGraph}
-                            type="file"
-                            id="importSHACLGraph"
-                            style={{"display": "none"}}
-                            accept={this.allowedExtensions}
-                        />
-                    </Menu.Item>
-                    <Menu.Item as="a" onClick={this.uploadDataGraphButton}>
-                        Import Data Graph
-                        <input
-                            onChange={this.importDataGraph}
-                            type="file"
-                            id="importDataGraph"
-                            style={{"display": "none"}}
-                            accept={this.allowedExtensions}
-                        />
-                    </Menu.Item>
 
                     <Popup
                         trigger={<Menu.Item as="a" onClick={this.saveGraph}>Save Graph</Menu.Item>}
