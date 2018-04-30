@@ -123,7 +123,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
         console.log(fileName);
         let model: Model = DataAccessProvider.getInstance().model;
         model.tasks.schedule(new LoadFileTask([ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph], fileName));
-        model.tasks.processTask();
+        model.tasks.processAllTasks();
     }
 
     /*

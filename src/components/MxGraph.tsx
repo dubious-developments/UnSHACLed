@@ -8,7 +8,8 @@ import {ValidationReport} from "../conformance/wrapper/ValidationReport";
 import {List} from 'semantic-ui-react';
 import {Button} from 'semantic-ui-react';
 import {MxGraphProps} from "./interfaces/interfaces";
-import {ModelObserver} from "../entities/model";
+import {ModelData, ModelObserver, ModelTaskMetadata} from "../entities/model";
+import {Task} from "../entities/task";
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout: any;
@@ -728,27 +729,22 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
             let model = DataAccessProvider.getInstance().model;
             model.registerObserver(new ModelObserver((changeBuf) => {
+                let tasks = new Array<Task<ModelData, ModelTaskMetadata>>();
                 changeBuf.forEach((key) => {
-                    if (key === ModelComponent.DataGraph) { // datagraph has changed
-                        model.tasks.schedule(new VisualizeComponent(ModelComponent.DataGraph, this));
-                        // TODO change this later
-                        model.tasks.processAllTasks();
+                    if (key === ModelComponent.DataGraph) { // data graph has changed
+                        tasks.push(new VisualizeComponent(ModelComponent.DataGraph, this));
                     }
 
-                    if (key === ModelComponent.SHACLShapesGraph) {
-                        model.tasks.schedule(new VisualizeComponent(ModelComponent.SHACLShapesGraph, this));
-                        // TODO change this later
-                        model.tasks.processAllTasks();
+                    if (key === ModelComponent.SHACLShapesGraph) { // shapes graph has changed
+                        tasks.push(new VisualizeComponent(ModelComponent.SHACLShapesGraph, this));
                     }
                 });
-                return [];
+                return tasks;
             }));
 
             // listen to all click events and key pressed events to check if user is actively editing
             document.addEventListener("click", this.handleUserAction, true);
             document.addEventListener("keypress", this.handleUserAction, true);
-
-            model.tasks.processAllTasks();
 
             let editor = new mxEditor();
 
