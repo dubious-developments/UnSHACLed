@@ -10,6 +10,7 @@ import {LoadFileTask, GetOpenedFilesTask, GetValidationReportNavbar} from '../se
 import {ModelComponent} from '../entities/modelTaskMetadata';
 import {ValidationReport, ValidationError} from "../conformance/wrapper/ValidationReport";
 import ToolbarIcon from './ToolbarIcon';
+import DropdownFile from '../dropdowns/DropdownFile';
 
 export class Navbar extends React.Component<NavbarWorkProps, {}> {
 
@@ -210,26 +211,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                 >
                     <Menu.Item as="a" onClick={this.iconClick} content={<Icon name='content'/>}/>
                     <Menu.Item>
-                        <Dropdown text='File'>
-                            <Dropdown.Menu>
-                                <Dropdown.Item text='New'/>
-                                    <Dropdown
-                                        text='Open local graph ..'
-                                        pointing='left'
-                                        className='link item'
-                                    >
-                                        <Dropdown.Menu>
-                                            <Dropdown.Item> SHACL Graph </Dropdown.Item>
-                                            <Dropdown.Item> Data Graph</Dropdown.Item>
-                                        </Dropdown.Menu>
-                                    </Dropdown>
-                                <Dropdown.Item text='Save local graph'/>
-                                <Dropdown.Divider/>
-                                <Dropdown.Item icon='github' text='Open graph from account' />
-                                <Dropdown.Item icon='github' text='Save graph to account'/>
-                                <Dropdown.Item icon='trash' text='Clear graph'/>
-                            </Dropdown.Menu>
-                        </Dropdown>
+                        <DropdownFile/>
                     </Menu.Item>
                     <Menu.Item>
                         Edit
