@@ -1,5 +1,6 @@
 import * as React from 'react';
-import {Sidebar, Menu, Image, Input, Button, Label, Accordion, Checkbox, Header, Popup} from 'semantic-ui-react';
+import {Sidebar, Menu, Image, Input, Button, Label,
+    Accordion, Checkbox, Header, Popup, List, Icon} from 'semantic-ui-react';
 import {SidebarProps} from './interfaces/interfaces';
 import SidebarPopup from './sidebarPopup';
 
@@ -194,7 +195,34 @@ class SideBar extends React.Component<SidebarProps, any> {
                     />
                     <Popup
                         trigger={<Checkbox/>}
-                        content={"Legend"}
+                        content={
+                            <List verticalAlign='middle'>
+                                <List.Item>
+                                    <Icon style={{ color: '#A1E44D'}} name="square"/>
+                                    <List.Content>
+                                        <List.Header> Shape </List.Header>
+                                    </List.Content>
+                                </List.Item>
+                                <List.Item>
+                                    <Icon style={{ color: '#2FBF71'}} name="square"/>
+                                    <List.Content>
+                                        <List.Header> Property </List.Header>
+                                    </List.Content>
+                                </List.Item>
+                                <List.Item>
+                                    <Icon style={{ color: '#7D26CD'}} name="square"/>
+                                    <List.Content>
+                                        <List.Header> Property Attribute </List.Header>
+                                    </List.Content>
+                                </List.Item>
+                                <List.Item>
+                                    <Icon style={{ color: '#7D26CD'}} name="square"/>
+                                    <List.Content>
+                                        <List.Header> Data </List.Header>
+                                    </List.Content>
+                                </List.Item>
+                            </List>
+                        }
                         on='click'
                         position='right center'
                     />
