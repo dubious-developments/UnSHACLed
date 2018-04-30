@@ -14,9 +14,8 @@ class SidebarPopup extends React.Component<SidebarPopupProps, any> {
     }
 
     render() {
-        let str = "Shape";
-        const preview = require('../img/' + str + '.png');
-        console.log(str.replace(/ /g, ''));
+        let str = this.props.header_title;
+        const preview = require('../img/' + str.replace(/ /g, '') + '.png');
         return (
             <Popup
                 trigger={this.props.trigger}
