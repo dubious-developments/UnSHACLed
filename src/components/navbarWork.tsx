@@ -1,15 +1,15 @@
 import * as React from 'react';
-import { Menu, Icon, Popup, List, Segment} from 'semantic-ui-react';
+import {Menu, Icon, Popup, List, Dropdown} from 'semantic-ui-react';
 import Auth from '../services/Auth';
-import { Link, withRouter } from 'react-router-dom';
-import { NavbarWorkProps } from './interfaces/interfaces';
-import { FileModule } from '../persistence/fileDAO';
-import { Model } from '../entities/model';
-import { DataAccessProvider } from '../persistence/dataAccessProvider';
+import {Link, withRouter} from 'react-router-dom';
+import {NavbarWorkProps} from './interfaces/interfaces';
+import {FileModule} from '../persistence/fileDAO';
+import {Model} from '../entities/model';
+import {DataAccessProvider} from '../persistence/dataAccessProvider';
 import {LoadFileTask, GetOpenedFilesTask, GetValidationReportNavbar} from '../services/ModelTasks';
-import { ModelComponent } from '../entities/modelTaskMetadata';
+import {ModelComponent} from '../entities/modelTaskMetadata';
 import {ValidationReport, ValidationError} from "../conformance/wrapper/ValidationReport";
-import  ToolbarIcon  from './ToolbarIcon';
+import ToolbarIcon from './ToolbarIcon';
 
 export class Navbar extends React.Component<NavbarWorkProps, {}> {
 
@@ -145,14 +145,14 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
         }
 
         if (items.length === 0) {
-            return <label>No files currently opened in the editor </label> ;
+            return <label>No files currently opened in the editor </label>;
         }
 
         return (
             <div>
                 <label>Files that are currently opened in the editor: </label>
-                <br />
-                <List items={items} />
+                <br/>
+                <List items={items}/>
             </div>
         );
     }
@@ -162,7 +162,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
     * TODO later show conformance errors in mxGraph
     */
     ConformanceErrors(props: any) {
-        if (! this.report) {
+        if (!this.report) {
             return (
                 <label>No conformance report generated yet</label>
             );
@@ -181,14 +181,14 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
         }
 
         if (items.length === 0) {
-            return <label>No conformance errors </label> ;
+            return <label>No conformance errors </label>;
         }
 
         return (
             <div>
                 <label>Conformance errors: </label>
-                <br />
-                <List items={items} />
+                <br/>
+                <List items={items}/>
             </div>
         );
     }
@@ -203,14 +203,33 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                     size="tiny"
                     style={{
                         borderRadius: 0,
-                        margin:0,
-                        padding:0
+                        margin: 0,
+                        padding: 0
                     }}
                     borderless={true}
                 >
                     <Menu.Item as="a" onClick={this.iconClick} content={<Icon name='content'/>}/>
                     <Menu.Item>
-                        File
+                        <Dropdown text='File'>
+                            <Dropdown.Menu>
+                                <Dropdown.Item text='New'/>
+                                    <Dropdown
+                                        text='Open local graph ..'
+                                        pointing='left'
+                                        className='link item'
+                                    >
+                                        <Dropdown.Menu>
+                                            <Dropdown.Item> SHACL Graph </Dropdown.Item>
+                                            <Dropdown.Item> Data Graph</Dropdown.Item>
+                                        </Dropdown.Menu>
+                                    </Dropdown>
+                                <Dropdown.Item text='Save local graph'/>
+                                <Dropdown.Divider/>
+                                <Dropdown.Item icon='github' text='Open graph from account' />
+                                <Dropdown.Item icon='github' text='Save graph to account'/>
+                                <Dropdown.Item icon='trash' text='Clear graph'/>
+                            </Dropdown.Menu>
+                        </Dropdown>
                     </Menu.Item>
                     <Menu.Item>
                         Edit
@@ -255,8 +274,8 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                     borderless={true}
                     style={{
                         borderRadius: 0,
-                        margin:0,
-                        padding:0
+                        margin: 0,
+                        padding: 0
                     }}
                 >
                     {/* Toolbar icons */}
@@ -331,7 +350,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                             onChange={this.importSHACLGraph}
                             type="file"
                             id="importSHACLGraph"
-                            style={{"display" : "none"}}
+                            style={{"display": "none"}}
                             accept={this.allowedExtensions}
                         />
                     </Menu.Item>
@@ -341,7 +360,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                             onChange={this.importDataGraph}
                             type="file"
                             id="importDataGraph"
-                            style={{"display" : "none"}}
+                            style={{"display": "none"}}
                             accept={this.allowedExtensions}
                         />
                     </Menu.Item>
@@ -351,7 +370,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                         on="click"
                         inverted={false}
                     >
-                        <this.OpenedFiles />
+                        <this.OpenedFiles/>
                     </Popup>
 
                     <Popup
@@ -359,7 +378,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                         on="click"
                         inverted={false}
                     >
-                        <this.ConformanceErrors />
+                        <this.ConformanceErrors/>
                     </Popup>
 
                 </Menu>
