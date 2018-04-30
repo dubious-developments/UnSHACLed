@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Sidebar, Menu, Image, Input, Button, Label, Accordion, Checkbox, Header} from 'semantic-ui-react';
+import {Sidebar, Menu, Image, Input, Button, Label, Accordion, Checkbox, Header, Popup} from 'semantic-ui-react';
 import {SidebarProps} from './interfaces/interfaces';
 import SidebarPopup from './sidebarPopup';
 
@@ -183,12 +183,8 @@ class SideBar extends React.Component<SidebarProps, any> {
                     fluid={true}
                     panels={rootPanels}
                 />
-                <Menu.Item
-                    style={{
-                        bottom: 0,
-                        position: 'absolute',
-                    }}
-                >
+                {/* Sidebar legend */}
+                <Menu.Item style={{bottom: 0, position: 'absolute'}}>
                     <Header
                         inverted={true}
                         content="Show Legend"
@@ -196,7 +192,12 @@ class SideBar extends React.Component<SidebarProps, any> {
                         size="tiny"
                         style={{verticalAlign: 'middle', fontWeight:'lighter'}}
                     />
-                    <Checkbox/>
+                    <Popup
+                        trigger={<Checkbox/>}
+                        content={"Legend"}
+                        on='click'
+                        position='right center'
+                    />
                 </Menu.Item>
             </Sidebar>
 
