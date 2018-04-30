@@ -189,7 +189,11 @@ class SideBar extends React.Component<SidebarProps, any> {
                 />
                 {/* Sidebar legend */}
                 <Menu.Item style={{bottom: 0, position: 'absolute'}}>
-                    <Legend header_title={"Show Legend"} colors={['red', 'green']} entries={['A', 'B']}/>
+                    <Legend
+                        header_title={"Show Legend"}
+                        colors={['#A1E44D', '#2FBF71', '#7D26CD', '#7D26CD']}
+                        entries={['Shape', 'Property', 'Property Attribute', 'Data']}
+                    />
                 </Menu.Item>
             </Sidebar>
 
