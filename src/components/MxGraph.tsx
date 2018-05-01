@@ -604,8 +604,8 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.addToolbarButton(editor, toolbar, 'selectNone', '', 'tb_none');
         /* Dropdown View toolbar */
         this.addToolbarButton(editor, toolbar, 'show', '', 'tb_show');
-        this.addToolbarButton(editor, toolbar, 'zoomIn', '+', 'tb_zoomin');
-        this.addToolbarButton(editor, toolbar, 'zoomOut', '-', 'tb_zoomout');
+        this.addToolbarButton(editor, toolbar, 'zoomIn', '', 'tb_zoomin');
+        this.addToolbarButton(editor, toolbar, 'zoomOut', '', 'tb_zoomout');
         this.addToolbarButton(editor, toolbar, 'actualSize', '', 'tb_actual');
         this.addToolbarButton(editor, toolbar, 'fit', '', 'tb_fit');
     }

@@ -15,14 +15,14 @@ class DropdownEdit extends React.Component<any, any> {
         return (
             <Dropdown text='Edit' pointing="top left">
                 <Dropdown.Menu>
-                    <Dropdown.Item icon='reply' text='Undo' id="tb_undo"/>
-                    <Dropdown.Item icon='share' text='Redo' id="tb_redo"/>
-                    <Dropdown.Item icon='trash' text='Delete' id="tb_delete"/>
-                    <Dropdown.Item icon='clipboard' text='Copy' id="tb_copy"/>
-                    <Dropdown.Item icon='paste' text='Paste' id="tb_paste"/>
+                    <Dropdown.Item icon='reply' text='Undo' id="tb_undo" description="Ctrl+Z"/>
+                    <Dropdown.Item icon='share' text='Redo' id="tb_redo" description="Ctrl+Z"/>
+                    <Dropdown.Item icon='trash' text='Delete' id="tb_delete" description="Del"/>
+                    <Dropdown.Item icon='clipboard' text='Copy' id="tb_copy" description="Ctrl+C"/>
+                    <Dropdown.Item icon='paste' text='Paste' id="tb_paste" description="Ctrl+V"/>
                     <Dropdown.Divider/>
-                    <Dropdown.Item icon='move' text='Select All' id="tb_all"/>
-                    <Dropdown.Item icon='move' text='Select None' id="tb_none"/>
+                    <Dropdown.Item icon='move' text='Select All' id="tb_all" description="Ctrl+A"/>
+                    <Dropdown.Item icon='move' text='Select None' id="tb_none" />
                 </Dropdown.Menu>
             </Dropdown>
         );
