@@ -593,6 +593,16 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.addToolbarButton(editor, toolbar, 'zoomOut', '-', 'zoom out');
         this.addToolbarButton(editor, toolbar, 'actualSize', '', 'actual size');
         this.addToolbarButton(editor, toolbar, 'fit', '', 'fit');
+        /* Dropdown File toolbar */
+        /* Dropdown Edit toolbar */
+        this.addToolbarButton(editor, toolbar, 'undo', '', 'tb_undo');
+        this.addToolbarButton(editor, toolbar, 'redo', '', 'tb_redo');
+        this.addToolbarButton(editor, toolbar, 'delete', '', 'tb_delete');
+        this.addToolbarButton(editor, toolbar, 'copy', '', 'tb_copy');
+        this.addToolbarButton(editor, toolbar, 'paste', '', 'tb_paste');
+        this.addToolbarButton(editor, toolbar, 'selectAll', '', 'tb_all');
+        this.addToolbarButton(editor, toolbar, 'selectNone', '', 'tb_none');
+        /* Dropdown View toolbar */
     }
 
     addToolbarButton(editor: any, toolbar: any, action: any, label: any, id: any) {
