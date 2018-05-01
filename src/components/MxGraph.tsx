@@ -771,6 +771,12 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             editor.setGraphContainer(container);
             let graph = editor.graph;
 
+            // Set keyboard short cuts
+            let kbsc = require('./config/keyhandler-minimal.xml');
+            let config = mxUtils.load(kbsc).
+            getDocumentElement();
+            editor.configure(config);
+
             // Enable Panning
             graph.panningHandler.ignoreCell = false;
             graph.setPanning(true);
