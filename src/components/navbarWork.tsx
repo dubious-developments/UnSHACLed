@@ -275,7 +275,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                         target="_blank"
                         href="https://github.com/dubious-developments/UnSHACLed/wiki/Release-notes"
                     >
-                        v0.3
+                        v0.5
                     </Menu.Item>
                     {/* Toolbar logout */}
                     <Menu.Item
