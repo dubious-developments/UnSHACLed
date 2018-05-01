@@ -16,7 +16,7 @@ class DropdownEdit extends React.Component<any, any> {
             <Dropdown text='Edit' pointing="top left">
                 <Dropdown.Menu>
                     <Dropdown.Item icon='reply' text='Undo' id="tb_undo" description="Ctrl+Z"/>
-                    <Dropdown.Item icon='share' text='Redo' id="tb_redo" description="Ctrl+Z"/>
+                    <Dropdown.Item icon='share' text='Redo' id="tb_redo" description="Ctrl+Y"/>
                     <Dropdown.Item icon='trash' text='Delete' id="tb_delete" description="Del"/>
                     <Dropdown.Item icon='clipboard' text='Copy' id="tb_copy" description="Ctrl+C"/>
                     <Dropdown.Item icon='paste' text='Paste' id="tb_paste" description="Ctrl+V"/>
