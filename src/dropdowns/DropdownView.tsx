@@ -15,12 +15,12 @@ class DropdownView extends React.Component<any, any> {
         return (
             <Dropdown text='View' pointing="top left">
                 <Dropdown.Menu>
-                    <Dropdown.Item icon='zoom' text='Zoom in'/>
-                    <Dropdown.Item icon='zoom' text='Zoom out'/>
-                    <Dropdown.Item icon='compress' text='Set actual size'/>
-                    <Dropdown.Item icon='expand' text='Fit to screen'/>
+                    <Dropdown.Item icon='zoom' text='Zoom in' id="tb_zoomin"/>
+                    <Dropdown.Item icon='zoom' text='Zoom out' id="tb_zoomout"/>
+                    <Dropdown.Item icon='compress' text='Set actual size' id="tb_actual"/>
+                    <Dropdown.Item icon='expand' text='Fit to screen' id="tb_fit"/>
                     <Dropdown.Divider/>
-                    <Dropdown.Item icon='camera' text='Print Graph'/>
+                    <Dropdown.Item icon='camera' text='Print Graph' id="tb_show"/>
                 </Dropdown.Menu>
             </Dropdown>
         );
