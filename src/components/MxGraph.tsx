@@ -431,7 +431,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     addNewRowOverlay(graph:any, cell: any) {
         // Creates a new overlay in the middle with an image and a tooltip
         let overlay = new mxCellOverlay(
-            new mxImage('add.png', 24, 24), 'Add a new row', mxConstants.ALIGN_CENTER);
+            new mxImage('img/add.png', 24, 24), 'Add a new row', mxConstants.ALIGN_CENTER);
         overlay.cursor = 'hand';
 
         let model = graph.getModel();
@@ -443,16 +443,12 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             model.beginUpdate();
             try {
                 let temprow = model.cloneCell(instance.nameToStandardCellDict.getValue('row'));
-                temprow.value = {name: "", trait: "null"};
-                let parent = cell.getParent();
-                
-                instance.addNewRowOverlay(graph, temprow);
-                graph.removeCellOverlay(cell);
-                parent.insert(temprow);
-                graph.view.refresh(parent);
+                temprow.value = {name: "new row", trait: "null"};
+                cell.insert(temprow);
             } finally {
                 // Updates the display
                 model.endUpdate();
+                graph.refresh();
             }
         });
 
@@ -536,8 +532,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                     temprow.value = {name: name, trait: trait};
                     v1.insert(temprow);
 
-                    this.addNewRowOverlay(graph, v1);
-
                     this.cellToTriples.setValue(temprow, trait);
 
                     let b2 = this.subjectToBlockDict.getValue(trait.object);
@@ -546,6 +540,8 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                         graph.insertEdge(graph.getDefaultParent(), null, '', temprow, v2);
                     }
                 });
+
+                this.addNewRowOverlay(graph, v1);
 
                 if (b.blockType === undefined) {
                     b.blockType = "Data";
