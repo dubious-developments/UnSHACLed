@@ -1,7 +1,10 @@
-.PHONY: nuget clean all
+.PHONY: nuget clean all run
 
 all:
 	msbuild selenium.sln
+
+run:
+	mono ./bin/Debug/selenium.exe
 
 nuget:
 	nuget restore
