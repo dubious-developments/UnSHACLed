@@ -888,41 +888,56 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     }
 
     turnCellInvalid(cell: any, errors: any[]) {
-        // Set style of block
-        cell.setStyle("InvalidBlock");
+        let graph = this.state.graph;
+        let model = graph.getModel();
+        model.beginUpdate();
+        try {
+            // Set style of block
+            cell.setStyle("InvalidBlock");
 
-        // Set style of rows
-        cell.children.forEach(rowCell => {
-            let found = false;
-            for (let error of errors) {
-                if (error.shapeProperty === rowCell.value.predicate) {
-                    rowCell.setStyle("InvalidRow");
-                    rowCell.value.errorMessage = `
-                        Error: ${error.message}\n\n
-                        Constraint: ${error.shapeConstraint}\n
-                        Originating property: ${error.shapeProperty}.`;
+            // Set style of rows
+            cell.children.forEach(rowCell => {
+                let found = false;
+                for (let error of errors) {
+                    if (error.getShapeProperty() === rowCell.value.trait.predicate) {
+                        rowCell.setStyle("InvalidRow");
+                        rowCell.value.error = error;
 
-                    found = true;
-                    break;
+                        found = true;
+                        break;
+                    }
                 }
-            }
 
-            if (!found) {
-                rowCell.setStyle("Row");
-                rowCell.value.errorMessage = null;
-            }
-        });
+                if (!found) {
+                    rowCell.setStyle("Row");
+                    rowCell.value.error = null;
+                }
+            });
+        } finally {
+            // Updates the display
+            model.endUpdate();
+            graph.refresh();
+        }
     }
 
     turnCellValid(cell: any) {
-        // Set style of block
-        cell.setStyle(cell.value.blockType);
+        let graph = this.state.graph;
+        let model = graph.getModel();
+        model.beginUpdate();
+        try {
+            // Set style of block
+            cell.setStyle(cell.value.blockType);
 
-        // Set style of rows
-        cell.children.forEach(rowCell => {
-            rowCell.setStyle("Row");
-            rowCell.value.errorMessage = null;
-        });
+            // Set style of rows
+            cell.children.forEach(rowCell => {
+                rowCell.setStyle("Row");
+                rowCell.value.error = null;
+            });
+        } finally {
+            // Updates the display
+            model.endUpdate();
+            graph.refresh();
+        }
     }
 
     /**
