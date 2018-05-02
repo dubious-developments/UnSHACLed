@@ -65,7 +65,22 @@ namespace SeleniumTests
                 "Specifies explicitly whether the test runner " +
                 "should build UnSHACLed or not. " +
                 "Default behavior is to build UnSHACLed only if " +
-                "no URL is specified ");
+                "no URL is specified.");
+
+        /// <summary>
+        /// The 'print-app-url' option, which makes the test runner
+        /// print the URL to 'index.html' just prior to running the
+        /// tests.
+        /// </summary>
+        public static readonly Option PrintApplicationUrl =
+            FlagOption.CreateFlagOption(
+                OptionForm.Long("print-app-url"))
+            .WithCategory("Debugging")
+            .WithDescription(
+                Quotation.QuoteEvenInBold(
+                    "Prints the URL to ",
+                    "index.html",
+                    " just prior to running the tests."));
 
         /// <summary>
         /// A read-only list of all options accepted by the function testing
@@ -75,7 +90,8 @@ namespace SeleniumTests
         {
             BuildApplication,
             Browsers,
-            Help
+            Help,
+            PrintApplicationUrl
         };
     }
 }

@@ -65,10 +65,10 @@ namespace SeleniumTests
                 return 0;
             }
 
-            string testUri = parsedOptions.GetValue<string>(Options.Url);
-            bool noUri = string.IsNullOrWhiteSpace(testUri);
+            string testUrl = parsedOptions.GetValue<string>(Options.Url);
+            bool noUrl = string.IsNullOrWhiteSpace(testUrl);
 
-            if ((noUri && !parsedOptions.ContainsOption(Options.BuildApplication))
+            if ((noUrl && !parsedOptions.ContainsOption(Options.BuildApplication))
                 || parsedOptions.GetValue<bool>(Options.BuildApplication))
             {
                 // Build the application if there's no URL and `--no-build-app`
@@ -86,11 +86,11 @@ namespace SeleniumTests
                         "UnSHACLed built successfully!"));
             }
 
-            if (noUri)
+            if (noUrl)
             {
                 // If nobody bothered to specify a URL, then we'll just point it to
                 // the application.
-                testUri = "file://" + Path.GetFullPath(Path.Combine("..", "build", "index.html"));
+                testUrl = "file://" + Path.GetFullPath(Path.Combine("..", "build", "index.html"));
             }
 
             var browserNames = parsedOptions.ContainsOption(Options.Browsers)
@@ -105,7 +105,19 @@ namespace SeleniumTests
                 return 1;
             }
 
-            Run(testUri, browsersToUse, log);
+            if (parsedOptions.GetValue<bool>(Options.PrintApplicationUrl))
+            {
+                log.Log(
+                    new Pixie.LogEntry(
+                        Severity.Message,
+                        "application url",
+                        Quotation.QuoteEvenInBold(
+                            "the absolute app url is ",
+                            testUrl,
+                            ".")));
+            }
+
+            Run(testUrl, browsersToUse, log);
 
             // If things went swimmingly, then return a zero exit code.
             // Otherwise, let the world know that something is wrong.
