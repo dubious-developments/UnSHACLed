@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.IO;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Support.UI;
@@ -49,23 +51,35 @@ namespace SeleniumTests
                         Severity.Message,
                         new HelpMessage(
                             "Runs UnSHACLed's functional tests.",
-                            "selenium-tests uri [options...]",
+                            "selenium-tests [url-or-options...]",
                             Options.All)));
                 return 0;
             }
 
+            Process unshacledProcess = null;
             string testUri = parsedOptions.GetValue<string>(Options.Uri);
             if (string.IsNullOrWhiteSpace(parsedOptions.GetValue<string>(Options.Uri)))
             {
-                log.Log(
-                    new Pixie.LogEntry(
-                        Severity.Error,
-                        "nothing to do",
-                        "no URI to test was specified."));
-                return 1;
+                // If nobody bothered to specify a URL, then we'll just have to
+                // run the server ourselves.
+                unshacledProcess = HostUnSHACLed();
+                testUri = "localhost:3000";
             }
 
-            Run(testUri, log);
+
+            try
+            {
+                Run(testUri, log);
+            }
+            finally
+            {
+                // Shut down the server if we started it.
+                if (unshacledProcess != null)
+                {
+                    unshacledProcess.Kill();
+                    unshacledProcess.Dispose();
+                }
+            }
 
             // If things went swimmingly, then return a zero exit code.
             // Otherwise, let the world know that something is wrong.
@@ -119,6 +133,21 @@ namespace SeleniumTests
                         "page title",
                         driver.Title));
             }
+        }
+
+        private static Process HostUnSHACLed()
+        {
+            var process = new Process();
+            process.StartInfo.WorkingDirectory = Directory.GetParent(Directory.GetCurrentDirectory()).FullName;
+            process.StartInfo.FileName = "npm";
+            process.StartInfo.Arguments = "start";
+            process.StartInfo.UseShellExecute = false;
+            // pProcess.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            process.StartInfo.CreateNoWindow = true;
+            process.Start();
+            
+            return process;
         }
     }
 }
