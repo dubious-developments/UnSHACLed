@@ -1,12 +1,13 @@
 import * as Collections from "typescript-collections";
 import * as Immutable from "immutable";
-import { InOrderProcessor, TaskProcessor } from "./taskProcessor";
-import { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";
-import { ModelData } from "./modelData";
-import { Task, OpaqueTask } from "./task";
-import { ModelTask, OpaqueModelTask } from "./taskInstruction";
-import { OutOfOrderProcessor } from "./outOfOrderProcessor";
+import {TaskProcessor} from "./taskProcessor";
+import {ModelComponent, ModelTaskMetadata} from "./modelTaskMetadata";
+import {ModelData} from "./modelData";
+import {OpaqueTask} from "./task";
+import {ModelTask, OpaqueModelTask} from "./taskInstruction";
+import {OutOfOrderProcessor} from "./outOfOrderProcessor";
 import {CausalChain} from "./causalChain";
+
 export { ModelData } from "./modelData";
 export { ModelTask, OpaqueModelTask } from "./taskInstruction";
 export { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";

@@ -6,6 +6,7 @@ import Work from "../pages/Work";
 import About from "../pages/About";
 import Contact from "../pages/Contact";
 import NotFound from "../pages/NotFound";
+import Signup from "../pages/Signup";
 
 class Routes extends React.Component<any, any> {
 
@@ -15,6 +16,7 @@ class Routes extends React.Component<any, any> {
                 <Switch>
                     <Route exact={true} path="/" component={Home}/>
                     <Route exact={true} path="/login" component={Login}/>
+                    <Route exact={true} path="/signup" component={Signup}/>
                     <Route exact={true} path="/user" component={Work}/>
                     <Route exact={true} path="/about" component={About}/>
                     <Route exact={true} path="/contact" component={Contact}/>

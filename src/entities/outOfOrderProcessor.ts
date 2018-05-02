@@ -1,13 +1,12 @@
 import * as Collections from "typescript-collections";
-import { TaskQueue } from "./taskQueue";
-import { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";
-import { ModelData } from "./modelData";
-import { Task } from "./task";
-import { TaskRewriter } from "./taskRewriter";
-import { PriorityPartitionedQueue } from "./priorityPartitionedQueue";
-import { TaskInstruction, ModelTask } from "./taskInstruction";
-import { InstructionMerger, ModelTaskRewriter } from "./instructionMerger";
-import { TaskProcessor, TaskStartedCallback, TaskCompletedCallback, TaskFinishedCallback } from "./taskProcessor";
+import {TaskQueue} from "./taskQueue";
+import {ModelComponent, ModelTaskMetadata} from "./modelTaskMetadata";
+import {ModelData} from "./modelData";
+import {Task} from "./task";
+import {PriorityPartitionedQueue} from "./priorityPartitionedQueue";
+import {TaskInstruction} from "./taskInstruction";
+import {InstructionMerger, ModelTaskRewriter} from "./instructionMerger";
+import {TaskCompletedCallback, TaskFinishedCallback, TaskProcessor, TaskStartedCallback} from "./taskProcessor";
 
 /**
  * A task queue and scheduler for model tasks.
