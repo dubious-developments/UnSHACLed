@@ -5,10 +5,9 @@ import {Link} from 'react-router-dom';
 class HomeContainer extends React.Component {
 
     render() {
-        const logo = require('../img/shacl_logo_trans.png');
+        const logo = require('../img/logo.png');
         return (
             <Container text={true}>
-
                 <Image
                     src={logo}
                     size="tiny"
@@ -17,7 +16,6 @@ class HomeContainer extends React.Component {
                         marginTop: '2em'
                     }}
                 />
-
                 <Header
                     as="h1"
                     inverted={true}
@@ -26,10 +24,8 @@ class HomeContainer extends React.Component {
                         fontWeight: 'normal',
                         marginTop: '2em',
                     }}
-                >
-                    {' '} UnSHACLed
+                > {' '} UnSHACLed
                 </Header>
-
                 <Header
                     as="h2"
                     content="A visual IDE for Semantic Web constraint languages"
@@ -48,35 +44,36 @@ class HomeContainer extends React.Component {
                     }}
                     columns={2}
                     divided={true}
-
                 >
                     <Grid.Column style={{maxWidth: 250}}>
                         <Link
                             to="/login"
                             style={{color: 'white'}}
-                        > 
+                        >
                             <Button
                                 inverted={true}
                                 color="teal"
                                 size="huge"
                             >
-                            Login
+                                Login
                             </Button>
                         </Link>
                     </Grid.Column>
                     <Grid.Column style={{maxWidth: 250}}>
-                        <Button
-                            animated="fade"
-                            inverted={true}
-                            size="huge"
+                        <Link
+                            to="/signup"
+                            style={{color: 'white'}}
                         >
-                            <Button.Content visible={true}>
-                            Sign-up
-                            </Button.Content>
-                            <Button.Content hidden={true}>
-                             Coming soon!
-                            </Button.Content>
-                        </Button>
+                            <Button
+                                animated="fade"
+                                inverted={true}
+                                size="huge"
+                            >
+                                <Button.Content visible={true}>
+                                    Sign-up
+                                </Button.Content>
+                            </Button>
+                        </Link>
                     </Grid.Column>
 
                 </Grid>
@@ -84,4 +81,5 @@ class HomeContainer extends React.Component {
         );
     }
 }
+
 export default HomeContainer;

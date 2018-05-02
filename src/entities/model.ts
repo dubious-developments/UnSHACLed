@@ -1,10 +1,13 @@
 import * as Collections from "typescript-collections";
-import { InOrderProcessor, TaskProcessor } from "./taskProcessor";
-import { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";
-import { ModelData } from "./modelData";
-import { Task, OpaqueTask } from "./task";
-import { ModelTask, OpaqueModelTask } from "./taskInstruction";
-import { OutOfOrderProcessor } from "./outOfOrderProcessor";
+import * as Immutable from "immutable";
+import {TaskProcessor} from "./taskProcessor";
+import {ModelComponent, ModelTaskMetadata} from "./modelTaskMetadata";
+import {ModelData} from "./modelData";
+import {OpaqueTask} from "./task";
+import {ModelTask, OpaqueModelTask} from "./taskInstruction";
+import {OutOfOrderProcessor} from "./outOfOrderProcessor";
+import {CausalChain} from "./causalChain";
+
 export { ModelData } from "./modelData";
 export { ModelTask, OpaqueModelTask } from "./taskInstruction";
 export { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";
@@ -13,7 +16,24 @@ export { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";
  * A model observer: a function that takes a change set as input
  * and produces a list of tasks to process as output.
  */
-type ModelObserver = (changeBuffer: Collections.Set<ModelComponent>) => Array<ModelTask>;
+export class ModelObserver {
+
+    private static counter: number = 0;
+    private identifier: number;
+
+    public constructor(private readonly observer: (changeBuffer: Immutable.Set<ModelComponent>) => Array<ModelTask>) {
+        this.identifier =
+        ModelObserver.counter++;
+    }
+
+    public getID(): number {
+        return this.identifier;
+    }
+
+    public observe(changeBuffer: Immutable.Set<ModelComponent>): Array<ModelTask> {
+        return this.observer(changeBuffer);
+    }
+}
 
 /**
  * Models the data handled by the UnSHACLed application.
@@ -36,6 +56,8 @@ export class Model {
 
     private observers: ModelObserver[];
 
+    private chain: CausalChain<ModelComponent, number>;
+
     /**
      * Creates a model.
      * 
@@ -51,9 +73,48 @@ export class Model {
         this.tasks = new OutOfOrderProcessor(
             wellDefinedData,
             task => task,
-            task => task,
-            task => this.notifyObservers(wellDefinedData.drainChangeBuffer()));
+            (task: ModelTask) => task,
+            (task: ModelTask) => {
+                // Drain the read/write buffers.
+                let buffers = wellDefinedData.drainBuffers();
+                
+                // Check that the read/write buffers match the behavior
+                // specified by the task metadata.
+                buffers.readBuffer.toArray().forEach(element => {
+                    if (!task.metadata.readsFrom(element)) {
+                        // Looks like the task read from an element that
+                        // it doesn't have access to.
+                        throw Error(
+                            `${task} read from ${element}, which is not in its read set. ` +
+                            `Consider adding ${element} to the read set if the read is intentional.`);
+                    }
+                });
+                buffers.writeBuffer.toArray().forEach(element => {
+                    if (!task.metadata.writesTo(element)) {
+                        // Looks like the task write to an element that
+                        // it doesn't have access to.
+                        throw Error(
+                            `${task} wrote to ${element}, which is not in its write set. ` +
+                            `Consider adding ${element} to the write set if the write is intentional.`);
+                    }
+                });
+                task.metadata.writeSet.toArray().forEach(element => {
+                    // Components that are written to must either be
+                    // in the read set, in the write buffer, or both.
+                    if (!task.metadata.readSet.contains(element)
+                        && !buffers.writeBuffer.contains(element)) {
+                            throw Error(
+                                `${task} does not write to ${element}, which is in the ` +
+                                `write set but not in the read set. Consider adding ${element} ` +
+                                `to the read set if no write is the intended behavior.`);
+                    }
+                });
+
+                // Notify observers.
+                this.notifyObservers(buffers.writeBuffer);
+            });
         this.observers = [];
+        this.chain = new CausalChain<ModelComponent, number>();
     }
 
     /**
@@ -82,15 +143,23 @@ export class Model {
      * a task completes and may queue additional tasks based on the changes
      * made to components.
      */
-    public registerObserver(observer: ModelObserver): void {
-        this.observers.push(observer);
+    public registerObserver(observer: ModelObserver
+        | ((changeBuffer: Immutable.Set<ModelComponent>) => Array<ModelTask>)): void {
+        if (observer instanceof ModelObserver) {
+            this.observers.push(observer);
+        } else {
+            this.observers.push(new ModelObserver(observer));
+        }
     }
 
-    private notifyObservers(changeBuffer: Collections.Set<ModelComponent>): void {
+    private notifyObservers(changeBuffer: Immutable.Set<ModelComponent>): void {
         this.observers.forEach(element => {
-            element(changeBuffer).forEach(newTask => {
-                this.tasks.schedule(newTask);
+            element.observe(changeBuffer).forEach(newTask => {
+                if (!this.chain.stage(element.getID(), newTask.metadata.readSet, newTask.metadata.writeSet)) {
+                    this.tasks.schedule(newTask);
+                }
             });
         });
+        this.chain.finalize();
     }
 }

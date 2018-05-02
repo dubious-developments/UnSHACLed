@@ -30,6 +30,9 @@
     "src/setupTests.ts"
   ],
   "files": [
-    "shacl.js"
+    "index.js"
+  ],
+  "include": [
+    "src/**/*"
   ]
 }

@@ -2,14 +2,19 @@ import * as React from 'react';
 import * as Collections from 'typescript-collections';
 import {ModelComponent} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
-import {VisualizeComponent} from "../services/ModelTasks";
+import {GetValidationReport, VisualizeComponent} from "../services/ModelTasks";
+import TimingService from "../services/TimingService";
+import {ValidationReport} from "../conformance/wrapper/ValidationReport";
+import {MxGraphProps} from "./interfaces/interfaces";
+import {ModelObserver} from "../entities/model";
+import {PrefixMap} from "../persistence/graph";
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout, mxCellOverlay, mxImage: any;
 
 let $rdf = require('rdflib');
 
-class MxGraph extends React.Component<any, any> {
+class MxGraph extends React.Component<MxGraphProps, any> {
 
     private nameToStandardCellDict: Collections.Dictionary<string, any>;
     private blockToCellDict: Collections.Dictionary<Block, any>;
@@ -17,15 +22,19 @@ class MxGraph extends React.Component<any, any> {
     private triples: Collections.Set<Triple>;
 
     private cellToTriples: Collections.Dictionary<any, Triple>;
+    private invalidCells: Collections.Set<any>;
 
-    constructor(props: string) {
+    private timer: TimingService;
+
+    constructor(props: any) {
         super(props);
         this.state = {
             graph: null,
             test: "Shape",
             preview: null,
             dragElement: null,
-            dragElList: ["Shape", "Node Shape", "Property Shape", "Address", "Person"]
+            dragElList: ["Shape", "Node Shape", "Property Shape"],
+            templateCount: 0
         };
         this.handleLoad = this.handleLoad.bind(this);
         this.saveGraph = this.saveGraph.bind(this);
@@ -35,12 +44,17 @@ class MxGraph extends React.Component<any, any> {
         this.getGraphUnderMouse = this.getGraphUnderMouse.bind(this);
         this.makeDragSource = this.makeDragSource.bind(this);
         this.visualizeDataGraph = this.visualizeDataGraph.bind(this);
+        this.handleUserAction = this.handleUserAction.bind(this);
+        this.addTemplate = this.addTemplate.bind(this);
 
         this.nameToStandardCellDict = new Collections.Dictionary<string, any>();
         this.blockToCellDict = new Collections.Dictionary<Block, any>((b) => b.name);
         this.subjectToBlockDict = new Collections.Dictionary<string, Block>();
         this.triples = new Collections.Set<Triple>((t) =>  t.subject + " " + t.predicate + " " + t.object);
         this.cellToTriples = new Collections.Dictionary<any, Triple>((c) => c.value.name);
+        this.invalidCells = new Collections.Set<any>();
+
+        this.timer = new TimingService();
     }
 
     componentDidMount() {
@@ -48,6 +62,11 @@ class MxGraph extends React.Component<any, any> {
     }
 
     componentWillReceiveProps(nextprops: any) {
+    }
+
+    componentDidUpdate() {
+        console.log("state adapted");
+        console.log(this.state.graph);
     }
 
     insertCell(grph: any, evt: any, target: any, x: any, y: any) {
@@ -111,6 +130,7 @@ class MxGraph extends React.Component<any, any> {
     }
 
     saveGraph(g: any) {
+        console.log(g);
         this.setState({
             graph: g
         });
@@ -197,12 +217,12 @@ class MxGraph extends React.Component<any, any> {
         };
 
         /**
-         * Guesses autoTranslate to avoid another repaint (see below).
-         * Works if only the scale of the graph changes or if pages
-         * are visible and the visible pages do not change.
+         * THIS FUNCTION CAUSED AUTOFOCUS BUG !!!!
          */
-        let graphViewValidate = graph.view.validate;
+
+        /*let graphViewValidate = graph.view.validate;
         graph.view.validate = function () {
+            console.log("graphViewValidate");
             if (this.graph.container !== null && mxUtils.hasScrollbars(this.graph.container)) {
                 let pad = this.graph.getPagePadding();
                 let size = this.graph.getPageSize();
@@ -214,7 +234,7 @@ class MxGraph extends React.Component<any, any> {
             }
 
             graphViewValidate.apply(this, arguments);
-        };
+        };*/
 
         let graphSizeDidChange = graph.sizeDidChange;
         graph.sizeDidChange = function () {
@@ -380,6 +400,21 @@ class MxGraph extends React.Component<any, any> {
 
     }
 
+    configureTooltips(graph: any) {
+        // Installs a custom global tooltip
+        graph.setTooltips(true);
+        graph.getTooltip = function(state: any) {
+            let cell = state.cell;
+            // If the cell is invalid, then it will have an error
+            // thus display the error message, else just show the label
+            if (cell.value.error) {
+                return cell.value.error.toString();
+            } else {
+                return graph.getLabel(cell);
+            }
+        };
+    }
+
     initStandardCells() {
         let blockObject = new Block();
         let block = new mxCell(blockObject, new mxGeometry(0, 0, 250, 28));
@@ -425,7 +460,7 @@ class MxGraph extends React.Component<any, any> {
         graph.addCellOverlay(cell, overlay);
     }
 
-    parseDataGraphToBlocks(store: any) {
+    parseDataGraphToBlocks(store: any, prefixes: PrefixMap) {
         // let DASH = $rdf.Namespace("http://datashapes.org/dash#");
         let RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
         // let RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
@@ -434,7 +469,7 @@ class MxGraph extends React.Component<any, any> {
         // let XSD = $rdf.Namespace("http://www.w3.org/2001/XMLSchema#");
 
         let triples = store.statements;
-        let newTriples = new Collections.Set<Triple>((t) =>  t.subject + " " + t.predicate + " " + t.object);
+        let newTriples = new Collections.Set<Triple>();
 
         triples.forEach((triple: any) => {
             if (!this.subjectToBlockDict.containsKey(triple.subject.value)) {
@@ -450,6 +485,7 @@ class MxGraph extends React.Component<any, any> {
             let subject = triple.subject;
             let predicate = triple.predicate;
             let object = triple.object;
+
             let subjectBlock = this.subjectToBlockDict.getValue(subject);
             if (subjectBlock) {
                 if (predicate === RDF("type").uri && object === SH("NodeShape").uri) {
@@ -472,16 +508,16 @@ class MxGraph extends React.Component<any, any> {
         this.blockToCellDict.clear();
     }
 
-    visualizeDataGraph(store: any) {
+    visualizeDataGraph(store: any, prefixes: PrefixMap) {
         this.clear();
         let {graph} = this.state;
-        let blocks = this.parseDataGraphToBlocks(store);
+        let blocks = this.parseDataGraphToBlocks(store, prefixes);
         let model = graph.getModel();
         let parent = graph.getDefaultParent();
 
         blocks.forEach(b => {
             let v1 = model.cloneCell(this.nameToStandardCellDict.getValue('block'));
-            v1.value = b;
+            v1.value = this.replacePrefixes(b.name, prefixes);
             this.blockToCellDict.setValue(b, v1);
         });
 
@@ -492,7 +528,10 @@ class MxGraph extends React.Component<any, any> {
                 let longestname = 0;
                 b.traits.forEach(trait => {
                     let temprow = model.cloneCell(this.nameToStandardCellDict.getValue('row'));
-                    let name = trait.predicate + ": " + trait.object;
+                    let name = this.replacePrefixes(trait.predicate, prefixes)
+                        + " :  "
+                        + this.replacePrefixes(trait.object, prefixes);
+                    // let name = trait.predicate + " :  " + trait.object;
                     longestname = Math.max(name.length, longestname);
                     temprow.value = {name: name, trait: trait};
                     v1.insert(temprow);
@@ -522,6 +561,18 @@ class MxGraph extends React.Component<any, any> {
         layout.execute(graph.getDefaultParent());
     }
 
+    /**
+     * Replaces prefixes where possible in the string s
+     * @param {string} s
+     * @param {PrefixMap} prefixes
+     */
+    replacePrefixes(s: string, prefixes: PrefixMap): string {
+        Object.keys(prefixes).forEach(key => {
+            s = s.replace(prefixes[key], key + ":");
+        });
+        return s;
+    }
+
     configureStylesheet(graph: any) {
         let style = {};
         style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RECTANGLE;
@@ -541,9 +592,9 @@ class MxGraph extends React.Component<any, any> {
         style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
         style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
         style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_TOP;
-        style[mxConstants.STYLE_FILLCOLOR] = '#A1E44D';
+        style[mxConstants.STYLE_FILLCOLOR] = '#135589';
         style[mxConstants.STYLE_SWIMLANE_FILLCOLOR] = '#ffffff';
-        style[mxConstants.STYLE_STROKECOLOR] = '#A6E853';
+        style[mxConstants.STYLE_STROKECOLOR] = '#135589';
         style[mxConstants.STYLE_FONTCOLOR] = '#000000';
         style[mxConstants.STYLE_STROKEWIDTH] = '1';
         style[mxConstants.STYLE_STARTSIZE] = '28';
@@ -557,9 +608,9 @@ class MxGraph extends React.Component<any, any> {
         style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
         style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
         style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_TOP;
-        style[mxConstants.STYLE_FILLCOLOR] = '#2FBF71';
+        style[mxConstants.STYLE_FILLCOLOR] = '#2A93D5';
         style[mxConstants.STYLE_SWIMLANE_FILLCOLOR] = '#ffffff';
-        style[mxConstants.STYLE_STROKECOLOR] = '#2FBF71';
+        style[mxConstants.STYLE_STROKECOLOR] = '#2A93D5';
         style[mxConstants.STYLE_FONTCOLOR] = '#000000';
         style[mxConstants.STYLE_STROKEWIDTH] = '1';
         style[mxConstants.STYLE_STARTSIZE] = '28';
@@ -573,9 +624,9 @@ class MxGraph extends React.Component<any, any> {
         style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
         style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
         style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_TOP;
-        style[mxConstants.STYLE_FILLCOLOR] = '#7D26CD';
+        style[mxConstants.STYLE_FILLCOLOR] = '#A1E44D';
         style[mxConstants.STYLE_SWIMLANE_FILLCOLOR] = '#ffffff';
-        style[mxConstants.STYLE_STROKECOLOR] = '#7D26CD';
+        style[mxConstants.STYLE_STROKECOLOR] = '#A1E44D';
         style[mxConstants.STYLE_FONTCOLOR] = '#000000';
         style[mxConstants.STYLE_STROKEWIDTH] = '1';
         style[mxConstants.STYLE_STARTSIZE] = '28';
@@ -627,6 +678,21 @@ class MxGraph extends React.Component<any, any> {
         this.addToolbarButton(editor, toolbar, 'zoomOut', '-', 'zoom out');
         this.addToolbarButton(editor, toolbar, 'actualSize', '', 'actual size');
         this.addToolbarButton(editor, toolbar, 'fit', '', 'fit');
+        /* Dropdown File toolbar */
+        /* Dropdown Edit toolbar */
+        this.addToolbarButton(editor, toolbar, 'undo', '', 'tb_undo');
+        this.addToolbarButton(editor, toolbar, 'redo', '', 'tb_redo');
+        this.addToolbarButton(editor, toolbar, 'delete', '', 'tb_delete');
+        this.addToolbarButton(editor, toolbar, 'copy', '', 'tb_copy');
+        this.addToolbarButton(editor, toolbar, 'paste', '', 'tb_paste');
+        this.addToolbarButton(editor, toolbar, 'selectAll', '', 'tb_all');
+        this.addToolbarButton(editor, toolbar, 'selectNone', '', 'tb_none');
+        /* Dropdown View toolbar */
+        this.addToolbarButton(editor, toolbar, 'show', '', 'tb_show');
+        this.addToolbarButton(editor, toolbar, 'zoomIn', '', 'tb_zoomin');
+        this.addToolbarButton(editor, toolbar, 'zoomOut', '', 'tb_zoomout');
+        this.addToolbarButton(editor, toolbar, 'actualSize', '', 'tb_actual');
+        this.addToolbarButton(editor, toolbar, 'fit', '', 'tb_fit');
     }
 
     addToolbarButton(editor: any, toolbar: any, action: any, label: any, id: any) {
@@ -699,6 +765,59 @@ class MxGraph extends React.Component<any, any> {
         ds.createDragElement = mxDragSource.prototype.createDragElement;
     }
 
+    addTemplate() {
+        let {graph} = this.state;
+        let {templateCount} = this.state;
+        // TODO prevent multiple cell selection
+        // TODO positioning??
+
+        if (!graph.isSelectionEmpty()) {
+            // Creates a copy of the selection array to preserve its state
+            var cells = graph.getSelectionCells();
+            // var bounds = graph.getView().getBounds(cells);
+            console.log(cells);
+            console.log(cells[0].value);
+            let cellname;
+
+            // handle multiple cell selection
+            if (cells.length === 1) {
+                // handle non-block/block cells differently
+                if (typeof (cells[0].value) === "string") {
+                    cellname = cells[0].value;
+                } else {
+                    cellname = cells[0].value.name.split("/").pop();
+                    console.log(cells[0]);
+                    // set all block clear all block values
+                    cells[0].value.traits = [];
+                }
+            } else {
+                cellname = "Multiple components";
+            }
+
+            // Function that is executed when the image is dropped on
+            // the graph. The cell argument points to the cell under
+            // the mousepointer if there is one.
+            var funct = function (gr: any, evt: any, target: any, x: any, y: any, cell: any) {
+                gr.setSelectionCells(gr.importCells(cells, x, y, cell));
+            };
+            // create sidebar entry
+            // invoke callback on parent component, which will add entry to sidebar
+            this.props.callback(cellname, templateCount);
+            // increment state counter
+            this.setState({
+                templateCount: templateCount + 1
+            });
+            // let preview = null;
+            var drag = document.getElementById(cellname + templateCount);
+            mxUtils.makeDraggable(drag, graph, funct);
+            this.props.setLabel(false);
+        } else {
+            console.log("nothing is selected");
+            this.props.setLabel(true);
+        }
+
+    }
+
     main(container: HTMLElement | null): void {
         // Checks if the browser is supported
         if (!container) {
@@ -708,16 +827,26 @@ class MxGraph extends React.Component<any, any> {
         } else {
 
             let model = DataAccessProvider.getInstance().model;
-            model.registerObserver((changeBuf) => {
+            model.registerObserver(new ModelObserver((changeBuf) => {
                 changeBuf.forEach((key) => {
                     if (key === ModelComponent.DataGraph) { // datagraph has changed
                         model.tasks.schedule(new VisualizeComponent(ModelComponent.DataGraph, this));
                         // TODO change this later
                         model.tasks.processAllTasks();
                     }
+
+                    if (key === ModelComponent.SHACLShapesGraph) {
+                        model.tasks.schedule(new VisualizeComponent(ModelComponent.SHACLShapesGraph, this));
+                        // TODO change this later
+                        model.tasks.processAllTasks();
+                    }
                 });
                 return [];
-            });
+            }));
+
+            // listen to all click events and key pressed events to check if user is actively editing
+            document.addEventListener("click", this.handleUserAction, true);
+            document.addEventListener("keypress", this.handleUserAction, true);
 
             model.tasks.processAllTasks();
 
@@ -726,6 +855,12 @@ class MxGraph extends React.Component<any, any> {
             // Creates the graph inside the given container
             editor.setGraphContainer(container);
             let graph = editor.graph;
+
+            // Set keyboard short cuts
+            let kbsc = require('./config/keyhandler-minimal.xml');
+            let config = mxUtils.load(kbsc).
+            getDocumentElement();
+            editor.configure(config);
 
             // Enable Panning
             graph.panningHandler.ignoreCell = false;
@@ -737,6 +872,7 @@ class MxGraph extends React.Component<any, any> {
             this.configureStylesheet(graph);
             this.configureCells(editor, graph);
             this.configureLabels(graph);
+            this.configureTooltips(graph);
             this.initStandardCells();
             this.saveGraph(graph);
             this.initiateDragPreview();
@@ -744,6 +880,12 @@ class MxGraph extends React.Component<any, any> {
             this.initToolBar(editor);
             container.focus();
 
+            // Get add template button
+            var d2 = document.getElementById("addTemplate");
+            if (d2) {
+                d2.onclick = this.addTemplate;
+            }
+          
             graph.addListener(mxEvent.CELLS_REMOVED, (sender: any, evt: any) => {
                 let cells = evt.getProperty("cells");
 
@@ -756,6 +898,104 @@ class MxGraph extends React.Component<any, any> {
             });
 
         }
+    }
+    
+    public handleConformance(report: ValidationReport) {
+        let invalidCellsToErrorDict = new Collections.DefaultDictionary<any, any>(() => []);
+        // The keys function of a dictionary returns an array instead of a set, so keep an extra set aswell
+        let incInvalidCells = new Collections.Set<any>(); 
+        if (!report.isConforming()) {
+            for (let error of report.getValidationErrors()) {
+                let block = this.subjectToBlockDict.getValue(error.getDataElement());
+                if (block) {
+                    let cell = this.blockToCellDict.getValue(block);
+                    invalidCellsToErrorDict.getValue(cell).push(error); 
+                    incInvalidCells.add(cell);
+                } else {
+                    console.log(
+                        "Error: could not find block for data element: " + error.getDataElement().toString() +
+                        "for the conformance error");
+                }
+            }
+        }
+        invalidCellsToErrorDict.forEach((cell, errors) => this.turnCellInvalid(cell, errors));
+
+        this.invalidCells.difference(incInvalidCells);
+        // In invalidCells are now the cells that are no longer invalid
+        this.invalidCells.forEach(cell => {
+            this.turnCellValid(cell);
+        });
+
+        this.invalidCells = incInvalidCells;
+    }
+
+    turnCellInvalid(cell: any, errors: any[]) {
+        let graph = this.state.graph;
+        let model = graph.getModel();
+        model.beginUpdate();
+        try {
+            // Set style of block
+            cell.setStyle("InvalidBlock");
+
+            // Set style of rows
+            cell.children.forEach(rowCell => {
+                let found = false;
+                for (let error of errors) {
+                    if (error.getShapeProperty() === rowCell.value.trait.predicate) {
+                        rowCell.setStyle("InvalidRow");
+                        rowCell.value.error = error;
+
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    rowCell.setStyle("Row");
+                    rowCell.value.error = null;
+                }
+            });
+        } finally {
+            // Updates the display
+            model.endUpdate();
+            graph.refresh();
+        }
+    }
+
+    turnCellValid(cell: any) {
+        let graph = this.state.graph;
+        let model = graph.getModel();
+        model.beginUpdate();
+        try {
+            // Set style of block
+            cell.setStyle(cell.value.blockType);
+
+            // Set style of rows
+            cell.children.forEach(rowCell => {
+                rowCell.setStyle("Row");
+                rowCell.value.error = null;
+            });
+        } finally {
+            // Updates the display
+            model.endUpdate();
+            graph.refresh();
+        }
+    }
+
+    /**
+     * Used for checking if user is actively editing or not
+     */
+    handleUserAction(event: any) {
+        let model = DataAccessProvider.getInstance().model;
+
+        // little hack to pass this to a callback
+        let self = this;
+
+        // notify that a user action took place
+        this.timer.userAction(function(this: MxGraph) {
+            model.tasks.schedule(new GetValidationReport(self));
+            model.tasks.processAllTasks();
+        });
     }
 
     render() {
@@ -798,6 +1038,10 @@ class Triple {
         this.subject = subject;
         this.predicate = predicate;
         this.object = object;
+    }
+
+    toString(): string {
+        return this.subject + " " + this.predicate + " " + this.object;
     }
 }
 

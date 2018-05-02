@@ -1,13 +1,12 @@
 import * as Collections from "typescript-collections";
-import { TaskQueue } from "./taskQueue";
-import { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";
-import { ModelData } from "./modelData";
-import { Task } from "./task";
-import { TaskRewriter } from "./taskRewriter";
-import { PriorityPartitionedQueue } from "./priorityPartitionedQueue";
-import { TaskInstruction, ModelTask } from "./taskInstruction";
-import { InstructionMerger, ModelTaskRewriter } from "./instructionMerger";
-import { TaskProcessor, TaskStartedCallback, TaskCompletedCallback, TaskFinishedCallback } from "./taskProcessor";
+import {TaskQueue} from "./taskQueue";
+import {ModelComponent, ModelTaskMetadata} from "./modelTaskMetadata";
+import {ModelData} from "./modelData";
+import {Task} from "./task";
+import {PriorityPartitionedQueue} from "./priorityPartitionedQueue";
+import {TaskInstruction} from "./taskInstruction";
+import {InstructionMerger, ModelTaskRewriter} from "./instructionMerger";
+import {TaskCompletedCallback, TaskFinishedCallback, TaskProcessor, TaskStartedCallback} from "./taskProcessor";
 
 /**
  * A task queue and scheduler for model tasks.
@@ -111,10 +110,13 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
     public schedule(task: Task<ModelData, ModelTaskMetadata>): void {
         // Create a new instruction.
 
-        let instruction = new TaskInstruction(task, this.state.clone());
+        let metadata = task.metadata;
+        let instruction = new TaskInstruction(
+            task,
+            this.state.clone(metadata.readSet, metadata.writeSet));
 
         // Turn the instruction's read set into a dependency set.
-        task.metadata.readSet.forEach(component => {
+        metadata.readSet.toArray().forEach(component => {
             let dependency = this.latestComponentStateMap.getValue(component);
             if (dependency) {
                 if (this.finishedInstructionMap.containsKey(dependency)) {
@@ -130,7 +132,7 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
         });
 
         // Use the instruction's write set to update the latest component state map.
-        task.metadata.writeSet.forEach(component => {
+        metadata.writeSet.toArray().forEach(component => {
             this.latestComponentStateMap.setValue(component, instruction);
         });
 
@@ -283,18 +285,23 @@ export class OutOfOrderProcessor extends TaskProcessor<ModelData, ModelTaskMetad
      * @param instructionData The model data for the instruction.
      */
     private complete(instruction: TaskInstruction): void {
-        instruction.task.metadata.writeSet.forEach(component => {
+        instruction.task.metadata.writeSet.toArray().forEach(component => {
             // Update the state map if applicable.
             if (this.latestComponentStateMap.getValue(component) === instruction) {
                 this.latestComponentStateMap.remove(component);
             }
+        });
 
+        let buffers = instruction.data.peekBuffers();
+        buffers.readBuffer.toArray().forEach(component => {
+            // Propagate reads to the architecture state's read buffer.
+            this.state.getComponent<any>(component);
+        });
+        buffers.writeBuffer.toArray().forEach(component => {
             // Update the architecture state.
             this.state.setComponent<any>(
                 component,
                 instruction.data.getComponent<any>(component));
-
-            this.state.componentHasChanged(component);
         });
     }
 

@@ -9,6 +9,7 @@ module.exports = function(config) {
             { pattern: "src/form/**/*.tsx" },
             { pattern: "src/pages/**/*.tsx" },
             { pattern: "src/services/**/*.tsx" },
+            { pattern: "src/dropdowns/**/*.tsx" },
             { pattern: "test/**/*.ts" },
         ],
 
@@ -80,6 +81,7 @@ module.exports = function(config) {
                 // karma-detect-browser advertises it.
                 let undesirables = ["PhantomJS", "IE", "Edge"];
                 if (!process.env.CI) {
+                    //undesirables.push("Chrome");
                     undesirables.push("Chrome");
                 }
 

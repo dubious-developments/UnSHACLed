@@ -21,9 +21,46 @@ export interface NavbarWorkProps {
 export interface SidebarProps {
     visible: boolean;
     callback: PropTypes.func;
+    templates: any;
+    showLabel: any;
 }
 
 /* Props definition for mxgraph component */
 export interface MxGraphProps {
-    dragid: string;
+    callback: PropTypes.func;
+    setLabel: PropTypes.func;
+}
+
+/* Props definition for ToolbarIcon component */
+export interface ToolbarIconProps {
+    /* Pop Up */
+    p_size: any; // size of the pop-up
+    p_position: any; // position of the pop-up
+    p_content: any; // content of pop-up
+    /* Trigger for the pop-up (always a Menu.Item) */
+    t_id: any; // id of the menu item (trigger)
+    icon_name: any; // name of the used icon within the menu item (trigger)
+}
+
+/* Props definition for SidebarPopup component */
+export interface SidebarPopupProps {
+    /* Pop Up */
+    p_size: any; // size of the pop-up
+    p_position: any; // position of the pop-up
+    header_title: any; // title of the grid
+    trigger: any; // trigger for the pop-op
+}
+
+/* Props definition for Legend component */
+export interface LegendProps {
+    header_title: any; // title besides the checkbox
+    colors: any; // array of colors representing the color for each legend entry
+    entries: any; // array of text entries for the each legend entry
+    /* Colors and text at same array index make up one legend entry ! */
+}
+
+/* Props definition for DropdownFile component */
+export interface DropdownFileProps {
+    opened_files: any; // currently opened files
+    import_cb: PropTypes.func; // callback function to parent for importing either a shacl or data graph
 }

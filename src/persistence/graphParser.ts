@@ -1,12 +1,10 @@
-/// <reference path="./parser.d.ts"/>
-
 import * as Collections from "typescript-collections";
 import {Graph} from "./graph";
 
 /**
  * A Parser that takes care of (de)serialization for graph structures.
  */
-export class GraphParser implements Parser {
+export class GraphParser implements Parser<Graph> {
 
     private graph: Graph;
 
@@ -29,18 +27,17 @@ export class GraphParser implements Parser {
      * Asynchronously serialize a graph of triples to a string containing
      * representational RDF code in some format.
      * @param data
-     * @param {string} mime
+     * @param mime
      * @param andThen
-     * @returns {string}
      */
-    public serialize(data: any, mime: string, andThen: ((result: string) => void) | null) {
+    public serialize(data: Graph, mime: string, andThen: ((result: string) => void) | null): void {
         if (this.mimeTypes.contains(mime)) {
             let N3 = require("n3");
             let writer = N3.Writer();
 
-            let graph: Graph = data;
+            let graph = data;
             writer.addPrefixes(graph.getPrefixes());
-            writer.addTriples(graph.getPersistentStore().getTriples());
+            writer.addTriples(graph.queryN3Store(store => store.getTriples()));
             writer.end(function (error: any, result: any) {
                 if (andThen) {
                     andThen(result);
@@ -57,9 +54,8 @@ export class GraphParser implements Parser {
      * @param {string} content
      * @param {string} mime
      * @param andThen
-     * @returns {any}
      */
-    public parse(content: string, mime: string, andThen: ((result: any) => void) | null) {
+    public parse(content: string, mime: string, andThen: ((result: Graph) => void) | null): void {
         if (this.mimeTypes.contains(mime)) {
             let N3 = require("n3");
             let parser = N3.Parser({ format: mime });
@@ -85,16 +81,15 @@ export class GraphParser implements Parser {
 
     /**
      * Retrieve the data contained by this GraphParser.
-     * @returns {any}
      */
-    public getData() {
+    public getData(): Graph {
         return this.graph;
     }
 
     /**
      * Clean whatever is contained by this GraphParser.
      */
-    public clean() {
+    public clean(): void {
         this.graph = new Graph();
     }
 }
