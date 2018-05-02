@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {
     Sidebar, Menu, Image, Input, Button, Label,
-    Accordion, Checkbox, Header, Popup, List, Icon
+    Accordion, Checkbox, Header, Popup, List, Icon, Dropdown
 } from 'semantic-ui-react';
 import {SidebarProps} from './interfaces/interfaces';
 import SidebarPopup from './sidebarPopup';
@@ -181,59 +181,73 @@ class SideBar extends React.Component<SidebarProps, any> {
                 <Menu.Item style={{height: '5em'}}>
                     <Image src={logo} size="mini" centered={true}/>
                 </Menu.Item>
-          {this.state.content === defaultOption && (
-                {/* Sidebar search box */}
-                <Menu.Item style={{backgroundColor: "#3d3e3f"}}>
-                    <Input
-                        onChange={this.handleChange}
-                        type="text"
-                        value={this.state.value}
-                        placeholder="Search components . . ."
-                        inverted={true}
-                        transparent={true}
-                        icon="search"
-                    />
-                </Menu.Item>
-                {/* Sidebar template button */}
                 <Menu.Item>
-                    <Button
-                        id={"addTemplate"}
-                        inverted={true}
-
-                    > Add template from selection
-                    </Button>
-                    {this.props.showLabel ?
-                        <Label
-                            basic={true}
-                            color='red'
-                            pointing={true}
-                        >
-                            Nothing is selected!
-                        </Label> : null
-                    }
-                </Menu.Item>
-                {/* Sidebar accordion submenu */}
-                <Accordion
-                    defaultActiveIndex={[0, 2]}
-                    inverted={true}
-                    exclusive={false}
-                    fluid={true}
-                    panels={rootPanels}
-                />
-                {/* Sidebar legend */}
-                <Menu.Item style={{bottom: 0, position: 'absolute'}}>
-                    <Legend
-                        header_title={"Show Legend"}
-                        colors={['#A1E44D', '#2FBF71', '#7D26CD', '#7D26CD']}
-                        entries={['Shape', 'Property', 'Property Attribute', 'Data']}
+                    <Dropdown
+                        defaultValue={defaultOption}
+                        options={SideBar.sidebarOptions}
+                        fluid={true}
+                        direction="left"
+                        onChange={this.handleDropDown}
+                        as="h5"
+                        pointing="top right"
                     />
                 </Menu.Item>
-          )
-    }
+
+                {this.state.content === defaultOption && (
+                    <div>
+                        <Menu.Item style={{backgroundColor: "#3d3e3f"}}>
+                            <Input
+                                onChange={this.handleChange}
+                                type="text"
+                                value={this.state.value}
+                                placeholder="Search components . . ."
+                                inverted={true}
+                                transparent={true}
+                                icon="search"
+                            />
+                        </Menu.Item>
+                        <Menu.Item>
+                            <Button
+                                id={"addTemplate"}
+                                inverted={true}
+
+                            > Add template from selection
+                            </Button>
+                            {this.props.showLabel ?
+                                <Label
+                                    basic={true}
+                                    color='red'
+                                    pointing={true}
+                                >
+                                    Nothing is selected!
+                                </Label> : null
+                            }
+                        </Menu.Item>
+
+                        <Accordion
+                            defaultActiveIndex={[0, 2]}
+                            inverted={true}
+                            exclusive={false}
+                            fluid={true}
+                            panels={rootPanels}
+                        />
+
+                        <Menu.Item style={{bottom: 0, position: 'absolute'}}>
+                            <Legend
+                                header_title={"Show Legend"}
+                                colors={['#A1E44D', '#2FBF71', '#7D26CD', '#7D26CD']}
+                                entries={['Shape', 'Property', 'Property Attribute', 'Data']}
+                            />
+                        </Menu.Item>
+                    </div>
+
+                )
+                }
+
 
                 {this.state.content === 2 && (
                     <Menu.Item>
-                        <this.PrefixMenu />
+                        <this.PrefixMenu/>
                     </Menu.Item>
                 )
                 }

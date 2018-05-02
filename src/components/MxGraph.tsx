@@ -825,7 +825,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     }
 
     public fitGraph() {
-        this.editor.execute("fit");
+        //this.editor.execute("fit");
     }
 
     main(container: HTMLElement | null): void {
