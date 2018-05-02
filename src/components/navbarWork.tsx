@@ -269,7 +269,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                             />
                         }
                     />
-                    {/* Toolbar 'Github release notes' */}
+                    {/* Toolbar 'Github re' */}
                     <Menu.Item
                         as="a"
                         target="_blank"
@@ -277,7 +277,6 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                     >
                         v0.5
                     </Menu.Item>
-                    {/* Toolbar logout */}
                     <Menu.Item
                         as={Link}
                         to="/login"
