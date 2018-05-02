@@ -598,9 +598,9 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
         style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
         style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_TOP;
-        style[mxConstants.STYLE_FILLCOLOR] = '#A1E44D';
+        style[mxConstants.STYLE_FILLCOLOR] = '#135589';
         style[mxConstants.STYLE_SWIMLANE_FILLCOLOR] = '#ffffff';
-        style[mxConstants.STYLE_STROKECOLOR] = '#A6E853';
+        style[mxConstants.STYLE_STROKECOLOR] = '#135589';
         style[mxConstants.STYLE_FONTCOLOR] = '#000000';
         style[mxConstants.STYLE_STROKEWIDTH] = '1';
         style[mxConstants.STYLE_STARTSIZE] = '28';
@@ -614,9 +614,9 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
         style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
         style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_TOP;
-        style[mxConstants.STYLE_FILLCOLOR] = '#2FBF71';
+        style[mxConstants.STYLE_FILLCOLOR] = '#2A93D5';
         style[mxConstants.STYLE_SWIMLANE_FILLCOLOR] = '#ffffff';
-        style[mxConstants.STYLE_STROKECOLOR] = '#2FBF71';
+        style[mxConstants.STYLE_STROKECOLOR] = '#2A93D5';
         style[mxConstants.STYLE_FONTCOLOR] = '#000000';
         style[mxConstants.STYLE_STROKEWIDTH] = '1';
         style[mxConstants.STYLE_STARTSIZE] = '28';
@@ -630,9 +630,9 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
         style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
         style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_TOP;
-        style[mxConstants.STYLE_FILLCOLOR] = '#7D26CD';
+        style[mxConstants.STYLE_FILLCOLOR] = '#A1E44D';
         style[mxConstants.STYLE_SWIMLANE_FILLCOLOR] = '#ffffff';
-        style[mxConstants.STYLE_STROKECOLOR] = '#7D26CD';
+        style[mxConstants.STYLE_STROKECOLOR] = '#A1E44D';
         style[mxConstants.STYLE_FONTCOLOR] = '#000000';
         style[mxConstants.STYLE_STROKEWIDTH] = '1';
         style[mxConstants.STYLE_STARTSIZE] = '28';
