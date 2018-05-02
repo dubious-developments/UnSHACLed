@@ -2,16 +2,20 @@ import * as React from 'react';
 import {Sidebar, Menu, Image, Input, Dropdown, List, Button, Label, Popup} from 'semantic-ui-react';
 import TreeView from './treeView';
 import {SidebarProps} from './interfaces/interfaces';
+import {PrefixMap} from "../persistence/graph";
 
 class SideBar extends React.Component<SidebarProps, any> {
 
     static sidebarOptions = [
         {key: 1, text: 'Add Components', value: 1},
-        {key: 2, text: 'Project structure', value: 2}
+        {key: 2, text: 'Prefixes', value: 2},
+        {key: 3, text: 'Project structure', value: 3}
     ];
     static SHACLMenuItems = ["Shape", "Node Shape", "Property Shape"];
     static GeneralMenuItems = ["Arrow", "Rectangle"];
     static TemplateMenuItems = ["Address", "Person"];
+
+    static prefixes: PrefixMap;
 
     constructor(props: any) {
         super(props);
@@ -27,6 +31,11 @@ class SideBar extends React.Component<SidebarProps, any> {
         this.getMenuItemsFiltered = this.getMenuItemsFiltered.bind(this);
         this.DynamicMenu = this.DynamicMenu.bind(this);
         this.addTemplateEntry = this.addTemplateEntry.bind(this);
+        this.PrefixMenu = this.PrefixMenu.bind(this);
+    }
+
+    static setPrefixes(prefixes: PrefixMap) {
+        SideBar.prefixes = prefixes;
     }
 
     getMenuItemsFiltered(kind: string, query: string) {
@@ -109,6 +118,28 @@ class SideBar extends React.Component<SidebarProps, any> {
         });
     }
 
+    PrefixMenu(props: any) {
+        let items = Array<JSX.Element>();
+
+        Object.keys(SideBar.prefixes).forEach(key => {
+            let line = key + ": " + SideBar.prefixes[key];
+            items.push(
+                <Menu.Item
+                    as="a"
+                    id={SideBar.prefixes[key]}
+                    content={line}
+                    key={key}
+                />
+            );
+        });
+
+        return (
+            <Menu.Menu>
+                {items}
+            </Menu.Menu>
+        );
+    }
+
     render() {
         const logo = require('../img/logo.png');
         const defaultOption = 1;
@@ -141,7 +172,7 @@ class SideBar extends React.Component<SidebarProps, any> {
                         pointing="top right"
                     />
                 </Menu.Item>
-                {this.state.content === defaultOption ? (
+                {this.state.content === defaultOption && (
                     <div>
                         <Menu.Item>
                             <Input
@@ -206,7 +237,15 @@ class SideBar extends React.Component<SidebarProps, any> {
                             inverted={true}
                         />
                     </div>
-                ) : (
+                )
+                }
+                {this.state.content === 2 && (
+                    <Menu.Item>
+                        <this.PrefixMenu />
+                    </Menu.Item>
+                )
+                }
+                {this.state.content === 3 && (
                     <Menu.Item>
                         <TreeView/>
                     </Menu.Item>
