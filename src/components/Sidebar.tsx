@@ -244,7 +244,6 @@ class SideBar extends React.Component<SidebarProps, any> {
                 )
                 }
 
-
                 {this.state.content === 2 && (
                     <Menu.Item>
                         <this.PrefixMenu/>
