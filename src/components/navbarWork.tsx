@@ -346,14 +346,6 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                         t_id={"camera"}
                         icon_name={"camera"}
                     />
-                    {/* set size */}
-                    <ToolbarIcon
-                        p_size={"mini"}
-                        p_position={"bottom left"}
-                        p_content={"Set current graph to actual size"}
-                        t_id={"actual size"}
-                        icon_name={"compress"}
-                    />
                     {/* fit size */}
                     <ToolbarIcon
                         p_size={"mini"}
