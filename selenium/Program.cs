@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Support.UI;
 using Pixie;
@@ -112,6 +113,10 @@ namespace SeleniumTests
                 "firefox",
                 () => new FirefoxDriver(
                     new FirefoxOptions() { LogLevel = FirefoxDriverLogLevel.Fatal })
+            },
+            {
+                "chrome",
+                () => new ChromeDriver()
             }
         };
 

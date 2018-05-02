@@ -9,6 +9,7 @@ run:
 nuget:
 	nuget restore
 	cd packages/Selenium.WebDriver.GeckoDriver.0.20.1; unzip -u Selenium.WebDriver.GeckoDriver.0.20.1.nupkg; cd ../..
+	cd packages/Selenium.WebDriver.ChromeDriver.2.38.0.1; unzip -u Selenium.WebDriver.ChromeDriver.2.38.0.1.nupkg; cd ../..
 
 clean:
 	rm -rf packages/ bin/ obj/

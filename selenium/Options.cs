@@ -40,15 +40,17 @@ namespace SeleniumTests
                     OptionForm.Short("b"),
                     OptionForm.Long("browsers")
                 })
-            .WithParameters(new SymbolicOptionParameter("browser-names", true))
             .WithDescription(
                 Quotation.QuoteEvenInBold(
                     "Chooses which browsers to use for running the tests. " +
-                    "Permissible values are: ",
+                    "Permissible values are ",
                     "firefox",
+                    " and ",
+                    "chrome",
                     ". By default, only ",
                     "firefox",
-                    " is used for running the tests."));
+                    " is used for running the tests."))
+            .WithParameters(new SymbolicOptionParameter("browser", true));
 
         /// <summary>
         /// The 'build-app' option, which determines if the test
