@@ -5,12 +5,9 @@ import {DataAccessProvider} from "../persistence/dataAccessProvider";
 import {GetValidationReport, VisualizeComponent} from "../services/ModelTasks";
 import TimingService from "../services/TimingService";
 import {ValidationReport} from "../conformance/wrapper/ValidationReport";
-import {List} from 'semantic-ui-react';
-import {Button} from 'semantic-ui-react';
 import {MxGraphProps} from "./interfaces/interfaces";
 import {ModelObserver} from "../entities/model";
 import {PrefixMap} from "../persistence/graph";
-import SideBar from "./Sidebar";
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout, mxCellOverlay, mxImage: any;
@@ -18,8 +15,6 @@ declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometr
 let $rdf = require('rdflib');
 
 class MxGraph extends React.Component<MxGraphProps, any> {
-
-    private editor: any;
 
     private nameToStandardCellDict: Collections.Dictionary<string, any>;
     private blockToCellDict: Collections.Dictionary<Block, any>;
@@ -51,8 +46,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.visualizeDataGraph = this.visualizeDataGraph.bind(this);
         this.handleUserAction = this.handleUserAction.bind(this);
         this.addTemplate = this.addTemplate.bind(this);
-        this.fitGraph = this.fitGraph.bind(this);
-      
+
         this.nameToStandardCellDict = new Collections.Dictionary<string, any>();
         this.blockToCellDict = new Collections.Dictionary<Block, any>((b) => b.name);
         this.subjectToBlockDict = new Collections.Dictionary<string, Block>();
@@ -780,7 +774,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         if (!graph.isSelectionEmpty()) {
             // Creates a copy of the selection array to preserve its state
             var cells = graph.getSelectionCells();
-            var bounds = graph.getView().getBounds(cells);
+            // var bounds = graph.getView().getBounds(cells);
             console.log(cells);
             console.log(cells[0].value);
             let cellname;
@@ -813,7 +807,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             this.setState({
                 templateCount: templateCount + 1
             });
-            let preview = null;
+            // let preview = null;
             var drag = document.getElementById(cellname + templateCount);
             mxUtils.makeDraggable(drag, graph, funct);
             this.props.setLabel(false);
@@ -822,10 +816,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             this.props.setLabel(true);
         }
 
-    }
-
-    public fitGraph() {
-        // this.editor.execute("fit");
     }
 
     main(container: HTMLElement | null): void {
@@ -861,7 +851,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             model.tasks.processAllTasks();
 
             let editor = new mxEditor();
-            this.editor = editor;
 
             // Creates the graph inside the given container
             editor.setGraphContainer(container);

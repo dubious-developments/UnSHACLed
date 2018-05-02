@@ -129,9 +129,6 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
 
                     SideBar.setPrefixes(graph.getPrefixes());
 
-                    // fit the graph again
-                    this.mxGraph.fitGraph();
-
                 } else {
                     console.log("error: could not find MxGraph");
                 }

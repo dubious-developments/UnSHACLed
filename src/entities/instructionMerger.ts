@@ -1,8 +1,6 @@
 import * as Collections from "typescript-collections";
 import { TaskInstruction, ModelTask } from "./taskInstruction";
 import { TaskRewriter } from "./taskRewriter";
-import { ModelData } from "./modelData";
-import { ModelTaskMetadata } from "./modelTaskMetadata";
 
 /**
  * The type of task rewriter used by the model.

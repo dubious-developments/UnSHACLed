@@ -1,6 +1,5 @@
 import * as Collections from "typescript-collections";
-import { Task } from "./task";
-import { TaskQueue } from "./taskQueue";
+import {Task} from "./task";
 
 export type TaskStartedCallback<TData, TTaskMetadata> =
     (task: Task<TData, TTaskMetadata>) => any;
