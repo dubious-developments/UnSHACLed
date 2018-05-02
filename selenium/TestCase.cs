@@ -34,7 +34,7 @@ namespace SeleniumTests
         /// <returns>The description.</returns>
         public string Description { get; private set; }
 
-        private Action<IWebDriver, ILog> impl;
+        private readonly Action<IWebDriver, ILog> impl;
 
         /// <summary>
         /// Runs this test case against a web driver.
@@ -90,12 +90,6 @@ namespace SeleniumTests
         {
             public TestFailedException(MarkupNode formattedMessage)
                 : base(AsPlainText(formattedMessage))
-            {
-                this.FormattedMessage = formattedMessage;
-            }
-
-            public TestFailedException(MarkupNode formattedMessage, Exception inner)
-                : base(AsPlainText(formattedMessage), inner)
             {
                 this.FormattedMessage = formattedMessage;
             }

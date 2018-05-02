@@ -19,7 +19,7 @@ namespace SeleniumTests.Tests
         /// A list of all sanity check tests.
         /// </summary>
         public static readonly IEnumerable<TestCase> All =
-            new TestCase[]
+            new[]
         {
             CheckTitle
         };

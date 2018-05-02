@@ -102,7 +102,7 @@ namespace SeleniumTests
 
             var browserNames = parsedOptions.ContainsOption(Options.Browsers)
                 ? parsedOptions.GetValue<IReadOnlyList<string>>(Options.Browsers)
-                : new string[] { "firefox" };
+                : new[] { "firefox" };
 
             var browsersToUse = ParseBrowserNames(browserNames, log);
 
@@ -132,12 +132,12 @@ namespace SeleniumTests
         }
 
         private static IReadOnlyDictionary<string, Func<IWebDriver>> Drivers =
-            new Dictionary<string, Func<IWebDriver>>()
+            new Dictionary<string, Func<IWebDriver>>
         {
             {
                 "firefox",
                 () => new FirefoxDriver(
-                    new FirefoxOptions() { LogLevel = FirefoxDriverLogLevel.Fatal })
+                    new FirefoxOptions { LogLevel = FirefoxDriverLogLevel.Fatal })
             },
             {
                 "chrome",
@@ -208,18 +208,6 @@ namespace SeleniumTests
         /// <param name="log">A log to send messages to.</param>
         private static void Run(string uri, IEnumerable<Func<IWebDriver>> driverBuilders, ILog log)
         {
-            // Create a new instance of the Firefox driver.
-            // Note that it is wrapped in a using clause so that the browser is closed 
-            // and the webdriver is disposed (even in the face of exceptions).
-
-            // Also note that the remainder of the code relies on the interface, 
-            // not the implementation.
-
-            // Further note that other drivers (InternetExplorerDriver,
-            // ChromeDriver, etc.) will require further configuration 
-            // before this example will work. See the wiki pages for the
-            // individual drivers at http://code.google.com/p/selenium/wiki
-            // for further information.
             foreach (var builder in driverBuilders)
             {
                 using (IWebDriver driver = builder())
@@ -243,7 +231,6 @@ namespace SeleniumTests
             process.StartInfo.FileName = "gulp";
             process.StartInfo.Arguments = "build";
             process.StartInfo.UseShellExecute = false;
-            // process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             process.StartInfo.CreateNoWindow = true;
             process.Start();

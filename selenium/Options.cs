@@ -86,7 +86,7 @@ namespace SeleniumTests
         /// A read-only list of all options accepted by the function testing
         /// program.
         /// </summary>
-        public static readonly IReadOnlyList<Option> All = new Option[]
+        public static readonly IReadOnlyList<Option> All = new[]
         {
             BuildApplication,
             Browsers,
