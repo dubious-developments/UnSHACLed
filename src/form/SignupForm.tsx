@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Form, Button, Grid, Image, Header, Segment, Input, Divider} from 'semantic-ui-react';
+import {Button, Form, Grid, Header, Image, Input, Segment} from 'semantic-ui-react';
 import {withRouter} from 'react-router-dom';
 import Auth from '../services/Auth';
 

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Menu, Icon, Popup, List, Dropdown} from 'semantic-ui-react';
+import {Menu, Icon, Popup, List} from 'semantic-ui-react';
 import Auth from '../services/Auth';
 import {Link} from 'react-router-dom';
 import {NavbarWorkProps} from './interfaces/interfaces';

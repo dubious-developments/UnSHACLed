@@ -1,5 +1,6 @@
 import * as React from 'react';
-import {Dropdown, Modal, Table, Header, Icon} from 'semantic-ui-react';
+import {Dropdown, Header, Icon, Modal, Table} from 'semantic-ui-react';
+
 /*
     Component used to create a dropdown component for the Help toolbar option
     Requires several props from the parent, which can be found in interfaces.d.ts
