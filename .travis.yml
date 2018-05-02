@@ -27,11 +27,13 @@ jdk:
 
 install:
   # Install mono to run the Selenium tests.
-  - sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
-  - sudo apt install apt-transport-https
-  - echo "deb https://download.mono-project.com/repo/ubuntu stable-trusty main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
-  - sudo apt update
-  - sudo apt install mono-devel mono-complete nuget
+  - if [ "$TRAVIS_OS_NAME" == "linux" ];
+      sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF;
+      sudo apt install apt-transport-https;
+      echo "deb https://download.mono-project.com/repo/ubuntu stable-trusty main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list;
+      sudo apt update;
+      sudo apt install mono-devel mono-complete nuget;
+    fi
   # Build sshpass 1.06 from source. We need it to deploy a nightly
   # build of UnSHACLed to the server.
   - wget https://netix.dl.sourceforge.net/project/sshpass/sshpass/1.06/sshpass-1.06.tar.gz
@@ -51,7 +53,9 @@ script:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then XVFB_RUN=xvfb-run; fi
   - $XVFB_RUN gulp test
   # Run the Selenium tests.
-  - pushd selenium && make nuget && make && $XVFB_RUN make TEST_OPTIONS="--no-build-app" run && popd
+  - if [ "$TRAVIS_OS_NAME" == "linux" ];
+      pushd selenium && make nuget && make && $XVFB_RUN make TEST_OPTIONS="--no-build-app" run && popd;
+    fi
   # Run SonarCloud, but only on Linux.
   - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ ! -z "$SONARCLOUD_KEY" ]; then sonar-scanner; fi
   # Deploy a nightly build when all tests are successful for a master branch commit.
