@@ -136,17 +136,30 @@ class SideBar extends React.Component<SidebarProps, any> {
     PrefixMenu(props: any) {
         let items = Array<JSX.Element>();
 
-        Object.keys(SideBar.prefixes).forEach(key => {
-            let line = key + ": " + SideBar.prefixes[key];
-            items.push(
-                <Menu.Item
-                    as="a"
-                    id={SideBar.prefixes[key]}
-                    content={line}
-                    key={key}
-                />
+        if (SideBar.prefixes) {
+            Object.keys(SideBar.prefixes).forEach(key => {
+                let line = key + ": " + SideBar.prefixes[key];
+                items.push(
+                    <Menu.Item
+                        as="a"
+                        id={SideBar.prefixes[key]}
+                        content={line}
+                        key={key}
+                    />
+                );
+            });
+        } else {
+            return (
+                <Menu.Menu>
+                    <Menu.Item
+                        as="a"
+                        id={"No prefixes"}
+                        content={"No prefixes"}
+                        key={"No prefixes"}
+                    />
+                </Menu.Menu>
             );
-        });
+        }
 
         return (
             <Menu.Menu>
