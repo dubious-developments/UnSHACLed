@@ -897,6 +897,12 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                     let triple = this.cellToTriples.getValue(cells[i]);
                     if (triple) {
                         console.log(triple);
+                        this.removeTripleFromBlocks(triple);
+                        this.triples.remove(triple);
+                        this.cellToTriples.remove(cells[i]);
+
+                        let mutableGraph = triple.mutableGraph;
+                        mutableGraph.removeTriple(triple.subject, triple.predicate, triple.object);
                     }
                 }
             });
