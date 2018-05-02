@@ -431,7 +431,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     addNewRowOverlay(graph:any, cell: any) {
         // Creates a new overlay in the middle with an image and a tooltip
         let overlay = new mxCellOverlay(
-            new mxImage('../img/add.png', 24, 24), 'Add a new row', mxConstants.ALIGN_CENTER);
+            new mxImage('add.png', 24, 24), 'Add a new row', mxConstants.ALIGN_CENTER);
         overlay.cursor = 'hand';
 
         let model = graph.getModel();
@@ -535,6 +535,8 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                     longestname = Math.max(name.length, longestname);
                     temprow.value = {name: name, trait: trait};
                     v1.insert(temprow);
+
+                    this.addNewRowOverlay(graph, v1);
 
                     this.cellToTriples.setValue(temprow, trait);
 
@@ -960,6 +962,16 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             model.endUpdate();
             graph.refresh();
         }
+    }
+
+    removeTripleFromBlocks(triple: Triple) {
+        this.blockToCellDict.forEach(block => {
+            block.traits = block.traits.filter(item => item !== triple);
+        });
+
+        this.subjectToBlockDict.forEach((subject: string, block: Block) => {
+            block.traits = block.traits.filter(item => item !== triple);
+        });
     }
 
     turnCellValid(cell: any) {
