@@ -123,11 +123,13 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
             for (let part of component.getAllKeys()) {
                 // handle the graph objects correctly
                 if (this.mxGraph) {
-                    let graph = component.getPart(part);
-                    graph.query(
-                        store => this.mxGraph.visualizeDataGraph(store, graph.getPrefixes()));
+                    let persistenceGraph = component.getPart(part);
 
-                    SideBar.setPrefixes(graph.getPrefixes());
+                    // graph.query(
+                    //     store => this.mxGraph.visualizeDataGraph(store, graph.getPrefixes()));
+                    this.mxGraph.visualizeDataGraph(persistenceGraph, persistenceGraph.getPrefixes());
+
+                    SideBar.setPrefixes(persistenceGraph.getPrefixes());
 
                 } else {
                     console.log("error: could not find MxGraph");
