@@ -115,9 +115,9 @@ export class TaskInstruction {
         }
 
         componentsToTransfer.forEach(component => {
-            target.data.setComponent<any>(
+            target.data.setComponentUnchecked<any>(
                 component,
-                this.data.getComponent<any>(component));
+                this.data.getComponentUnchecked<any>(component));
         });
     }
 

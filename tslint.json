@@ -3,8 +3,6 @@
     "rules": {
         "align": [
             true,
-            "parameters",
-            "arguments",
             "statements"
         ],
         "ban": false,
@@ -15,7 +13,7 @@
         ],
         "curly": true,
         "eofline": false,
-        "forin": true,
+        "forin": false,
         "indent": [ true, "spaces" ],
         "interface-name": [true, "never-prefix"],
         "jsdoc-format": false,
@@ -44,7 +42,7 @@
         "no-empty": false,
         "no-eval": true,
         "no-shadowed-variable": true,
-        "no-string-literal": true,
+        "no-string-literal": false,
         "no-switch-case-fall-through": true,
         "no-trailing-whitespace": false,
         "no-unused-expression": false,

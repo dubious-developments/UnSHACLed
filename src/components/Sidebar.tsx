@@ -1,7 +1,7 @@
 import * as React from 'react';
-import {Sidebar, Menu, Image, Input, Dropdown} from 'semantic-ui-react';
+import {Sidebar, Menu, Image, Input, Dropdown, List, Button, Label, Popup} from 'semantic-ui-react';
 import TreeView from './treeView';
-import { SidebarProps } from './interfaces/interfaces';
+import {SidebarProps} from './interfaces/interfaces';
 
 class SideBar extends React.Component<SidebarProps, any> {
 
@@ -19,13 +19,14 @@ class SideBar extends React.Component<SidebarProps, any> {
         this.state = {
             value: '',
             content: 1,
-            dragid: null
+            dragid: null,
         };
 
         this.handleChange = this.handleChange.bind(this);
         this.handleDropDown = this.handleDropDown.bind(this);
         this.getMenuItemsFiltered = this.getMenuItemsFiltered.bind(this);
         this.DynamicMenu = this.DynamicMenu.bind(this);
+        this.addTemplateEntry = this.addTemplateEntry.bind(this);
     }
 
     getMenuItemsFiltered(kind: string, query: string) {
@@ -92,9 +93,26 @@ class SideBar extends React.Component<SidebarProps, any> {
         });
 
     }
+
+    addTemplateEntry(entryName: any) {
+        let {templateCount} = this.state;
+        this.setState({
+            templateCount: this.state.templateCount + 1,
+            templates: this.state.templates.concat(
+                <Menu.Item
+                    as="a"
+                    content={entryName + templateCount}
+                    key={entryName}
+                    id={entryName}
+                />
+            )
+        });
+    }
+
     render() {
-        const logo = require('../img/shacl_logo_trans.png');
+        const logo = require('../img/logo.png');
         const defaultOption = 1;
+        let {templates} = this.props;
         return (
             <Sidebar
                 as={Menu}
@@ -137,18 +155,56 @@ class SideBar extends React.Component<SidebarProps, any> {
                             />
                         </Menu.Item>
 
-                        <Menu.Item>
-                            SHACL
-                            <this.DynamicMenu kind="SHACL"/>
-                        </Menu.Item>
-{/*                        <Menu.Item>
+                        <Popup
+                            trigger={
+                                <Menu.Item>
+                                    SHACL
+                                    <this.DynamicMenu kind="SHACL"/>
+                                </Menu.Item>
+                            }
+                            content='Drag and drop a component of your choice to the graph.'
+                            size="mini"
+                            position='right center'
+                            inverted={true}
+                        />
+
+                        {/*                        <Menu.Item>
                             General
                             <this.DynamicMenu kind="General"/>
                         </Menu.Item>*/}
-                        <Menu.Item>
-                            Template
-                            <this.DynamicMenu kind="Template"/>
-                        </Menu.Item>
+                        <Popup
+                            trigger={
+                                <Menu.Item id="TemplateMenu">
+                                    Template
+                                    <this.DynamicMenu kind="Template"/>
+
+                                    <Menu.Menu>
+                                        <Menu.Item>
+                                            <Button
+                                                id={"addTemplate"}
+                                                inverted={true}
+
+                                            > Add template from selection
+                                            </Button>
+                                            {this.props.showLabel ?
+                                            <Label
+                                                basic={true}
+                                                color='red'
+                                                pointing={true}
+                                            >
+                                                Nothing is selected!
+                                            </Label> : null
+                                            }
+                                        </Menu.Item>
+                                        {templates}
+                                    </Menu.Menu>
+                                </Menu.Item>
+                            }
+                            content='Drag and drop a component of your choice to the graph.'
+                            size="mini"
+                            position='right center'
+                            inverted={true}
+                        />
                     </div>
                 ) : (
                     <Menu.Item>

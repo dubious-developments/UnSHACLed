@@ -1,11 +1,16 @@
 import * as Collections from "typescript-collections";
+import * as Immutable from "immutable";
 import { ModelComponent } from "./modelTaskMetadata";
+
+type AccessBuffer = Immutable.Set<ModelComponent>;
+type AccessBufferPair = { readBuffer: AccessBuffer, writeBuffer: AccessBuffer };
 
 /**
  * A mutable view of the model.
  */
 export class ModelData {
-    private changeBuffer: Collections.Set<ModelComponent>;
+    private writeBuffer: AccessBuffer;
+    private readBuffer: AccessBuffer;
 
     /**
      * A dictionary that contains all of the model's components.
@@ -15,10 +20,18 @@ export class ModelData {
     /**
      * Creates a data container for the model.
      * @param components A mapping of component types to their values.
+     * @param readSet The set of all model components that the model data
+     * is allowed to read from.
+     * @param writeSet The set of all model components that the model data
+     * is allowed to write to.
      */
     public constructor(
-        components?: Collections.Dictionary<ModelComponent, any>) {
-        this.changeBuffer = new Collections.Set<ModelComponent>();
+        components?: Collections.Dictionary<ModelComponent, any>,
+        public readonly readSet?: AccessBuffer,
+        public readonly writeSet?: AccessBuffer) {
+
+        this.writeBuffer = Immutable.Set<ModelComponent>();
+        this.readBuffer = Immutable.Set<ModelComponent>();
         if (components) {
             this.components = components;
         } else {
@@ -31,6 +44,33 @@ export class ModelData {
      * @param component The component to retrieve.
      */
     public getComponent<T>(component: ModelComponent): T | undefined {
+
+        if (this.readSet
+            && !this.readSet.contains(component)
+            && !this.writeBuffer.contains(component)) {
+
+            // Looks like the task is writing to an element that
+            // it doesn't have access to.
+            throw Error(
+                `Intercepted a read from '${component}', which is not in the read set. ` +
+                `Consider adding '${component}' to the read set if the read is intentional.`);
+        }
+        return this.getComponentUnchecked(component);
+    }
+
+    /**
+     * Gets a particular component of this model. Elides the legality
+     * check associated with this operation.
+     * @param component The component to retrieve.
+     */
+    public getComponentUnchecked<T>(component: ModelComponent): T | undefined {
+
+        if (this.components.containsKey(component)
+            && !this.writeBuffer.contains(component)) {
+
+            // Only update the read buffer if the component wasn't written to before.
+            this.readBuffer = this.readBuffer.add(component);
+        }
         return this.components.getValue(component);
     }
 
@@ -42,6 +82,7 @@ export class ModelData {
      * if it doesn't exist already.
      */
     public getOrCreateComponent<T>(component: ModelComponent, createComponent: () => T): T {
+
         let result = this.getComponent<T>(component);
         if (result === undefined) {
             result = createComponent();
@@ -57,36 +98,65 @@ export class ModelData {
     public setComponent<T>(component: ModelComponent, value: T): void {
 
         if (value !== this.components.getValue(component)) {
-            this.changeBuffer.add(component);
+            if (this.writeSet && !this.writeSet.contains(component)) {
+                // Looks like the task wrote to an element that
+                // it doesn't have access to.
+                throw Error(
+                    `Intercepted a write to '${component}', which is not in the write set. ` +
+                    `Consider adding '${component}' to the write set if the write is intentional.`);
+            }
+
+            this.setComponentUnchecked(component, value);
         }
+    }
+
+    /**
+     * Sets a particular component of this model. Elides the legality check
+     * associated with this operation.
+     */
+    public setComponentUnchecked<T>(component: ModelComponent, value: T): void {
+
+        if (value !== this.components.getValue(component)) {
+
+            // Record the write in the write buffer.
+            this.writeBuffer = this.writeBuffer.add(component);
+        }
+
         this.components.setValue(component, value);
     }
 
     /**
-     * temp method to tell the model that a mutable component has changed
+     * Drains the model's read, write buffer pair.
      */
-    public componentHasChanged(component: ModelComponent): void {
-        this.changeBuffer.add(component);
+    public drainBuffers(): AccessBufferPair {
+        let readBuf = this.readBuffer;
+        let writeBuf = this.writeBuffer;
+        this.readBuffer = Immutable.Set<ModelComponent>();
+        this.writeBuffer = Immutable.Set<ModelComponent>();
+        return { readBuffer: readBuf, writeBuffer: writeBuf };
     }
 
     /**
-     * Drains the model's change buffer.
+     * Takes a peek at the read, write buffer pair without
+     * modifying them.
      */
-    public drainChangeBuffer(): Collections.Set<ModelComponent> {
-        let result = this.changeBuffer;
-        this.changeBuffer = new Collections.Set<ModelComponent>();
-        return result;
+    public peekBuffers(): AccessBufferPair {
+        return { readBuffer: this.readBuffer, writeBuffer: this.writeBuffer };
     }
 
     /**
      * Creates a shallow copy of this model data's components.
      * Note that the change buffer is not copied.
+     * @param readSet The set of all model components that the
+     * cloned model data is allowed to read from.
+     * @param writeSet The set of all model components that the
+     * model data is allowed to write to.
      */
-    public clone(): ModelData {
+    public clone(readSet?: AccessBuffer, writeSet?: AccessBuffer): ModelData {
         let componentCopy = new Collections.Dictionary<ModelComponent, any>();
         this.components.forEach((key, value) => {
             componentCopy.setValue(key, value);
         });
-        return new ModelData(componentCopy);
+        return new ModelData(componentCopy, readSet, writeSet);
     }
 }

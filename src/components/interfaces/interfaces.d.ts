@@ -21,9 +21,12 @@ export interface NavbarWorkProps {
 export interface SidebarProps {
     visible: boolean;
     callback: PropTypes.func;
+    templates: any;
+    showLabel: any;
 }
 
 /* Props definition for mxgraph component */
 export interface MxGraphProps {
-    dragid: string;
+    callback: PropTypes.func;
+    setLabel: PropTypes.func;
 }
