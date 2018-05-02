@@ -9,6 +9,8 @@ import {List} from 'semantic-ui-react';
 import {Button} from 'semantic-ui-react';
 import {MxGraphProps} from "./interfaces/interfaces";
 import {ModelObserver} from "../entities/model";
+import {PrefixMap} from "../persistence/graph";
+import SideBar from "./Sidebar";
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout: any;
@@ -16,6 +18,8 @@ declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometr
 let $rdf = require('rdflib');
 
 class MxGraph extends React.Component<MxGraphProps, any> {
+
+    private editor: any;
 
     private nameToStandardCellDict: Collections.Dictionary<string, any>;
     private blockToCellDict: Collections.Dictionary<Block, any>;
@@ -45,6 +49,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.visualizeDataGraph = this.visualizeDataGraph.bind(this);
         this.handleUserAction = this.handleUserAction.bind(this);
         this.addTemplate = this.addTemplate.bind(this);
+        this.fitGraph = this.fitGraph.bind(this);
       
         this.nameToStandardCellDict = new Collections.Dictionary<string, any>();
         this.blockToCellDict = new Collections.Dictionary<Block, any>((b) => b.name);
@@ -411,7 +416,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.nameToStandardCellDict.setValue('row', row);
     }
 
-    parseDataGraphToBlocks(store: any) {
+    parseDataGraphToBlocks(store: any, prefixes: PrefixMap) {
         // let DASH = $rdf.Namespace("http://datashapes.org/dash#");
         let RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
         // let RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
@@ -436,6 +441,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             let subject = triple.subject;
             let predicate = triple.predicate;
             let object = triple.object;
+
             let subjectBlock = this.subjectToBlockDict.getValue(subject);
             if (subjectBlock) {
                 if (predicate === RDF("type").uri && object === SH("NodeShape").uri) {
@@ -458,16 +464,16 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.blockToCellDict.clear();
     }
 
-    visualizeDataGraph(store: any) {
+    visualizeDataGraph(store: any, prefixes: PrefixMap) {
         this.clear();
         let {graph} = this.state;
-        let blocks = this.parseDataGraphToBlocks(store);
+        let blocks = this.parseDataGraphToBlocks(store, prefixes);
         let model = graph.getModel();
         let parent = graph.getDefaultParent();
 
         blocks.forEach(b => {
             let v1 = model.cloneCell(this.nameToStandardCellDict.getValue('block'));
-            v1.value = b;
+            v1.value = this.replacePrefixes(b.name, prefixes);
             this.blockToCellDict.setValue(b, v1);
         });
 
@@ -478,7 +484,10 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 let longestname = 0;
                 b.traits.forEach(trait => {
                     let temprow = model.cloneCell(this.nameToStandardCellDict.getValue('row'));
-                    let name = trait.predicate + ": " + trait.object;
+                    let name = this.replacePrefixes(trait.predicate, prefixes)
+                        + " :  "
+                        + this.replacePrefixes(trait.object, prefixes);
+                    // let name = trait.predicate + " :  " + trait.object;
                     longestname = Math.max(name.length, longestname);
                     temprow.value = {name: name, trait: trait};
                     v1.insert(temprow);
@@ -507,6 +516,18 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
         let layout = new mxStackLayout(graph, false, 35);
         layout.execute(graph.getDefaultParent());
+    }
+
+    /**
+     * Replaces prefixes where possible in the string s
+     * @param {string} s
+     * @param {PrefixMap} prefixes
+     */
+    replacePrefixes(s: string, prefixes: PrefixMap): string {
+        Object.keys(prefixes).forEach(key => {
+            s = s.replace(prefixes[key], key + ":");
+        });
+        return s;
     }
 
     configureStylesheet(graph: any) {
@@ -718,6 +739,10 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
     }
 
+    public fitGraph() {
+        this.editor.execute("fit");
+    }
+
     main(container: HTMLElement | null): void {
         // Checks if the browser is supported
         if (!container) {
@@ -751,6 +776,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             model.tasks.processAllTasks();
 
             let editor = new mxEditor();
+            this.editor = editor;
 
             // Creates the graph inside the given container
             editor.setGraphContainer(container);
