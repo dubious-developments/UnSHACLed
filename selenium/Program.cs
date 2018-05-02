@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Support.UI;
@@ -32,7 +33,7 @@ namespace SeleniumTests
                 });
 
             // Parse command-line arguments.
-            var optParser = new GnuOptionSetParser(Options.All, Options.Uri);
+            var optParser = new GnuOptionSetParser(Options.All, Options.Url);
 
             // Actually parse the options.
             var parsedOptions = optParser.Parse(args, log);
@@ -56,30 +57,35 @@ namespace SeleniumTests
                 return 0;
             }
 
-            Process unshacledProcess = null;
-            string testUri = parsedOptions.GetValue<string>(Options.Uri);
-            if (string.IsNullOrWhiteSpace(parsedOptions.GetValue<string>(Options.Uri)))
+            string testUri = parsedOptions.GetValue<string>(Options.Url);
+            bool noUri = string.IsNullOrWhiteSpace(testUri);
+
+            if ((noUri && !parsedOptions.ContainsOption(Options.BuildApplication))
+                || parsedOptions.GetValue<bool>(Options.BuildApplication))
             {
-                // If nobody bothered to specify a URL, then we'll just have to
-                // run the server ourselves.
-                unshacledProcess = HostUnSHACLed();
-                testUri = "localhost:3000";
+                // Build the application if there's no URL and `--no-build-app`
+                // was not specified or if `--build-app` was specified.
+                log.Log(
+                    new Pixie.LogEntry(
+                        Severity.Info,
+                        "status",
+                        "building UnSHACLed..."));
+                BuildUnSHACLed();
+                log.Log(
+                    new Pixie.LogEntry(
+                        Severity.Info,
+                        "status",
+                        "UnSHACLed built successfully!"));
             }
 
+            if (noUri)
+            {
+                // If nobody bothered to specify a URL, then we'll just point it to
+                // the application.
+                testUri = "file://" + Path.GetFullPath("../build/index.html");
+            }
 
-            try
-            {
-                Run(testUri, log);
-            }
-            finally
-            {
-                // Shut down the server if we started it.
-                if (unshacledProcess != null)
-                {
-                    unshacledProcess.Kill();
-                    unshacledProcess.Dispose();
-                }
-            }
+            Run(testUri, log);
 
             // If things went swimmingly, then return a zero exit code.
             // Otherwise, let the world know that something is wrong.
@@ -112,21 +118,20 @@ namespace SeleniumTests
                 //This is because 'get' is a keyword in C#
                 driver.Navigate().GoToUrl(uri);
 
-                // Find the text input element by its name
-                IWebElement query = driver.FindElement(By.Name("q"));
+                // // Find the text input element by its name
+                // IWebElement query = driver.FindElement(By.Name("q"));
 
-                // Enter something to search for
-                query.SendKeys("Cheese");
+                // // Enter something to search for
+                // query.SendKeys("Cheese");
 
-                // Now submit the form. WebDriver will find the form for us from the element
-                query.Submit();
+                // // Now submit the form. WebDriver will find the form for us from the element
+                // query.Submit();
 
-                // Google's search is rendered dynamically with JavaScript.
-                // Wait for the page to load, timeout after 10 seconds
-                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-                wait.Until(d => d.Title.StartsWith("cheese", StringComparison.OrdinalIgnoreCase));
+                // // Google's search is rendered dynamically with JavaScript.
+                // // Wait for the page to load, timeout after 10 seconds
+                // var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+                // wait.Until(d => d.Title.StartsWith("cheese", StringComparison.OrdinalIgnoreCase));
 
-                // Should see: "Cheese - Google Search" (for an English locale)
                 log.Log(
                     new Pixie.LogEntry(
                         Severity.Message,
@@ -135,19 +140,19 @@ namespace SeleniumTests
             }
         }
 
-        private static Process HostUnSHACLed()
+        private static void BuildUnSHACLed()
         {
             var process = new Process();
             process.StartInfo.WorkingDirectory = Directory.GetParent(Directory.GetCurrentDirectory()).FullName;
-            process.StartInfo.FileName = "npm";
-            process.StartInfo.Arguments = "start";
+            process.StartInfo.FileName = "gulp";
+            process.StartInfo.Arguments = "build";
             process.StartInfo.UseShellExecute = false;
             // pProcess.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             process.StartInfo.CreateNoWindow = true;
             process.Start();
-            
-            return process;
+
+            process.WaitForExit();
         }
     }
 }
