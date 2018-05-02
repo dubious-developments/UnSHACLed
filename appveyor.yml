@@ -30,4 +30,4 @@ test_script:
   # Run tests.
   - gulp test
   # Run Selenium tests.
-  - pushd selenium; run-ci.bat; popd
+  - pushd selenium && run-ci.bat && popd

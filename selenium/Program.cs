@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -85,11 +86,85 @@ namespace SeleniumTests
                 testUri = "file://" + Path.GetFullPath("../build/index.html");
             }
 
-            Run(testUri, log);
+            var browserNames = parsedOptions.ContainsOption(Options.Browsers)
+                ? parsedOptions.GetValue<IReadOnlyList<string>>(Options.Browsers)
+                : new string[] { "firefox" };
+
+            var browsersToUse = ParseBrowserNames(browserNames, log);
+
+            if (errorEncountered)
+            {
+                // Couldn't parse the command-line args. Better quit now.
+                return 1;
+            }
+
+            Run(testUri, browsersToUse, log);
 
             // If things went swimmingly, then return a zero exit code.
             // Otherwise, let the world know that something is wrong.
             return errorEncountered ? 1 : 0;
+        }
+
+        private static IReadOnlyDictionary<string, Func<IWebDriver>> Drivers =
+            new Dictionary<string, Func<IWebDriver>>()
+        {
+            {
+                "firefox",
+                () => new FirefoxDriver(
+                    new FirefoxOptions() { LogLevel = FirefoxDriverLogLevel.Fatal })
+            }
+        };
+
+        /// <summary>
+        /// Parses a list of browser names to use.
+        /// </summary>
+        /// <param name="names">The names to parse.</param>
+        /// <param name="log">A log for sending errors to.</param>
+        /// <returns>A list of web driver builders.</returns>
+        private static IEnumerable<Func<IWebDriver>> ParseBrowserNames(
+            IEnumerable<string> names, ILog log)
+        {
+            var browsersToUse = new List<Func<IWebDriver>>();
+            foreach (var name in names)
+            {
+                if (Drivers.ContainsKey(name))
+                {
+                    browsersToUse.Add(Drivers[name]);
+                }
+                else
+                {
+                    // Try to guess what the user meant.
+                    var suggestion = NameSuggestion.SuggestName(name, Drivers.Keys);
+                    if (suggestion == null)
+                    {
+                        // Log an error if we couldn't find a reasonable guess.
+                        log.Log(
+                            new Pixie.LogEntry(
+                                Severity.Error,
+                                "unknown browser",
+                                Quotation.QuoteEvenInBold(
+                                    "specified browser ",
+                                    name,
+                                    " is not a known browser.")));
+                    }
+                    else
+                    {
+                        // Give the user a hand otherwise.
+                        var diff = Diff.Create(name, suggestion);
+                        log.Log(
+                            new Pixie.LogEntry(
+                                Severity.Error,
+                                "unknown browser",
+                                Quotation.QuoteEvenInBold(
+                                    "specified browser ",
+                                    TextDiff.RenderDeletions(diff),
+                                    " is not a known browser; did you mean ",
+                                    TextDiff.RenderInsertions(diff),
+                                    "?")));
+                    }
+                }
+            }
+            return browsersToUse;
         }
 
         /// <summary>
@@ -97,8 +172,11 @@ namespace SeleniumTests
         /// and a log.
         /// </summary>
         /// <param name="uri">The URI to test.</param>
+        /// <param name="driverBuilders">
+        /// A sequence of functions that each produce a driver to run the tests with.
+        /// </param>
         /// <param name="log">A log to send messages to.</param>
-        private static void Run(string uri, ILog log)
+        private static void Run(string uri, IEnumerable<Func<IWebDriver>> driverBuilders, ILog log)
         {
             // Create a new instance of the Firefox driver.
             // Note that it is wrapped in a using clause so that the browser is closed 
@@ -112,31 +190,34 @@ namespace SeleniumTests
             // before this example will work. See the wiki pages for the
             // individual drivers at http://code.google.com/p/selenium/wiki
             // for further information.
-            using (IWebDriver driver = new FirefoxDriver())
+            foreach (var builder in driverBuilders)
             {
-                //Notice navigation is slightly different than the Java version
-                //This is because 'get' is a keyword in C#
-                driver.Navigate().GoToUrl(uri);
+                using (IWebDriver driver = builder())
+                {
+                    //Notice navigation is slightly different than the Java version
+                    //This is because 'get' is a keyword in C#
+                    driver.Navigate().GoToUrl(uri);
 
-                // // Find the text input element by its name
-                // IWebElement query = driver.FindElement(By.Name("q"));
+                    // // Find the text input element by its name
+                    // IWebElement query = driver.FindElement(By.Name("q"));
 
-                // // Enter something to search for
-                // query.SendKeys("Cheese");
+                    // // Enter something to search for
+                    // query.SendKeys("Cheese");
 
-                // // Now submit the form. WebDriver will find the form for us from the element
-                // query.Submit();
+                    // // Now submit the form. WebDriver will find the form for us from the element
+                    // query.Submit();
 
-                // // Google's search is rendered dynamically with JavaScript.
-                // // Wait for the page to load, timeout after 10 seconds
-                // var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-                // wait.Until(d => d.Title.StartsWith("cheese", StringComparison.OrdinalIgnoreCase));
+                    // // Google's search is rendered dynamically with JavaScript.
+                    // // Wait for the page to load, timeout after 10 seconds
+                    // var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+                    // wait.Until(d => d.Title.StartsWith("cheese", StringComparison.OrdinalIgnoreCase));
 
-                log.Log(
-                    new Pixie.LogEntry(
-                        Severity.Message,
-                        "page title",
-                        driver.Title));
+                    log.Log(
+                        new Pixie.LogEntry(
+                            Severity.Message,
+                            "page title",
+                            driver.Title));
+                }
             }
         }
 
@@ -147,7 +228,7 @@ namespace SeleniumTests
             process.StartInfo.FileName = "gulp";
             process.StartInfo.Arguments = "build";
             process.StartInfo.UseShellExecute = false;
-            // pProcess.StartInfo.RedirectStandardOutput = true;
+            // process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             process.StartInfo.CreateNoWindow = true;
             process.Start();
