@@ -4,7 +4,7 @@ all:
 	msbuild selenium.sln
 
 run:
-	mono ./bin/Debug/selenium-tests.exe
+	mono ./bin/Debug/selenium-tests.exe "http://www.google.com/"
 
 nuget:
 	nuget restore

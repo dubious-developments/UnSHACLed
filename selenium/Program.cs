@@ -54,14 +54,31 @@ namespace SeleniumTests
                 return 0;
             }
 
-            Run(log);
+            string testUri = parsedOptions.GetValue<string>(Options.Uri);
+            if (string.IsNullOrWhiteSpace(parsedOptions.GetValue<string>(Options.Uri)))
+            {
+                log.Log(
+                    new Pixie.LogEntry(
+                        Severity.Error,
+                        "nothing to do",
+                        "no URI to test was specified."));
+                return 1;
+            }
+
+            Run(testUri, log);
 
             // If things went swimmingly, then return a zero exit code.
             // Otherwise, let the world know that something is wrong.
             return errorEncountered ? 1 : 0;
         }
 
-        private static void Run(ILog log)
+        /// <summary>
+        /// Runs all the tests based on parsed command-line options
+        /// and a log.
+        /// </summary>
+        /// <param name="uri">The URI to test.</param>
+        /// <param name="log">A log to send messages to.</param>
+        private static void Run(string uri, ILog log)
         {
             // Create a new instance of the Firefox driver.
             // Note that it is wrapped in a using clause so that the browser is closed 
@@ -79,7 +96,7 @@ namespace SeleniumTests
             {
                 //Notice navigation is slightly different than the Java version
                 //This is because 'get' is a keyword in C#
-                driver.Navigate().GoToUrl("http://www.google.com/");
+                driver.Navigate().GoToUrl(uri);
 
                 // Find the text input element by its name
                 IWebElement query = driver.FindElement(By.Name("q"));
