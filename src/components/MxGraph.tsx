@@ -38,7 +38,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             test: "Shape",
             preview: null,
             dragElement: null,
-            dragElList: ["Shape", "Node Shape", "Property Shape", "Address", "Person"],
+            dragElList: ["Shape", "Node Shape", "Property Shape"],
             templateCount: 0
         };
         this.handleLoad = this.handleLoad.bind(this);
@@ -223,12 +223,12 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         };
 
         /**
-         * Guesses autoTranslate to avoid another repaint (see below).
-         * Works if only the scale of the graph changes or if pages
-         * are visible and the visible pages do not change.
+         * THIS FUNCTION CAUSED AUTOFOCUS BUG !!!!
          */
-        let graphViewValidate = graph.view.validate;
+
+        /*let graphViewValidate = graph.view.validate;
         graph.view.validate = function () {
+            console.log("graphViewValidate");
             if (this.graph.container !== null && mxUtils.hasScrollbars(this.graph.container)) {
                 let pad = this.graph.getPagePadding();
                 let size = this.graph.getPageSize();
@@ -240,7 +240,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             }
 
             graphViewValidate.apply(this, arguments);
-        };
+        };*/
 
         let graphSizeDidChange = graph.sizeDidChange;
         graph.sizeDidChange = function () {
@@ -598,9 +598,9 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
         style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
         style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_TOP;
-        style[mxConstants.STYLE_FILLCOLOR] = '#A1E44D';
+        style[mxConstants.STYLE_FILLCOLOR] = '#135589';
         style[mxConstants.STYLE_SWIMLANE_FILLCOLOR] = '#ffffff';
-        style[mxConstants.STYLE_STROKECOLOR] = '#A6E853';
+        style[mxConstants.STYLE_STROKECOLOR] = '#135589';
         style[mxConstants.STYLE_FONTCOLOR] = '#000000';
         style[mxConstants.STYLE_STROKEWIDTH] = '1';
         style[mxConstants.STYLE_STARTSIZE] = '28';
@@ -614,9 +614,9 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
         style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
         style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_TOP;
-        style[mxConstants.STYLE_FILLCOLOR] = '#2FBF71';
+        style[mxConstants.STYLE_FILLCOLOR] = '#2A93D5';
         style[mxConstants.STYLE_SWIMLANE_FILLCOLOR] = '#ffffff';
-        style[mxConstants.STYLE_STROKECOLOR] = '#2FBF71';
+        style[mxConstants.STYLE_STROKECOLOR] = '#2A93D5';
         style[mxConstants.STYLE_FONTCOLOR] = '#000000';
         style[mxConstants.STYLE_STROKEWIDTH] = '1';
         style[mxConstants.STYLE_STARTSIZE] = '28';
@@ -630,9 +630,9 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
         style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
         style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_TOP;
-        style[mxConstants.STYLE_FILLCOLOR] = '#7D26CD';
+        style[mxConstants.STYLE_FILLCOLOR] = '#A1E44D';
         style[mxConstants.STYLE_SWIMLANE_FILLCOLOR] = '#ffffff';
-        style[mxConstants.STYLE_STROKECOLOR] = '#7D26CD';
+        style[mxConstants.STYLE_STROKECOLOR] = '#A1E44D';
         style[mxConstants.STYLE_FONTCOLOR] = '#000000';
         style[mxConstants.STYLE_STROKEWIDTH] = '1';
         style[mxConstants.STYLE_STARTSIZE] = '28';
@@ -684,6 +684,21 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.addToolbarButton(editor, toolbar, 'zoomOut', '-', 'zoom out');
         this.addToolbarButton(editor, toolbar, 'actualSize', '', 'actual size');
         this.addToolbarButton(editor, toolbar, 'fit', '', 'fit');
+        /* Dropdown File toolbar */
+        /* Dropdown Edit toolbar */
+        this.addToolbarButton(editor, toolbar, 'undo', '', 'tb_undo');
+        this.addToolbarButton(editor, toolbar, 'redo', '', 'tb_redo');
+        this.addToolbarButton(editor, toolbar, 'delete', '', 'tb_delete');
+        this.addToolbarButton(editor, toolbar, 'copy', '', 'tb_copy');
+        this.addToolbarButton(editor, toolbar, 'paste', '', 'tb_paste');
+        this.addToolbarButton(editor, toolbar, 'selectAll', '', 'tb_all');
+        this.addToolbarButton(editor, toolbar, 'selectNone', '', 'tb_none');
+        /* Dropdown View toolbar */
+        this.addToolbarButton(editor, toolbar, 'show', '', 'tb_show');
+        this.addToolbarButton(editor, toolbar, 'zoomIn', '', 'tb_zoomin');
+        this.addToolbarButton(editor, toolbar, 'zoomOut', '', 'tb_zoomout');
+        this.addToolbarButton(editor, toolbar, 'actualSize', '', 'tb_actual');
+        this.addToolbarButton(editor, toolbar, 'fit', '', 'tb_fit');
     }
 
     addToolbarButton(editor: any, toolbar: any, action: any, label: any, id: any) {
@@ -810,7 +825,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     }
 
     public fitGraph() {
-        this.editor.execute("fit");
+        // this.editor.execute("fit");
     }
 
     main(container: HTMLElement | null): void {
@@ -852,6 +867,12 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             editor.setGraphContainer(container);
             let graph = editor.graph;
 
+            // Set keyboard short cuts
+            let kbsc = require('./config/keyhandler-minimal.xml');
+            let config = mxUtils.load(kbsc).
+            getDocumentElement();
+            editor.configure(config);
+
             // Enable Panning
             graph.panningHandler.ignoreCell = false;
             graph.setPanning(true);
@@ -869,7 +890,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             this.initDragAndDrop(graph);
             this.initToolBar(editor);
             container.focus();
-          
+
             // Get add template button
             var d2 = document.getElementById("addTemplate");
             if (d2) {
