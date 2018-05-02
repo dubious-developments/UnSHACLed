@@ -9,6 +9,7 @@ module.exports = function(config) {
             { pattern: "src/form/**/*.tsx" },
             { pattern: "src/pages/**/*.tsx" },
             { pattern: "src/services/**/*.tsx" },
+            { pattern: "src/dropdowns/**/*.tsx" },
             { pattern: "test/**/*.ts" },
         ],
 
