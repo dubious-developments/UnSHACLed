@@ -8,6 +8,7 @@ import MxGraph from "../components/MxGraph";
 import { ImmutableGraph } from "../persistence/graph";
 import { Component } from "../persistence/component";
 import SideBar from "../components/Sidebar";
+import { Triple } from "../components/MxGraph";
 
 /**
  * First search the component which belongs to the fileName
@@ -118,16 +119,16 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
 
     public execute(data: ModelData): void {
         let component = data.getComponent<Component<ImmutableGraph>>(this.mComponent);
-        if (component) {
 
+        if (component) {
             for (let part of component.getAllKeys()) {
                 // handle the graph objects correctly
                 if (this.mxGraph) {
                     let persistenceGraph = component.getPart(part);
 
-                    // graph.query(
-                    //     store => this.mxGraph.visualizeDataGraph(store, graph.getPrefixes()));
-                    this.mxGraph.visualizeDataGraph(persistenceGraph, persistenceGraph.getPrefixes());
+                    this.mxGraph.visualizeDataGraph(
+                        persistenceGraph, ModelComponent[this.mComponent],  persistenceGraph.getPrefixes()
+                    );
 
                     SideBar.setPrefixes(persistenceGraph.getPrefixes());
 
@@ -209,5 +210,33 @@ export class GetValidationReportNavbar extends Task<ModelData, ModelTaskMetadata
 
     public get metadata(): ModelTaskMetadata {
         return new ModelTaskMetadata([ModelComponent.ValidationReport, ModelComponent.UI], [ModelComponent.UI]);
+    }
+}
+
+export class RemoveTripleComponent extends Task<ModelData, ModelTaskMetadata> {
+
+    public constructor(private triple: Triple) {
+        super();
+    }
+
+    public execute(data: ModelData): void {
+
+        let dataComponent = data.getComponent<Component<ImmutableGraph>>(ModelComponent.DataGraph);
+
+        let shapesComponent = data.getComponent<Component<ImmutableGraph>>(ModelComponent.SHACLShapesGraph);
+
+        console.log(this.triple);
+        if (this.triple.type === "DataGraph" && dataComponent) {
+            data.setComponent(ModelComponent.DataGraph, dataComponent.withRoot(this.triple.mutableGraph.asImmutable()));
+        } else if (shapesComponent) {
+            data.setComponent(
+                ModelComponent.SHACLShapesGraph, shapesComponent.withRoot(this.triple.mutableGraph.asImmutable()));
+        }
+    }
+
+    public get metadata(): ModelTaskMetadata {
+        return new ModelTaskMetadata(
+            [ModelComponent.UI, ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph],
+            [ModelComponent.UI, ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph]);
     }
 }

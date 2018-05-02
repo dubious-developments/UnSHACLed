@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as Collections from 'typescript-collections';
 import {ModelComponent} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
-import {GetValidationReport, VisualizeComponent} from "../services/ModelTasks";
+import {GetValidationReport, RemoveTripleComponent, VisualizeComponent} from "../services/ModelTasks";
 import TimingService from "../services/TimingService";
 import {ValidationReport} from "../conformance/wrapper/ValidationReport";
 import {MxGraphProps} from "./interfaces/interfaces";
@@ -460,7 +460,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         graph.addCellOverlay(cell, overlay);
     }
 
-    parseDataGraphToBlocks(persistenceGraph: any, prefixes: PrefixMap) {
+    parseDataGraphToBlocks(persistenceGraph: any, type: string, prefixes: PrefixMap) {
         // let DASH = $rdf.Namespace("http://datashapes.org/dash#");
         let RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
         // let RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
@@ -476,7 +476,8 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             if (!this.subjectToBlockDict.containsKey(triple.subject.value)) {
                 this.subjectToBlockDict.setValue(triple.subject.value, new Block(triple.subject.value));
             }
-            newTriples.add(new Triple(triple.subject.value, triple.predicate.value, triple.object.value, mutableGraph));
+            newTriples.add(new Triple(
+                triple.subject.value, triple.predicate.value, triple.object.value, mutableGraph, type));
         });
 
         newTriples.difference(this.triples);
@@ -509,10 +510,10 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.blockToCellDict.clear();
     }
 
-    visualizeDataGraph(persistenceGraph: any, prefixes: PrefixMap) {
+    visualizeDataGraph(persistenceGraph: any, type: string, prefixes: PrefixMap) {
         this.clear();
         let {graph} = this.state;
-        let blocks = this.parseDataGraphToBlocks(persistenceGraph, prefixes);
+        let blocks = this.parseDataGraphToBlocks(persistenceGraph, type, prefixes);
 
         let model = graph.getModel();
         let parent = graph.getDefaultParent();
@@ -896,13 +897,15 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 for (let i = 0; i < cells.length; i++) {
                     let triple = this.cellToTriples.getValue(cells[i]);
                     if (triple) {
-                        console.log(triple);
                         this.removeTripleFromBlocks(triple);
                         this.triples.remove(triple);
                         this.cellToTriples.remove(cells[i]);
 
                         let mutableGraph = triple.mutableGraph;
                         mutableGraph.removeTriple(triple.subject, triple.predicate, triple.object);
+
+                        model.tasks.schedule(new RemoveTripleComponent(triple));
+                        model.tasks.processAllTasks();
                     }
                 }
             });
@@ -1049,17 +1052,19 @@ class Block {
     }
 }
 
-class Triple {
+export class Triple {
     public subject: string;
     public predicate: string;
     public object: string;
     public mutableGraph: Graph;
+    public type: string;
 
-    constructor(subject: string, predicate: string, object: string, mutableGraph: Graph) {
+    constructor(subject: string, predicate: string, object: string, mutableGraph: Graph, type: string) {
         this.subject = subject;
         this.predicate = predicate;
         this.object = object;
         this.mutableGraph = mutableGraph;
+        this.type = type;
     }
 
     toString(): string {
