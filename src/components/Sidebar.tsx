@@ -1,8 +1,13 @@
 import * as React from 'react';
-import {Sidebar, Menu, Image, Input, Dropdown, List, Button, Label, Popup} from 'semantic-ui-react';
-import TreeView from './treeView';
+import {
+    Sidebar, Menu, Image, Input, Button, Label,
+    Accordion, Checkbox, Header, Popup, List, Icon, Dropdown
+} from 'semantic-ui-react';
 import {SidebarProps} from './interfaces/interfaces';
+import SidebarPopup from './sidebarPopup';
+import Legend from './Legend';
 import {PrefixMap} from "../persistence/graph";
+import TreeView from './treeView';
 
 class SideBar extends React.Component<SidebarProps, any> {
 
@@ -13,7 +18,7 @@ class SideBar extends React.Component<SidebarProps, any> {
     ];
     static SHACLMenuItems = ["Shape", "Node Shape", "Property Shape"];
     static GeneralMenuItems = ["Arrow", "Rectangle"];
-    static TemplateMenuItems = ["Address", "Person"];
+    static TemplateMenuItems;
 
     static prefixes: PrefixMap;
 
@@ -23,8 +28,11 @@ class SideBar extends React.Component<SidebarProps, any> {
         this.state = {
             value: '',
             content: 1,
-            dragid: null,
+            dragid: null
         };
+
+        /* bind template menu to props */
+        SideBar.TemplateMenuItems = this.props.templates;
 
         this.handleChange = this.handleChange.bind(this);
         this.handleDropDown = this.handleDropDown.bind(this);
@@ -74,11 +82,18 @@ class SideBar extends React.Component<SidebarProps, any> {
         for (let i = 0; i < res.length; i++) {
             let key = kind + i;
             items.push(
-                <Menu.Item
-                    as="a"
-                    id={res[i]}
-                    content={res[i]}
+                <SidebarPopup
+                    p_size={"mini"}
+                    p_position={"right center"}
+                    header_title={res[i]}
                     key={key}
+                    trigger={
+                        <Menu.Item
+                            as="a"
+                            id={res[i]}
+                            content={res[i]}
+                        />
+                    }
                 />
             );
         }
@@ -157,6 +172,11 @@ class SideBar extends React.Component<SidebarProps, any> {
         const logo = require('../img/logo.png');
         const defaultOption = 1;
         let {templates} = this.props;
+        const rootPanels = [
+            {title: 'SHACL', content: {content: <this.DynamicMenu kind="SHACL"/>, key: 'content-1'}},
+            {title: 'Template', content: {content: templates, key: 'content-2'}},
+        ];
+
         return (
             <Sidebar
                 as={Menu}
@@ -170,10 +190,10 @@ class SideBar extends React.Component<SidebarProps, any> {
                 }}
                 id="sideBarID"
             >
+                {/* Sidebar Logo */}
                 <Menu.Item style={{height: '5em'}}>
                     <Image src={logo} size="mini" centered={true}/>
                 </Menu.Item>
-
                 <Menu.Item>
                     <Dropdown
                         defaultValue={defaultOption}
@@ -185,9 +205,10 @@ class SideBar extends React.Component<SidebarProps, any> {
                         pointing="top right"
                     />
                 </Menu.Item>
+
                 {this.state.content === defaultOption && (
                     <div>
-                        <Menu.Item>
+                        <Menu.Item style={{backgroundColor: "#3d3e3f"}}>
                             <Input
                                 onChange={this.handleChange}
                                 type="text"
@@ -198,63 +219,47 @@ class SideBar extends React.Component<SidebarProps, any> {
                                 icon="search"
                             />
                         </Menu.Item>
+                        <Menu.Item>
+                            <Button
+                                id={"addTemplate"}
+                                inverted={true}
 
-                        <Popup
-                            trigger={
-                                <Menu.Item>
-                                    SHACL
-                                    <this.DynamicMenu kind="SHACL"/>
-                                </Menu.Item>
+                            > Add template from selection
+                            </Button>
+                            {this.props.showLabel ?
+                                <Label
+                                    basic={true}
+                                    color='red'
+                                    pointing={true}
+                                >
+                                    Nothing is selected!
+                                </Label> : null
                             }
-                            content='Drag and drop a component of your choice to the graph.'
-                            size="mini"
-                            position='right center'
+                        </Menu.Item>
+
+                        <Accordion
+                            defaultActiveIndex={[0, 2]}
                             inverted={true}
+                            exclusive={false}
+                            fluid={true}
+                            panels={rootPanels}
                         />
 
-                        {/*                        <Menu.Item>
-                            General
-                            <this.DynamicMenu kind="General"/>
-                        </Menu.Item>*/}
-                        <Popup
-                            trigger={
-                                <Menu.Item id="TemplateMenu">
-                                    Template
-                                    <this.DynamicMenu kind="Template"/>
-
-                                    <Menu.Menu>
-                                        <Menu.Item>
-                                            <Button
-                                                id={"addTemplate"}
-                                                inverted={true}
-
-                                            > Add template from selection
-                                            </Button>
-                                            {this.props.showLabel ?
-                                            <Label
-                                                basic={true}
-                                                color='red'
-                                                pointing={true}
-                                            >
-                                                Nothing is selected!
-                                            </Label> : null
-                                            }
-                                        </Menu.Item>
-                                        {templates}
-                                    </Menu.Menu>
-                                </Menu.Item>
-                            }
-                            content='Drag and drop a component of your choice to the graph.'
-                            size="mini"
-                            position='right center'
-                            inverted={true}
-                        />
+                        <Menu.Item style={{bottom: 0, position: 'absolute'}}>
+                            <Legend
+                                header_title={"Show Legend"}
+                                colors={['#135589', '#2A93D5', 'AED9DA', '#A1E44D']}
+                                entries={['Shape', 'Property', 'Property Attribute', 'Data']}
+                            />
+                        </Menu.Item>
                     </div>
+
                 )
                 }
+
                 {this.state.content === 2 && (
                     <Menu.Item>
-                        <this.PrefixMenu />
+                        <this.PrefixMenu/>
                     </Menu.Item>
                 )
                 }

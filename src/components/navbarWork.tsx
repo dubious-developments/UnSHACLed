@@ -1,14 +1,19 @@
 import * as React from 'react';
-import { Menu, Icon, Popup, List} from 'semantic-ui-react';
+import {Menu, Icon, Popup, List, Dropdown} from 'semantic-ui-react';
 import Auth from '../services/Auth';
-import { Link, withRouter } from 'react-router-dom';
-import { NavbarWorkProps } from './interfaces/interfaces';
-import { FileModule } from '../persistence/fileDAO';
-import { Model } from '../entities/model';
-import { DataAccessProvider } from '../persistence/dataAccessProvider';
+import {Link, withRouter} from 'react-router-dom';
+import {NavbarWorkProps} from './interfaces/interfaces';
+import {FileModule} from '../persistence/fileDAO';
+import {Model} from '../entities/model';
+import {DataAccessProvider} from '../persistence/dataAccessProvider';
 import {LoadFileTask, GetOpenedFilesTask, GetValidationReportNavbar} from '../services/ModelTasks';
-import { ModelComponent } from '../entities/modelTaskMetadata';
+import {ModelComponent} from '../entities/modelTaskMetadata';
 import {ValidationReport, ValidationError} from "../conformance/wrapper/ValidationReport";
+import ToolbarIcon from './ToolbarIcon';
+import DropdownFile from '../dropdowns/DropdownFile';
+import DropdownEdit from '../dropdowns/DropdownEdit';
+import DropdownView from '../dropdowns/DropdownView';
+import DropdownHelp from '../dropdowns/DropdownHelp';
 
 export class Navbar extends React.Component<NavbarWorkProps, {}> {
 
@@ -28,6 +33,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
         this.ConformanceErrors = this.ConformanceErrors.bind(this);
         this.getConformanceErrors = this.getConformanceErrors.bind(this);
         this.setReport = this.setReport.bind(this);
+        this.fileCallback = this.fileCallback.bind(this);
     }
 
     public setLoadedFiles(files: string[]) {
@@ -146,14 +152,14 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
         }
 
         if (items.length === 0) {
-            return <label>No files currently opened in the editor </label> ;
+            return <label>No files currently opened in the editor </label>;
         }
 
         return (
             <div>
                 <label>Files that are currently opened in the editor: </label>
-                <br />
-                <List items={items} />
+                <br/>
+                <List items={items}/>
             </div>
         );
     }
@@ -163,7 +169,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
     * TODO later show conformance errors in mxGraph
     */
     ConformanceErrors(props: any) {
-        if (! this.report) {
+        if (!this.report) {
             return (
                 <label>No conformance report generated yet</label>
             );
@@ -182,143 +188,78 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
         }
 
         if (items.length === 0) {
-            return <label>No conformance errors </label> ;
+            return <label>No conformance errors </label>;
         }
 
         return (
             <div>
                 <label>Conformance errors: </label>
-                <br />
-                <List items={items} />
+                <br/>
+                <List items={items}/>
             </div>
         );
+    }
+
+    /* Function used as a callback from the child componente for the file dropdown option */
+    fileCallback (childData: any) {
+        if (childData === "shacl") {
+            this.uploadSHACLGraphButton();
+        } else if (childData === "data") {
+            this.uploadDataGraphButton();
+
+        }
+        console.log(childData);
     }
 
     render() {
 
         return (
             <div>
+                {/* General Toolbar */}
                 <Menu
                     inverted={true}
-                    size="large"
-                    icon={true}
+                    size="tiny"
                     style={{
                         borderRadius: 0,
+                        margin: 0,
+                        padding: 0
                     }}
+                    borderless={true}
                 >
-                    {/* Toolbar icons */}
                     <Menu.Item as="a" onClick={this.iconClick} content={<Icon name='content'/>}/>
-                    <Popup
-                        trigger={<Menu.Item as="a" id="delete" content={<Icon name='trash'/>}/>}
-                        content='Delete selected component(s) from graph'
-                        size="mini"
-                        position='bottom left'
-                        inverted={true}
-                    />
-
-                    <Popup
-                        trigger={<Menu.Item as="a" id="undo" content={<Icon name='reply'/>}/>}
-                        content='Undo last action'
-                        size="mini"
-                        position='bottom left'
-                        inverted={true}
-                    />
-
-                    <Popup
-                        trigger={<Menu.Item as="a" id="redo" content={<Icon name='share'/>}/>}
-                        content='Redo last action'
-                        size="mini"
-                        position='bottom left'
-                        inverted={true}
-                    />
-
-                    <Popup
-                        trigger={<Menu.Item as="a" id="camera" content={<Icon name='camera'/>}/>}
-                        content='Generate snap shot of current graph'
-                        size="mini"
-                        position='bottom left'
-                        inverted={true}
-                    />
-
-                    <Popup
-                        trigger={
-                            <Menu.Item
-                                as="a"
-                                id="zoom in"
-                                content={<Icon name='search' style={{paddingRight: '1em'}}/>}
-                            />}
-                        content='Zoom in'
-                        size="mini"
-                        position='bottom left'
-                        inverted={true}
-                    />
-
-                    <Popup
-                        trigger={
-                            <Menu.Item
-                                as="a"
-                                id="zoom out"
-                                content={<Icon name='search' style={{paddingRight: '1em'}}/>}
-                            />}
-                        content='Zoom out'
-                        size="mini"
-                        position='bottom left'
-                        inverted={true}
-                    />
-
-                    <Popup
-                        trigger={<Menu.Item as="a" id="actual size" content={<Icon name='compress'/>}/>}
-                        content='Set current graph to actual size'
-                        size="mini"
-                        position='bottom left'
-                        inverted={true}
-                    />
-
-                    <Popup
-                        trigger={<Menu.Item as="a" id="fit" content={<Icon name='expand'/>}/>}
-                        content='Make graph fit the screen'
-                        size="mini"
-                        position='bottom left'
-                        inverted={true}
-                    />
-
-                    <Menu.Item as="a" onClick={this.uploadSHACLGraphButton}>
-                        Import SHACL Graph
+                    {/* Toolbar 'File' */}
+                    <Menu.Item>
+                        <DropdownFile opened_files={<this.OpenedFiles/>} import_cb={this.fileCallback}/>
+                        {/* Import SHACL Graph input*/}
                         <input
                             onChange={this.importSHACLGraph}
                             type="file"
                             id="importSHACLGraph"
-                            style={{"display" : "none"}}
+                            style={{"display": "none"}}
                             accept={this.allowedExtensions}
                         />
-                    </Menu.Item>
-                    <Menu.Item as="a" onClick={this.uploadDataGraphButton}>
-                        Import Data Graph
+                        {/* Import Data graph input*/}
                         <input
                             onChange={this.importDataGraph}
                             type="file"
                             id="importDataGraph"
-                            style={{"display" : "none"}}
+                            style={{"display": "none"}}
                             accept={this.allowedExtensions}
                         />
                     </Menu.Item>
-
-                    <Popup
-                        trigger={<Menu.Item as="a" onClick={this.saveGraph}>Save Graph</Menu.Item>}
-                        on="click"
-                        inverted={false}
-                    >
-                        <this.OpenedFiles />
-                    </Popup>
-
-                    <Popup
-                        trigger={<Menu.Item as="a" onClick={this.getConformanceErrors}>Conformance errors</Menu.Item>}
-                        on="click"
-                        inverted={false}
-                    >
-                        <this.ConformanceErrors />
-                    </Popup>
-
+                    {/* Toolbar 'Edit' */}
+                    <Menu.Item>
+                        <DropdownEdit/>
+                    </Menu.Item>
+                    {/* Toolbar 'View' */}
+                    <Menu.Item>
+                        <DropdownView/>
+                    </Menu.Item>
+                    {/* Toolbar 'Help' */}
+                    <Menu.Item>
+                        <DropdownHelp/>
+                    </Menu.Item>
+                    {/* Toolbar 'Github repo' */}
                     <Menu.Item
                         as="a"
                         href="https://github.com/dubious-developments/UnSHACLed"
@@ -330,12 +271,13 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                             />
                         }
                     />
+                    {/* Toolbar 'Github re' */}
                     <Menu.Item
                         as="a"
                         target="_blank"
                         href="https://github.com/dubious-developments/UnSHACLed/wiki/Release-notes"
                     >
-                        v0.3
+                        v0.5
                     </Menu.Item>
                     <Menu.Item
                         as={Link}
@@ -344,6 +286,101 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                     >
                         Logout
                     </Menu.Item>
+                </Menu>
+                {/* Toolbar icons menu */}
+                <Menu
+                    inverted={true}
+                    size="mini"
+                    icon={true}
+                    borderless={true}
+                    style={{
+                        borderRadius: 0,
+                        margin: 0,
+                        padding: 0
+                    }}
+                >
+                    {/* Toolbar icons */}
+                    {/* Zoom in */}
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Zoom in"}
+                        t_id={"zoom in"}
+                        icon_name={"search"}
+                    />
+                    {/* Zoom out */}
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Zoom out"}
+                        t_id={"zoom out"}
+                        icon_name={"search"}
+                    />
+                    {/* Undo */}
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Undo last action"}
+                        t_id={"undo"}
+                        icon_name={"reply"}
+                    />
+                    {/* Redo */}
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Redo last action"}
+                        t_id={"redo"}
+                        icon_name={"share"}
+                    />
+                    {/* Delete */}
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Delete selected component(s) from graph"}
+                        t_id={"delete"}
+                        icon_name={"trash"}
+                    />
+                    {/* snapshot */}
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Generate snap shot of current graph"}
+                        t_id={"camera"}
+                        icon_name={"camera"}
+                    />
+                    {/* set size */}
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Set current graph to actual size"}
+                        t_id={"actual size"}
+                        icon_name={"compress"}
+                    />
+                    {/* fit size */}
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Make graph fit the screen"}
+                        t_id={"fit"}
+                        icon_name={"expand"}
+                    />
+
+                    <Popup
+                        trigger={<Menu.Item as="a" onClick={this.saveGraph}>Save Graph</Menu.Item>}
+                        on="click"
+                        inverted={false}
+                    >
+                        <this.OpenedFiles/>
+                    </Popup>
+
+                    <Popup
+                        trigger={<Menu.Item as="a" onClick={this.getConformanceErrors}>Conformance errors</Menu.Item>}
+                        on="click"
+                        inverted={false}
+                    >
+                        <this.ConformanceErrors/>
+                    </Popup>
+
                 </Menu>
             </div>
         );
