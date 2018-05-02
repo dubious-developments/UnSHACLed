@@ -90,7 +90,13 @@ namespace SeleniumTests
             {
                 // If nobody bothered to specify a URL, then we'll just point it to
                 // the application.
-                testUrl = "file:///" + Path.GetFullPath(Path.Combine("..", "build", "index.html")).TrimStart('/');
+                var absPath = Path.GetFullPath(Path.Combine("..", "build", "index.html")).TrimStart('/');
+                if (Path.DirectorySeparatorChar == '\\')
+                {
+                    // <Shivers>
+                    absPath = absPath.Replace(Path.DirectorySeparatorChar, '/');
+                }
+                testUrl = "file:///" + absPath;
             }
 
             var browserNames = parsedOptions.ContainsOption(Options.Browsers)
