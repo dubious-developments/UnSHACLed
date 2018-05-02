@@ -8,29 +8,29 @@ export enum ModelComponent {
     /**
      * The data graph component.
      */
-    DataGraph,
+    DataGraph = "DataGraph",
 
     /**
      * A pseudo-component for I/O access. Tasks that use
      * this component must both read from and write to it.
      */
-    IO,
+    IO = "IO",
 
     /**
      * A pseudo-component for UI access.
      */
-    UI,
+    UI = "UI",
 
     /**
      * The shapes graph component used for SHACL validation.
      */
-    SHACLShapesGraph,
+    SHACLShapesGraph = "SHACLShapesGraph",
 
     /**
      * The validation report indicating which nodes
      * of the datagraph are conforming to active constraints.
      */
-    ValidationReport
+    ValidationReport = "ValidationReport"
 }
 
 /**

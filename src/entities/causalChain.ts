@@ -48,8 +48,13 @@ export class CausalChain<S, T> {
                 let success = link.linkTo(newLink);
                 if (success) {
                     if (newLink.hasSimilarAncestor(newLink)) {
-                        newLink.severLink(link);
+                        // if the new link causes periodicity
+                        // sever all newly made ties
+                        newLink.antecedent.forEach(ancestor => {
+                            newLink.severLink(ancestor);
+                        });
                         periodic = true;
+                        return;
                     }
                 }
             }
@@ -116,9 +121,21 @@ export class CausalChain<S, T> {
         this.tails.forEach(link => {
             chain += "[";
             link.antecedent.forEach(ancestor => {
-                chain += `(${ancestor}, ${ancestor.getEvent()})`;
+                chain += `( ${ancestor}, ${ancestor.getEvent()}, effects:`;
+                ancestor.effects.forEach(effect => {
+                   chain += ` ${effect}`;
+                });
+                chain += ')';
             });
-            chain += `] => (${link}, ${link.getEvent()})\n`;
+            chain += `] ==> ( causes:`;
+            link.causes.forEach(cause => {
+                chain += ` ${cause} `;
+            });
+            chain += `, ${link}, ${link.getEvent()}, effects:`;
+            link.effects.forEach(effect => {
+                chain += ` ${effect}`;
+            });
+            chain += `)\n`;
         });
 
         return chain;
