@@ -60,7 +60,6 @@ class Workspace extends React.Component<any, any> {
     }
     render() {
         const {menuVisible} = this.state;
-        const {dragid} = this.state;
         const {templates} = this.state;
         const {errorLabel} = this.state;
         return (

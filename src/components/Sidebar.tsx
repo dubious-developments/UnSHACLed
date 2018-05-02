@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Sidebar, Menu, Image, Input, Dropdown, List, Button, Label, Popup} from 'semantic-ui-react';
+import {Sidebar, Menu, Image, Input, Dropdown, Button, Label, Popup} from 'semantic-ui-react';
 import TreeView from './treeView';
 import {SidebarProps} from './interfaces/interfaces';
 import {PrefixMap} from "../persistence/graph";

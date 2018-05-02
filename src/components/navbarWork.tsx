@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Menu, Icon, Popup, List} from 'semantic-ui-react';
 import Auth from '../services/Auth';
-import { Link, withRouter } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { NavbarWorkProps } from './interfaces/interfaces';
 import { FileModule } from '../persistence/fileDAO';
 import { Model } from '../entities/model';
