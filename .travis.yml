@@ -31,7 +31,7 @@ install:
   - sudo apt install apt-transport-https
   - echo "deb https://download.mono-project.com/repo/ubuntu stable-trusty main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
   - sudo apt update
-  - sudo apt install mono-devel mono-complete
+  - sudo apt install mono-devel mono-complete nuget
   # Build sshpass 1.06 from source. We need it to deploy a nightly
   # build of UnSHACLed to the server.
   - wget https://netix.dl.sourceforge.net/project/sshpass/sshpass/1.06/sshpass-1.06.tar.gz
@@ -51,7 +51,7 @@ script:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then XVFB_RUN=xvfb-run; fi
   - $XVFB_RUN gulp test
   # Run the Selenium tests.
-  - pushd selenium; make nuget && make && make TEST_OPTIONS=--no-build-app run; popd
+  - pushd selenium && make nuget && make && $XVFB_RUN make TEST_OPTIONS=--no-build-app run && popd
   # Run SonarCloud, but only on Linux.
   - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ ! -z "$SONARCLOUD_KEY" ]; then sonar-scanner; fi
   # Deploy a nightly build when all tests are successful for a master branch commit.
