@@ -59,6 +59,17 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
     componentDidMount() {
         this.handleLoad();
+        window.addEventListener('beforeunload', this.leaveAlert);
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('beforeunload', this.leaveAlert);
+    }
+
+    leaveAlert(e:any) {
+        const c = '';
+        e.returnValue = c;
+        return c;
     }
 
     componentWillReceiveProps(nextprops: any) {
