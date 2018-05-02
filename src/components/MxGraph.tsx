@@ -868,22 +868,22 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         let invalidCellsToErrorDict = new Collections.DefaultDictionary<any, any>(() => []);
         // The keys function of a dictionary returns an array instead of a set, so keep an extra set aswell
         let incInvalidCells = new Collections.Set<any>(); 
-        if (!report.getIsConforming()) {
+        if (!report.isConforming()) {
             for (let error of report.getValidationErrors()) {
-                let block = this.subjectToBlockDict.getValue(error.dataElement);
+                let block = this.subjectToBlockDict.getValue(error.getDataElement());
                 let cell = this.blockToCellDict.getValue(block);
                 invalidCellsToErrorDict.getValue(cell).push(error); 
                 incInvalidCells.add(cell);
             }
         }
         invalidCellsToErrorDict.forEach((cell, errors) => this.turnCellInvalid(cell, errors));
-    
+
         this.invalidCells.difference(incInvalidCells);
         // In invalidCells are now the cells that are no longer invalid
         this.invalidCells.forEach(cell => {
             this.turnCellValid(cell);
         });
-    
+
         this.invalidCells = incInvalidCells;
     }
 
