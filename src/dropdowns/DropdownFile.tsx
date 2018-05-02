@@ -38,7 +38,7 @@ class DropdownFile extends React.Component<DropdownFileProps, any> {
                     <Dropdown.Divider/>
                     <Dropdown.Item icon='github' text='Open graph from account' />
                     <Dropdown.Item icon='github' text='Save graph to account'/>
-                    <Dropdown.Item icon='trash' text='Clear graph'/>
+                    <Dropdown.Item icon='trash' text='Clear graph' id='tb_clear_graph'/>
                 </Dropdown.Menu>
             </Dropdown>
         );
