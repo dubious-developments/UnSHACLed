@@ -423,7 +423,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         // let SCHEMA = $rdf.Namespace("http://schema.org/");
         let SH = $rdf.Namespace("http://www.w3.org/ns/shacl#");
         // let XSD = $rdf.Namespace("http://www.w3.org/2001/XMLSchema#");
-        // console.log(prefixes);
+
         let triples = store.statements;
         let newTriples = new Collections.Set<Triple>();
 
@@ -523,7 +523,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
      * @param {string} s
      * @param {PrefixMap} prefixes
      */
-    replacePrefixes(s: string, prefixes: PrefixMap) {
+    replacePrefixes(s: string, prefixes: PrefixMap): string {
         Object.keys(prefixes).forEach(key => {
             s = s.replace(prefixes[key], key + ":");
         });
