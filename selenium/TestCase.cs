@@ -40,11 +40,12 @@ namespace SeleniumTests
         /// Runs this test case against a web driver.
         /// </summary>
         /// <param name="driver">A web driver to use.</param>
+        /// <param name="driverName">The name of the driver being used.</param>
         /// <param name="log">A log to send messages to.</param>
         /// <returns>
         /// <c>true</c> if the test was successful; otherwise, <c>false</c>.
         /// </returns>
-        public bool Run(IWebDriver driver, ILog log)
+        public bool Run(IWebDriver driver, string driverName, ILog log)
         {
             try
             {
@@ -57,11 +58,29 @@ namespace SeleniumTests
                     new Pixie.LogEntry(
                         Severity.Error,
                         new Diagnostic(
-                            new Quotation(Description, 2),
+                            driverName,
                             "error",
                             Colors.Red,
-                            "assertion failed",
+                            new Quotation(Description, 2),
                             ex.FormattedMessage)));
+                return false;
+            }
+            catch (Exception ex)
+            {
+                log.Log(
+                    new Pixie.LogEntry(
+                        Severity.Error,
+                        new Diagnostic(
+                            driverName,
+                            "error",
+                            Colors.Red,
+                            new Quotation(Description, 2),
+                            new Sequence(
+                                Quotation.QuoteEvenInBold(
+                                "unhandled exception of type ",
+                                ex.GetType().FullName,
+                                "."),
+                                new Paragraph(ex.ToString())))));
                 return false;
             }
         }
