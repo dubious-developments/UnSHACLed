@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -94,8 +94,14 @@ namespace SeleniumTests
                 var absPath = Path.GetFullPath(Path.Combine("..", "build", "index.html")).TrimStart('/');
                 if (Path.DirectorySeparatorChar == '\\')
                 {
-                    // <Shivers>
+                    // Welcome to Windows file URL hell.
                     absPath = absPath.Replace(Path.DirectorySeparatorChar, '/');
+                    int colonIndex = absPath.IndexOf(":");
+                    if (colonIndex > 0)
+                    {
+                        // Make the drive letter lowercase.
+                        absPath = absPath.Substring(0, colonIndex).ToLower() + absPath.Substring(colonIndex);
+                    }
                 }
                 testUrl = "file:///" + absPath;
             }
