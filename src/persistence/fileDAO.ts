@@ -36,7 +36,7 @@ export class FileDAO implements DataAccessObject {
      */
     public insert(module: Module) {
         this.model.tasks.schedule(new SaveTask(this.io, module));
-        this.model.tasks.processTask(); // TODO: Do this in the frontend!
+        this.model.tasks.processAllTasks();
     }
 
     /**
@@ -47,7 +47,7 @@ export class FileDAO implements DataAccessObject {
         let self = this;
         this.io.readFromFile(module, function (result: Graph) {
             self.model.tasks.schedule(new LoadTask(result.asImmutable(), module));
-            self.model.tasks.processTask(); // TODO: Do this in the frontend!
+            self.model.tasks.processAllTasks();
         });
     }
 }
