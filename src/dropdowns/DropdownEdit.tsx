@@ -1,5 +1,6 @@
 import * as React from 'react';
-import {Dropdown, Popup} from 'semantic-ui-react';
+import {Dropdown} from 'semantic-ui-react';
+
 /*
     Component used to create a dropdown component for the edit toolbar option
     Requires several props from the parent, which can be found in interfaces.d.ts

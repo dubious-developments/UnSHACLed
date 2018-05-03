@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {
     Sidebar, Menu, Image, Input, Button, Label,
-    Accordion, Checkbox, Header, Popup, List, Icon, Dropdown
+    Accordion, Checkbox, Header, Popup, Icon, Dropdown
 } from 'semantic-ui-react';
 import {SidebarProps} from './interfaces/interfaces';
 import SidebarPopup from './sidebarPopup';

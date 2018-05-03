@@ -1,5 +1,3 @@
-import { Task } from "./task";
-
 /**
  * Rewrites tasks that been scheduled but have not yet been
  * executed.

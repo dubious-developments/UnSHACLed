@@ -1,7 +1,6 @@
 import {Model} from "../entities/model";
 import {FileDAO} from "./fileDAO";
 import {ValidationService} from "../conformance/ValidationService";
-import TimingService from "../services/TimingService";
 
 export class DataAccessProvider {
 

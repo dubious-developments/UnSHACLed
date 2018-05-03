@@ -1,4 +1,3 @@
-import * as Collections from "typescript-collections";
 import * as Immutable from "immutable";
 import { ModelData } from "../entities/model";
 import { ModelComponent } from "../entities/modelTaskMetadata";
