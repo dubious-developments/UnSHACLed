@@ -91,3 +91,13 @@ package-lock.json
 
 # Python bytecode cache
 __pycache__/
+
+# NuGet packages
+packages/
+
+# Build directories
+bin/
+obj/
+
+# MonoDevelop preferences
+*.userprefs

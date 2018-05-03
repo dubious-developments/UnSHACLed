@@ -139,7 +139,6 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
         } else {
             console.log("Could not find the ModelComponent: ", component);
         }
-
     }
 
     public get metadata(): ModelTaskMetadata {

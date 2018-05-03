@@ -27,5 +27,7 @@ build_script:
 
 # Post-install test scripts.
 test_script:
-  # run tests
+  # Run tests.
   - gulp test
+  # Run Selenium tests. TODO: get URL to index.html right on Windows.
+  # - pushd selenium && run-ci.bat && popd
