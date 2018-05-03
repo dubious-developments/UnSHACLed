@@ -431,11 +431,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     addNewRowOverlay(graph:any, cell: any) {
         // Creates a new overlay in the middle with an image and a tooltip
         let overlay = new mxCellOverlay(
-<<<<<<< HEAD
             new mxImage('img/add.png', 24, 24), 'Add a new row', mxConstants.ALIGN_CENTER);
-=======
-            new mxImage('add.png', 24, 24), 'Add a new row', mxConstants.ALIGN_CENTER);
->>>>>>> 7f951800d261b8d9f7eee113131f6175a841e063
         overlay.cursor = 'hand';
 
         let model = graph.getModel();
