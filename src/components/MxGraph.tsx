@@ -833,11 +833,12 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             model.registerObserver(new ModelObserver((changeBuf) => {
                 let tasks = new Array<Task<ModelData, ModelTaskMetadata>>();
                 changeBuf.forEach((key) => {
-                    if (key === ModelComponent.DataGraph) { // data graph has changed
+                    console.log(key);
+                    // only listen to IO, mgxgraph handles the other changes self
+                    if (key === ModelComponent.IO) {
+                        console.log("change");
+                        // TODO only one task with both
                         tasks.push(new VisualizeComponent(ModelComponent.DataGraph, this));
-                    }
-
-                    if (key === ModelComponent.SHACLShapesGraph) { // shapes graph has changed
                         tasks.push(new VisualizeComponent(ModelComponent.SHACLShapesGraph, this));
                     }
                 });
@@ -992,6 +993,8 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         // notify that a user action took place
         this.timer.userAction(function(this: MxGraph) {
             model.tasks.schedule(new GetValidationReport(self));
+            // process all tasks when idle
+            console.log("idle");
             model.tasks.processAllTasks();
         });
     }

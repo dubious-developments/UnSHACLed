@@ -117,6 +117,8 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
     }
 
     public execute(data: ModelData): void {
+        console.log("called");
+
         let component = data.getComponent<Component<ImmutableGraph>>(this.mComponent);
         if (component) {
 
