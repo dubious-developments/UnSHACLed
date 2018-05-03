@@ -108,7 +108,7 @@ namespace SeleniumTests
                                 " failed to launch; do you have ",
                                 procName,
                                 " installed? If not, try ",
-                                "npm install -g " + procName,
+                                "npm install -g " + procName + "@6.5.3",
                                 ".")));
                     return 1;
                 }

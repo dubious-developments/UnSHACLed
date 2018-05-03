@@ -45,6 +45,8 @@ install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo pip3 install pygithub; fi
   # Install gulp.
   - npm install -g gulp
+  # Install serve, which we'll need for running the Selenium tests.
+  - npm install -g serve@6.5.3
   # Install npm dependencies.
   - npm install
 
