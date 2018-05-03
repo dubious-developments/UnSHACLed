@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -87,23 +88,31 @@ namespace SeleniumTests
                         "UnSHACLed built successfully!"));
             }
 
+            Process serverProcess = null;
             if (noUrl)
             {
-                // If nobody bothered to specify a URL, then we'll just point it to
-                // the application.
-                var absPath = Path.GetFullPath(Path.Combine("..", "build", "index.html")).TrimStart('/');
-                if (Path.DirectorySeparatorChar == '\\')
+                // If nobody bothered to specify a URL, then we'll just have to
+                // host it ourselves.
+                string procName = "serve";
+                string procArgs = "-s build -p 8080";
+                serverProcess = StartUnSHACLedProcess(procName, procArgs);
+                if (serverProcess == null)
                 {
-                    // Welcome to Windows file URL hell.
-                    absPath = absPath.Replace(Path.DirectorySeparatorChar, '/');
-                    int colonIndex = absPath.IndexOf(":");
-                    if (colonIndex > 0)
-                    {
-                        // Make the drive letter lowercase.
-                        absPath = absPath.Substring(0, colonIndex).ToLower() + absPath.Substring(colonIndex);
-                    }
+                    log.Log(
+                        new Pixie.LogEntry(
+                            Severity.Error,
+                            "cannot host",
+                            Quotation.QuoteEvenInBold(
+                                "command ",
+                                procName + " " + procArgs,
+                                " failed to launch; do you have ",
+                                procName,
+                                " installed? If not, try ",
+                                "npm install -g " + procName,
+                                ".")));
+                    return 1;
                 }
-                testUrl = "file:///" + absPath;
+                testUrl = "http://localhost:8080/index.html";
             }
 
             var browserNames = parsedOptions.ContainsOption(Options.Browsers)
@@ -130,7 +139,18 @@ namespace SeleniumTests
                             ".")));
             }
 
-            Run(testUrl, browsersToUse, log);
+            try
+            {
+                Run(testUrl, browsersToUse, log);
+            }
+            finally
+            {
+                if (serverProcess != null)
+                {
+                    serverProcess.Kill();
+                    serverProcess.Dispose();
+                }
+            }
 
             // If things went swimmingly, then return a zero exit code.
             // Otherwise, let the world know that something is wrong.
@@ -236,16 +256,38 @@ namespace SeleniumTests
 
         private static void BuildUnSHACLed()
         {
+            var process = StartUnSHACLedProcess("gulp", "build");
+
+            process.WaitForExit();
+        }
+
+        /// <summary>
+        /// Starts a process with the UnSHACLed directory
+        /// as working directory.
+        /// </summary>
+        /// <param name="fileName">The name of the process to launch.</param>
+        /// <param name="arguments">The arguments to pass to the process.</param>
+        /// <returns>A handle to a process that has been launched.</returns>
+        private static Process StartUnSHACLedProcess(string fileName, string arguments)
+        {
             var process = new Process();
             process.StartInfo.WorkingDirectory = Directory.GetParent(Directory.GetCurrentDirectory()).FullName;
-            process.StartInfo.FileName = "gulp";
-            process.StartInfo.Arguments = "build";
+            process.StartInfo.FileName = fileName;
+            process.StartInfo.Arguments = arguments;
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             process.StartInfo.CreateNoWindow = true;
-            process.Start();
 
-            process.WaitForExit();
+            try
+            {
+                process.Start();
+            }
+            catch (Win32Exception)
+            {
+                process.Dispose();
+                return null;
+            }
+            return process;
         }
     }
 }
