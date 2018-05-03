@@ -487,11 +487,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         newTriples.difference(this.triples);
         this.triples.union(newTriples);
 
-        if (! newTriples.isEmpty()) {
-            this.needToRender = true;
-        } else {
-            this.needToRender = false;
-        }
+        this.needToRender = !newTriples.isEmpty();
 
         newTriples.forEach((triple: any) => {
             let subject = triple.subject;
