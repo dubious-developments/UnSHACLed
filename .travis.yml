@@ -34,7 +34,7 @@ install:
       sudo apt update;
       sudo apt install mono-devel mono-complete nuget;
     else
-      brew update && brew install mono;
+      brew update && brew install mono && brew install nuget;
     fi
   # Build sshpass 1.06 from source. We need it to deploy a nightly
   # build of UnSHACLed to the server.
