@@ -43,7 +43,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.initiateDragPreview = this.initiateDragPreview.bind(this);
         this.getGraphUnderMouse = this.getGraphUnderMouse.bind(this);
         this.makeDragSource = this.makeDragSource.bind(this);
-        this.visualizeDataGraph = this.visualizeDataGraph.bind(this);
+        this.visualizeFile = this.visualizeFile.bind(this);
         this.handleUserAction = this.handleUserAction.bind(this);
         this.addTemplate = this.addTemplate.bind(this);
 
@@ -460,7 +460,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         graph.addCellOverlay(cell, overlay);
     }
 
-    parseDataGraphToBlocks(persistenceGraph: any, type: string, prefixes: PrefixMap) {
+    parseDataGraphToBlocks(persistenceGraph: any, type: string, file: string, prefixes: PrefixMap) {
         // let DASH = $rdf.Namespace("http://datashapes.org/dash#");
         let RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
         // let RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
@@ -477,7 +477,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 this.subjectToBlockDict.setValue(triple.subject.value, new Block(triple.subject.value));
             }
             newTriples.add(new Triple(
-                triple.subject.value, triple.predicate.value, triple.object.value, mutableGraph, type));
+                triple.subject.value, triple.predicate.value, triple.object.value, mutableGraph, type, file));
         });
 
         newTriples.difference(this.triples);
@@ -510,10 +510,10 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.blockToCellDict.clear();
     }
 
-    visualizeDataGraph(persistenceGraph: any, type: string, prefixes: PrefixMap) {
+    visualizeFile(persistenceGraph: any, type: string, file: string, prefixes: PrefixMap) {
         this.clear();
         let {graph} = this.state;
-        let blocks = this.parseDataGraphToBlocks(persistenceGraph, type, prefixes);
+        let blocks = this.parseDataGraphToBlocks(persistenceGraph, type, file, prefixes);
 
         let model = graph.getModel();
         let parent = graph.getDefaultParent();
@@ -1058,13 +1058,15 @@ export class Triple {
     public object: string;
     public mutableGraph: Graph;
     public type: string;
+    public file: string;
 
-    constructor(subject: string, predicate: string, object: string, mutableGraph: Graph, type: string) {
+    constructor(subject: string, predicate: string, object: string, mutableGraph: Graph, type: string, file: string) {
         this.subject = subject;
         this.predicate = predicate;
         this.object = object;
         this.mutableGraph = mutableGraph;
         this.type = type;
+        this.file = file;
     }
 
     toString(): string {

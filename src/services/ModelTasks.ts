@@ -126,8 +126,8 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
                 if (this.mxGraph) {
                     let persistenceGraph = component.getPart(part);
 
-                    this.mxGraph.visualizeDataGraph(
-                        persistenceGraph, ModelComponent[this.mComponent],  persistenceGraph.getPrefixes()
+                    this.mxGraph.visualizeFile(
+                        persistenceGraph, ModelComponent[this.mComponent], part, persistenceGraph.getPrefixes()
                     );
 
                     SideBar.setPrefixes(persistenceGraph.getPrefixes());
@@ -227,11 +227,13 @@ export class RemoveTripleComponent extends Task<ModelData, ModelTaskMetadata> {
 
         console.log(this.triple);
         if (this.triple.type === "DataGraph" && dataComponent) {
-            data.setComponent(ModelComponent.DataGraph, dataComponent.withRoot(this.triple.mutableGraph.asImmutable()));
+            data.setComponent(ModelComponent.DataGraph, dataComponent.withPart(
+                this.triple.file, this.triple.mutableGraph.asImmutable()));
         } else if (shapesComponent) {
-            data.setComponent(
-                ModelComponent.SHACLShapesGraph, shapesComponent.withRoot(this.triple.mutableGraph.asImmutable()));
+            data.setComponent(ModelComponent.SHACLShapesGraph, shapesComponent.withPart(
+                this.triple.file, this.triple.mutableGraph.asImmutable()));
         }
+
     }
 
     public get metadata(): ModelTaskMetadata {
