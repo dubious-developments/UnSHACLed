@@ -23,6 +23,7 @@ class Navbar extends React.Component<any, any> {
                     <Menu.Item
                         as={Link}
                         to="/about"
+                        id="navbar-item-about"
                         style={{color: 'white'}}
                     >
                         About
