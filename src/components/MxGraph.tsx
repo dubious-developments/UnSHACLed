@@ -7,7 +7,7 @@ import TimingService from "../services/TimingService";
 import {ValidationReport} from "../conformance/wrapper/ValidationReport";
 import {MxGraphProps} from "./interfaces/interfaces";
 import {ModelObserver} from "../entities/model";
-import {Graph, PrefixMap} from "../persistence/graph";
+import {ImmutableGraph, PrefixMap} from "../persistence/graph";
 import {Task} from "../entities/task";
 import {ModelData} from "../entities/modelData";
 
@@ -22,6 +22,10 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     private blockToCellDict: Collections.Dictionary<Block, any>;
     private subjectToBlockDict: Collections.Dictionary<string, Block>;
     private triples: Collections.Set<Triple>;
+    private needToRender: boolean;
+
+    private fileToGraphDict: Collections.Dictionary<string, ImmutableGraph>;
+    private fileToTypeDict: Collections.Dictionary<string, string>;
 
     private cellToTriples: Collections.Dictionary<any, Triple>;
     private invalidCells: Collections.Set<any>;
@@ -55,6 +59,8 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.triples = new Collections.Set<Triple>((t) =>  t.subject + " " + t.predicate + " " + t.object);
         this.cellToTriples = new Collections.Dictionary<any, Triple>((c) => c.value.name);
         this.invalidCells = new Collections.Set<any>();
+        this.fileToGraphDict = new Collections.Dictionary<string, ImmutableGraph>();
+        this.fileToTypeDict = new Collections.Dictionary<string, string>();
 
         this.timer = new TimingService();
     }
@@ -462,16 +468,12 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         graph.addCellOverlay(cell, overlay);
     }
 
-    parseDataGraphToBlocks(persistenceGraph: any, type: string, file: string, prefixes: PrefixMap) {
-        // let DASH = $rdf.Namespace("http://datashapes.org/dash#");
+    parseDataGraphToBlocks(persistenceGraph: any, file: string) {
         let RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-        // let RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
-        // let SCHEMA = $rdf.Namespace("http://schema.org/");
         let SH = $rdf.Namespace("http://www.w3.org/ns/shacl#");
-        // let XSD = $rdf.Namespace("http://www.w3.org/2001/XMLSchema#");
 
         let triples = persistenceGraph.query(store => store).statements;
-        let mutableGraph = persistenceGraph.toMutable();
+        this.fileToGraphDict.setValue(file, persistenceGraph);
         let newTriples = new Collections.Set<Triple>();
 
         triples.forEach((triple: any) => {
@@ -479,11 +481,17 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 this.subjectToBlockDict.setValue(triple.subject.value, new Block(triple.subject.value));
             }
             newTriples.add(new Triple(
-                triple.subject.value, triple.predicate.value, triple.object.value, mutableGraph, type, file));
+                triple.subject.value, triple.predicate.value, triple.object.value, file));
         });
 
         newTriples.difference(this.triples);
         this.triples.union(newTriples);
+
+        if (! newTriples.isEmpty()) {
+            this.needToRender = true;
+        } else {
+            this.needToRender = false;
+        }
 
         newTriples.forEach((triple: any) => {
             let subject = triple.subject;
@@ -513,9 +521,16 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     }
 
     visualizeFile(persistenceGraph: any, type: string, file: string, prefixes: PrefixMap) {
+        let blocks = this.parseDataGraphToBlocks(persistenceGraph, file);
+        if (! this.needToRender) {
+            return;
+        }
+
+        console.log("start real vis");
+
         this.clear();
         let {graph} = this.state;
-        let blocks = this.parseDataGraphToBlocks(persistenceGraph, type, file, prefixes);
+        this.fileToTypeDict.setValue(file, type);
 
         let model = graph.getModel();
         let parent = graph.getDefaultParent();
@@ -898,11 +913,24 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                         this.triples.remove(triple);
                         this.cellToTriples.remove(cells[i]);
 
-                        let mutableGraph = triple.mutableGraph;
-                        mutableGraph.removeTriple(triple.subject, triple.predicate, triple.object);
+                        let oldGraph = this.fileToGraphDict.getValue(triple.file);
+                        let file = this.fileToTypeDict.getValue(triple.file);
 
-                        model.tasks.schedule(new RemoveTripleComponent(triple));
-                        model.tasks.processAllTasks();
+                        if (oldGraph && file) {
+                            let newGraph = oldGraph.removeTriple(triple.subject, triple.predicate, triple.object);
+                            this.fileToGraphDict.setValue(
+                                triple.file,
+                                newGraph
+                            );
+
+                            model.tasks.schedule(new RemoveTripleComponent(
+                                newGraph, file, triple.file)
+                            );
+
+                            model.tasks.processAllTasks();
+                        } else {
+                            console.log("removed triple was not linked to graph or file");
+                        }
                     }
                 }
             });
@@ -1053,16 +1081,12 @@ export class Triple {
     public subject: string;
     public predicate: string;
     public object: string;
-    public mutableGraph: Graph;
-    public type: string;
     public file: string;
 
-    constructor(subject: string, predicate: string, object: string, mutableGraph: Graph, type: string, file: string) {
+    constructor(subject: string, predicate: string, object: string, file: string) {
         this.subject = subject;
         this.predicate = predicate;
         this.object = object;
-        this.mutableGraph = mutableGraph;
-        this.type = type;
         this.file = file;
     }
 
