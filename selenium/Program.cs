@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -94,8 +94,14 @@ namespace SeleniumTests
                 var absPath = Path.GetFullPath(Path.Combine("..", "build", "index.html")).TrimStart('/');
                 if (Path.DirectorySeparatorChar == '\\')
                 {
-                    // <Shivers>
+                    // Welcome to Windows file URL hell.
                     absPath = absPath.Replace(Path.DirectorySeparatorChar, '/');
+                    int colonIndex = absPath.IndexOf(":");
+                    if (colonIndex > 0)
+                    {
+                        // Make the drive letter lowercase.
+                        absPath = absPath.Substring(0, colonIndex).ToLower() + absPath.Substring(colonIndex);
+                    }
                 }
                 testUrl = "file:///" + absPath;
             }
@@ -151,15 +157,15 @@ namespace SeleniumTests
         /// <param name="names">The names to parse.</param>
         /// <param name="log">A log for sending errors to.</param>
         /// <returns>A list of web driver builders.</returns>
-        private static IEnumerable<Func<IWebDriver>> ParseBrowserNames(
+        private static IReadOnlyDictionary<string, Func<IWebDriver>> ParseBrowserNames(
             IEnumerable<string> names, ILog log)
         {
-            var browsersToUse = new List<Func<IWebDriver>>();
-            foreach (var name in names)
+            var browsersToUse = new Dictionary<string, Func<IWebDriver>>();
+            foreach (var name in names.Distinct())
             {
                 if (Drivers.ContainsKey(name))
                 {
-                    browsersToUse.Add(Drivers[name]);
+                    browsersToUse[name] = Drivers[name];
                 }
                 else
                 {
@@ -203,14 +209,18 @@ namespace SeleniumTests
         /// </summary>
         /// <param name="uri">The URI to test.</param>
         /// <param name="driverBuilders">
-        /// A sequence of functions that each produce a driver to run the tests with.
+        /// A mapping of driver names to functions that each produce
+        /// a driver to run the tests with.
         /// </param>
         /// <param name="log">A log to send messages to.</param>
-        private static void Run(string uri, IEnumerable<Func<IWebDriver>> driverBuilders, ILog log)
+        private static void Run(
+            string uri,
+            IReadOnlyDictionary<string, Func<IWebDriver>> driverBuilders,
+            ILog log)
         {
             foreach (var builder in driverBuilders)
             {
-                using (IWebDriver driver = builder())
+                using (IWebDriver driver = builder.Value())
                 {
                     foreach (var testCase in TestCases)
                     {
@@ -218,7 +228,7 @@ namespace SeleniumTests
                         driver.Navigate().GoToUrl(uri);
 
                         // Then run the actual test case.
-                        testCase.Run(driver, log);
+                        testCase.Run(driver, builder.Key, log);
                     }
                 }
             }
