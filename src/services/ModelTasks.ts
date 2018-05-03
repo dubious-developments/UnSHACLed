@@ -212,7 +212,7 @@ export class GetValidationReportNavbar extends Task<ModelData, ModelTaskMetadata
     }
 }
 
-export class RemoveTripleComponent extends Task<ModelData, ModelTaskMetadata> {
+export class RemoveTriple extends Task<ModelData, ModelTaskMetadata> {
 
     public constructor(private graph: ImmutableGraph, private type: string, private file: string) {
         super();

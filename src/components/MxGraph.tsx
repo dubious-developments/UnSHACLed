@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as Collections from 'typescript-collections';
 import {ModelComponent, ModelTaskMetadata} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
-import {GetValidationReport, RemoveTripleComponent, VisualizeComponent} from "../services/ModelTasks";
+import {GetValidationReport, RemoveTriple, VisualizeComponent} from "../services/ModelTasks";
 import TimingService from "../services/TimingService";
 import {ValidationReport} from "../conformance/wrapper/ValidationReport";
 import {MxGraphProps} from "./interfaces/interfaces";
@@ -522,8 +522,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             return;
         }
 
-        console.log("start real vis");
-
         this.clear();
         let {graph} = this.state;
         this.fileToTypeDict.setValue(file, type);
@@ -919,7 +917,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                                 newGraph
                             );
 
-                            model.tasks.schedule(new RemoveTripleComponent(
+                            model.tasks.schedule(new RemoveTriple(
                                 newGraph, file, triple.file)
                             );
 
