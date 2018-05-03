@@ -178,7 +178,7 @@ export class FileModule implements Module {
 
 /**
  * A Task that reads a file and adds its contents as a component to the Model.
- * Also adds to the pseudo IO component so that observers know IO changes have happened
+ * Also adds to the pseudo IO component so that observers know IO changes have happened.
  */
 class LoadTask extends Task<ModelData, ModelTaskMetadata> {
 
@@ -201,7 +201,7 @@ class LoadTask extends Task<ModelData, ModelTaskMetadata> {
      * @param data The data the task takes as input.
      */
     public execute(data: ModelData): void {
-        console.log("reading");
+
         let component = data.getOrCreateComponent(
             this.module.getTarget(),
             () => new Component<ImmutableGraph>()
