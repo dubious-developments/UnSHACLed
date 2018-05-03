@@ -10,7 +10,8 @@ import {ModelObserver} from "../entities/model";
 import {Graph, PrefixMap} from "../persistence/graph";
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
-    mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout, mxCellOverlay, mxImage: any;
+    mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout, mxCellOverlay, mxImage,
+    mxGraphModel: any;
 
 let $rdf = require('rdflib');
 
@@ -370,26 +371,40 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             if (cell.value != null && cell.value.name != null) {
                 return cell.value.name;
             }
-            return mxGraph.prototype.convertValueToString.apply(this, arguments); // "supercall"
+            // "supercall"
+            return mxGraph.prototype.convertValueToString.apply(this, arguments);
         };
 
-        let superCellLabelChanged = graph.cellLabelChanged;
-        graph.cellLabelChanged = function (cell: any, newValue: string, autoSize: any) {
-            if (mxUtils.isNode(cell.value.name)) {
-                // Clones the value for correct undo/redo
-                let elt = cell.value.cloneNode(true);
-                elt.setAttribute('label', newValue);
-                newValue = elt;
-            }
+        // let superCellLabelChanged = graph.cellLabelChanged;
+        // graph.cellLabelChanged = function (cell: any, newValue: string, autoSize: any) {
+        //     if (cell.value) {
+        //         // Clones the value for correct undo/redo
+        //         // let elt = mxUtils.clone(cell.value);
+        //         let elt = cell.value.clone();
+        //         elt.setAttribute('name', newValue);
+        //         newValue = elt;
+        //     }
 
-            superCellLabelChanged.apply(this, arguments);
-        };
+        //     superCellLabelChanged.apply(this, arguments);
+        // };
 
         graph.getLabel = function (cell: any) {
+            console.log(cell);
             if (this.isHtmlLabel(cell)) {
                 return mxUtils.htmlEntities(cell.value.name);
             }
             return mxGraph.prototype.getLabel.apply(this, arguments);
+        };
+
+        // Text label changes will go into the name field of the user object
+        graph.model.valueForCellChanged = function(cell: any, value: any) {
+            if (value.name != null) {
+                return mxGraphModel.prototype.valueForCellChanged.apply(this, arguments);
+            } else {
+                var old = cell.value.name;
+                cell.value.name = value;
+                return old;
+            }
         };
 
         // Properties are dynamically created HTML labels
@@ -443,7 +458,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             model.beginUpdate();
             try {
                 let temprow = model.cloneCell(instance.nameToStandardCellDict.getValue('row'));
-                temprow.value = {name: "new row", trait: "null"};
+                temprow.value.name = "new row";
                 cell.insert(temprow);
             } finally {
                 // Updates the display
@@ -516,7 +531,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
         blocks.forEach(b => {
             let v1 = model.cloneCell(this.nameToStandardCellDict.getValue('block'));
-            v1.value = this.replacePrefixes(b.name, prefixes);
+            v1.value.name = this.replacePrefixes(b.name, prefixes);
             this.blockToCellDict.setValue(b, v1);
         });
 
@@ -532,7 +547,8 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                         + this.replacePrefixes(trait.object, prefixes);
                     // let name = trait.predicate + " :  " + trait.object;
                     longestname = Math.max(name.length, longestname);
-                    temprow.value = {name: name, trait: trait};
+                    temprow.value.name = name;
+                    temprow.value.trait = trait;
                     v1.insert(temprow);
 
                     this.addNewRowOverlay(graph, v1);
@@ -729,13 +745,12 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 style = 'Property';
             }
             /* Create empty block */
-            let b = new Block();
+            let b = v1.getValue();
             b.name = "new " + id;
             b.blockType = style;
 
             /* Create empty row */
             let temprow = model.cloneCell(row);
-            temprow.value = {name: "", trait: "null"};
             b.traits = [temprow];
 
             model.beginUpdate();
@@ -771,8 +786,8 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     addTemplate() {
         let {graph} = this.state;
         let {templateCount} = this.state;
-        // TODO prevent multiple cell selection
-        // TODO positioning??
+        // TODO: prevent multiple cell selection
+        // TODO: positioning??
 
         if (!graph.isSelectionEmpty()) {
             // Creates a copy of the selection array to preserve its state
@@ -952,7 +967,8 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             cell.children.forEach(rowCell => {
                 let found = false;
                 for (let error of errors) {
-                    if (error.getShapeProperty() === rowCell.value.trait.predicate) {
+                    if (rowCell.value.trait && 
+                        rowCell.value.trait.predicate === error.getShapeProperty()) {
                         rowCell.setStyle("InvalidRow");
                         rowCell.value.error = error;
 
@@ -1072,6 +1088,12 @@ export class Triple {
 
 class Row {
     name: string;
+    trait: Triple;
+    error: any;
+
+    constructor(name?: string) {
+        this.name = name || "";
+    }
 
     clone() {
         return mxUtils.clone(this);
