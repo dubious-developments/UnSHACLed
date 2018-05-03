@@ -12,7 +12,6 @@ import {PrefixMap} from "../persistence/graph";
 import {Task} from "../entities/task";
 import {ModelData} from "../entities/modelData";
 
-
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout, mxCellOverlay, mxImage: any;
 
