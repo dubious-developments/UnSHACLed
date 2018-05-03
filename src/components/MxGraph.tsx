@@ -2,12 +2,12 @@ import * as React from 'react';
 import * as Collections from 'typescript-collections';
 import {ModelComponent} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
-import {GetValidationReport, VisualizeComponent} from "../services/ModelTasks";
+import {GetValidationReport, RemoveTripleComponent, VisualizeComponent} from "../services/ModelTasks";
 import TimingService from "../services/TimingService";
 import {ValidationReport} from "../conformance/wrapper/ValidationReport";
 import {MxGraphProps} from "./interfaces/interfaces";
 import {ModelObserver} from "../entities/model";
-import {PrefixMap} from "../persistence/graph";
+import {Graph, PrefixMap} from "../persistence/graph";
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout, mxCellOverlay, mxImage: any;
@@ -431,7 +431,11 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     addNewRowOverlay(graph:any, cell: any) {
         // Creates a new overlay in the middle with an image and a tooltip
         let overlay = new mxCellOverlay(
+<<<<<<< HEAD
             new mxImage('img/add.png', 24, 24), 'Add a new row', mxConstants.ALIGN_CENTER);
+=======
+            new mxImage('add.png', 24, 24), 'Add a new row', mxConstants.ALIGN_CENTER);
+>>>>>>> 7f951800d261b8d9f7eee113131f6175a841e063
         overlay.cursor = 'hand';
 
         let model = graph.getModel();
@@ -456,7 +460,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         graph.addCellOverlay(cell, overlay);
     }
 
-    parseDataGraphToBlocks(store: any, prefixes: PrefixMap) {
+    parseDataGraphToBlocks(persistenceGraph: any, type: string, prefixes: PrefixMap) {
         // let DASH = $rdf.Namespace("http://datashapes.org/dash#");
         let RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
         // let RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
@@ -464,14 +468,16 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         let SH = $rdf.Namespace("http://www.w3.org/ns/shacl#");
         // let XSD = $rdf.Namespace("http://www.w3.org/2001/XMLSchema#");
 
-        let triples = store.statements;
+        let triples = persistenceGraph.query(store => store).statements;
+        let mutableGraph = persistenceGraph.toMutable();
         let newTriples = new Collections.Set<Triple>();
 
         triples.forEach((triple: any) => {
             if (!this.subjectToBlockDict.containsKey(triple.subject.value)) {
                 this.subjectToBlockDict.setValue(triple.subject.value, new Block(triple.subject.value));
             }
-            newTriples.add(new Triple(triple.subject.value, triple.predicate.value, triple.object.value));
+            newTriples.add(new Triple(
+                triple.subject.value, triple.predicate.value, triple.object.value, mutableGraph, type));
         });
 
         newTriples.difference(this.triples);
@@ -504,10 +510,11 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.blockToCellDict.clear();
     }
 
-    visualizeDataGraph(store: any, prefixes: PrefixMap) {
+    visualizeDataGraph(persistenceGraph: any, type: string, prefixes: PrefixMap) {
         this.clear();
         let {graph} = this.state;
-        let blocks = this.parseDataGraphToBlocks(store, prefixes);
+        let blocks = this.parseDataGraphToBlocks(persistenceGraph, type, prefixes);
+
         let model = graph.getModel();
         let parent = graph.getDefaultParent();
 
@@ -531,6 +538,8 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                     longestname = Math.max(name.length, longestname);
                     temprow.value = {name: name, trait: trait};
                     v1.insert(temprow);
+
+                    this.addNewRowOverlay(graph, v1);
 
                     this.cellToTriples.setValue(temprow, trait);
 
@@ -890,7 +899,15 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 for (let i = 0; i < cells.length; i++) {
                     let triple = this.cellToTriples.getValue(cells[i]);
                     if (triple) {
-                        console.log(triple);
+                        this.removeTripleFromBlocks(triple);
+                        this.triples.remove(triple);
+                        this.cellToTriples.remove(cells[i]);
+
+                        let mutableGraph = triple.mutableGraph;
+                        mutableGraph.removeTriple(triple.subject, triple.predicate, triple.object);
+
+                        model.tasks.schedule(new RemoveTripleComponent(triple));
+                        model.tasks.processAllTasks();
                     }
                 }
             });
@@ -1037,15 +1054,19 @@ class Block {
     }
 }
 
-class Triple {
+export class Triple {
     public subject: string;
     public predicate: string;
     public object: string;
+    public mutableGraph: Graph;
+    public type: string;
 
-    constructor(subject: string, predicate: string, object: string) {
+    constructor(subject: string, predicate: string, object: string, mutableGraph: Graph, type: string) {
         this.subject = subject;
         this.predicate = predicate;
         this.object = object;
+        this.mutableGraph = mutableGraph;
+        this.type = type;
     }
 
     toString(): string {
