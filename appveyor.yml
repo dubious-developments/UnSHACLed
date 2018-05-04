@@ -19,6 +19,8 @@ install:
   - npm install
   # Install gulp.
   - npm install -g gulp
+  # Install serve for running the Selenium tests.
+  - npm install -g serve@6.5.3
 
 # Build scripts. These run after installation.
 build_script:
