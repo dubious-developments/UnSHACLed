@@ -30,8 +30,9 @@ namespace SeleniumTests
             bool errorEncountered = false;
 
             // Acquire a log for when things go sideways.
+            var rawLog = TerminalLog.Acquire();
             var log = new TransformLog(
-                TerminalLog.Acquire(),
+                rawLog,
                 entry => DiagnosticExtractor.Transform(entry, "selenium-tests"),
                 entry =>
                 {
@@ -141,7 +142,7 @@ namespace SeleniumTests
 
             try
             {
-                Run(testUrl, browsersToUse, log);
+                Run(testUrl, browsersToUse, log, rawLog);
             }
             finally
             {
@@ -233,22 +234,42 @@ namespace SeleniumTests
         /// a driver to run the tests with.
         /// </param>
         /// <param name="log">A log to send messages to.</param>
+        /// <param name="progressLog">A log for progress messages.</param>
         private static void Run(
             string uri,
             IReadOnlyDictionary<string, Func<IWebDriver>> driverBuilders,
-            ILog log)
+            ILog log,
+            ILog progressLog)
         {
+            var allTestCases = TestCases.ToArray();
+            int testCaseCount = allTestCases.Length * driverBuilders.Count;
+            int completedTestCases = 0;
             foreach (var builder in driverBuilders)
             {
                 using (IWebDriver driver = builder.Value())
                 {
-                    foreach (var testCase in TestCases)
+                    foreach (var testCase in allTestCases)
                     {
                         // Always navigate to the front page first.
                         driver.Navigate().GoToUrl(uri);
 
                         // Then run the actual test case.
-                        testCase.Run(driver, builder.Key, log);
+                        bool success = testCase.Run(driver, builder.Key, log);
+
+                        completedTestCases++;
+                        double percentage = 100 * completedTestCases / testCaseCount;
+
+                        // Print a fancy progress message.
+                        progressLog.Log(
+                            new Pixie.LogEntry(
+                                Severity.Info,
+                                DecorationSpan.MakeBold(
+                                    new ColorSpan(
+                                        string.Format("[{0,3}%]", Math.Round(percentage)),
+                                        success ? Colors.Green : Colors.Red)),
+                                " ",
+                                DecorationSpan.MakeBold(new Quotation(testCase.Description, 2)),
+                                string.Format(" [{0}]", builder.Key)));
                     }
                 }
             }
