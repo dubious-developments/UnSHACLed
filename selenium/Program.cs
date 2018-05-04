@@ -94,23 +94,9 @@ namespace SeleniumTests
             {
                 // If nobody bothered to specify a URL, then we'll just have to
                 // host it ourselves.
-                string procName = "serve";
-                string procArgs = "-s build -p 8080";
-                serverProcess = StartUnSHACLedProcess(procName, procArgs);
+                serverProcess = HostUnSHACLed(8080, log);
                 if (serverProcess == null)
                 {
-                    log.Log(
-                        new Pixie.LogEntry(
-                            Severity.Error,
-                            "cannot host",
-                            Quotation.QuoteEvenInBold(
-                                "command ",
-                                procName + " " + procArgs,
-                                " failed to launch; do you have ",
-                                procName,
-                                " installed? If not, try ",
-                                "npm install -g " + procName + "@6.5.3",
-                                ".")));
                     return 1;
                 }
                 testUrl = "http://localhost:8080/index.html";
@@ -288,8 +274,14 @@ namespace SeleniumTests
         /// </summary>
         /// <param name="fileName">The name of the process to launch.</param>
         /// <param name="arguments">The arguments to pass to the process.</param>
+        /// <param name="redirectStandardOutput">
+        /// Tells if the process' standard output should be redirected.
+        /// </param>
         /// <returns>A handle to a process that has been launched.</returns>
-        private static Process StartUnSHACLedProcess(string fileName, string arguments)
+        private static Process StartUnSHACLedProcess(
+            string fileName,
+            string arguments,
+            bool redirectStandardOutput = false)
         {
             var process = new Process();
             process.StartInfo.WorkingDirectory = Directory.GetParent(Directory.GetCurrentDirectory()).FullName;
@@ -297,6 +289,7 @@ namespace SeleniumTests
             process.StartInfo.Arguments = arguments;
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            process.StartInfo.RedirectStandardOutput = redirectStandardOutput;
             process.StartInfo.CreateNoWindow = true;
 
             try
@@ -309,6 +302,68 @@ namespace SeleniumTests
                 return null;
             }
             return process;
+        }
+
+        /// <summary>
+        /// Hosts an instance of UnSHACLed on the local host.
+        /// </summary>
+        /// <param name="port">The port to host UnSHACLed on.</param>
+        /// <param name="log">A log to send errors to.</param>
+        /// <returns>
+        /// The host process if it can be launched; otherwise, <c>null</c>.
+        /// An error is logged by this function in the latter case.
+        /// </returns>
+        private static Process HostUnSHACLed(int port, ILog log)
+        {
+            // If nobody bothered to specify a URL, then we'll just have to
+            // host it ourselves.
+            string procName = "serve";
+            string procArgs = "-s build -p " + port;
+            var serverProcess = StartUnSHACLedProcess(procName, procArgs, true);
+            if (serverProcess == null)
+            {
+                log.Log(
+                    new Pixie.LogEntry(
+                        Severity.Error,
+                        "cannot host",
+                        Quotation.QuoteEvenInBold(
+                            "command ",
+                            procName + " " + procArgs,
+                            " failed to launch; do you have ",
+                            procName,
+                            " installed? If not, try ",
+                            "npm install -g " + procName + "@6.5.3",
+                            ".")));
+                return null;
+            }
+
+            string expectedServerOutput = "serve: Running on port " + port;
+            var serverOutput = serverProcess.StandardOutput.ReadLine();
+            if (serverOutput == expectedServerOutput)
+            {
+                return serverProcess;
+            }
+            else
+            {
+                if (!serverProcess.HasExited)
+                {
+                    serverProcess.Kill();
+                }
+                serverProcess.Dispose();
+                log.Log(
+                    new Pixie.LogEntry(
+                        Severity.Error,
+                        "cannot host",
+                        Quotation.QuoteEvenInBold(
+                            "expected ",
+                            "serve",
+                            " to reply with ",
+                            expectedServerOutput,
+                            " but instead it said ",
+                            serverOutput,
+                            "; assuming that something went terribly wrong.")));
+                return null;
+            }
         }
     }
 }
