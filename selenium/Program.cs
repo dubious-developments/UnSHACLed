@@ -356,7 +356,7 @@ namespace SeleniumTests
                         "cannot host",
                         Quotation.QuoteEvenInBold(
                             "expected ",
-                            "serve",
+                            procName,
                             " to reply with ",
                             expectedServerOutput,
                             " but instead it said ",
