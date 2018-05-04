@@ -466,11 +466,15 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 // we just need to make sure that there is one row as well
                 // this also makes sense since a node without rows is pointless
                 let firstRowTrait = event.properties.cell.children[0].value.trait;
-                let triple = new Triple(block.name, "pred", "obj", firstRowTrait.mutableGraph, firstRowTrait.type);
+                let triple = new Triple(block.name, "predicate", "object",
+                    firstRowTrait.mutableGraph, firstRowTrait.type);
                 console.log(triple);
-                // TODO what to do with the triple
-                temprow.value.name = "new row";
-                console.log(temprow);
+                temprow.value.name = instance.nameFromTrait(triple);
+                temprow.value.trait = triple;
+                // TODO store the triple and row in model
+
+                // TODO store the triple and row in mxgraph structures
+
                 cell.insert(temprow);
             } finally {
                 // Updates the display
@@ -593,10 +597,14 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     /**
      * Get the name for a row based on trait
      */
-    nameFromTrait(trait: any, prefixes: PrefixMap) {
-        return this.replacePrefixes(trait.predicate, prefixes)
+    nameFromTrait(trait: any, prefixes?: PrefixMap) {
+        if (prefixes) {
+            return this.replacePrefixes(trait.predicate, prefixes)
                 + " :  "
                 + this.replacePrefixes(trait.object, prefixes);
+        } else {
+            return trait.predicate + " : " + trait.object;
+        }
     }
 
     /**
