@@ -461,16 +461,14 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             try {
                 let temprow = model.cloneCell(instance.nameToStandardCellDict.getValue('row'));
                 let block = event.properties.cell.value;
-                console.log("block: ", block);
                 // here the assumption is made that next row will be the same type (i.e. data or shape) as the first row
                 // this is justified because it has the same subject
                 // we just need to make sure that there is one row as well
                 // this also makes sense since a node without rows is pointless
-                let type = event.properties.cell.children[0].value.trait.type;
-                // TODO how to get (mutable)graph
-                let mutableGraph = new Graph();
-                let triple = new Triple(block.name, "pred", "obj", mutableGraph, type);
+                let firstRowTrait = event.properties.cell.children[0].value.trait;
+                let triple = new Triple(block.name, "pred", "obj", firstRowTrait.mutableGraph, firstRowTrait.type);
                 console.log(triple);
+                // TODO what to do with the triple
                 temprow.value.name = "new row";
                 console.log(temprow);
                 cell.insert(temprow);
