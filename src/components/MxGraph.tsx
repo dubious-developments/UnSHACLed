@@ -67,10 +67,10 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     componentWillReceiveProps(nextprops: any) {
     }
 
-    componentDidUpdate() {
+    /* componentDidUpdate() {
         console.log("state adapted");
         console.log(this.state.graph);
-    }
+    } */
 
     insertCell(grph: any, evt: any, target: any, x: any, y: any) {
         const {test} = this.state;
@@ -133,7 +133,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     }
 
     saveGraph(g: any) {
-        console.log(g);
         this.setState({
             graph: g
         });
@@ -833,11 +832,10 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             model.registerObserver(new ModelObserver((changeBuf) => {
                 let tasks = new Array<Task<ModelData, ModelTaskMetadata>>();
                 changeBuf.forEach((key) => {
-                    if (key === ModelComponent.DataGraph) { // data graph has changed
+                    // only listen to IO, mgxgraph handles the other changes
+                    if (key === ModelComponent.IO) {
+                        // TODO only one task with both
                         tasks.push(new VisualizeComponent(ModelComponent.DataGraph, this));
-                    }
-
-                    if (key === ModelComponent.SHACLShapesGraph) { // shapes graph has changed
                         tasks.push(new VisualizeComponent(ModelComponent.SHACLShapesGraph, this));
                     }
                 });
@@ -992,6 +990,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         // notify that a user action took place
         this.timer.userAction(function(this: MxGraph) {
             model.tasks.schedule(new GetValidationReport(self));
+            // process all tasks when idle
             model.tasks.processAllTasks();
         });
     }

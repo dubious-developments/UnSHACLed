@@ -117,6 +117,8 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
     }
 
     public execute(data: ModelData): void {
+        console.log("called");
+
         let component = data.getComponent<Component<ImmutableGraph>>(this.mComponent);
         if (component) {
 
@@ -149,7 +151,7 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
 export class GetValidationReport extends Task<ModelData, ModelTaskMetadata> {
 
     /**
-     * Create a new VisualizeComponent task from Model
+     * Create a new GetValidationReport task from Model
      * @param mxGraph
      */
     public constructor(private mxGraph: MxGraph) {
@@ -181,7 +183,7 @@ export class GetValidationReport extends Task<ModelData, ModelTaskMetadata> {
 export class GetValidationReportNavbar extends Task<ModelData, ModelTaskMetadata> {
 
     /**
-     * Create a new VisualizeComponent task from Model
+     * Create a new GetValidationReportNavbar task from Model
      * @param navBar
      */
     public constructor(private navBar: Navbar) {
