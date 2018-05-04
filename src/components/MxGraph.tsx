@@ -7,7 +7,7 @@ import TimingService from "../services/TimingService";
 import {ValidationReport} from "../conformance/wrapper/ValidationReport";
 import {MxGraphProps} from "./interfaces/interfaces";
 
-import {ModelObserver} from "../entities/model";
+import {Model, ModelObserver} from "../entities/model";
 import {Task} from "../entities/task";
 import {ModelData} from "../entities/modelData";
 import {Graph, PrefixMap} from "../persistence/graph";
@@ -461,7 +461,12 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             try {
                 let temprow = model.cloneCell(instance.nameToStandardCellDict.getValue('row'));
                 let block = event.properties.cell.value;
-                console.log(block);
+                console.log("block: ", block);
+                // TODO how to get (mutable)graph
+                let mutableGraph = new Graph();
+                // TODO how to get type
+                let triple = new Triple(block.name, "pred", "obj", mutableGraph, ModelComponent.SHACLShapesGraph);
+                console.log(triple);
                 temprow.value.name = "new row";
                 console.log(temprow);
                 cell.insert(temprow);
@@ -476,7 +481,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         graph.addCellOverlay(cell, overlay);
     }
 
-    parseDataGraphToBlocks(persistenceGraph: any, type: string, prefixes: PrefixMap) {
+    parseDataGraphToBlocks(persistenceGraph: any, type: ModelComponent, prefixes: PrefixMap) {
         // let DASH = $rdf.Namespace("http://datashapes.org/dash#");
         let RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
         // let RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
@@ -526,7 +531,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.blockToCellDict.clear();
     }
 
-    visualizeDataGraph(persistenceGraph: any, type: string, prefixes: PrefixMap) {
+    visualizeDataGraph(persistenceGraph: any, type: ModelComponent, prefixes: PrefixMap) {
         this.clear();
         let {graph} = this.state;
         let blocks = this.parseDataGraphToBlocks(persistenceGraph, type, prefixes);
@@ -1078,9 +1083,9 @@ export class Triple {
     public predicate: string;
     public object: string;
     public mutableGraph: Graph;
-    public type: string;
+    public type: ModelComponent;
 
-    constructor(subject: string, predicate: string, object: string, mutableGraph: Graph, type: string) {
+    constructor(subject: string, predicate: string, object: string, mutableGraph: Graph, type: ModelComponent) {
         this.subject = subject;
         this.predicate = predicate;
         this.object = object;
