@@ -22,7 +22,7 @@ namespace SeleniumTests.Tests
                 (driver, log) =>
                 {
                     // Grab the 'about' navbar item.
-                    var elem = driver.FindElement(By.Id("navbar-item-about"));
+                    var elem = driver.FindElement(By.Id("navbarItemAbout"));
                     // Click it.
                     elem.Click();
                     // Check that we're at '#/about'.
