@@ -1,3 +1,3 @@
 nuget restore
 msbuild selenium.sln
-bin\Debug\selenium-tests.exe --no-build-app --print-app-url
+bin\Debug\selenium-tests.exe %1 --no-build-app --print-app-url
