@@ -31,7 +31,7 @@ build_script:
 test_script:
   # Run tests.
   - gulp test
-  # Host UnSHACLed so we can run the Selenium tests.
-  - start /B serve -s build -p 8080
   # Run the Selenium tests.
-  - pushd selenium && run-ci.bat https://localhost:8080/index.html && popd
+  - start /b serve -s build -p 8080 &&
+    pushd selenium && run-ci.bat https://localhost:8080/index.html && popd &&
+    taskkill /F /IM serve /T
