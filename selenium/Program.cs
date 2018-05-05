@@ -277,7 +277,7 @@ namespace SeleniumTests
                         bool success = testCase.Run(driver, builder.Key, log);
 
                         completedTestCases++;
-                        double percentage = 100 * completedTestCases / testCaseCount;
+                        var percentage = 100.0 * completedTestCases / testCaseCount;
 
                         // Print a fancy progress message.
                         progressLog.Log(
