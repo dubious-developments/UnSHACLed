@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as Collections from 'typescript-collections';
 import {ModelComponent, ModelTaskMetadata} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
-import {GetValidationReport, RemoveTriple, VisualizeComponent} from "../services/ModelTasks";
+import {GetValidationReport, EditTriple, VisualizeComponent} from "../services/ModelTasks";
 import TimingService from "../services/TimingService";
 import {ValidationReport} from "../conformance/wrapper/ValidationReport";
 import {MxGraphProps} from "./interfaces/interfaces";
@@ -466,17 +466,14 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             try {
                 let temprow = model.cloneCell(instance.nameToStandardCellDict.getValue('row'));
                 let block = event.properties.cell.value;
-                // here the assumption is made that next row will be the same type (i.e. data or shape) as the first row
-                // this is justified because it has the same subject
-                // we just need to make sure that there is one row as well
+                // here the assumption is made that next row will belong to the same file as the first
+                // we just need to make sure that there is at least one row as well
                 // this also makes sense since a node without rows is pointless
                 let firstRowTrait = event.properties.cell.children[0].value.trait;
-                // TODO fix this after merge
-                /* let triple = new Triple(block.name, "predicate", "object",
-                    firstRowTrait.mutableGraph, firstRowTrait.type);
+                let triple = new Triple(block.name, "predicate", "object", firstRowTrait.file);
                 console.log(triple);
                 temprow.value.name = instance.nameFromTrait(triple);
-                temprow.value.trait = triple; */
+                temprow.value.trait = triple;
                 // TODO store the triple and row in model
 
                 // TODO store the triple and row in mxgraph structures
@@ -954,7 +951,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                                 newGraph
                             );
 
-                            model.tasks.schedule(new RemoveTriple(
+                            model.tasks.schedule(new EditTriple(
                                 newGraph, file, triple.file)
                             );
 

@@ -214,7 +214,13 @@ export class GetValidationReportNavbar extends Task<ModelData, ModelTaskMetadata
     }
 }
 
-export class RemoveTriple extends Task<ModelData, ModelTaskMetadata> {
+/**
+ * Edits a triple and updates the corresponding part in the model
+ * An edit here can be interpreted as a regular edit (e.g. change of predicate)
+ * but can also be interpreted as a remove of the entire triple
+ * This Task can be used for both
+ */
+export class EditTriple extends Task<ModelData, ModelTaskMetadata> {
 
     public constructor(private graph: ImmutableGraph, private type: string, private file: string) {
         super();
