@@ -465,19 +465,34 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             model.beginUpdate();
             try {
                 let temprow = model.cloneCell(instance.nameToStandardCellDict.getValue('row'));
-                let block = event.properties.cell.value;
+                let blockName = event.properties.cell.value.name;
                 // here the assumption is made that next row will belong to the same file as the first
                 // we just need to make sure that there is at least one row as well
                 // this also makes sense since a node without rows is pointless
                 let firstRowTrait = event.properties.cell.children[0].value.trait;
-                let triple = new Triple(block.name, "predicate", "object", firstRowTrait.file);
+                let triple = new Triple(blockName, "predicate", "object", firstRowTrait.file);
                 console.log(triple);
+
                 temprow.value.name = instance.nameFromTrait(triple);
                 temprow.value.trait = triple;
                 // TODO store the triple and row in model
 
                 // TODO store the triple and row in mxgraph structures
-                
+                // update the data structures
+                instance.triples.add(triple);
+                instance.cellToTriples.setValue(temprow, triple);
+                console.log(instance.subjectToBlockDict);
+                // TODO check how to get the real block
+                console.log(blockName);
+                let block = instance.subjectToBlockDict.getValue(blockName);
+                if (block) {
+                    block.traits.push(triple);
+                } else {
+                    console.log("error: could not find block: " + blockName);
+                }
+
+                console.log(block);
+
                 cell.insert(temprow);
             } finally {
                 // Updates the display
