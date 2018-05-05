@@ -474,7 +474,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 // TODO store the triple and row in model
 
                 // TODO store the triple and row in mxgraph structures
-
+                
                 cell.insert(temprow);
             } finally {
                 // Updates the display
