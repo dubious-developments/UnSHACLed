@@ -59,6 +59,7 @@ script:
   - $XVFB_RUN gulp test
   # Run the Selenium tests. Go with Firefox and Chrome on Linux, add Safari on Mac OS X.
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+      sudo safaridriver --enable;
       SELENIUM_BROWSERS="firefox chrome safari";
     else
       SELENIUM_BROWSERS="firefox chrome";
