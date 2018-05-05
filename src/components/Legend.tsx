@@ -32,7 +32,6 @@ class Legend extends React.Component<LegendProps, any> {
         });
     }
     fillList() {
-        console.log('filing list');
         var legend = [] as any[];
         /* Check for same length */
         if (this.props.colors.length === this.props.entries.length) {

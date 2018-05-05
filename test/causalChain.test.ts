@@ -37,7 +37,7 @@ describe("CausalChain Class", () => {
             expect(chain.getTails().size()).toEqual(0);
 
             // in the next time step the same event that caused a loop
-            // should be again addable
+            // should again be addable
             incoming = Immutable.Set<ModelComponent>([ModelComponent.DataGraph]);
             outgoing = Immutable.Set<ModelComponent>([ModelComponent.DataGraph]);
             expect(chain.stage(1, incoming, outgoing)).toEqual(false);
@@ -48,6 +48,19 @@ describe("CausalChain Class", () => {
             // a break in causality should also cause a reset
             chain.finalize();
             expect(chain.getTails().size()).toEqual(0);
+
+            // an event causing periodicity with multiple potential ancestors
+            // should entirely be severed from the data structure
+            expect(chain.stage(1, incoming, outgoing)).toEqual(false);
+            expect(chain.stage(2, incoming, outgoing)).toEqual(false);
+            chain.finalize();
+            expect(chain.getTails().size()).toEqual(2);
+            expect(chain.stage(2, incoming, outgoing)).toEqual(true);
+            chain.finalize();
+            // the new event will not be linked to any existing tail,
+            // so that for each existing tail a break in causality will be detected
+            expect(chain.getTails().size()).toEqual(0);
+
         });
 });
 

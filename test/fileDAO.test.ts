@@ -28,7 +28,7 @@ describe("FileDAO Class", () => {
                         },
                         [],
                         [ModelComponent.DataGraph]));
-                model.tasks.processTask();
+                model.tasks.processAllTasks();
 
                 // this is pretty horrible and there probably exists a better way of doing this,
                 // but at the moment I can't seem to think of one
