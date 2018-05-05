@@ -25,8 +25,8 @@ namespace SeleniumTests.Tests
                     var elem = driver.FindElement(By.Id("navbarItemAbout"));
                     // Click it.
                     elem.Click();
-                    // Check that we're at '#/about'.
-                    Assert.IsTrue(driver.Url.EndsWith("#/about"));
+                    // Check that we're at '/about'.
+                    Assert.IsTrue(driver.Url.EndsWith("/about"));
                 });
 
         /// <summary>
