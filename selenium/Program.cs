@@ -14,6 +14,7 @@ using Pixie;
 using Pixie.Markup;
 using Pixie.Options;
 using Pixie.Terminal;
+using Pixie.Terminal.Devices;
 using Pixie.Transforms;
 using SeleniumTests.Tests;
 
@@ -28,21 +29,11 @@ namespace SeleniumTests
 
         public static int Main(string[] args)
         {
-            bool errorEncountered = false;
+            // Acquire a log for printing output.
+            var rawLog = new RecordingLog(TerminalLog.Acquire());
 
-            // Acquire a log for when things go sideways.
-            var rawLog = TerminalLog.Acquire();
-            var log = new TransformLog(
-                rawLog,
-                entry => DiagnosticExtractor.Transform(entry, "selenium-tests"),
-                entry =>
-                {
-                    if (entry.Severity == Severity.Error)
-                    {
-                        errorEncountered = true;
-                    }
-                    return entry;
-                });
+            // Create a derived log for printing diagnostics.
+            var log = CreateDiagnosticLog(rawLog);
 
             // Parse command-line arguments.
             var optParser = new GnuOptionSetParser(Options.All, Options.Url);
@@ -50,12 +41,30 @@ namespace SeleniumTests
             // Actually parse the options.
             var parsedOptions = optParser.Parse(args, log);
 
-            if (errorEncountered)
+            if (rawLog.Contains(Severity.Error))
             {
                 // Ouch. Command-line arguments were bad. Stop testing now.
                 return 1;
             }
-            else if (parsedOptions.GetValue<bool>(Options.Help))
+
+            if (parsedOptions.ContainsOption(Options.Color))
+            {
+                if (parsedOptions.GetValue<bool>(Options.Color))
+                {
+                    rawLog = new RecordingLog(
+                        TerminalLog.AcquireStandardError(
+                            new AnsiStyleManager(Console.Error)));
+                }
+                else
+                {
+                    rawLog = new RecordingLog(
+                        TerminalLog.AcquireStandardError(
+                            NoStyleManager.Instance));
+                }
+                log = CreateDiagnosticLog(rawLog);
+            }
+
+            if (parsedOptions.GetValue<bool>(Options.Help))
             {
                 // Print a cute little help message (to stdout instead of stderr).
                 var helpLog = TerminalLog.AcquireStandardOutput();
@@ -109,7 +118,7 @@ namespace SeleniumTests
 
             var browsersToUse = ParseBrowserNames(browserNames, log);
 
-            if (errorEncountered)
+            if (rawLog.Contains(Severity.Error))
             {
                 // Couldn't parse the command-line args. Better quit now.
                 return 1;
@@ -142,7 +151,7 @@ namespace SeleniumTests
 
             // If things went swimmingly, then return a zero exit code.
             // Otherwise, let the world know that something is wrong.
-            return errorEncountered ? 1 : 0;
+            return rawLog.Contains(Severity.Error) ? 1 : 0;
         }
 
         private static IReadOnlyDictionary<string, Func<IWebDriver>> Drivers =
@@ -276,7 +285,12 @@ namespace SeleniumTests
                                 Severity.Info,
                                 DecorationSpan.MakeBold(
                                     new ColorSpan(
-                                        string.Format("[{0,3}%]", Math.Round(percentage)),
+                                        new Sequence(
+                                            string.Format("[{0,3}%]", Math.Round(percentage)),
+                                            " ",
+                                            success
+                                                ? new DegradableText("✓", new DegradableText("√", "v"))
+                                                : new DegradableText("✗", "x")),
                                         success ? Colors.Green : Colors.Red)),
                                 " ",
                                 DecorationSpan.MakeBold(new Quotation(testCase.Description, 2)),
@@ -389,6 +403,25 @@ namespace SeleniumTests
                             "; assuming that something went terribly wrong.")));
                 return null;
             }
+        }
+
+        /// <summary>
+        /// Takes a raw log and turns it into a log that
+        /// always prints diagnostics.
+        /// </summary>
+        /// <param name="rawLog">The raw log to accept.</param>
+        /// <returns>A log that always prints diagnostics.</returns>
+        private static ILog CreateDiagnosticLog(ILog rawLog)
+        {
+            // Turn all entries into diagnostics and word-wrap the output.
+            return new TransformLog(
+                rawLog,
+                entry => {
+                    var transformed = DiagnosticExtractor.Transform(entry, "selenium-tests");
+                    return new Pixie.LogEntry(
+                        transformed.Severity,
+                        WrapBox.WordWrap(transformed.Contents));
+                });
         }
     }
 }
