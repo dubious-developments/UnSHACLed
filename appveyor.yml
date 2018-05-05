@@ -21,13 +21,9 @@ install:
   - npm install -g gulp
   # Install serve for running the Selenium tests.
   - npm install -g serve@6.5.3
-  # Install this to keep node from running out of memory.
-  - npm install -g increase-memory-limit
 
 # Build scripts. These run after installation.
 build_script:
-  # Increase the memory limit before building.
-  - increase-memory-limit
   # Compile sources.
   - gulp lint build build-test
 
@@ -35,7 +31,3 @@ build_script:
 test_script:
   # Run tests.
   - gulp test
-  # Run the Selenium tests.
-  - start /b serve -s build -p 8080 &&
-    pushd selenium && run-ci.bat http://localhost:8080/index.html && popd &
-    taskkill /F /IM serve /T
