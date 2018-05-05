@@ -45,6 +45,8 @@ namespace SeleniumTests
                     "Chooses which browsers to use for running the tests. " +
                     "Permissible values are ",
                     "firefox",
+                    ", ",
+                    "safari",
                     " and ",
                     "chrome",
                     ". By default, only ",

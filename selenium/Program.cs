@@ -8,6 +8,7 @@ using System.Threading;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Firefox;
+using OpenQA.Selenium.Safari;
 using OpenQA.Selenium.Support.UI;
 using Pixie;
 using Pixie.Markup;
@@ -168,6 +169,16 @@ namespace SeleniumTests
                     options.SetLoggingPreference(LogType.Browser, LogLevel.Off);
                     options.SetLoggingPreference(LogType.Driver, LogLevel.Off);
                     return new ChromeDriver(options);
+                }
+            },
+            {
+                "safari",
+                () =>
+                {
+                    var options = new SafariOptions();
+                    options.SetLoggingPreference(LogType.Browser, LogLevel.Off);
+                    options.SetLoggingPreference(LogType.Driver, LogLevel.Off);
+                    return new SafariDriver(options);
                 }
             }
         };
