@@ -2,15 +2,14 @@ import * as React from 'react';
 import * as Collections from 'typescript-collections';
 import {ModelComponent, ModelTaskMetadata} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
-import {GetValidationReport, RemoveTripleComponent, VisualizeComponent} from "../services/ModelTasks";
+import {GetValidationReport, RemoveTriple, VisualizeComponent} from "../services/ModelTasks";
 import TimingService from "../services/TimingService";
 import {ValidationReport} from "../conformance/wrapper/ValidationReport";
 import {MxGraphProps} from "./interfaces/interfaces";
-
 import {Model, ModelObserver} from "../entities/model";
 import {Task} from "../entities/task";
 import {ModelData} from "../entities/modelData";
-import {Graph, PrefixMap} from "../persistence/graph";
+import {ImmutableGraph, Graph, PrefixMap} from "../persistence/graph";
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout, mxCellOverlay, mxImage,
@@ -24,6 +23,10 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     private blockToCellDict: Collections.Dictionary<Block, any>;
     private subjectToBlockDict: Collections.Dictionary<string, Block>;
     private triples: Collections.Set<Triple>;
+    private needToRender: boolean;
+
+    private fileToGraphDict: Collections.Dictionary<string, ImmutableGraph>;
+    private fileToTypeDict: Collections.Dictionary<string, string>;
 
     private cellToTriples: Collections.Dictionary<any, Triple>;
     private invalidCells: Collections.Set<any>;
@@ -47,7 +50,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.initiateDragPreview = this.initiateDragPreview.bind(this);
         this.getGraphUnderMouse = this.getGraphUnderMouse.bind(this);
         this.makeDragSource = this.makeDragSource.bind(this);
-        this.visualizeDataGraph = this.visualizeDataGraph.bind(this);
+        this.visualizeFile = this.visualizeFile.bind(this);
         this.handleUserAction = this.handleUserAction.bind(this);
         this.addTemplate = this.addTemplate.bind(this);
 
@@ -57,6 +60,8 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.triples = new Collections.Set<Triple>((t) =>  t.subject + " " + t.predicate + " " + t.object);
         this.cellToTriples = new Collections.Dictionary<any, Triple>((c) => c.value.name);
         this.invalidCells = new Collections.Set<any>();
+        this.fileToGraphDict = new Collections.Dictionary<string, ImmutableGraph>();
+        this.fileToTypeDict = new Collections.Dictionary<string, string>();
 
         this.timer = new TimingService();
     }
@@ -466,11 +471,12 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 // we just need to make sure that there is one row as well
                 // this also makes sense since a node without rows is pointless
                 let firstRowTrait = event.properties.cell.children[0].value.trait;
-                let triple = new Triple(block.name, "predicate", "object",
+                // TODO fix this after merge
+                /* let triple = new Triple(block.name, "predicate", "object",
                     firstRowTrait.mutableGraph, firstRowTrait.type);
                 console.log(triple);
                 temprow.value.name = instance.nameFromTrait(triple);
-                temprow.value.trait = triple;
+                temprow.value.trait = triple; */
                 // TODO store the triple and row in model
 
                 // TODO store the triple and row in mxgraph structures
@@ -487,16 +493,12 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         graph.addCellOverlay(cell, overlay);
     }
 
-    parseDataGraphToBlocks(persistenceGraph: any, type: ModelComponent, prefixes: PrefixMap) {
-        // let DASH = $rdf.Namespace("http://datashapes.org/dash#");
+    parseDataGraphToBlocks(persistenceGraph: any, file: string) {
         let RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-        // let RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
-        // let SCHEMA = $rdf.Namespace("http://schema.org/");
         let SH = $rdf.Namespace("http://www.w3.org/ns/shacl#");
-        // let XSD = $rdf.Namespace("http://www.w3.org/2001/XMLSchema#");
 
         let triples = persistenceGraph.query(store => store).statements;
-        let mutableGraph = persistenceGraph.toMutable();
+        this.fileToGraphDict.setValue(file, persistenceGraph);
         let newTriples = new Collections.Set<Triple>();
 
         triples.forEach((triple: any) => {
@@ -504,11 +506,13 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 this.subjectToBlockDict.setValue(triple.subject.value, new Block(triple.subject.value));
             }
             newTriples.add(new Triple(
-                triple.subject.value, triple.predicate.value, triple.object.value, mutableGraph, type));
+                triple.subject.value, triple.predicate.value, triple.object.value, file));
         });
 
         newTriples.difference(this.triples);
         this.triples.union(newTriples);
+
+        this.needToRender = !newTriples.isEmpty();
 
         newTriples.forEach((triple: any) => {
             let subject = triple.subject;
@@ -537,10 +541,15 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.blockToCellDict.clear();
     }
 
-    visualizeDataGraph(persistenceGraph: any, type: ModelComponent, prefixes: PrefixMap) {
+    visualizeFile(persistenceGraph: any, type: string, file: string, prefixes: PrefixMap) {
+        let blocks = this.parseDataGraphToBlocks(persistenceGraph, file);
+        if (! this.needToRender) {
+            return;
+        }
+
         this.clear();
         let {graph} = this.state;
-        let blocks = this.parseDataGraphToBlocks(persistenceGraph, type, prefixes);
+        this.fileToTypeDict.setValue(file, type);
 
         let model = graph.getModel();
         let parent = graph.getDefaultParent();
@@ -935,11 +944,24 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                         this.triples.remove(triple);
                         this.cellToTriples.remove(cells[i]);
 
-                        let mutableGraph = triple.mutableGraph;
-                        mutableGraph.removeTriple(triple.subject, triple.predicate, triple.object);
+                        let oldGraph = this.fileToGraphDict.getValue(triple.file);
+                        let file = this.fileToTypeDict.getValue(triple.file);
 
-                        model.tasks.schedule(new RemoveTripleComponent(triple));
-                        model.tasks.processAllTasks();
+                        if (oldGraph && file) {
+                            let newGraph = oldGraph.removeTriple(triple.subject, triple.predicate, triple.object);
+                            this.fileToGraphDict.setValue(
+                                triple.file,
+                                newGraph
+                            );
+
+                            model.tasks.schedule(new RemoveTriple(
+                                newGraph, file, triple.file)
+                            );
+
+                            model.tasks.processAllTasks();
+                        } else {
+                            console.log("removed triple was not linked to graph or file");
+                        }
                     }
                 }
             });
@@ -1092,15 +1114,13 @@ export class Triple {
     public subject: string;
     public predicate: string;
     public object: string;
-    public mutableGraph: Graph;
-    public type: ModelComponent;
+    public file: string;
 
-    constructor(subject: string, predicate: string, object: string, mutableGraph: Graph, type: ModelComponent) {
+    constructor(subject: string, predicate: string, object: string, file: string) {
         this.subject = subject;
         this.predicate = predicate;
         this.object = object;
-        this.mutableGraph = mutableGraph;
-        this.type = type;
+        this.file = file;
     }
 
     toString(): string {
