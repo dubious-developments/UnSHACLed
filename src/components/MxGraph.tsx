@@ -1,13 +1,16 @@
 import * as React from 'react';
 import * as Collections from 'typescript-collections';
-import {ModelComponent} from "../entities/modelTaskMetadata";
+import {ModelComponent, ModelTaskMetadata} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
 import {GetValidationReport, VisualizeComponent} from "../services/ModelTasks";
 import TimingService from "../services/TimingService";
 import {ValidationReport} from "../conformance/wrapper/ValidationReport";
 import {MxGraphProps} from "./interfaces/interfaces";
+
 import {ModelObserver} from "../entities/model";
 import {PrefixMap} from "../persistence/graph";
+import {Task} from "../entities/task";
+import {ModelData} from "../entities/modelData";
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout, mxCellOverlay, mxImage: any;
@@ -64,10 +67,10 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     componentWillReceiveProps(nextprops: any) {
     }
 
-    componentDidUpdate() {
+    /* componentDidUpdate() {
         console.log("state adapted");
         console.log(this.state.graph);
-    }
+    } */
 
     insertCell(grph: any, evt: any, target: any, x: any, y: any) {
         const {test} = this.state;
@@ -130,7 +133,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     }
 
     saveGraph(g: any) {
-        console.log(g);
         this.setState({
             graph: g
         });
@@ -828,27 +830,21 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
             let model = DataAccessProvider.getInstance().model;
             model.registerObserver(new ModelObserver((changeBuf) => {
+                let tasks = new Array<Task<ModelData, ModelTaskMetadata>>();
                 changeBuf.forEach((key) => {
-                    if (key === ModelComponent.DataGraph) { // datagraph has changed
-                        model.tasks.schedule(new VisualizeComponent(ModelComponent.DataGraph, this));
-                        // TODO change this later
-                        model.tasks.processAllTasks();
-                    }
-
-                    if (key === ModelComponent.SHACLShapesGraph) {
-                        model.tasks.schedule(new VisualizeComponent(ModelComponent.SHACLShapesGraph, this));
-                        // TODO change this later
-                        model.tasks.processAllTasks();
+                    // only listen to IO, mgxgraph handles the other changes
+                    if (key === ModelComponent.IO) {
+                        // TODO only one task with both
+                        tasks.push(new VisualizeComponent(ModelComponent.DataGraph, this));
+                        tasks.push(new VisualizeComponent(ModelComponent.SHACLShapesGraph, this));
                     }
                 });
-                return [];
+                return tasks;
             }));
 
             // listen to all click events and key pressed events to check if user is actively editing
             document.addEventListener("click", this.handleUserAction, true);
             document.addEventListener("keypress", this.handleUserAction, true);
-
-            model.tasks.processAllTasks();
 
             let editor = new mxEditor();
 
@@ -994,6 +990,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         // notify that a user action took place
         this.timer.userAction(function(this: MxGraph) {
             model.tasks.schedule(new GetValidationReport(self));
+            // process all tasks when idle
             model.tasks.processAllTasks();
         });
     }

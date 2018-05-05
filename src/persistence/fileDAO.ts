@@ -36,7 +36,7 @@ export class FileDAO implements DataAccessObject {
      */
     public insert(module: Module) {
         this.model.tasks.schedule(new SaveTask(this.io, module));
-        this.model.tasks.processTask(); // TODO: Do this in the frontend!
+        this.model.tasks.processAllTasks();
     }
 
     /**
@@ -47,7 +47,7 @@ export class FileDAO implements DataAccessObject {
         let self = this;
         this.io.readFromFile(module, function (result: Graph) {
             self.model.tasks.schedule(new LoadTask(result.asImmutable(), module));
-            self.model.tasks.processTask(); // TODO: Do this in the frontend!
+            self.model.tasks.processAllTasks();
         });
     }
 }
@@ -178,6 +178,7 @@ export class FileModule implements Module {
 
 /**
  * A Task that reads a file and adds its contents as a component to the Model.
+ * Also adds to the pseudo IO component so that observers know IO changes have happened.
  */
 class LoadTask extends Task<ModelData, ModelTaskMetadata> {
 
@@ -200,13 +201,30 @@ class LoadTask extends Task<ModelData, ModelTaskMetadata> {
      * @param data The data the task takes as input.
      */
     public execute(data: ModelData): void {
+
         let component = data.getOrCreateComponent(
             this.module.getTarget(),
-            () => new Component<ImmutableGraph>());
+            () => new Component<ImmutableGraph>()
+        );
 
         data.setComponent(
             this.module.getTarget(),
-            component.withPart(this.module.getIdentifier(), this.result));
+            component.withPart(this.module.getIdentifier(), this.result)
+        );
+
+        // changes the IO pseudo component
+        // that way IO observers know that changes have happened
+        let ioComponent = data.getOrCreateComponent(
+            ModelComponent.IO,
+            () => new Component<ImmutableGraph>()
+        );
+
+        // the IO component will always store the file as loaded
+        data.setComponent(
+            ModelComponent.IO,
+            ioComponent.withPart(this.module.getIdentifier(), this.result)
+        );
+
     }
 
     /**

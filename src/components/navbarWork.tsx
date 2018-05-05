@@ -126,10 +126,9 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
 
     getFileFromPopup(e: any) {
         let fileName = (e.target || e.srcElement).innerHTML;
-        console.log(fileName);
         let model: Model = DataAccessProvider.getInstance().model;
         model.tasks.schedule(new LoadFileTask([ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph], fileName));
-        model.tasks.processTask();
+        model.tasks.processAllTasks();
     }
 
     /*
@@ -206,7 +205,6 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
             this.uploadDataGraphButton();
 
         }
-        console.log(childData);
     }
 
     render() {
