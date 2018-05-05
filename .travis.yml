@@ -57,8 +57,13 @@ script:
   # Run the tests.
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then XVFB_RUN=xvfb-run; fi
   - $XVFB_RUN gulp test
-  # Run the Selenium tests.
-  - pushd selenium && make nuget && make && $XVFB_RUN make TEST_OPTIONS="--no-build-app --browsers firefox chrome" run && popd
+  # Run the Selenium tests. Go with Firefox and Chrome on Linux, add Safari on Mac OS X.
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+      SELENIUM_BROWSERS="firefox chrome safari";
+    else
+      SELENIUM_BROWSERS="firefox chrome";
+    fi
+  - pushd selenium && make nuget && make && $XVFB_RUN make TEST_OPTIONS="--no-build-app --browsers $SELENIUM_BROWSERS" run && popd
   # Run SonarCloud, but only on Linux.
   - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ ! -z "$SONARCLOUD_KEY" ]; then sonar-scanner; fi
   # Deploy a nightly build when all tests are successful for a master branch commit.
