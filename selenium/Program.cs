@@ -149,12 +149,26 @@ namespace SeleniumTests
         {
             {
                 "firefox",
-                () => new FirefoxDriver(
-                    new FirefoxOptions { LogLevel = FirefoxDriverLogLevel.Fatal })
+                () =>
+                {
+                    var options = new FirefoxOptions { LogLevel = FirefoxDriverLogLevel.Fatal };
+                    options.SetLoggingPreference(LogType.Browser, LogLevel.Off);
+                    options.SetLoggingPreference(LogType.Driver, LogLevel.Off);
+                    options.SetLoggingPreference(LogType.Server, LogLevel.Off);
+                    options.SetLoggingPreference(LogType.Profiler, LogLevel.Off);
+                    options.SetLoggingPreference(LogType.Client, LogLevel.Off);
+                    return new FirefoxDriver(options);
+                }
             },
             {
                 "chrome",
-                () => new ChromeDriver()
+                () =>
+                {
+                    var options = new ChromeOptions();
+                    options.SetLoggingPreference(LogType.Browser, LogLevel.Off);
+                    options.SetLoggingPreference(LogType.Driver, LogLevel.Off);
+                    return new ChromeDriver(options);
+                }
             }
         };
 
