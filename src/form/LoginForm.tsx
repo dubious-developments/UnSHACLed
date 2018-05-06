@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Form, Button, Grid, Image, Header, Segment, Input, Divider } from 'semantic-ui-react';
 import {withRouter} from 'react-router-dom';
 import Auth from '../services/Auth';
+import {Link} from 'react-router-dom';
 
 class LoginForm extends React.Component<any, any> {
 
@@ -19,7 +20,7 @@ class LoginForm extends React.Component<any, any> {
             <div className="login">
                 <Grid
                     textAlign="center"
-                    style={{height: '100%', marginTop: '8em'}}
+                    style={{height: '100%', marginTop: '2em'}}
                     verticalAlign="middle"
                 >
                     <Grid.Column style={{maxWidth: 550}}>
@@ -83,20 +84,15 @@ class LoginForm extends React.Component<any, any> {
                                     inverted={true}
                                 >Or
                                 </Divider>
+                                <Link to="/signup">
                                 <Button
                                     animated="fade"
                                     fluid={true}
                                     inverted={true}
                                     size="large"
-                                >
-                                    <Button.Content visible={true}>
-                                    Sign-up
-                                    </Button.Content>
-                                    <Button.Content hidden={true}>
-                                        Coming soon!
-                                    </Button.Content>
+                                > Sign up
                                 </Button>
-
+                                </Link>
                             </Segment>
                         </Form>
                     </Grid.Column>
