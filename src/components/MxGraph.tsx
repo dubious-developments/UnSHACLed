@@ -24,6 +24,9 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     private subjectToBlockDict: Collections.Dictionary<string, Block>;
     private triples: Collections.Set<Triple>;
     private needToRender: boolean;
+    // subjectName is like "prefix/uri" and not "_b0" like the other subjectToBlockDict
+    // TODO when we have extra time it might be possible to merge these together
+    private subjectNameToBlockDict: Collections.Dictionary<string, Block>;
 
     private fileToGraphDict: Collections.Dictionary<string, ImmutableGraph>;
     private fileToTypeDict: Collections.Dictionary<string, string>;
@@ -57,6 +60,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.nameToStandardCellDict = new Collections.Dictionary<string, any>();
         this.blockToCellDict = new Collections.Dictionary<Block, any>((b) => b.name);
         this.subjectToBlockDict = new Collections.Dictionary<string, Block>();
+        this.subjectNameToBlockDict = new Collections.Dictionary<string, Block>();
         this.triples = new Collections.Set<Triple>((t) =>  t.subject + " " + t.predicate + " " + t.object);
         this.cellToTriples = new Collections.Dictionary<any, Triple>((c) => c.value.name);
         this.invalidCells = new Collections.Set<any>();
@@ -477,14 +481,14 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 temprow.value.trait = triple;
                 // TODO store the triple and row in model
 
-                // TODO store the triple and row in mxgraph structures
                 // update the data structures
                 instance.triples.add(triple);
                 instance.cellToTriples.setValue(temprow, triple);
                 console.log(instance.subjectToBlockDict);
-                // TODO check how to get the real block
+                // TODO check how to get the real blockname
                 console.log(blockName);
-                let block = instance.subjectToBlockDict.getValue(blockName);
+                console.log(instance.subjectNameToBlockDict);
+                let block = instance.subjectNameToBlockDict.getValue(blockName);
                 if (block) {
                     block.traits.push(triple);
                 } else {
@@ -568,7 +572,10 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
         blocks.forEach(b => {
             let v1 = model.cloneCell(this.nameToStandardCellDict.getValue('block'));
+            // TODO check: replacePrefixes does not seem necessary here
             v1.value.name = this.replacePrefixes(b.name, prefixes);
+            let subjectName = b.traits[0].subject;
+            this.subjectNameToBlockDict.setValue(this.replacePrefixes(subjectName, prefixes), b);
             this.blockToCellDict.setValue(b, v1);
         });
 
