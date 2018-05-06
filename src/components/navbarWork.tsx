@@ -39,10 +39,10 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
         this.setReport = this.setReport.bind(this);
         this.fileCallback = this.fileCallback.bind(this);
         this.saveCallback = this.saveCallback.bind(this);
+        this.getFileFromPopupCallback = this.getFileFromPopupCallback.bind(this);
     }
 
     public setLoadedFiles(files: string[]) {
-        console.log('setLoadFiles called');
         if (files.length === 0) {
             console.log("no files found");
         }
@@ -135,7 +135,7 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
     }
 
     getFileFromPopup(e: any) {
-        let fileName = (e.target || e.srcElement).innerHTML;
+        let fileName = e;
         let model: Model = DataAccessProvider.getInstance().model;
         model.tasks.schedule(new LoadFileTask([ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph], fileName));
         model.tasks.processAllTasks();
@@ -208,7 +208,7 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
     }
 
     /* Function used as a callback from the child componente for the file dropdown option */
-    fileCallback (childData: any) {
+    fileCallback(childData: any) {
         if (childData === "shacl") {
             this.uploadSHACLGraphButton();
         } else if (childData === "data") {
@@ -220,15 +220,19 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
     /* Function used as a callback from the child component for the file dropdown option
        will initiate a call to this.saveGraph in this component as a result from an onClick in the child component
      */
-    saveCallback (e: any) {
-        console.log('called saveCallback');
+    saveCallback(e: any) {
         this.saveGraph(e);
     }
 
+    /* Function used as a callback from the child component for saving the correct file
+        will initiate a call to this.getFileFromPopup
+    */
+    getFileFromPopupCallback(fileName: any) {
+        this.getFileFromPopup(fileName);
+    }
+
     render() {
-
         let {opened_files} = this.state;
-
         return (
             <div>
                 {/* General Toolbar */}
@@ -249,6 +253,7 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
                             save_graph={this.saveCallback}
                             opened_files={opened_files}
                             import_cb={this.fileCallback}
+                            get_file_from_popup={this.getFileFromPopupCallback}
                         />
                         {/* Import SHACL Graph input*/}
                         <input
@@ -392,10 +397,6 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
                     >
                         <this.ConformanceErrors/>
                     </Popup>
-
-                    <Menu.Item>
-                        => {opened_files}
-                    </Menu.Item>
                 </Menu>
             </div>
         );

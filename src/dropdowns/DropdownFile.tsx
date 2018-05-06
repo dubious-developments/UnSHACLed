@@ -12,7 +12,6 @@ class DropdownFile extends React.Component<DropdownFileProps, any> {
     constructor(props: any) {
         super(props);
         this.getOpenedFiles = this.getOpenedFiles.bind(this);
-        this.OpenedFiles = this.OpenedFiles.bind(this);
     }
 
     getOpenedFiles() {
@@ -20,12 +19,19 @@ class DropdownFile extends React.Component<DropdownFileProps, any> {
 
         if (this.props.opened_files.length === 0) {
             console.log('no files found in child component');
+            items.push(<Button key="none" icon="ban" disabled={true} basic={true} content="No files opened"/>);
         }
 
         for (let i = 0; i < this.props.opened_files.length; i++) {
             let cur = this.props.opened_files[i];
             items.push(
-                <Button icon="save" basic={true} content={cur}/>
+                <Button
+                    key={cur + i}
+                    icon="save"
+                    basic={true}
+                    content={cur}
+                    onClick={() => this.props.get_file_from_popup(cur)}
+                />
             );
         }
 
@@ -34,15 +40,6 @@ class DropdownFile extends React.Component<DropdownFileProps, any> {
                 <Button.Group vertical={true}>
                     {items}
                 </Button.Group>
-            </div>
-        );
-    }
-
-    OpenedFiles(props: any) {
-        return (
-            <div>
-                <label>Files that are currently opened in the editor: </label>
-                <br/>
             </div>
         );
     }
@@ -71,14 +68,6 @@ class DropdownFile extends React.Component<DropdownFileProps, any> {
                     >
                         <Dropdown.Menu content={<this.getOpenedFiles/>}/>
                     </Dropdown>
-                    {/*                    <Popup
-                        trigger={<Dropdown.Item onClick={() => this.props.save_graph(event)} text='Save local graph'/>}
-                        on="click"
-                        inverted={false}
-                        hoverable={true}
-                        position="right center"
-                        content={this.OpenedFiles}
-                    />*/}
                     <Dropdown.Divider/>
                     <Dropdown.Item icon='github' text='Open graph from account'/>
                     <Dropdown.Item icon='github' text='Save graph to account'/>
