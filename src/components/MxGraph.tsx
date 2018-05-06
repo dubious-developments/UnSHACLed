@@ -480,14 +480,24 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 temprow.value.name = instance.nameFromTrait(triple);
                 temprow.value.trait = triple;
                 // TODO store the triple and row in model
+                // start an update task in the model
+                let file = triple.file;
+                let immutableGraph = instance.fileToGraphDict.getValue(file);
+                let type = instance.fileToTypeDict.getValue(file);
+                if (immutableGraph && type) {
+                    let backendModel = DataAccessProvider.getInstance().model;
+                    backendModel.tasks.schedule(new EditTriple(
+                        immutableGraph, type, file)
+                    );
+                    // TODO remove this after testing
+                    backendModel.tasks.processAllTasks();
+                } else {
+                    console.log("error: graph or type undefined");
+                }
 
                 // update the data structures
                 instance.triples.add(triple);
                 instance.cellToTriples.setValue(temprow, triple);
-                console.log(instance.subjectToBlockDict);
-                // TODO check how to get the real blockname
-                console.log(blockName);
-                console.log(instance.subjectNameToBlockDict);
                 let block = instance.subjectNameToBlockDict.getValue(blockName);
                 if (block) {
                     block.traits.push(triple);
