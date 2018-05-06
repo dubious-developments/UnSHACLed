@@ -94,7 +94,7 @@ export class GetOpenedFilesTask extends Task<ModelData, ModelTaskMetadata> {
     }
 
     public get metadata(): ModelTaskMetadata {
-        let tmp = this.components;
+        let tmp = this.components.concat();
         tmp.push(ModelComponent.IO);
         return new ModelTaskMetadata(tmp, [ModelComponent.IO]);
     }
