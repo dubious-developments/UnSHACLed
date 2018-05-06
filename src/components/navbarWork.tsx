@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Menu, Icon, Popup, List} from 'semantic-ui-react';
+import {Menu, Icon, Popup, List, Image} from 'semantic-ui-react';
 import Auth from '../services/Auth';
 import {Link} from 'react-router-dom';
 import {NavbarWorkProps} from './interfaces/interfaces';
@@ -22,6 +22,15 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
 
     // temp var
     report: ValidationReport;
+
+    menuStyle = {
+        borderStyle: 'solid',
+        borderWidth: '0 0 0 2px ',
+        borderColor: '#3d3e3f',
+        borderRadius: 0,
+        margin: 0,
+        padding: 0
+    };
 
     constructor(props: NavbarWorkProps) {
         super(props);
@@ -232,172 +241,174 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
     }
 
     render() {
+        const logo = require('../img/logo.png');
         let {opened_files} = this.state;
         return (
-            <div>
-                {/* General Toolbar */}
-                <Menu
-                    inverted={true}
-                    size="tiny"
-                    style={{
-                        borderRadius: 0,
-                        margin: 0,
-                        padding: 0
-                    }}
-                    borderless={true}
-                >
-                    <Menu.Item as="a" onClick={this.iconClick} content={<Icon name='content'/>}/>
-                    {/* Toolbar 'File' */}
-                    <Menu.Item>
-                        <DropdownFile
-                            save_graph={this.saveCallback}
-                            opened_files={opened_files}
-                            import_cb={this.fileCallback}
-                            get_file_from_popup={this.getFileFromPopupCallback}
-                        />
-                        {/* Import SHACL Graph input*/}
-                        <input
-                            onChange={this.importSHACLGraph}
-                            type="file"
-                            id="importSHACLGraph"
-                            style={{"display": "none"}}
-                            accept={this.allowedExtensions}
-                        />
-                        {/* Import Data graph input*/}
-                        <input
-                            onChange={this.importDataGraph}
-                            type="file"
-                            id="importDataGraph"
-                            style={{"display": "none"}}
-                            accept={this.allowedExtensions}
-                        />
-                    </Menu.Item>
-                    {/* Toolbar 'Edit' */}
-                    <Menu.Item>
-                        <DropdownEdit/>
-                    </Menu.Item>
-                    {/* Toolbar 'View' */}
-                    <Menu.Item>
-                        <DropdownView/>
-                    </Menu.Item>
-                    {/* Toolbar 'Help' */}
-                    <Menu.Item>
-                        <DropdownHelp/>
-                    </Menu.Item>
-                    {/* Toolbar 'Github repo' */}
-                    <Menu.Item
-                        as="a"
-                        href="https://github.com/dubious-developments/UnSHACLed"
-                        target="_blank"
-                        icon={
-                            <Icon
-                                name="github"
-                                inverted={true}
+            <div style={{ backgroundColor: '#1b1c1d'}} >
+                <div style={{float: 'left', width: '5%', backgroundColor: '#1b1c1d', marginTop: '14px' }}>
+                    <Image src={logo} size="mini" centered={true}/>
+                </div>
+                    {/* General Toolbar */}
+                    <Menu
+                        inverted={true}
+                        size="tiny"
+                        style={this.menuStyle}
+                        borderless={true}
+                    >
+                        <Menu.Item as="a" onClick={this.iconClick} content={<Icon name='content'/>}/>
+                        {/* Toolbar 'File' */}
+                        <Menu.Item>
+                            <DropdownFile
+                                save_graph={this.saveCallback}
+                                opened_files={opened_files}
+                                import_cb={this.fileCallback}
+                                get_file_from_popup={this.getFileFromPopupCallback}
                             />
-                        }
-                    />
-                    {/* Toolbar 'Github re' */}
-                    <Menu.Item
-                        as="a"
-                        target="_blank"
-                        href="https://github.com/dubious-developments/UnSHACLed/wiki/Release-notes"
+                            {/* Import SHACL Graph input*/}
+                            <input
+                                onChange={this.importSHACLGraph}
+                                type="file"
+                                id="importSHACLGraph"
+                                style={{"display": "none"}}
+                                accept={this.allowedExtensions}
+                            />
+                            {/* Import Data graph input*/}
+                            <input
+                                onChange={this.importDataGraph}
+                                type="file"
+                                id="importDataGraph"
+                                style={{"display": "none"}}
+                                accept={this.allowedExtensions}
+                            />
+                        </Menu.Item>
+                        {/* Toolbar 'Edit' */}
+                        <Menu.Item>
+                            <DropdownEdit/>
+                        </Menu.Item>
+                        {/* Toolbar 'View' */}
+                        <Menu.Item>
+                            <DropdownView/>
+                        </Menu.Item>
+                        {/* Toolbar 'Help' */}
+                        <Menu.Item>
+                            <DropdownHelp/>
+                        </Menu.Item>
+                        {/* Toolbar 'Github repo' */}
+                        <Menu.Item
+                            as="a"
+                            href="https://github.com/dubious-developments/UnSHACLed"
+                            target="_blank"
+                            icon={
+                                <Icon
+                                    name="github"
+                                    inverted={true}
+                                />
+                            }
+                        />
+                        {/* Toolbar 'Github re' */}
+                        <Menu.Item
+                            as="a"
+                            target="_blank"
+                            href="https://github.com/dubious-developments/UnSHACLed/wiki/Release-notes"
+                        >
+                            v0.5
+                        </Menu.Item>
+                        <Menu.Item
+                            as={Link}
+                            to="/login"
+                            onClick={(event) => this.logoutButton(event)}
+                        >
+                            Logout
+                        </Menu.Item>
+                        <Menu.Menu position="right">
+                            <Menu.Item>
+                                Test
+                            </Menu.Item>
+                        </Menu.Menu>
+                    </Menu>
+                    {/* Toolbar icons menu */}
+                    <Menu
+                        inverted={true}
+                        size="mini"
+                        icon={true}
+                        borderless={true}
+                        style={this.menuStyle}
                     >
-                        v0.5
-                    </Menu.Item>
-                    <Menu.Item
-                        as={Link}
-                        to="/login"
-                        onClick={(event) => this.logoutButton(event)}
-                    >
-                        Logout
-                    </Menu.Item>
-                </Menu>
-                {/* Toolbar icons menu */}
-                <Menu
-                    inverted={true}
-                    size="mini"
-                    icon={true}
-                    borderless={true}
-                    style={{
-                        borderRadius: 0,
-                        margin: 0,
-                        padding: 0
-                    }}
-                >
-                    {/* Toolbar icons */}
-                    {/* Zoom in */}
-                    <ToolbarIcon
-                        p_size={"mini"}
-                        p_position={"bottom left"}
-                        p_content={"Zoom in"}
-                        t_id={"zoom in"}
-                        icon_name={"search"}
-                    />
-                    {/* Zoom out */}
-                    <ToolbarIcon
-                        p_size={"mini"}
-                        p_position={"bottom left"}
-                        p_content={"Zoom out"}
-                        t_id={"zoom out"}
-                        icon_name={"search"}
-                    />
-                    {/* Undo */}
-                    <ToolbarIcon
-                        p_size={"mini"}
-                        p_position={"bottom left"}
-                        p_content={"Undo last action"}
-                        t_id={"undo"}
-                        icon_name={"reply"}
-                    />
-                    {/* Redo */}
-                    <ToolbarIcon
-                        p_size={"mini"}
-                        p_position={"bottom left"}
-                        p_content={"Redo last action"}
-                        t_id={"redo"}
-                        icon_name={"share"}
-                    />
-                    {/* Delete */}
-                    <ToolbarIcon
-                        p_size={"mini"}
-                        p_position={"bottom left"}
-                        p_content={"Delete selected component(s) from graph"}
-                        t_id={"delete"}
-                        icon_name={"trash"}
-                    />
-                    {/* snapshot */}
-                    <ToolbarIcon
-                        p_size={"mini"}
-                        p_position={"bottom left"}
-                        p_content={"Generate snap shot of current graph"}
-                        t_id={"camera"}
-                        icon_name={"camera"}
-                    />
-                    {/* fit size */}
-                    <ToolbarIcon
-                        p_size={"mini"}
-                        p_position={"bottom left"}
-                        p_content={"Make graph fit the screen"}
-                        t_id={"fit"}
-                        icon_name={"expand"}
-                    />
+                        {/* Toolbar icons */}
+                        {/* Zoom in */}
+                        <ToolbarIcon
+                            p_size={"mini"}
+                            p_position={"bottom left"}
+                            p_content={"Zoom in"}
+                            t_id={"zoom in"}
+                            icon_name={"search"}
+                        />
+                        {/* Zoom out */}
+                        <ToolbarIcon
+                            p_size={"mini"}
+                            p_position={"bottom left"}
+                            p_content={"Zoom out"}
+                            t_id={"zoom out"}
+                            icon_name={"search"}
+                        />
+                        {/* Undo */}
+                        <ToolbarIcon
+                            p_size={"mini"}
+                            p_position={"bottom left"}
+                            p_content={"Undo last action"}
+                            t_id={"undo"}
+                            icon_name={"reply"}
+                        />
+                        {/* Redo */}
+                        <ToolbarIcon
+                            p_size={"mini"}
+                            p_position={"bottom left"}
+                            p_content={"Redo last action"}
+                            t_id={"redo"}
+                            icon_name={"share"}
+                        />
+                        {/* Delete */}
+                        <ToolbarIcon
+                            p_size={"mini"}
+                            p_position={"bottom left"}
+                            p_content={"Delete selected component(s) from graph"}
+                            t_id={"delete"}
+                            icon_name={"trash"}
+                        />
+                        {/* snapshot */}
+                        <ToolbarIcon
+                            p_size={"mini"}
+                            p_position={"bottom left"}
+                            p_content={"Generate snap shot of current graph"}
+                            t_id={"camera"}
+                            icon_name={"camera"}
+                        />
+                        {/* fit size */}
+                        <ToolbarIcon
+                            p_size={"mini"}
+                            p_position={"bottom left"}
+                            p_content={"Make graph fit the screen"}
+                            t_id={"fit"}
+                            icon_name={"expand"}
+                        />
 
-                    <Popup
-                        trigger={<Menu.Item as="a" onClick={this.saveGraph}>Save Graph</Menu.Item>}
-                        on="click"
-                        inverted={false}
-                    >
-                        <this.OpenedFiles/>
-                    </Popup>
+                        <Popup
+                            trigger={<Menu.Item as="a" onClick={this.saveGraph}>Save Graph</Menu.Item>}
+                            on="click"
+                            inverted={false}
+                        >
+                            <this.OpenedFiles/>
+                        </Popup>
 
-                    <Popup
-                        trigger={<Menu.Item as="a" onClick={this.getConformanceErrors}>Conformance errors</Menu.Item>}
-                        on="click"
-                        inverted={false}
-                    >
-                        <this.ConformanceErrors/>
-                    </Popup>
-                </Menu>
+                        <Popup
+                            trigger={<Menu.Item as="a" onClick={this.getConformanceErrors}>Conformance
+                                errors</Menu.Item>}
+                            on="click"
+                            inverted={false}
+                        >
+                            <this.ConformanceErrors/>
+                        </Popup>
+                    </Menu>
             </div>
         );
     }

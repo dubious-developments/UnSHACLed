@@ -169,7 +169,6 @@ class SideBar extends React.Component<SidebarProps, any> {
     }
 
     render() {
-        const logo = require('../img/logo.png');
         const defaultOption = 1;
         let {templates} = this.props;
         const rootPanels = [
@@ -185,15 +184,8 @@ class SideBar extends React.Component<SidebarProps, any> {
                 vertical={true}
                 inverted={true}
                 borderless={true}
-                style={{
-                    width: '50h'
-                }}
                 id="sideBarID"
             >
-                {/* Sidebar Logo */}
-                <Menu.Item style={{height: '5em'}}>
-                    <Image src={logo} size="mini" centered={true}/>
-                </Menu.Item>
                 <Menu.Item>
                     <Dropdown
                         defaultValue={defaultOption}

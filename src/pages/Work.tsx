@@ -2,7 +2,7 @@ import * as React from 'react';
 import Navbar from '../components/navbarWork';
 import SideBar from '../components/Sidebar';
 import MxGraph from '../components/MxGraph';
-import { Sidebar, Segment, Menu } from 'semantic-ui-react';
+import {Sidebar, Segment, Menu} from 'semantic-ui-react';
 
 class Workspace extends React.Component<any, any> {
 
@@ -55,23 +55,32 @@ class Workspace extends React.Component<any, any> {
 
     setLabel(val: boolean) {
         this.setState({
-            errorLabel : val
+            errorLabel: val
         });
     }
+
     render() {
         const {menuVisible} = this.state;
         const {templates} = this.state;
         const {errorLabel} = this.state;
         return (
-            <Sidebar.Pushable style={{width: '100%', height: '100%'}}>
-                <SideBar visible={menuVisible} callback={this.idCallback} templates={templates} showLabel={errorLabel}/>
-                <Sidebar.Pusher style={{height: '100vh', padding: '0em 0em'}}>
-                    <Segment basic={true} style={{height: '100vh', padding: '0em 0em'}}>
-                        <Navbar visible={menuVisible} callback={this.callBackNavBar}/>
-                        <MxGraph callback={this.templateCallback} setLabel={this.setLabel}/>
-                    </Segment>
-                </Sidebar.Pusher>
-            </Sidebar.Pushable>
+            <div>
+                <Navbar visible={menuVisible} callback={this.callBackNavBar}/>
+                <Sidebar.Pushable >
+                    <SideBar
+                        visible={menuVisible}
+                        callback={this.idCallback}
+                        templates={templates}
+                        showLabel={errorLabel}
+                    />
+                    <Sidebar.Pusher>
+                        {/* TODO replace height ugly fix*/}
+                        <Segment basic={true} style={{height: '94vh', padding:0}}>
+                            <MxGraph callback={this.templateCallback} setLabel={this.setLabel}/>
+                        </Segment>
+                    </Sidebar.Pusher>
+                </Sidebar.Pushable>
+            </div>
         );
     }
 }
