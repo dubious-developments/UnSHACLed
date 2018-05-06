@@ -71,7 +71,7 @@ class DropdownView extends React.Component<any, any> {
 
                                     <Table.Row>
                                         <Table.Cell collapsing={true}>
-                                            <Icon name='move' /> Select all graph components
+                                            <Icon name='block layout' /> Select all graph components
                                         </Table.Cell>
                                         <Table.Cell> Ctr + A</Table.Cell>
                                     </Table.Row>
@@ -80,14 +80,28 @@ class DropdownView extends React.Component<any, any> {
                                         <Table.Cell collapsing={true}>
                                             <Icon name='zoom' /> Zoom in
                                         </Table.Cell>
-                                        <Table.Cell> +</Table.Cell>
+                                        <Table.Cell> + / Alt + Scroll  </Table.Cell>
                                     </Table.Row>
 
                                     <Table.Row>
                                         <Table.Cell collapsing={true}>
                                             <Icon name='zoom' /> Zoom out
                                         </Table.Cell>
-                                        <Table.Cell> - </Table.Cell>
+                                        <Table.Cell> - / Alt + Scroll </Table.Cell>
+                                    </Table.Row>
+
+                                    <Table.Row>
+                                        <Table.Cell collapsing={true}>
+                                            <Icon name='move' /> Move whole graph
+                                        </Table.Cell>
+                                        <Table.Cell> Hold right mouse button </Table.Cell>
+                                    </Table.Row>
+
+                                    <Table.Row>
+                                        <Table.Cell collapsing={true}>
+                                            <Icon name='resize horizontal' /> Pan to the left/right
+                                        </Table.Cell>
+                                        <Table.Cell> Shift + Scroll </Table.Cell>
                                     </Table.Row>
 
                                 </Table.Body>
