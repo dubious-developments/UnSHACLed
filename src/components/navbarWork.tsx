@@ -15,7 +15,7 @@ import DropdownEdit from '../dropdowns/DropdownEdit';
 import DropdownView from '../dropdowns/DropdownView';
 import DropdownHelp from '../dropdowns/DropdownHelp';
 
-export class Navbar extends React.Component<NavbarWorkProps, {}> {
+export class Navbar extends React.Component<NavbarWorkProps, any> {
 
     allowedExtensions = ".n3,.ttl,.rdf";
     loadedFiles: string[] = [];
@@ -25,6 +25,10 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
 
     constructor(props: NavbarWorkProps) {
         super(props);
+
+        this.state = {
+            opened_files: []
+        };
         this.iconClick = this.iconClick.bind(this);
         this.setLoadedFiles = this.setLoadedFiles.bind(this);
         this.OpenedFiles = this.OpenedFiles.bind(this);
@@ -34,13 +38,19 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
         this.getConformanceErrors = this.getConformanceErrors.bind(this);
         this.setReport = this.setReport.bind(this);
         this.fileCallback = this.fileCallback.bind(this);
+        this.saveCallback = this.saveCallback.bind(this);
     }
 
     public setLoadedFiles(files: string[]) {
+        console.log('setLoadFiles called');
         if (files.length === 0) {
             console.log("no files found");
         }
         this.loadedFiles = files;
+        /* Set State */
+        this.setState({
+            opened_files: files
+        });
     }
 
     // TODO temp method
@@ -207,7 +217,17 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
         }
     }
 
+    /* Function used as a callback from the child component for the file dropdown option
+       will initiate a call to this.saveGraph in this component as a result from an onClick in the child component
+     */
+    saveCallback (e: any) {
+        console.log('called saveCallback');
+        this.saveGraph(e);
+    }
+
     render() {
+
+        let {opened_files} = this.state;
 
         return (
             <div>
@@ -225,7 +245,11 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                     <Menu.Item as="a" onClick={this.iconClick} content={<Icon name='content'/>}/>
                     {/* Toolbar 'File' */}
                     <Menu.Item>
-                        <DropdownFile opened_files={<this.OpenedFiles/>} import_cb={this.fileCallback}/>
+                        <DropdownFile
+                            save_graph={this.saveCallback}
+                            opened_files={opened_files}
+                            import_cb={this.fileCallback}
+                        />
                         {/* Import SHACL Graph input*/}
                         <input
                             onChange={this.importSHACLGraph}
@@ -369,6 +393,9 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
                         <this.ConformanceErrors/>
                     </Popup>
 
+                    <Menu.Item>
+                        => {opened_files}
+                    </Menu.Item>
                 </Menu>
             </div>
         );

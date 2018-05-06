@@ -63,4 +63,6 @@ export interface LegendProps {
 export interface DropdownFileProps {
     opened_files: any; // currently opened files
     import_cb: PropTypes.func; // callback function to parent for importing either a shacl or data graph
+    save_graph: PropTypes.func; // callback function to parent for saving graph, will call this.saveGraph
+
 }
