@@ -475,19 +475,19 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 // this also makes sense since a node without rows is pointless
                 let firstRowTrait = event.properties.cell.children[0].value.trait;
                 let triple = new Triple(blockName, "predicate", "object", firstRowTrait.file);
-                console.log(triple);
 
                 temprow.value.name = instance.nameFromTrait(triple);
                 temprow.value.trait = triple;
                 // TODO store the triple and row in model
                 // start an update task in the model
                 let file = triple.file;
-                let immutableGraph = instance.fileToGraphDict.getValue(file);
+                let oldGraph = instance.fileToGraphDict.getValue(file);
                 let type = instance.fileToTypeDict.getValue(file);
-                if (immutableGraph && type) {
+                if (oldGraph && type) {
                     let backendModel = DataAccessProvider.getInstance().model;
+                    let newGraph = oldGraph.addTriple(triple.subject, triple.predicate, triple.object);
                     backendModel.tasks.schedule(new EditTriple(
-                        immutableGraph, type, file)
+                        newGraph, type, file)
                     );
                     // TODO remove this after testing
                     backendModel.tasks.processAllTasks();
