@@ -14,6 +14,7 @@ import DropdownFile from '../dropdowns/DropdownFile';
 import DropdownEdit from '../dropdowns/DropdownEdit';
 import DropdownView from '../dropdowns/DropdownView';
 import DropdownHelp from '../dropdowns/DropdownHelp';
+import DropdownUser from '../dropdowns/DropdownUser';
 
 export class Navbar extends React.Component<NavbarWorkProps, any> {
 
@@ -244,54 +245,60 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
         const logo = require('../img/logo.png');
         let {opened_files} = this.state;
         return (
-            <div style={{ backgroundColor: '#1b1c1d'}} >
-                <div style={{float: 'left', width: '5%', backgroundColor: '#1b1c1d', marginTop: '14px' }}>
+            <div style={{backgroundColor: '#1b1c1d'}}>
+                <div style={{float: 'left', width: '5%', backgroundColor: '#1b1c1d', marginTop: '14px'}}>
                     <Image src={logo} size="mini" centered={true}/>
                 </div>
-                    {/* General Toolbar */}
-                    <Menu
-                        inverted={true}
-                        size="tiny"
-                        style={this.menuStyle}
-                        borderless={true}
-                    >
-                        <Menu.Item as="a" onClick={this.iconClick} content={<Icon name='content'/>}/>
-                        {/* Toolbar 'File' */}
+                {/* General Toolbar */}
+                <Menu
+                    inverted={true}
+                    size="tiny"
+                    style={this.menuStyle}
+                    borderless={true}
+                >
+                    <Menu.Item as="a" onClick={this.iconClick} content={<Icon name='content'/>}/>
+                    {/* Toolbar 'File' */}
+                    <Menu.Item>
+                        <DropdownFile
+                            save_graph={this.saveCallback}
+                            opened_files={opened_files}
+                            import_cb={this.fileCallback}
+                            get_file_from_popup={this.getFileFromPopupCallback}
+                        />
+                        {/* Import SHACL Graph input*/}
+                        <input
+                            onChange={this.importSHACLGraph}
+                            type="file"
+                            id="importSHACLGraph"
+                            style={{"display": "none"}}
+                            accept={this.allowedExtensions}
+                        />
+                        {/* Import Data graph input*/}
+                        <input
+                            onChange={this.importDataGraph}
+                            type="file"
+                            id="importDataGraph"
+                            style={{"display": "none"}}
+                            accept={this.allowedExtensions}
+                        />
+                    </Menu.Item>
+                    {/* Toolbar 'Edit' */}
+                    <Menu.Item>
+                        <DropdownEdit/>
+                    </Menu.Item>
+                    {/* Toolbar 'View' */}
+                    <Menu.Item>
+                        <DropdownView/>
+                    </Menu.Item>
+                    {/* Toolbar 'Help' */}
+                    <Menu.Item>
+                        <DropdownHelp/>
+                    </Menu.Item>
+                    <Menu.Menu position="right">
+                        {/* Toolbar 'User info' */}
                         <Menu.Item>
-                            <DropdownFile
-                                save_graph={this.saveCallback}
-                                opened_files={opened_files}
-                                import_cb={this.fileCallback}
-                                get_file_from_popup={this.getFileFromPopupCallback}
-                            />
-                            {/* Import SHACL Graph input*/}
-                            <input
-                                onChange={this.importSHACLGraph}
-                                type="file"
-                                id="importSHACLGraph"
-                                style={{"display": "none"}}
-                                accept={this.allowedExtensions}
-                            />
-                            {/* Import Data graph input*/}
-                            <input
-                                onChange={this.importDataGraph}
-                                type="file"
-                                id="importDataGraph"
-                                style={{"display": "none"}}
-                                accept={this.allowedExtensions}
-                            />
-                        </Menu.Item>
-                        {/* Toolbar 'Edit' */}
-                        <Menu.Item>
-                            <DropdownEdit/>
-                        </Menu.Item>
-                        {/* Toolbar 'View' */}
-                        <Menu.Item>
-                            <DropdownView/>
-                        </Menu.Item>
-                        {/* Toolbar 'Help' */}
-                        <Menu.Item>
-                            <DropdownHelp/>
+                            <Icon name='user'/>
+                            <DropdownUser/>
                         </Menu.Item>
                         {/* Toolbar 'Github repo' */}
                         <Menu.Item
@@ -320,95 +327,91 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
                         >
                             Logout
                         </Menu.Item>
-                        <Menu.Menu position="right">
-                            <Menu.Item>
-                                Test
-                            </Menu.Item>
-                        </Menu.Menu>
-                    </Menu>
-                    {/* Toolbar icons menu */}
-                    <Menu
-                        inverted={true}
-                        size="mini"
-                        icon={true}
-                        borderless={true}
-                        style={this.menuStyle}
+                    </Menu.Menu>
+                </Menu>
+                {/* Toolbar icons menu */}
+                <Menu
+                    inverted={true}
+                    size="mini"
+                    icon={true}
+                    borderless={true}
+                    style={this.menuStyle}
+                >
+                    {/* Toolbar icons */}
+                    {/* Zoom in */}
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Zoom in"}
+                        t_id={"zoom in"}
+                        icon_name={"search"}
+                    />
+                    {/* Zoom out */}
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Zoom out"}
+                        t_id={"zoom out"}
+                        icon_name={"search"}
+                    />
+                    {/* Undo */}
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Undo last action"}
+                        t_id={"undo"}
+                        icon_name={"reply"}
+                    />
+                    {/* Redo */}
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Redo last action"}
+                        t_id={"redo"}
+                        icon_name={"share"}
+                    />
+                    {/* Delete */}
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Delete selected component(s) from graph"}
+                        t_id={"delete"}
+                        icon_name={"trash"}
+                    />
+                    {/* snapshot */}
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Generate snap shot of current graph"}
+                        t_id={"camera"}
+                        icon_name={"camera"}
+                    />
+                    {/* fit size */}
+                    <ToolbarIcon
+                        p_size={"mini"}
+                        p_position={"bottom left"}
+                        p_content={"Make graph fit the screen"}
+                        t_id={"fit"}
+                        icon_name={"expand"}
+                    />
+
+                    <Popup
+                        trigger={<Menu.Item as="a" onClick={this.saveGraph}>Save Graph</Menu.Item>}
+                        on="click"
+                        inverted={false}
                     >
-                        {/* Toolbar icons */}
-                        {/* Zoom in */}
-                        <ToolbarIcon
-                            p_size={"mini"}
-                            p_position={"bottom left"}
-                            p_content={"Zoom in"}
-                            t_id={"zoom in"}
-                            icon_name={"search"}
-                        />
-                        {/* Zoom out */}
-                        <ToolbarIcon
-                            p_size={"mini"}
-                            p_position={"bottom left"}
-                            p_content={"Zoom out"}
-                            t_id={"zoom out"}
-                            icon_name={"search"}
-                        />
-                        {/* Undo */}
-                        <ToolbarIcon
-                            p_size={"mini"}
-                            p_position={"bottom left"}
-                            p_content={"Undo last action"}
-                            t_id={"undo"}
-                            icon_name={"reply"}
-                        />
-                        {/* Redo */}
-                        <ToolbarIcon
-                            p_size={"mini"}
-                            p_position={"bottom left"}
-                            p_content={"Redo last action"}
-                            t_id={"redo"}
-                            icon_name={"share"}
-                        />
-                        {/* Delete */}
-                        <ToolbarIcon
-                            p_size={"mini"}
-                            p_position={"bottom left"}
-                            p_content={"Delete selected component(s) from graph"}
-                            t_id={"delete"}
-                            icon_name={"trash"}
-                        />
-                        {/* snapshot */}
-                        <ToolbarIcon
-                            p_size={"mini"}
-                            p_position={"bottom left"}
-                            p_content={"Generate snap shot of current graph"}
-                            t_id={"camera"}
-                            icon_name={"camera"}
-                        />
-                        {/* fit size */}
-                        <ToolbarIcon
-                            p_size={"mini"}
-                            p_position={"bottom left"}
-                            p_content={"Make graph fit the screen"}
-                            t_id={"fit"}
-                            icon_name={"expand"}
-                        />
+                        <this.OpenedFiles/>
+                    </Popup>
 
-                        <Popup
-                            trigger={<Menu.Item as="a" onClick={this.saveGraph}>Save Graph</Menu.Item>}
-                            on="click"
-                            inverted={false}
-                        >
-                            <this.OpenedFiles/>
-                        </Popup>
-
-                        <Popup
-                            trigger={<Menu.Item as="a" onClick={this.getConformanceErrors}>Conformance
-                                errors</Menu.Item>}
-                            on="click"
-                            inverted={false}
-                        >
-                            <this.ConformanceErrors/>
-                        </Popup>
-                    </Menu>
+                    <Popup
+                        trigger={<Menu.Item as="a" onClick={this.getConformanceErrors}>Conformance
+                            errors</Menu.Item>}
+                        on="click"
+                        inverted={false}
+                    >
+                        <this.ConformanceErrors/>
+                    </Popup>
+                </Menu>
             </div>
         );
     }
