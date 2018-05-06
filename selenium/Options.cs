@@ -45,6 +45,8 @@ namespace SeleniumTests
                     "Chooses which browsers to use for running the tests. " +
                     "Permissible values are ",
                     "firefox",
+                    ", ",
+                    "safari",
                     " and ",
                     "chrome",
                     ". By default, only ",
@@ -66,6 +68,22 @@ namespace SeleniumTests
                 "should build UnSHACLed or not. " +
                 "Default behavior is to build UnSHACLed only if " +
                 "no URL is specified.");
+
+        /// <summary>
+        /// The 'color' option, which tells the test runner to print
+        /// colors even when it thinks it shouldn't.
+        /// </summary>
+        public static readonly Option Color =
+            new FlagOption(
+                OptionForm.Long("color"),
+                OptionForm.Long("no-color"),
+                false)
+            .WithDescription(
+                "Colorize the output. The positive form forces the " +
+                "use of ANSI color codes, the negative form disables " +
+                "output colors altogether. By default, the colorization " +
+                "of the output is decided based on the terminal in use, " +
+                "the operating system and whether output is redirected or not.");
 
         /// <summary>
         /// The 'print-app-url' option, which makes the test runner
@@ -90,6 +108,7 @@ namespace SeleniumTests
         {
             BuildApplication,
             Browsers,
+            Color,
             Help,
             PrintApplicationUrl
         };
