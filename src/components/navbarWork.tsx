@@ -396,14 +396,6 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
                     />
 
                     <Popup
-                        trigger={<Menu.Item as="a" onClick={this.saveGraph}>Save Graph</Menu.Item>}
-                        on="click"
-                        inverted={false}
-                    >
-                        <this.OpenedFiles/>
-                    </Popup>
-
-                    <Popup
                         trigger={<Menu.Item as="a" onClick={this.getConformanceErrors}>Conformance
                             errors</Menu.Item>}
                         on="click"
