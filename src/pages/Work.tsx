@@ -64,18 +64,17 @@ class Workspace extends React.Component<any, any> {
         const {templates} = this.state;
         const {errorLabel} = this.state;
         return (
-            <div>
+            <div id="wrapper" style={{display:'flex', flexDirection:'column', height:'100%'}}>
                 <Navbar visible={menuVisible} callback={this.callBackNavBar}/>
-                <Sidebar.Pushable >
+                <Sidebar.Pushable style={{flex:1, height:'100%'}}>
                     <SideBar
                         visible={menuVisible}
                         callback={this.idCallback}
                         templates={templates}
                         showLabel={errorLabel}
                     />
-                    <Sidebar.Pusher>
-                        {/* TODO replace height ugly fix*/}
-                        <Segment basic={true} style={{height: '94vh', padding:0}}>
+                    <Sidebar.Pusher style={{height:'100%'}}>
+                        <Segment basic={true} style={{height:'100vh', padding:0}}>
                             <MxGraph callback={this.templateCallback} setLabel={this.setLabel}/>
                         </Segment>
                     </Sidebar.Pusher>

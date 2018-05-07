@@ -12,7 +12,7 @@ class Routes extends React.Component<any, any> {
 
     render() {
         return (
-            <div>
+            <div style={{height:'100%'}}>
                 <Switch>
                     <Route exact={true} path="/" component={Home}/>
                     <Route exact={true} path="/login" component={Login}/>
