@@ -67,3 +67,9 @@ export interface DropdownFileProps {
     get_file_from_popup: PropTypes.func; // callback function to parent for saving correct file
 
 }
+
+export interface RepoModalProps {
+    visible: any; // state variable from parent that will determine visibility
+    confirm_cb: PropTypes.func; // callback function  to parent when confirm is clicked
+    cancel_cb: PropTypes.func; // callback function to parent when cancel is clicked
+}
