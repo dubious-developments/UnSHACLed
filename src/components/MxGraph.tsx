@@ -6,7 +6,7 @@ import {GetValidationReport, EditTriple, VisualizeComponent} from "../services/M
 import TimingService from "../services/TimingService";
 import {ValidationReport} from "../conformance/wrapper/ValidationReport";
 import {MxGraphProps} from "./interfaces/interfaces";
-import {ModelObserver} from "../entities/model";
+import {ModelObserver, Model} from "../entities/model";
 import {ImmutableGraph, PrefixMap} from "../persistence/graph";
 import {Task} from "../entities/task";
 import {ModelData} from "../entities/modelData";
@@ -372,7 +372,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         };
     }
 
-    configureLabels(graph: any) {
+    configureLabels(graph: any, model: Model) {
         // Returns the name field of the user object for the label
         graph.convertValueToString = function (cell: any) {
             if (cell.value != null && cell.value.name != null) {
@@ -409,9 +409,8 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             let [predicate, object] = value.split(" : ").map(d => d.trim());
             let triple = instance.cellToTriples.getValue(cell);
             if (triple) {
-                triple.predicate = predicate;
-                triple.object = object;
-                instance.cellToTriples.setValue(cell, triple);
+                let newTriple = new Triple(triple.object, predicate, object, triple.file);
+                instance.editTriple(cell, triple, newTriple, model);
             } else {
                 console.log("Error: edited cell has no linked triple");
             }
@@ -569,7 +568,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                     let name = this.replacePrefixes(trait.predicate, prefixes)
                         + " :  "
                         + this.replacePrefixes(trait.object, prefixes);
-                    // let name = trait.predicate + " :  " + trait.object;
+
                     longestname = Math.max(name.length, longestname);
                     temprow.value.name = name;
                     v1.insert(temprow);
@@ -908,7 +907,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             this.initPeripheralHandling(graph);
             this.configureStylesheet(graph);
             this.configureCells(editor, graph);
-            this.configureLabels(graph);
+            this.configureLabels(graph, model);
             this.configureTooltips(graph);
             this.initStandardCells();
             this.saveGraph(graph);
@@ -951,10 +950,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                         }
                     }
                 }
-                console.log(this.blockToCellDict);
-                console.log(this.subjectToBlockDict);
-                console.log(this.triples);
-                console.log(this.cellToTriples);
             });
         }
     }
@@ -980,6 +975,34 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
             model.tasks.schedule(new EditTriple(
                 newGraph, file, triple.file)
+            );
+
+            model.tasks.processAllTasks();
+        }
+    }
+
+    editTriple(cell: any, oldTriple: Triple, newTriple: Triple, model: Model) {
+        // Update data structures
+        this.triples.remove(oldTriple);
+        this.triples.add(newTriple);
+        this.cellToTriples.setValue(cell, newTriple);
+
+        // Edit triple in the model
+        let oldGraph = this.fileToGraphDict.getValue(newTriple.file);
+        let file = this.fileToTypeDict.getValue(newTriple.file);
+
+        if (oldGraph && file) {
+            // Use param object to adhere to interface of the backend graph structure
+            let param = {nSubject: newTriple.subject, nPredicate: newTriple.predicate, nObject: newTriple.object};
+            let newGraph = oldGraph.updateTriple(oldTriple.subject, oldTriple.predicate, oldTriple.object, param);
+
+            this.fileToGraphDict.setValue(
+                newTriple.file,
+                newGraph
+            );
+
+            model.tasks.schedule(new EditTriple(
+                newGraph, file, newTriple.file)
             );
 
             model.tasks.processAllTasks();
