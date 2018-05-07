@@ -84,6 +84,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
             if (files) {
                 if (files[0]) {
                     fileDAO.find(new FileModule(ModelComponent.DataGraph, files[0].name, files[0]));
+                    console.log("Import data graph");
                 }
             } else {
                 console.log("error: no files found");
@@ -102,6 +103,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
             if (files) {
                 if (files[0]) {
                     fileDAO.find(new FileModule(ModelComponent.SHACLShapesGraph, files[0].name, files[0]));
+                    console.log("Import shapes graph");
                 }
             } else {
                 console.log("error: no files found");
@@ -129,7 +131,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
         console.log(fileName);
         let model: Model = DataAccessProvider.getInstance().model;
         model.tasks.schedule(new LoadFileTask([ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph], fileName));
-        model.tasks.processTask();
+        model.tasks.processAllTasks();
     }
 
     /*

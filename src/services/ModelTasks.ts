@@ -8,7 +8,6 @@ import MxGraph from "../components/MxGraph";
 import { ImmutableGraph } from "../persistence/graph";
 import { Component } from "../persistence/component";
 import SideBar from "../components/Sidebar";
-import { Triple } from "../components/MxGraph";
 
 /**
  * First search the component which belongs to the fileName
@@ -124,14 +123,15 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
             for (let part of component.getAllKeys()) {
                 // handle the graph objects correctly
                 if (this.mxGraph) {
-                    let persistenceGraph = component.getPart(part);
+                    if (part !== "ROOT") {
+                        let persistenceGraph = component.getPart(part);
 
-                    this.mxGraph.visualizeDataGraph(
-                        persistenceGraph, ModelComponent[this.mComponent],  persistenceGraph.getPrefixes()
-                    );
+                        this.mxGraph.visualizeFile(
+                            persistenceGraph, ModelComponent[this.mComponent], part, persistenceGraph.getPrefixes()
+                        );
 
-                    SideBar.setPrefixes(persistenceGraph.getPrefixes());
-
+                        SideBar.setPrefixes(persistenceGraph.getPrefixes());
+                    }
                 } else {
                     console.log("error: could not find MxGraph");
                 }
@@ -139,7 +139,6 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
         } else {
             console.log("Could not find the ModelComponent: ", component);
         }
-
     }
 
     public get metadata(): ModelTaskMetadata {
@@ -213,9 +212,9 @@ export class GetValidationReportNavbar extends Task<ModelData, ModelTaskMetadata
     }
 }
 
-export class RemoveTripleComponent extends Task<ModelData, ModelTaskMetadata> {
+export class RemoveTriple extends Task<ModelData, ModelTaskMetadata> {
 
-    public constructor(private triple: Triple) {
+    public constructor(private graph: ImmutableGraph, private type: string, private file: string) {
         super();
     }
 
@@ -225,13 +224,14 @@ export class RemoveTripleComponent extends Task<ModelData, ModelTaskMetadata> {
 
         let shapesComponent = data.getComponent<Component<ImmutableGraph>>(ModelComponent.SHACLShapesGraph);
 
-        console.log(this.triple);
-        if (this.triple.type === "DataGraph" && dataComponent) {
-            data.setComponent(ModelComponent.DataGraph, dataComponent.withRoot(this.triple.mutableGraph.asImmutable()));
+        if (this.type === "DataGraph" && dataComponent) {
+            data.setComponent(ModelComponent.DataGraph, dataComponent.withPart(
+                this.file, this.graph));
         } else if (shapesComponent) {
-            data.setComponent(
-                ModelComponent.SHACLShapesGraph, shapesComponent.withRoot(this.triple.mutableGraph.asImmutable()));
+            data.setComponent(ModelComponent.SHACLShapesGraph, shapesComponent.withPart(
+                this.file, this.graph));
         }
+
     }
 
     public get metadata(): ModelTaskMetadata {
