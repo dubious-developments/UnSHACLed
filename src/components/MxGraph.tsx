@@ -519,9 +519,11 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             if (subjectBlock) {
                 if (predicate === RDF("type").uri && object === SH("NodeShape").uri) {
                     subjectBlock.blockType = "NodeShape";
+                    subjectBlock.triple = triple;
                 } else if (predicate === SH("path").uri) {
                     subjectBlock.name = object;
                     subjectBlock.blockType = "Property";
+                    subjectBlock.triple = triple;
                 } else {
                     subjectBlock.traits.push(triple);
                 }
@@ -532,9 +534,9 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     }
 
     clear() {
+        this.blockToCellDict.clear();
         let {graph} = this.state;
         graph.removeCells(graph.getChildVertices(graph.getDefaultParent()));
-        this.blockToCellDict.clear();
     }
 
     visualizeFile(persistenceGraph: any, type: string, file: string, prefixes: PrefixMap) {
@@ -927,36 +929,60 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 for (let i = 0; i < cells.length; i++) {
                     let triple = this.cellToTriples.getValue(cells[i]);
                     if (triple) {
-                        console.log("TRAIT DELETED");
-
-                        this.removeTripleFromBlocks(triple);
-                        this.triples.remove(triple);
-                        this.cellToTriples.remove(cells[i]);
-
-                        let oldGraph = this.fileToGraphDict.getValue(triple.file);
-                        let file = this.fileToTypeDict.getValue(triple.file);
-
-                        if (oldGraph && file) {
-                            let newGraph = oldGraph.removeTriple(triple.subject, triple.predicate, triple.object);
-                            this.fileToGraphDict.setValue(
-                                triple.file,
-                                newGraph
-                            );
-
-                            model.tasks.schedule(new EditTriple(
-                                newGraph, file, triple.file)
-                            );
-
-                            model.tasks.processAllTasks();
-                        } else {
-                            console.log("removed triple was not linked to graph or file");
-                        }
+                        this.removeTriple(triple, model, cells[i]);
                     } else {
-                        console.log("BLOCK DELETED");
+                        if (this.blockToCellDict.containsKey(cells[i].value)) {
+                            let block  = cells[i].value;
+                            for (let trait of block.traits) {
+                                this.removeTriple(trait, model, cells[i]);
+                            }
+
+                            let subject: string;
+                            if (block.triple) {
+                                subject = block.triple.subject;
+                                this.triples.remove(block.triple);
+                                this.removeTripleFromModel(block.triple, model);
+                            } else {
+                                subject = block.name;
+                            }
+
+                            this.subjectToBlockDict.remove(subject);
+                            this.blockToCellDict.remove(block);
+                        }
                     }
                 }
+                console.log(this.blockToCellDict);
+                console.log(this.subjectToBlockDict);
+                console.log(this.triples);
+                console.log(this.cellToTriples);
             });
+        }
+    }
 
+    removeTriple(triple: Triple, model: any, cell: any) {
+        this.removeTripleFromBlocks(triple);
+        this.triples.remove(triple);
+        this.cellToTriples.remove(cell);
+
+        this.removeTripleFromModel(triple, model);
+    }
+
+    removeTripleFromModel(triple: Triple, model: any) {
+        let oldGraph = this.fileToGraphDict.getValue(triple.file);
+        let file = this.fileToTypeDict.getValue(triple.file);
+
+        if (oldGraph && file) {
+            let newGraph = oldGraph.removeTriple(triple.subject, triple.predicate, triple.object);
+            this.fileToGraphDict.setValue(
+                triple.file,
+                newGraph
+            );
+
+            model.tasks.schedule(new EditTriple(
+                newGraph, file, triple.file)
+            );
+
+            model.tasks.processAllTasks();
         }
     }
     
@@ -1090,6 +1116,7 @@ class Block {
     public traits: Array<Triple>;
     public blockType: string;
     public name: string;
+    public triple: Triple;
 
     constructor(name?: string) {
         this.name = name || "";
