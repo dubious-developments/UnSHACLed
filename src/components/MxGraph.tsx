@@ -404,8 +404,17 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             return mxGraph.prototype.getLabel.apply(this, arguments);
         };
 
+        let instance = this;
         // Text label changes will go into the name field of the user object
         graph.model.valueForCellChanged = function(cell: any, value: any) {
+            let [predicate, object] = value.split(" : ").map(d => d.trim());
+            let triple = instance.cellToTriples.getValue(cell);
+            if (triple) {
+                triple.predicate = predicate;
+                triple.object = object;
+                instance.cellToTriples.setValue(cell, triple);
+            }
+
             if (value.name != null) {
                 return mxGraphModel.prototype.valueForCellChanged.apply(this, arguments);
             } else {
