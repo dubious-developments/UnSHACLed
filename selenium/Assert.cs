@@ -1,3 +1,5 @@
+using System;
+using OpenQA.Selenium;
 using Pixie;
 using Pixie.Markup;
 
@@ -30,7 +32,7 @@ namespace SeleniumTests
         /// </param>
         public static void IsTrue(bool condition)
         {
-            IsTrue(condition, "condition was false.");
+            IsTrue(condition, "condition was unexpectedly false.");
         }
 
         /// <summary>
@@ -55,7 +57,26 @@ namespace SeleniumTests
         /// </param>
         public static void IsFalse(bool condition)
         {
-            IsFalse(condition, "condition was true.");
+            IsFalse(condition, "condition was unexpectedly true.");
+        }
+
+        /// <summary>
+        /// Asserts that a value cannot be <c>null</c>.
+        /// </summary>
+        /// <param name="value">The value to check.</param>
+        /// <param name="valueName">The name of the value to check.</param>
+        public static void IsNotNull(object value, string valueName)
+        {
+            IsTrue(
+                value != null,
+                Quotation.QuoteEvenInBold(
+                    "expected a non-",
+                    "null",
+                    " value for ",
+                    valueName,
+                    ", but got ",
+                    "null",
+                    " anyway."));
         }
 
         /// <summary>
