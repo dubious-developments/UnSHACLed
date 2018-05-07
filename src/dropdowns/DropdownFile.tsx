@@ -63,7 +63,9 @@ class DropdownFile extends React.Component<DropdownFileProps, any> {
     // TODO make dynamic for other modals
     confirmCallback(type: any) {
         console.log("Confirm clicked");
-
+        this.setState({
+            repoVisible: false
+        });
     }
 
     /* Function that will handle callback from child component
@@ -72,7 +74,9 @@ class DropdownFile extends React.Component<DropdownFileProps, any> {
     // TODO make dynamic for other modals
     cancelCallback(type: any) {
         console.log("Cancel clicked");
-
+        this.setState({
+            repoVisible: false
+        });
     }
 
     render() {
