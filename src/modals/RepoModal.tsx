@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Confirm, Button} from 'semantic-ui-react';
+import {Modal, Button} from 'semantic-ui-react';
 import {RepoModalProps} from '../components/interfaces/interfaces';
 
 /*
@@ -23,8 +23,7 @@ class RepoModal extends React.Component<RepoModalProps, any> {
     render() {
         return (
             <div>
-                <Confirm
-                    content={<this.modalContent/>}
+                <Modal
                     open={this.props.visible}
                     style={{
                         marginTop: '0 !important',
@@ -34,7 +33,14 @@ class RepoModal extends React.Component<RepoModalProps, any> {
                         top: '50%',
                         transform: 'translateY(-50%)'
                     }}
-                />
+                >
+                    <Modal.Header>GitHub repo's</Modal.Header>
+                    <Modal.Content>
+                        <Modal.Description>
+                            <p> Projects </p>
+                        </Modal.Description>
+                    </Modal.Content>
+                </Modal>
             </div>
         );
     }
