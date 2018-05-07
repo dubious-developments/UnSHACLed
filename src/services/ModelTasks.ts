@@ -117,8 +117,6 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
     }
 
     public execute(data: ModelData): void {
-        console.log("called");
-
         let component = data.getComponent<Component<ImmutableGraph>>(this.mComponent);
 
         if (component) {
@@ -214,7 +212,7 @@ export class GetValidationReportNavbar extends Task<ModelData, ModelTaskMetadata
     }
 }
 
-export class RemoveTriple extends Task<ModelData, ModelTaskMetadata> {
+export class EditTriple extends Task<ModelData, ModelTaskMetadata> {
 
     public constructor(private graph: ImmutableGraph, private type: string, private file: string) {
         super();

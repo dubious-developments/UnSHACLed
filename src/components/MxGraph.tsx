@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as Collections from 'typescript-collections';
 import {ModelComponent, ModelTaskMetadata} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
-import {GetValidationReport, RemoveTriple, VisualizeComponent} from "../services/ModelTasks";
+import {GetValidationReport, EditTriple, VisualizeComponent} from "../services/ModelTasks";
 import TimingService from "../services/TimingService";
 import {ValidationReport} from "../conformance/wrapper/ValidationReport";
 import {MxGraphProps} from "./interfaces/interfaces";
@@ -927,6 +927,8 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 for (let i = 0; i < cells.length; i++) {
                     let triple = this.cellToTriples.getValue(cells[i]);
                     if (triple) {
+                        console.log("TRAIT DELETED");
+
                         this.removeTripleFromBlocks(triple);
                         this.triples.remove(triple);
                         this.cellToTriples.remove(cells[i]);
@@ -941,7 +943,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                                 newGraph
                             );
 
-                            model.tasks.schedule(new RemoveTriple(
+                            model.tasks.schedule(new EditTriple(
                                 newGraph, file, triple.file)
                             );
 
@@ -949,6 +951,8 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                         } else {
                             console.log("removed triple was not linked to graph or file");
                         }
+                    } else {
+                        console.log("BLOCK DELETED");
                     }
                 }
             });
