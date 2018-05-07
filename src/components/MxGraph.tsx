@@ -389,7 +389,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         // };
 
         graph.getLabel = function (cell: any) {
-            console.log(cell);
             if (this.isHtmlLabel(cell)) {
                 return mxUtils.htmlEntities(cell.value.name);
             }
@@ -548,10 +547,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                     // let name = trait.predicate + " :  " + trait.object;
                     longestname = Math.max(name.length, longestname);
                     temprow.value.name = name;
-                    temprow.value.trait = trait;
                     v1.insert(temprow);
-
-                    this.addNewRowOverlay(graph, v1);
 
                     this.cellToTriples.setValue(temprow, trait);
 
@@ -751,12 +747,11 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
             /* Create empty row */
             let temprow = model.cloneCell(row);
-            b.traits = [temprow];
+            b.traits = [];
 
             model.beginUpdate();
             try {
                 v1.insert(temprow);
-                v1.value = b.name;
                 v1.style = style;
                 v1.geometry.x = x;
                 v1.geometry.y = y;
@@ -1088,7 +1083,6 @@ export class Triple {
 
 class Row {
     name: string;
-    trait: Triple;
     error: any;
 
     constructor(name?: string) {
