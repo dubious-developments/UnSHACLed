@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {Dropdown, Button} from 'semantic-ui-react';
 import {DropdownFileProps} from '../components/interfaces/interfaces';
+import RepoModal from '../modals/RepoModal';
 
 /*
     Component used to create a dropdown component for the file toolbar option
@@ -11,7 +12,13 @@ class DropdownFile extends React.Component<DropdownFileProps, any> {
 
     constructor(props: any) {
         super(props);
+        this.state = {
+            repoVisible: false
+        };
         this.getOpenedFiles = this.getOpenedFiles.bind(this);
+        this.cancelCallback = this.cancelCallback.bind(this);
+        this.confirmCallback = this.confirmCallback.bind(this);
+        this.showRepoModal = this.showRepoModal.bind(this);
     }
 
     getOpenedFiles() {
@@ -44,36 +51,73 @@ class DropdownFile extends React.Component<DropdownFileProps, any> {
         );
     }
 
-    render() {
-        return (
-            <Dropdown text='File' pointing="top left">
-                <Dropdown.Menu>
-                    <Dropdown.Item text='New'/>
-                    <Dropdown
-                        text='Open local graph'
-                        pointing='left'
-                        className='link item'
-                    >
-                        <Dropdown.Menu>
-                            <Dropdown.Item onClick={() => this.props.import_cb("shacl")}> SHACL Graph </Dropdown.Item>
-                            <Dropdown.Item onClick={() => this.props.import_cb("data")}> Data Graph</Dropdown.Item>
-                        </Dropdown.Menu>
-                    </Dropdown>
+    showRepoModal() {
+        this.setState({
+            repoVisible: true
+        });
+    }
 
-                    <Dropdown
-                        text='Save local graph'
-                        pointing='left'
-                        className='link item'
-                        onClick={() => this.props.save_graph(event)}
-                    >
-                        <Dropdown.Menu content={<this.getOpenedFiles/>}/>
-                    </Dropdown>
-                    <Dropdown.Divider/>
-                    <Dropdown.Item icon='github' text='Open graph from account'/>
-                    <Dropdown.Item icon='github' text='Save graph to account'/>
-                    <Dropdown.Item icon='trash' text='Clear graph' id='tb_clear_graph'/>
-                </Dropdown.Menu>
-            </Dropdown>
+    /* Function that will handle callback from child component
+    to adapt right state */
+
+    // TODO make dynamic for other modals
+    confirmCallback(type: any) {
+        console.log("Confirm clicked");
+        this.setState({
+            repoVisible: false
+        });
+    }
+
+    /* Function that will handle callback from child component
+        to adapt right state */
+
+    // TODO make dynamic for other modals
+    cancelCallback(type: any) {
+        console.log("Cancel clicked");
+        this.setState({
+            repoVisible: false
+        });
+    }
+
+    render() {
+        let {repoVisible} = this.state;
+        return (
+            <div>
+                <Dropdown text='File' pointing="top left">
+                    <Dropdown.Menu>
+                        <Dropdown.Item text='New'/>
+                        <Dropdown
+                            text='Open local graph'
+                            pointing='left'
+                            className='link item'
+                        >
+                            <Dropdown.Menu>
+                                <Dropdown.Item onClick={() => this.props.import_cb("shacl")}> SHACL
+                                    Graph </Dropdown.Item>
+                                <Dropdown.Item onClick={() => this.props.import_cb("data")}> Data Graph</Dropdown.Item>
+                            </Dropdown.Menu>
+                        </Dropdown>
+
+                        <Dropdown
+                            text='Save local graph'
+                            pointing='left'
+                            className='link item'
+                            onClick={() => this.props.save_graph(event)}
+                        >
+                            <Dropdown.Menu content={<this.getOpenedFiles/>}/>
+                        </Dropdown>
+                        <Dropdown.Divider/>
+                        <Dropdown.Item
+                            icon='github'
+                            onClick={this.showRepoModal}
+                            text='Open graph from account'
+                        />
+                        <Dropdown.Item icon='github' text='Save graph to account'/>
+                        <Dropdown.Item icon='trash' text='Clear graph' id='tb_clear_graph'/>
+                    </Dropdown.Menu>
+                </Dropdown>
+                <RepoModal visible={repoVisible} confirm_cb={this.confirmCallback} cancel_cb={this.cancelCallback}/>
+            </div>
         );
     }
 }
