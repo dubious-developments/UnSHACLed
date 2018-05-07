@@ -58,7 +58,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.blockToCellDict = new Collections.Dictionary<Block, any>((b) => b.name);
         this.subjectToBlockDict = new Collections.Dictionary<string, Block>();
         this.triples = new Collections.Set<Triple>((t) =>  t.subject + " " + t.predicate + " " + t.object);
-        this.cellToTriples = new Collections.Dictionary<any, Triple>((c) => c.value.name);
+        this.cellToTriples = new Collections.Dictionary<any, Triple>((c) => c.getId());
         this.invalidCells = new Collections.Set<any>();
         this.fileToGraphDict = new Collections.Dictionary<string, ImmutableGraph>();
         this.fileToTypeDict = new Collections.Dictionary<string, string>();
@@ -385,13 +385,14 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
         // let superCellLabelChanged = graph.cellLabelChanged;
         // graph.cellLabelChanged = function (cell: any, newValue: string, autoSize: any) {
-        //     if (cell.value) {
-        //         // Clones the value for correct undo/redo
-        //         // let elt = mxUtils.clone(cell.value);
-        //         let elt = cell.value.clone();
-        //         elt.setAttribute('name', newValue);
-        //         newValue = elt;
-        //     }
+        //     console.log(cell, newValue);
+        //     // if (cell.value) {
+        //     //     // Clones the value for correct undo/redo
+        //     //     // let elt = mxUtils.clone(cell.value);
+        //     //     let elt = cell.value.clone();
+        //     //     elt.setAttribute('name', newValue);
+        //     //     newValue = elt;
+        //     // }
 
         //     superCellLabelChanged.apply(this, arguments);
         // };
@@ -408,7 +409,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             if (value.name != null) {
                 return mxGraphModel.prototype.valueForCellChanged.apply(this, arguments);
             } else {
-                var old = cell.value.name;
+                let old = cell.value.name;
                 cell.value.name = value;
                 return old;
             }
@@ -548,6 +549,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         blocks.forEach(b => {
             let v1 = this.blockToCellDict.getValue(b);
             model.beginUpdate();
+            let rows: any[] = []; // store rows temporarily, since they only get an id after the model updates
             try {
                 let longestname = 0;
                 b.traits.forEach(trait => {
@@ -560,13 +562,12 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                     temprow.value.name = name;
                     v1.insert(temprow);
 
-                    this.cellToTriples.setValue(temprow, trait);
-
                     let b2 = this.subjectToBlockDict.getValue(trait.object);
                     if (b2) {
                         let v2 = this.blockToCellDict.getValue(b2);
                         graph.insertEdge(graph.getDefaultParent(), null, '', temprow, v2);
                     }
+                    rows.push(temprow);
                 });
 
                 this.addNewRowOverlay(graph, v1);
@@ -583,6 +584,11 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             } finally {
                 model.endUpdate();
             }
+
+            for (let i = 0; i < rows.length; i++) {
+                this.cellToTriples.setValue(rows[i], b.traits[i]);
+            }
+            console.log(this.cellToTriples);
         });
 
         let layout = new mxStackLayout(graph, false, 35);
