@@ -1,7 +1,6 @@
 import * as React from 'react';
 import {Menu, Icon, Popup, List, Image} from 'semantic-ui-react';
 import Auth from '../services/Auth';
-import {Link} from 'react-router-dom';
 import {NavbarWorkProps} from './interfaces/interfaces';
 import {FileModule} from '../persistence/fileDAO';
 import {Model} from '../entities/model';
@@ -319,13 +318,6 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
                             href="https://github.com/dubious-developments/UnSHACLed/wiki/Release-notes"
                         >
                             v0.5
-                        </Menu.Item>
-                        <Menu.Item
-                            as={Link}
-                            to="/login"
-                            onClick={(event) => this.logoutButton(event)}
-                        >
-                            Logout
                         </Menu.Item>
                     </Menu.Menu>
                 </Menu>
