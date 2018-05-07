@@ -571,9 +571,11 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
                 this.addNewRowOverlay(graph, v1);
 
-                if (b.blockType === undefined) {
+                if (!b.blockType) {
                     b.blockType = "Data";
                 }
+
+                v1.value.blockType = b.blockType;
                 v1.style = b.blockType;
                 v1.geometry.width += longestname * 4;
                 v1.geometry.alternateBounds = new mxRectangle(0, 0, v1.geometry.width, v1.geometry.height);
@@ -1019,7 +1021,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         model.beginUpdate();
         try {
             // Set style of block
-            cell.setStyle(cell.value.blockType);
+            cell.setStyle(cell.getValue().blockType);
 
             // Set style of rows
             cell.children.forEach(rowCell => {
