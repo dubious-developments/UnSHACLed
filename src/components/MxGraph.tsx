@@ -413,6 +413,8 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 triple.predicate = predicate;
                 triple.object = object;
                 instance.cellToTriples.setValue(cell, triple);
+            } else {
+                console.log("Error: edited cell has no linked triple");
             }
 
             if (value.name != null) {
@@ -597,7 +599,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             for (let i = 0; i < rows.length; i++) {
                 this.cellToTriples.setValue(rows[i], b.traits[i]);
             }
-            console.log(this.cellToTriples);
         });
 
         let layout = new mxStackLayout(graph, false, 35);
