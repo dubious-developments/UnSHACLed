@@ -12,9 +12,13 @@ class RepoModal extends React.Component<RepoModalProps, any> {
     constructor(props: any) {
         super(props);
         this.state = {
-            selected: true
+            selected: true,
+            files: true
         };
         this.setSelected = this.setSelected.bind(this);
+        this.setFilesSelected = this.setFilesSelected.bind(this);
+        this.cancelModal = this.cancelModal.bind(this);
+        this.confirmModal = this.confirmModal.bind(this);
     }
 
     setSelected() {
@@ -23,9 +27,33 @@ class RepoModal extends React.Component<RepoModalProps, any> {
         });
     }
 
+    setFilesSelected() {
+        this.setState({
+            files: false
+        });
+    }
+
+    cancelModal() {
+        this.props.cancel_cb("RepoModal");
+        this.setState({
+            files: true,
+            selected: true
+        });
+    }
+
+    confirmModal() {
+        this.props.confirm_cb("RepoModal");
+        this.setState({
+            files: true,
+            selected: true
+        });
+    }
+
     render() {
         let projects = [{text: " Project 1", value: "Project 1"}, {text: " Project 2", value: "Project 2"}];
+        let graphs = [{text: " File 1", value: "File 1"}, {text: " File 2", value: "File 2"}];
         let {selected} = this.state;
+        let {files} = this.state;
         return (
             <div>
                 <Modal
@@ -48,12 +76,21 @@ class RepoModal extends React.Component<RepoModalProps, any> {
                             options={projects}
                             onChange={this.setSelected}
                         />
+                        {selected === false && (
+                            <Dropdown
+                                placeholder='Select Graph File'
+                                fluid={true}
+                                selection={true}
+                                options={graphs}
+                                onChange={this.setFilesSelected}
+                            />)
+                        }
                     </Modal.Content>
                     <Modal.Actions>
-                        <Button color='red' onClick={() => this.props.cancel_cb("RepoModal")}>
+                        <Button color='red' onClick={this.cancelModal}>
                             <Icon name='remove'/> Cancel
                         </Button>
-                        <Button color='green' onClick={() => this.props.confirm_cb("RepoModal")} disabled={selected}>
+                        <Button color='green' onClick={this.confirmModal} disabled={files} >
                             <Icon name='checkmark'/> Open
                         </Button>
                     </Modal.Actions>
