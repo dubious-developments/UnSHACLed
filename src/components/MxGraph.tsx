@@ -941,31 +941,30 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                     let cell = cells[i];
                     let triple = this.cellToTriples.getValue(cell);
 
-                    if (triple) {
-                        if (cell.style === "Row") {
-                            this.removeTriple(triple, model);
-                        } else if (this.blockToCellDict.containsKey(cell.value)) {
-                            let block  = this.subjectToBlockDict.getValue(cell.value.longName);
-                            if (block) {
-                                for (let trait of block.traits) {
-                                    this.removeTriple(trait, model);
-                                }
-
-                                let subject: string;
-                                if (block.triple) {
-                                    subject = block.triple.subject;
-                                    this.triples.remove(block.triple);
-                                    this.cellToTriples.remove(cell);
-                                    // this.removeTripleFromModel(block.triple, model);
-                                } else {
-                                    subject = block.longName;
-                                }
-
-                                this.subjectToBlockDict.remove(subject);
-                                this.blockToCellDict.remove(block);
+                    if (triple && cell.style === "Row") {
+                        this.removeTriple(triple, model);
+                    } else if (this.blockToCellDict.containsKey(cell.value)) {
+                        let block  = this.subjectToBlockDict.getValue(cell.value.longName);
+                        if (block) {
+                            let subject: string;
+                            if (block.triple) {
+                                subject = block.triple.subject;
+                                this.triples.remove(block.triple);
+                                this.cellToTriples.remove(cell);
+                                this.removeTripleFromModel(block.triple, model);
+                            } else {
+                                subject = block.longName;
                             }
+
+                            for (let trait of block.traits) {
+                                this.removeTriple(trait, model);
+                            }
+
+                            this.subjectToBlockDict.remove(subject);
+                            this.blockToCellDict.remove(block);
                         }
                     }
+
                 }
 
                 this.debug();
