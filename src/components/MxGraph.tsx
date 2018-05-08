@@ -559,46 +559,51 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         });
 
         blocks.forEach(b => {
-            let v1 = this.blockToCellDict.getValue(b);
+            let blockCell = this.blockToCellDict.getValue(b);
             model.beginUpdate();
             let rows: any[] = []; // store rows temporarily, since they only get an id after the model updates
             try {
                 let longestname = 0;
                 b.traits.forEach(trait => {
-                    let temprow = model.cloneCell(this.nameToStandardCellDict.getValue('row'));
+                    let rowCell = model.cloneCell(this.nameToStandardCellDict.getValue('row'));
                     let name = this.replacePrefixes(trait.predicate, prefixes)
                         + " :  "
                         + this.replacePrefixes(trait.object, prefixes);
 
                     longestname = Math.max(name.length, longestname);
-                    temprow.value.name = name;
-                    v1.insert(temprow);
+                    rowCell.value.name = name;
+                    blockCell.insert(rowCell);
 
                     let b2 = this.subjectToBlockDict.getValue(trait.object);
                     if (b2) {
                         let v2 = this.blockToCellDict.getValue(b2);
-                        graph.insertEdge(graph.getDefaultParent(), null, '', temprow, v2);
+                        graph.insertEdge(graph.getDefaultParent(), null, '', rowCell, v2);
                     }
-                    rows.push(temprow);
+                    rows.push(rowCell);
                 });
 
-                this.addNewRowOverlay(graph, v1);
+                this.addNewRowOverlay(graph, blockCell);
 
                 if (!b.blockType) {
                     b.blockType = "Data";
                 }
 
-                v1.value.blockType = b.blockType;
-                v1.style = b.blockType;
-                v1.geometry.width += longestname * 4;
-                v1.geometry.alternateBounds = new mxRectangle(0, 0, v1.geometry.width, v1.geometry.height);
-                graph.addCell(v1, parent);
+                blockCell.value.blockType = b.blockType;
+                blockCell.style = b.blockType;
+                blockCell.geometry.width += longestname * 4;
+                blockCell.geometry.alternateBounds = 
+                    new mxRectangle(0, 0, blockCell.geometry.width, blockCell.geometry.height);
+                graph.addCell(blockCell, parent);
             } finally {
                 model.endUpdate();
             }
 
             for (let i = 0; i < rows.length; i++) {
                 this.cellToTriples.setValue(rows[i], b.traits[i]);
+            }
+
+            if (b.triple) {
+                this.cellToTriples.setValue(blockCell, b.triple);
             }
         });
 
