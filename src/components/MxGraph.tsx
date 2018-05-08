@@ -372,7 +372,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         };
     }
 
-    configureLabels(graph: any, model: Model) {
+    configureLabels(graph: any) {
         // Returns the name field of the user object for the label
         graph.convertValueToString = function (cell: any) {
             if (cell.value != null && cell.value.name != null) {
@@ -406,13 +406,14 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         let instance = this;
         // Text label changes will go into the name field of the user object
         graph.model.valueForCellChanged = function(cell: any, value: any) {
-            let [predicate, object] = value.split(" : ").map(d => d.trim());
             let triple = instance.cellToTriples.getValue(cell);
-            if (triple) {
+            if (triple && cell.style === "Row") {
+                let [predicate, object] = value.split(" : ").map(d => d.trim());
                 let newTriple = new Triple(triple.object, predicate, object, triple.file);
-                instance.editTriple(cell, triple, newTriple, model);
+                instance.editTriple(cell, triple, newTriple);
             } else {
-                console.log("Error: edited cell has no linked triple");
+                // instance.editBlock(cell, value);
+                console.log('Edit blocking');
             }
 
             if (value.name != null) {
@@ -907,7 +908,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             this.initPeripheralHandling(graph);
             this.configureStylesheet(graph);
             this.configureCells(editor, graph);
-            this.configureLabels(graph, model);
+            this.configureLabels(graph);
             this.configureTooltips(graph);
             this.initStandardCells();
             this.saveGraph(graph);
@@ -981,7 +982,9 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         }
     }
 
-    editTriple(cell: any, oldTriple: Triple, newTriple: Triple, model: Model) {
+    editTriple(cell: any, oldTriple: Triple, newTriple: Triple) {
+        let model = DataAccessProvider.getInstance().model;
+
         // Update data structures
         this.triples.remove(oldTriple);
         this.triples.add(newTriple);
