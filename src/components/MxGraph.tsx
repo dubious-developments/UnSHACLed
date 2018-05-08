@@ -55,7 +55,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.addTemplate = this.addTemplate.bind(this);
 
         this.nameToStandardCellDict = new Collections.Dictionary<string, any>();
-        this.blockToCellDict = new Collections.Dictionary<Block, any>((b) => b.name);
+        this.blockToCellDict = new Collections.Dictionary<Block, any>((b) => b.shortName);
         this.subjectToBlockDict = new Collections.Dictionary<string, Block>();
         this.triples = new Collections.Set<Triple>((t) =>  t.subject + " " + t.predicate + " " + t.object);
         this.cellToTriples = new Collections.Dictionary<any, Triple>((c) => c.getId());
@@ -541,6 +541,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
     visualizeFile(persistenceGraph: any, type: string, file: string, prefixes: PrefixMap) {
         let blocks = this.parseDataGraphToBlocks(persistenceGraph, file);
+
         if (! this.needToRender) {
             return;
         }
@@ -553,8 +554,10 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         let parent = graph.getDefaultParent();
 
         blocks.forEach(b => {
+            b.shortName = this.replacePrefixes(b.name, prefixes);
             let v1 = model.cloneCell(this.nameToStandardCellDict.getValue('block'));
-            v1.value.name = this.replacePrefixes(b.name, prefixes);
+            v1.value.shortName = b.shortName;
+            v1.value.name = b.shortName;
             this.blockToCellDict.setValue(b, v1);
         });
 
@@ -932,14 +935,18 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 let cells = evt.getProperty("cells");
 
                 for (let i = 0; i < cells.length; i++) {
-                    let triple = this.cellToTriples.getValue(cells[i]);
+                    let cell = cells[i];
+                    let triple = this.cellToTriples.getValue(cell);
+
                     if (triple) {
-                        this.removeTriple(triple, model, cells[i]);
-                    } else {
-                        if (this.blockToCellDict.containsKey(cells[i].value)) {
-                            let block  = cells[i].value;
+                        if (cell.style === "Row") {
+                            this.removeTriple(triple, model, cell);
+                        } else {
+                            console.log("delete block");
+                            let block  = cell.value;
+
                             for (let trait of block.traits) {
-                                this.removeTriple(trait, model, cells[i]);
+                                this.removeTriple(trait, model, cell);
                             }
 
                             let subject: string;
@@ -951,13 +958,23 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                                 subject = block.name;
                             }
 
+                            console.log(block);
                             this.subjectToBlockDict.remove(subject);
                             this.blockToCellDict.remove(block);
                         }
                     }
                 }
+
+                this.debug();
             });
         }
+    }
+
+    debug() {
+        console.log(this.blockToCellDict);
+        console.log(this.subjectToBlockDict);
+        console.log(this.triples);
+        console.log(this.cellToTriples);
     }
 
     removeTriple(triple: Triple, model: any, cell: any) {
@@ -1178,9 +1195,11 @@ class Block {
     public blockType: string;
     public name: string;
     public triple: Triple;
+    public shortName;
 
     constructor(name?: string) {
         this.name = name || "";
+        this.shortName = name || "";
         this.traits = [];
     }
 
