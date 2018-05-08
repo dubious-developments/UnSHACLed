@@ -522,6 +522,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                     subjectBlock.triple = triple;
                 } else if (predicate === SH("path").uri) {
                     subjectBlock.name = object;
+                    subjectBlock.longName = subject;
                     subjectBlock.blockType = "Property";
                     subjectBlock.triple = triple;
                 } else {
@@ -535,6 +536,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
     clear() {
         this.blockToCellDict.clear();
+        this.cellToTriples.clear();
         let {graph} = this.state;
         graph.removeCells(graph.getChildVertices(graph.getDefaultParent()));
     }
@@ -558,7 +560,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             let v1 = model.cloneCell(this.nameToStandardCellDict.getValue('block'));
             v1.value.shortName = b.shortName;
             v1.value.name = b.shortName;
-            v1.value.longName = b.name;
+            v1.value.longName = b.longName || b.name;
             this.blockToCellDict.setValue(b, v1);
         });
 

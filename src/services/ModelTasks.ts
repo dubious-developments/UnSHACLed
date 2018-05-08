@@ -233,7 +233,6 @@ export class EditTriple extends Task<ModelData, ModelTaskMetadata> {
             data.setComponent(ModelComponent.SHACLShapesGraph, shapesComponent.withPart(
                 this.file, this.graph));
         }
-
     }
 
     public get metadata(): ModelTaskMetadata {
