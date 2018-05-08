@@ -1016,6 +1016,36 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             model.tasks.processAllTasks();
         }
     }
+
+    editBlock(cell: any, value: string) {
+        let block = cell.getValue();
+        let subject: string;
+
+        // Store prefixmap/prefixes when visualizing the file in the state
+        // Transfer prefix to full version
+        
+        subject = "TODO";
+        let trait = this.cellToTriples.getValue(cell);
+        if (trait) {
+            let newTrait = new Triple(subject, trait.predicate, trait.object, trait.file);
+            this.subjectToBlockDict.remove(trait.subject);
+            this.subjectToBlockDict.setValue(subject, block);
+
+            // TODO: CHECK, blockToCellDict zou niet moeten gewijzigd worden
+
+            this.editTriple(cell, trait, newTrait);
+        }
+
+        for (let child of cell.children) {
+            trait = this.cellToTriples.getValue(child);
+            if (trait) {
+                let newTrait = new Triple(subject, trait.predicate, trait.object, trait.file);
+                this.editTriple(cell, trait, newTrait);
+            } else {
+                console.log("Error: edited cell has no linked triple");
+            }
+        }
+    }
     
     public handleConformance(report: ValidationReport) {
         let invalidCellsToErrorDict = new Collections.DefaultDictionary<any, any>(() => []);
