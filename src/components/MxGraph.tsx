@@ -558,6 +558,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             let v1 = model.cloneCell(this.nameToStandardCellDict.getValue('block'));
             v1.value.shortName = b.shortName;
             v1.value.name = b.shortName;
+            v1.value.longName = b.name;
             this.blockToCellDict.setValue(b, v1);
         });
 
@@ -603,10 +604,12 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
             for (let i = 0; i < rows.length; i++) {
                 this.cellToTriples.setValue(rows[i], b.traits[i]);
+                b.traits[i].cell = rows[i];
             }
 
             if (b.triple) {
                 this.cellToTriples.setValue(blockCell, b.triple);
+                b.triple.cell = blockCell;
             }
         });
 
@@ -940,27 +943,27 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
                     if (triple) {
                         if (cell.style === "Row") {
-                            this.removeTriple(triple, model, cell);
-                        } else {
-                            console.log("delete block");
-                            let block  = cell.value;
+                            this.removeTriple(triple, model);
+                        } else if (this.blockToCellDict.containsKey(cell.value)) {
+                            let block  = this.subjectToBlockDict.getValue(cell.value.longName);
+                            if (block) {
+                                for (let trait of block.traits) {
+                                    this.removeTriple(trait, model);
+                                }
 
-                            for (let trait of block.traits) {
-                                this.removeTriple(trait, model, cell);
+                                let subject: string;
+                                if (block.triple) {
+                                    subject = block.triple.subject;
+                                    this.triples.remove(block.triple);
+                                    this.cellToTriples.remove(cell);
+                                    // this.removeTripleFromModel(block.triple, model);
+                                } else {
+                                    subject = block.longName;
+                                }
+
+                                this.subjectToBlockDict.remove(subject);
+                                this.blockToCellDict.remove(block);
                             }
-
-                            let subject: string;
-                            if (block.triple) {
-                                subject = block.triple.subject;
-                                this.triples.remove(block.triple);
-                                this.removeTripleFromModel(block.triple, model);
-                            } else {
-                                subject = block.name;
-                            }
-
-                            console.log(block);
-                            this.subjectToBlockDict.remove(subject);
-                            this.blockToCellDict.remove(block);
                         }
                     }
                 }
@@ -977,10 +980,10 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         console.log(this.cellToTriples);
     }
 
-    removeTriple(triple: Triple, model: any, cell: any) {
+    removeTriple(triple: Triple, model: any) {
         this.removeTripleFromBlocks(triple);
         this.triples.remove(triple);
-        this.cellToTriples.remove(cell);
+        this.cellToTriples.remove(triple.cell);
 
         this.removeTripleFromModel(triple, model);
     }
@@ -1195,11 +1198,13 @@ class Block {
     public blockType: string;
     public name: string;
     public triple: Triple;
-    public shortName;
+    public shortName: string;
+    public longName: string;
 
     constructor(name?: string) {
         this.name = name || "";
         this.shortName = name || "";
+        this.longName = name || "";
         this.traits = [];
     }
 
@@ -1213,6 +1218,7 @@ export class Triple {
     public predicate: string;
     public object: string;
     public file: string;
+    public cell: any;
 
     constructor(subject: string, predicate: string, object: string, file: string) {
         this.subject = subject;
