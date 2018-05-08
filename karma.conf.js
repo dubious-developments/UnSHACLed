@@ -10,6 +10,8 @@ module.exports = function(config) {
             { pattern: "src/pages/**/*.tsx" },
             { pattern: "src/services/**/*.tsx" },
             { pattern: "src/dropdowns/**/*.tsx" },
+            { pattern: "src/modals/**/*.tsx" },
+            { pattern: "src/requests/**/*.tsx" },
             { pattern: "test/**/*.ts" },
         ],
 
