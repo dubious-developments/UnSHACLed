@@ -1,8 +1,8 @@
 import * as React from 'react';
 import {Button, Grid, Image, Header, Segment, Divider} from 'semantic-ui-react';
 import {withRouter} from 'react-router-dom';
-import Auth from '../services/Auth';
 import {Link} from 'react-router-dom';
+import RequestModule from '../requests/RequestModule';
 
 class LoginForm extends React.Component<any, any> {
 
@@ -10,8 +10,17 @@ class LoginForm extends React.Component<any, any> {
         super(props);
         this.state = {
             username: "",
-            password: ""
+            password: "",
+            token: ""
         };
+    }
+
+    componentDidMount() {
+        RequestModule.getToken();
+        let response = "ToKeN";
+        this.setState({
+            token: response
+        });
     }
 
     render() {
@@ -67,10 +76,9 @@ class LoginForm extends React.Component<any, any> {
     }
 
     handleClick(event: any) {
-        Auth.login();
-        if (this.state.username === "Admin" || this.state.password === "Admin10") {
-            console.log("invalid");
-        } else {
+        let {token} = this.state;
+        RequestModule.AuthWithToken(token);
+        if (RequestModule.isAuthenticated(token)) {
             this.props.history.push("/user");
         }
     }
