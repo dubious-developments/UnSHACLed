@@ -14,6 +14,8 @@ class LoginForm extends React.Component<any, any> {
             password: "",
             token: ""
         };
+
+        this.startEditing = this.startEditing.bind(this);
     }
 
     componentDidMount() {
@@ -46,28 +48,38 @@ class LoginForm extends React.Component<any, any> {
                             {' '}Log-in to your account
                         </Header>
                         <Segment inverted={true}>
-                            <Button
-                                color="teal"
-                                fluid={true}
-                                inverted={true}
-                                size="large"
-                                onClick={(event) => this.handleClick(event)}
-                                icon="github"
-                                content="Sign in with GitHub"
-                            />
-                            <Divider horizontal={true} inverted={true}>
-                                Or
-                            </Divider>
-                            <Link to="/signup">
+                            <Button.Group size='huge'>
                                 <Button
-                                    animated="fade"
-                                    fluid={true}
+                                    color="teal"
                                     inverted={true}
-                                    size="large"
+                                    size="huge"
+                                    onClick={(event) => this.handleClick(event)}
+                                    icon="github"
+                                    content="Sign in"
+                                />
+                                <Button.Or />
+                                <Button
+                                    inverted={true}
+                                    size="huge"
                                     icon="signup"
                                     content="Sign up"
+                                    as={Link}
+                                    to="/signup"
                                 />
-                            </Link>
+                            </Button.Group>
+                            <Divider horizontal={true} inverted={true}>
+                                Authenticated?
+                            </Divider>
+
+                            <Button
+                                icon="birthday"
+                                fluid={true}
+                                inverted={true}
+                                size="huge"
+                                content="Start editing"
+                                onClick={this.startEditing}
+                            />
+
                         </Segment>
                     </Grid.Column>
                 </Grid>
@@ -80,6 +92,11 @@ class LoginForm extends React.Component<any, any> {
         let {token} = this.state;
         console.log(token);
         RequestModule.AuthWithToken(token);
+    }
+
+    startEditing(event: any) {
+        let {token} = this.state;
+        console.log(token);
         if (RequestModule.isAuthenticated(token)) {
             this.props.history.push("/user");
         }

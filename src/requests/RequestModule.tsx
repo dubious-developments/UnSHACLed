@@ -26,10 +26,8 @@ class RequestModule {
     to the GitHub login page and redirect if logged in succesfully.
      */
     static AuthWithToken(token: any) {
-        console.log("ask for authentication");
         window.open('http://193.190.127.184:8042/auth/auth/' + token, "_blank",
             "top=100,left=500,width=500,height=1000");
-        console.log('http://193.190.127.184:8042/auth/auth/' + token);
     }
 
     /* Method to check wether or not a user with an obtained token is authenticated using a
@@ -41,9 +39,7 @@ class RequestModule {
             .then(response => {
                 console.log(response);
             });
-        console.log("check if authenticated ");
-        console.log('http://193.190.127.184:8042/auth/is-authenticated/' + token);
-        return true;
+        return false;
     }
 
     /* GitHub API*/
