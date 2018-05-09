@@ -498,7 +498,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                     triple = new Triple(blockName, "predicate", "object", trait.file);
 
                     temprow.value.name = instance.nameFromTrait(triple);
-                    temprow.value.trait = triple;
 
                     cell.insert(temprow);
                 }
@@ -1058,6 +1057,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         let type = this.fileToTypeDict.getValue(triple.file);
 
         if (oldGraph && type) {
+            console.log(triple.subject, triple.predicate, triple.object);
             let newGraph = oldGraph.removeTriple(triple.subject, triple.predicate, triple.object);
             this.fileToGraphDict.setValue(
                 triple.file,
