@@ -481,61 +481,26 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         let model = graph.getModel();
         let instance = this;
 
+        let temprow = model.cloneCell(instance.nameToStandardCellDict.getValue('row'));
+        let blockName, trait, triple;
+
         // Installs a handler for clicks on the overlay
         overlay.addListener(mxEvent.CLICK, function (sender: any, event: any) {
             graph.clearSelection();
             model.beginUpdate();
             try {
-                let temprow = model.cloneCell(instance.nameToStandardCellDict.getValue('row'));
-                let blockName = event.properties.cell.value.realName;
+                blockName = event.properties.cell.value.realName;
                 // here the assumption is made that next row will belong to the same file as the first
                 // we just need to make sure that there is at least one row as well
                 // this also makes sense since a node without rows is pointless
-                let trait = instance.cellToTriples.getValue(event.properties.cell.children[0]);
+                trait = instance.cellToTriples.getValue(event.properties.cell.children[0]);
                 if (trait) {
-                    let triple = new Triple(blockName, "predicate", "object", trait.file);
+                    triple = new Triple(blockName, "predicate", "object", trait.file);
 
                     temprow.value.name = instance.nameFromTrait(triple);
                     temprow.value.trait = triple;
-                    // TODO store the triple and row in model
-                    // start an update task in the model
-                    let file = triple.file;
-                    let oldGraph = instance.fileToGraphDict.getValue(file);
-                    let type = instance.fileToTypeDict.getValue(file);
-                    if (oldGraph && type) {
-                        let backendModel = DataAccessProvider.getInstance().model;
-                        let newGraph = oldGraph.addTriple(triple.subject, triple.predicate, triple.object);
-                        backendModel.tasks.schedule(new EditTriple(
-                            newGraph, type, file)
-                        );
-                        // TODO remove this after testing
-                        backendModel.tasks.processAllTasks();
-                    } else {
-                        console.log("error: graph or type undefined");
-                    }
-
-                    // update the data structures
-                    instance.triples.add(triple);
-                    instance.cellToTriples.setValue(temprow, triple);
-                    let block = instance.subjectToBlockDict.getValue(blockName);
-                    if (block) {
-                        block.traits.push(triple);
-                    } else {
-                        console.log("error: could not find block: " + blockName);
-                    }
-
-                    console.log(block);
 
                     cell.insert(temprow);
-                    /*
-                    temprow.value = {name: "", trait: "null"};
-                    let parent = cell.getParent();
-
-                    instance.addNewRowOverlay(graph, temprow);
-                    graph.removeCellOverlay(cell);
-                    parent.insert(temprow);
-                    graph.view.refresh(parent);
-                    */
                 }
 
             } finally {
@@ -544,6 +509,36 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 graph.refresh();
             }
         });
+
+        if (triple) {
+            // start an update task in the model
+            let file = triple.file;
+            let oldGraph = instance.fileToGraphDict.getValue(file);
+            let type = instance.fileToTypeDict.getValue(file);
+            if (oldGraph && type) {
+                let backendModel = DataAccessProvider.getInstance().model;
+                let newGraph = oldGraph.addTriple(triple.subject, triple.predicate, triple.object);
+                backendModel.tasks.schedule(new EditTriple(
+                    newGraph, type, file)
+                );
+                // TODO remove this after testing
+                backendModel.tasks.processAllTasks();
+            } else {
+                console.log("error: graph or type undefined");
+            }
+
+            // update the data structures
+            instance.triples.add(triple);
+            instance.cellToTriples.setValue(temprow, triple);
+            let block = instance.subjectToBlockDict.getValue(blockName);
+            if (block) {
+                block.traits.push(triple);
+            } else {
+                console.log("error: could not find block: " + blockName);
+            }
+
+            console.log(block);
+        }
 
         // Sets the overlay for the cell in the graph
         graph.addCellOverlay(cell, overlay);
