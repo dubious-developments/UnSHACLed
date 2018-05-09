@@ -57,7 +57,7 @@ class LoginForm extends React.Component<any, any> {
                                     icon="github"
                                     content="Sign in"
                                 />
-                                <Button.Or />
+                                <Button.Or/>
                                 <Button
                                     inverted={true}
                                     size="huge"
@@ -96,10 +96,13 @@ class LoginForm extends React.Component<any, any> {
 
     startEditing(event: any) {
         let {token} = this.state;
-        console.log(token);
-        if (RequestModule.isAuthenticated(token)) {
-            this.props.history.push("/user");
-        }
+        axios.get('http://193.190.127.184:8042/auth/is-authenticated/' + token)
+            .then(response => {
+                console.log(response.data);
+                if (response.data) {
+                    this.props.history.push("/user");
+                }
+            });
     }
 }
 

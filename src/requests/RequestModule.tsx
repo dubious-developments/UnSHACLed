@@ -16,8 +16,8 @@ class RequestModule {
     static getToken() {
         return axios.post('http://193.190.127.184:8042/auth/request-token')
             .then(response => {
-                    console.log(response);
-                    return response.data;
+                console.log(response);
+                return response.data;
             });
     }
 
@@ -35,7 +35,8 @@ class RequestModule {
         Returns either true or false
      */
     static isAuthenticated(token: any) {
-        axios.get('http://193.190.127.184:8042/auth/is-authenticated/', token)
+        console.log('http://193.190.127.184:8042/auth/is-authenticated/' + token);
+        axios.get('http://193.190.127.184:8042/auth/is-authenticated/' + token)
             .then(response => {
                 console.log(response);
             });
