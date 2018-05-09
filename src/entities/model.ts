@@ -21,15 +21,28 @@ export class ModelObserver {
     private static counter: number = 0;
     private identifier: number;
 
+    /**
+     * Create a new Model Observer.
+     * @param {(changeBuffer: Set<ModelComponent>) => Array<ModelTask>} observer
+     */
     public constructor(private readonly observer: (changeBuffer: Immutable.Set<ModelComponent>) => Array<ModelTask>) {
         this.identifier =
         ModelObserver.counter++;
     }
 
+    /**
+     * Retrieve the identifier.
+     * @returns {number}
+     */
     public getID(): number {
         return this.identifier;
     }
 
+    /**
+     * Observe changes reported by the model and react accordingly.
+     * @param {Set<ModelComponent>} changeBuffer
+     * @returns {Array<ModelTask>}
+     */
     public observe(changeBuffer: Immutable.Set<ModelComponent>): Array<ModelTask> {
         return this.observer(changeBuffer);
     }
@@ -152,6 +165,10 @@ export class Model {
         }
     }
 
+    /**
+     * Notify all registered observers.
+     * @param {Set<ModelComponent>} changeBuffer
+     */
     private notifyObservers(changeBuffer: Immutable.Set<ModelComponent>): void {
         this.observers.forEach(element => {
             element.observe(changeBuffer).forEach(newTask => {

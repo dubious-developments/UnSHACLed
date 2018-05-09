@@ -1,5 +1,5 @@
 import { WellDefinedSHACLValidator } from "../src/conformance/SHACLValidator";
-import { ValidationReport } from "../src/conformance/wrapper/ValidationReport";
+import { ValidationReport } from "../src/conformance/ValidationReport";
 import { Model } from "../src/entities/model";
 import { ModelComponent } from "../src/entities/modelTaskMetadata";
 import { GraphParser } from "../src/persistence/graphParser";

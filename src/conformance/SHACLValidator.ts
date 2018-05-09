@@ -5,7 +5,7 @@ import { ModelData } from "../entities/model";
 import { ModelComponent } from "../entities/modelTaskMetadata";
 import { Component } from "../persistence/component";
 import { Graph, ImmutableGraph } from "../persistence/graph";
-import { ValidationReport } from "./wrapper/ValidationReport";
+import { ValidationReport } from "./ValidationReport";
 import { GraphParser } from "../persistence/graphParser";
 
 /**
@@ -33,7 +33,7 @@ export class WellDefinedSHACLValidator implements Validator {
     }
 
     /**
-     * Perform the routine validation operation.
+     * Perform a routine validation operation.
      * @param {ModelData} data
      * @param {((report: ValidationReport) => void) | null} andThen
      */

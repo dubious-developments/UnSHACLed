@@ -67,6 +67,11 @@ class IOFacilitator {
         this.parsers = new Collections.Dictionary<ModelComponent, Parser<Graph>>();
     }
 
+    /**
+     * Register a parser with this IOFacilitator.
+     * @param {ModelComponent} label
+     * @param {Parser<Graph>} parser
+     */
     public registerParser(label: ModelComponent, parser: Parser<Graph>) {
         this.parsers.setValue(label, parser);
     }
