@@ -14,13 +14,11 @@ class RequestModule {
         The obtained token is used for further authentication.
      */
     static getToken() {
-        axios.post('http://193.190.127.184:8042/auth/request-token')
+        return axios.post('http://193.190.127.184:8042/auth/request-token')
             .then(response => {
-                console.log(response);
+                    console.log(response);
+                    return response.data;
             });
-
-        console.log("GETTING TOKEN");
-        console.log("POST http://193.190.127.184:8042/auth/request-token");
     }
 
     /* Method to start authentication process through the collaboration server using

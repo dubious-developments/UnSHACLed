@@ -3,6 +3,7 @@ import {Button, Grid, Image, Header, Segment, Divider} from 'semantic-ui-react';
 import {withRouter} from 'react-router-dom';
 import {Link} from 'react-router-dom';
 import RequestModule from '../requests/RequestModule';
+import axios from "axios";
 
 class LoginForm extends React.Component<any, any> {
 
@@ -16,11 +17,11 @@ class LoginForm extends React.Component<any, any> {
     }
 
     componentDidMount() {
-        RequestModule.getToken();
-        let response = "ToKeN";
-        this.setState({
-            token: response
-        });
+        axios.post('http://193.190.127.184:8042/auth/request-token')
+            .then(response => {
+                console.log(response);
+                this.setState({token: response.data});
+            });
     }
 
     render() {
@@ -77,6 +78,7 @@ class LoginForm extends React.Component<any, any> {
 
     handleClick(event: any) {
         let {token} = this.state;
+        console.log(token);
         RequestModule.AuthWithToken(token);
         if (RequestModule.isAuthenticated(token)) {
             this.props.history.push("/user");
