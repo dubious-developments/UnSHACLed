@@ -55,7 +55,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.addTemplate = this.addTemplate.bind(this);
 
         this.nameToStandardCellDict = new Collections.Dictionary<string, any>();
-        this.blockToCellDict = new Collections.Dictionary<Block, any>((b) => b.shortName);
+        this.blockToCellDict = new Collections.Dictionary<Block, any>((b) => b.name);
         this.subjectToBlockDict = new Collections.Dictionary<string, Block>();
         this.triples = new Collections.Set<Triple>((t) =>  t.subject + " " + t.predicate + " " + t.object);
         this.cellToTriples = new Collections.Dictionary<any, Triple>((c) => c.getId());
@@ -522,7 +522,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                     subjectBlock.triple = triple;
                 } else if (predicate === SH("path").uri) {
                     subjectBlock.name = object;
-                    subjectBlock.longName = subject;
+                    subjectBlock.realName = subject;
                     subjectBlock.blockType = "Property";
                     subjectBlock.triple = triple;
                 } else {
@@ -556,11 +556,10 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         let parent = graph.getDefaultParent();
 
         blocks.forEach(b => {
-            b.shortName = this.replacePrefixes(b.name, prefixes);
+            b.name = this.replacePrefixes(b.name, prefixes);
             let v1 = model.cloneCell(this.nameToStandardCellDict.getValue('block'));
-            v1.value.shortName = b.shortName;
-            v1.value.name = b.shortName;
-            v1.value.longName = b.longName || b.name;
+            v1.value.name = b.name;
+            v1.value.realName = b.realName;
             this.blockToCellDict.setValue(b, v1);
         });
 
@@ -944,29 +943,25 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                     let triple = this.cellToTriples.getValue(cell);
 
                     if (triple && cell.style === "Row") {
+                        // a row was removed
                         this.removeTriple(triple, model);
                     } else if (this.blockToCellDict.containsKey(cell.value)) {
-                        let block  = this.subjectToBlockDict.getValue(cell.value.longName);
+                        // a block was removed
+                        let block  = this.subjectToBlockDict.getValue(cell.value.realName);
                         if (block) {
-                            let subject: string;
                             if (block.triple) {
-                                subject = block.triple.subject;
-                                this.triples.remove(block.triple);
-                                this.cellToTriples.remove(cell);
-                                this.removeTripleFromModel(block.triple, model);
-                            } else {
-                                subject = block.longName;
+                                // block is a property or shape, not data
+                                this.removeTriple(block.triple, model);
                             }
 
                             for (let trait of block.traits) {
                                 this.removeTriple(trait, model);
                             }
 
-                            this.subjectToBlockDict.remove(subject);
+                            this.subjectToBlockDict.remove(block.realName);
                             this.blockToCellDict.remove(block);
                         }
                     }
-
                 }
 
                 this.debug();
@@ -1199,13 +1194,11 @@ class Block {
     public blockType: string;
     public name: string;
     public triple: Triple;
-    public shortName: string;
-    public longName: string;
+    public realName: string;
 
     constructor(name?: string) {
         this.name = name || "";
-        this.shortName = name || "";
-        this.longName = name || "";
+        this.realName = name || "";
         this.traits = [];
     }
 
