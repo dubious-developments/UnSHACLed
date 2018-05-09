@@ -950,6 +950,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                         let block  = this.subjectToBlockDict.getValue(cell.value.realName);
                         if (block) {
                             if (block.triple) {
+                                console.log("shape or property removed");
                                 // block is a property or shape, not data
                                 this.removeTriple(block.triple, model);
                             }
@@ -986,9 +987,9 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
     removeTripleFromModel(triple: Triple, model: any) {
         let oldGraph = this.fileToGraphDict.getValue(triple.file);
-        let file = this.fileToTypeDict.getValue(triple.file);
+        let type = this.fileToTypeDict.getValue(triple.file);
 
-        if (oldGraph && file) {
+        if (oldGraph && type) {
             let newGraph = oldGraph.removeTriple(triple.subject, triple.predicate, triple.object);
             this.fileToGraphDict.setValue(
                 triple.file,
@@ -996,7 +997,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             );
 
             model.tasks.schedule(new EditTriple(
-                newGraph, file, triple.file)
+                newGraph, type, triple.file)
             );
 
             model.tasks.processAllTasks();
