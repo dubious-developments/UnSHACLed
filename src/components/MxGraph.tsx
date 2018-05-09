@@ -423,7 +423,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             if (triple && cell.style === "Row") {
                 let [predicate, object] = 
                     instance.traitRestFromName(value, instance.fileToPrefixesDict.getValue(triple.file));
-                let newTriple = new Triple(triple.object, predicate, object, triple.file);
+                let newTriple = new Triple(triple.subject, predicate, object, triple.file);
                 instance.editTriple(cell, triple, newTriple);
             } else {
                 // instance.editBlock(cell, value);
@@ -719,7 +719,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
      */
     replacePrefixes(s: string, prefixes: PrefixMap): string {
         Object.keys(prefixes).forEach(key => {
-            s = s.replace(key, prefixes[key]);
+            s = s.replace(key + ":", prefixes[key]);
         });
         return s;
     }
