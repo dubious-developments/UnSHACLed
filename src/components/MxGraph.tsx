@@ -591,7 +591,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         return this.subjectToBlockDict.values();
     }
 
-    clear() {
+    clearVisualisation() {
         this.blockToCellDict.clear();
         this.cellToTriples.clear();
         let {graph} = this.state;
@@ -605,7 +605,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             return;
         }
 
-        this.clear();
+        this.clearVisualisation();
         let {graph} = this.state;
         this.fileToTypeDict.setValue(file, type);
 
@@ -798,7 +798,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         /* Defines new editor action*/
         // Defines a new export action
         editor.addAction('cleargraph', () => {
-            this.clear();
+            this.clearVisualisation();
         });
         /* Toolbar functionality */
         this.addToolbarButton(editor, toolbar, 'delete', '', 'delete');
