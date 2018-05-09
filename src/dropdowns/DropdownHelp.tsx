@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {Dropdown, Header, Icon, Modal, Table} from 'semantic-ui-react';
+import {Link} from "react-router-dom";
 
 /*
     Component used to create a dropdown component for the Help toolbar option
@@ -19,7 +20,7 @@ class DropdownView extends React.Component<any, any> {
                 <Dropdown.Menu>
                     <Dropdown.Item icon='idea' text='Start Tutorial'/>
                     <Dropdown.Item icon='play' text='Quick Start video'/>
-                    <Dropdown.Item icon='book' text='User Manual'/>
+                    <Dropdown.Item  icon='book' as={Link} to="/support" content="User Manual"/>
                     <Modal
                         trigger={<Dropdown.Item icon='keyboard' text='Keyboard Shortcuts'/>}
                         closeIcon={true}
