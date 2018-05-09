@@ -27,6 +27,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
     private fileToGraphDict: Collections.Dictionary<string, ImmutableGraph>;
     private fileToTypeDict: Collections.Dictionary<string, string>;
+    private fileToPrefixesDict: Collections.Dictionary<string, PrefixMap>;
 
     private cellToTriples: Collections.Dictionary<any, Triple>;
     private invalidCells: Collections.Set<any>;
@@ -62,6 +63,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.invalidCells = new Collections.Set<any>();
         this.fileToGraphDict = new Collections.Dictionary<string, ImmutableGraph>();
         this.fileToTypeDict = new Collections.Dictionary<string, string>();
+        this.fileToPrefixesDict = new Collections.Dictionary<string, PrefixMap>();
 
         this.timer = new TimingService();
     }
@@ -419,7 +421,8 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         graph.model.valueForCellChanged = function(cell: any, value: any) {
             let triple = instance.cellToTriples.getValue(cell);
             if (triple && cell.style === "Row") {
-                let [predicate, object] = value.split(" : ").map(d => d.trim());
+                let [predicate, object] = 
+                    instance.traitRestFromName(value, instance.fileToPrefixesDict.getValue(triple.file));
                 let newTriple = new Triple(triple.object, predicate, object, triple.file);
                 instance.editTriple(cell, triple, newTriple);
             } else {
@@ -608,12 +611,13 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.clearVisualisation();
         let {graph} = this.state;
         this.fileToTypeDict.setValue(file, type);
+        this.fileToPrefixesDict.setValue(file, prefixes);
 
         let model = graph.getModel();
         let parent = graph.getDefaultParent();
 
         blocks.forEach(b => {
-            b.name = this.replacePrefixes(b.name, prefixes);
+            b.name = this.placePrefixes(b.name, prefixes);
             let v1 = model.cloneCell(this.nameToStandardCellDict.getValue('block'));
             v1.value.name = b.name;
             v1.value.realName = b.realName;
@@ -632,7 +636,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
                     longestname = Math.max(name.length, longestname);
                     rowCell.value.name = name;
-                    rowCell.value.trait = trait;
                     blockCell.insert(rowCell);
 
                     let b2 = this.subjectToBlockDict.getValue(trait.object);
@@ -679,22 +682,44 @@ class MxGraph extends React.Component<MxGraphProps, any> {
      */
     nameFromTrait(trait: any, prefixes?: PrefixMap) {
         if (prefixes) {
-            return this.replacePrefixes(trait.predicate, prefixes)
+            return this.placePrefixes(trait.predicate, prefixes)
                 + " :  "
-                + this.replacePrefixes(trait.object, prefixes);
+                + this.placePrefixes(trait.object, prefixes);
         } else {
             return trait.predicate + " : " + trait.object;
         }
     }
 
     /**
-     * Replaces prefixes where possible in the string s
+     * Get the predicate and object of a trait for a row based on a name
+     */
+    traitRestFromName(name: string, prefixes?: PrefixMap) {
+        if (prefixes) {
+            name = this.replacePrefixes(name, prefixes);
+        }
+        return name.split(' : ');
+    }
+
+    /**
+     * Places prefixes where possible in the string s
+     * @param {string} s
+     * @param {PrefixMap} prefixes
+     */
+    placePrefixes(s: string, prefixes: PrefixMap): string {
+        Object.keys(prefixes).forEach(key => {
+            s = s.replace(prefixes[key], key + ":");
+        });
+        return s;
+    }
+
+    /**
+     * Replaces the prefixes where possible in the string with the full values
      * @param {string} s
      * @param {PrefixMap} prefixes
      */
     replacePrefixes(s: string, prefixes: PrefixMap): string {
         Object.keys(prefixes).forEach(key => {
-            s = s.replace(prefixes[key], key + ":");
+            s = s.replace(key, prefixes[key]);
         });
         return s;
     }
