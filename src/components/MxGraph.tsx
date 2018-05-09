@@ -950,7 +950,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                         let block  = this.subjectToBlockDict.getValue(cell.value.realName);
                         if (block) {
                             if (block.triple) {
-                                console.log("shape or property removed");
                                 // block is a property or shape, not data
                                 this.removeTriple(block.triple, model);
                             }
