@@ -63,4 +63,13 @@ export interface LegendProps {
 export interface DropdownFileProps {
     opened_files: any; // currently opened files
     import_cb: PropTypes.func; // callback function to parent for importing either a shacl or data graph
+    save_graph: PropTypes.func; // callback function to parent for saving graph, will call this.saveGraph
+    get_file_from_popup: PropTypes.func; // callback function to parent for saving correct file
+
+}
+
+export interface RepoModalProps {
+    visible: any; // state variable from parent that will determine visibility
+    confirm_cb: PropTypes.func; // callback function  to parent when confirm is clicked
+    cancel_cb: PropTypes.func; // callback function to parent when cancel is clicked
 }
