@@ -228,6 +228,8 @@ export class EditTriple extends Task<ModelData, ModelTaskMetadata> {
 
     public execute(data: ModelData): void {
 
+        console.log("called");
+
         let dataComponent = data.getComponent<Component<ImmutableGraph>>(ModelComponent.DataGraph);
 
         let shapesComponent = data.getComponent<Component<ImmutableGraph>>(ModelComponent.SHACLShapesGraph);
