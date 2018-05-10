@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Button, Grid, Image, Header, Segment, Divider} from 'semantic-ui-react';
+import {Button, Grid, Image, Header, Segment, Divider, Label} from 'semantic-ui-react';
 import {withRouter} from 'react-router-dom';
 import {Link} from 'react-router-dom';
 import RequestModule from '../requests/RequestModule';
@@ -11,7 +11,8 @@ class LoginForm extends React.Component<any, any> {
         this.state = {
             username: "",
             password: "",
-            token: ""
+            token: "",
+            showLabel: false
         };
 
         this.startEditing = this.startEditing.bind(this);
@@ -48,7 +49,7 @@ class LoginForm extends React.Component<any, any> {
                             {' '}Log-in to your account
                         </Header>
                         <Segment inverted={true}>
-                            <Button.Group size='huge'>
+                            <Button.Group size='huge' fluid={true}>
                                 <Button
                                     color="teal"
                                     inverted={true}
@@ -79,7 +80,9 @@ class LoginForm extends React.Component<any, any> {
                                 content="Start editing"
                                 onClick={this.startEditing}
                             />
-
+                            {this.state.showLabel && (
+                                <Label color='red' pointing='above'>Please authenticate first</Label>
+                            )}
                         </Segment>
                     </Grid.Column>
                 </Grid>
@@ -99,6 +102,11 @@ class LoginForm extends React.Component<any, any> {
         RequestModule.isAuthenticated(token).then(authenticated => {
             if (authenticated) {
                 this.props.history.push("/user");
+            } else {
+                console.log('not authenticated');
+                this.setState({
+                    showLabel: true
+                });
             }
         });
     }
