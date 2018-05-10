@@ -15,10 +15,7 @@ class RequestModule {
      */
     static getToken() {
         return axios.post('http://193.190.127.184:8042/auth/request-token')
-            .then(response => {
-                console.log(response);
-                return response.data;
-            });
+            .then(res => res.data);
     }
 
     /* Method to start authentication process through the collaboration server using
@@ -34,13 +31,9 @@ class RequestModule {
        GET request to the collaboration server including the previously obtained token
         Returns either true or false
      */
-    static isAuthenticated(token: any) {
-        console.log('http://193.190.127.184:8042/auth/is-authenticated/' + token);
-        axios.get('http://193.190.127.184:8042/auth/is-authenticated/' + token)
-            .then(response => {
-                console.log(response);
-            });
-        return false;
+    static isAuthenticated(this: any, token: any) {
+        return axios.get('http://193.190.127.184:8042/auth/is-authenticated/' + token)
+            .then(res => res.data);
     }
 
     /* GitHub API*/
