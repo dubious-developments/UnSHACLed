@@ -12,11 +12,21 @@ export interface DataAccessObject {
     find(module: Module): void;
 
     /**
+     * Load the workspace from the persistence system.
+     */
+    findWorkspace(module:Module): void;
+
+    /**
      * Insert the contents of the module into the persistence system
      * (i.e. database, filesystem, CVS, ...).
      * @param {Module} module
      */
     insert(module: Module): void;
+
+    /**
+     * Insert workspace into the persistence system.
+     */
+    insertWorkspace(module: Module): void;
 }
 
 /**

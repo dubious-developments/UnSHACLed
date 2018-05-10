@@ -10,11 +10,13 @@ import {Model} from "../entities/model";
 import {ModelData} from "../entities/modelData";
 import {extensionToMIME} from "../services/extensionToMIME";
 import { ImmutableGraph, Graph } from "./graph";
+import {WorkspaceParser} from "./workspaceParser";
 
 /**
  * Provides basic DAO functionality at the file granularity level.
  */
 export class FileDAO implements DataAccessObject {
+
     private model: Model;
     private io: IOFacilitator;
 
@@ -28,6 +30,7 @@ export class FileDAO implements DataAccessObject {
         // register parsers
         this.io.registerParser(ModelComponent.DataGraph, new GraphParser());
         this.io.registerParser(ModelComponent.SHACLShapesGraph, new GraphParser());
+        this.io.registerParser(ModelComponent.Workspace, new WorkspaceParser());
     }
 
     /**
@@ -36,6 +39,14 @@ export class FileDAO implements DataAccessObject {
      */
     public insert(module: Module) {
         this.model.tasks.schedule(new SaveTask(this.io, module));
+        this.model.tasks.processAllTasks();
+    }
+
+    /**
+     * Create a new file containing the current workspace.
+     */
+    public insertWorkspace(module: Module) {
+        this.model.tasks.schedule(new SaveWorkspaceTask(this.io, module));
         this.model.tasks.processAllTasks();
     }
 
@@ -50,6 +61,18 @@ export class FileDAO implements DataAccessObject {
             self.model.tasks.processAllTasks();
         });
     }
+
+    /**
+     * Load the workspace from a file.
+     * @param {Module} module
+     */
+    public findWorkspace(module: Module) {
+        let self = this;
+        this.io.readFromFile(module, function (result: ModelData) {
+            self.model.tasks.schedule(new LoadWorkspaceTask(result, module));
+            self.model.tasks.processAllTasks();
+        });
+    }
 }
 
 /**
@@ -58,13 +81,13 @@ export class FileDAO implements DataAccessObject {
  */
 class IOFacilitator {
 
-    private parsers: Collections.Dictionary<ModelComponent, Parser<Graph>>;
+    private parsers: Collections.Dictionary<ModelComponent, Parser<any>>;
 
     /**
      * Create a new IOFacilitator.
      */
     public constructor() {
-        this.parsers = new Collections.Dictionary<ModelComponent, Parser<Graph>>();
+        this.parsers = new Collections.Dictionary<ModelComponent, Parser<any>>();
     }
 
     /**
@@ -72,7 +95,7 @@ class IOFacilitator {
      * @param {ModelComponent} label
      * @param {Parser<Graph>} parser
      */
-    public registerParser(label: ModelComponent, parser: Parser<Graph>) {
+    public registerParser(label: ModelComponent, parser: Parser<any>) {
         this.parsers.setValue(label, parser);
     }
 
@@ -82,7 +105,7 @@ class IOFacilitator {
      * @param load
      */
 
-    public readFromFile(module: Module, load: (result: Graph) => void) {
+    public readFromFile(module: Module, load: (result: any) => void) {
         let parser = this.parsers.getValue(module.getTarget());
         if (!parser) {
             throw new Error("Unsupported target " + module.getTarget());
@@ -107,7 +130,7 @@ class IOFacilitator {
      * @param module
      * @param data
      */
-    public writeToFile(module: Module, data: Graph) {
+    public writeToFile(module: Module, data: any) {
         let FileSaver = require("file-saver");
         let parser = this.parsers.getValue(module.getTarget());
         if (!parser) {
@@ -243,6 +266,55 @@ class LoadTask extends Task<ModelData, ModelTaskMetadata> {
 }
 
 /**
+ * A Task that loads a workspace from a file and sets the state of the Model accordingly.
+ */
+class LoadWorkspaceTask extends Task<ModelData, ModelTaskMetadata> {
+
+    public constructor(private readonly workspace: ModelData,
+                       private readonly module: Module) {
+        super();
+    }
+
+    public execute(data: ModelData): void {
+        let SHACLComponent = this.workspace.getOrCreateComponent(
+            ModelComponent.SHACLShapesGraph,
+            () => new Component<ImmutableGraph>()
+        );
+
+        let dataComponent = this.workspace.getOrCreateComponent(
+            ModelComponent.DataGraph,
+            () => new Component<ImmutableGraph>()
+        );
+
+        let ioComponent = this.workspace.getOrCreateComponent(
+            ModelComponent.IO,
+            () => new Component<ImmutableGraph>()
+        );
+
+        data.setComponent(
+            ModelComponent.SHACLShapesGraph,
+            SHACLComponent
+        );
+
+        data.setComponent(
+            ModelComponent.DataGraph,
+            dataComponent
+        );
+
+        data.setComponent(
+            ModelComponent.IO,
+            ioComponent
+        );
+    }
+
+    public get metadata(): ModelTaskMetadata {
+        return new ModelTaskMetadata([ModelComponent.SHACLShapesGraph, ModelComponent.DataGraph, ModelComponent.IO],
+            [ModelComponent.IO]);
+    }
+
+}
+
+/**
  * A Task that retrieves a component from the Model and writes its contents to a file.
  */
 class SaveTask extends Task<ModelData, ModelTaskMetadata> {
@@ -282,4 +354,25 @@ class SaveTask extends Task<ModelData, ModelTaskMetadata> {
             [this.module.getTarget(), ModelComponent.IO],
             [ModelComponent.IO]);
     }
+}
+
+/**
+ * A task that saves the workspace to a file.
+ */
+class SaveWorkspaceTask extends Task<ModelData, ModelTaskMetadata> {
+
+    public constructor(private readonly io: IOFacilitator,
+                       private readonly module: Module) {
+        super();
+    }
+
+    public execute(data: ModelData): void {
+        this.io.writeToFile(this.module, data);
+    }
+
+    public get metadata(): ModelTaskMetadata {
+        return new ModelTaskMetadata([ModelComponent.SHACLShapesGraph, ModelComponent.DataGraph, ModelComponent.IO],
+            [ModelComponent.IO]);
+    }
+
 }
