@@ -7,7 +7,7 @@ import axios from 'axios';
  */
 
 class RequestModule {
-    
+
     /**
      * Method to receive a token from the collaboration server.
      * A POST request is used to obtain the token in a plain text from the collaboration server.
