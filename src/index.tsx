@@ -7,6 +7,7 @@ import Routes from "./components/Routes";
 import 'semantic-ui-css/semantic.min.css';
 import {createStore, combineReducers} from 'redux';
 import {userNameReducer, userLoginReducer, userEmailReducer, userTokenReducer} from './redux/reducers/userReducer';
+import {Provider} from 'react-redux';
 
 const allReducers = combineReducers(
     {
@@ -21,8 +22,10 @@ const store = createStore(allReducers);
 console.log(store.getState());
 
 ReactDOM.render(
-    <HashRouter>
-        <Routes/>
-    </HashRouter>,
+    <Provider store={store}>
+        <HashRouter>
+            <Routes/>
+        </HashRouter>
+    </Provider>,
     document.getElementById('root'));
 registerServiceWorker();
