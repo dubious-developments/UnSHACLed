@@ -5,13 +5,26 @@ import './index.css';
 import {HashRouter} from 'react-router-dom';
 import Routes from "./components/Routes";
 import 'semantic-ui-css/semantic.min.css';
-import {createStore} from 'redux';
+import {createStore, combineReducers} from 'redux';
+import userReducer from './redux/reducers/userReducer';
 
-function reducer() {
-    return 'State';
-}
+const allReducers = combineReducers(
+    {
+        user: userReducer
+    }
+);
+const store = createStore(allReducers);
 
-const store = createStore(reducer);
+const updateUserAction = {
+    type: 'updateUserAction',
+    payload: {
+        user: 'name of user'
+    }
+};
+
+console.log(store.getState());
+
+store.dispatch(updateUserAction);
 
 console.log(store.getState());
 
