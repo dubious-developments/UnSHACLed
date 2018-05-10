@@ -18,25 +18,6 @@ const allReducers = combineReducers(
 );
 const store = createStore(allReducers);
 
-const updateUserAction = {
-    type: 'updateUsername',
-    payload: {
-        name: 'name of user'
-    }
-};
-
-const updateUserlogin = {
-    type: 'updateUserLogin',
-    payload: {
-        login: 'here comes login'
-    }
-};
-
-console.log(store.getState());
-
-store.dispatch(updateUserAction);
-store.dispatch(updateUserlogin);
-
 console.log(store.getState());
 
 ReactDOM.render(
