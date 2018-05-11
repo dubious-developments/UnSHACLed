@@ -73,3 +73,12 @@ export interface RepoModalProps {
     confirm_cb: PropTypes.func; // callback function  to parent when confirm is clicked
     cancel_cb: PropTypes.func; // callback function to parent when cancel is clicked
 }
+
+/**
+ * Props definition for user info modal.
+ */
+export interface UserModalProps {
+    visible: any; // state variable from parent that will determine visibility
+    login: any; // login of currently authenticated user
+    onClose_cb: PropTypes.func; // callback function to parent when modal is closed
+}
