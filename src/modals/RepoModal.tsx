@@ -23,6 +23,7 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
         this.cancelModal = this.cancelModal.bind(this);
         this.confirmModal = this.confirmModal.bind(this);
         this.getRepos = this.getRepos.bind(this);
+        this.processRepos = this.processRepos.bind(this);
     }
 
     componentDidMount() {
@@ -30,9 +31,29 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
         console.log(this.props.token + 'on mounting');
         RequestModule.getUserRepos(this.props.token).then(repoArray => {
             console.log(repoArray);
-            this.setState({
-                repos: repoArray
-            });
+            this.processRepos(repoArray);
+        });
+    }
+
+    /**
+     * Method that will map an array of repos required from the API to
+     * an array able to be loaded in a Dropdown UI component.
+     * @param repoArray
+     */
+    processRepos(repoArray: any) {
+        let result: any[] = [];
+        for (let i in repoArray) {
+            result.push(
+                {
+                    text: repoArray[i].split("/")[1],
+                    value: repoArray[i].split("/")[1]
+                }
+            );
+        }
+        console.log(result);
+        /* set state */
+        this.setState({
+           repos: result
         });
     }
 
@@ -99,7 +120,7 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
                             placeholder='Select Project'
                             fluid={true}
                             selection={true}
-                            options={graphs}
+                            options={repos}
                             onChange={this.setSelected}
                         />
                         {selected === false && (
