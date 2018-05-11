@@ -18,6 +18,7 @@ class RequestModule {
         return axios.post('http://193.190.127.184:8042/auth/request-token')
             .then(res => res.data);
     }
+
     /**
      * Method to start authentication process through the collaboration server using
      * a GET request with the earlier obtained token. The collaboration server will redirect
@@ -47,6 +48,7 @@ class RequestModule {
      * @returns {Promise<AxiosResponse<any>>}, Returns the requested user info through a promise.
      */
     static getUserInfo(type: any, token: any) {
+        console.log('http://193.190.127.184:8042/user/' + type + '/' + token);
         return axios.get('http://193.190.127.184:8042/user/' + type + '/' + token)
             .then(res => res.data);
     }

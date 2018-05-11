@@ -4,7 +4,7 @@ import {withRouter} from 'react-router-dom';
 import {Link} from 'react-router-dom';
 import RequestModule from '../requests/RequestModule';
 import {connect} from 'react-redux';
-import {updateToken} from "../redux/actions/userActions";
+import {updateEmail, updateLogin, updateName, updateToken} from "../redux/actions/userActions";
 
 class LoginForm extends React.Component<any, any> {
 
@@ -19,6 +19,10 @@ class LoginForm extends React.Component<any, any> {
 
         this.startEditing = this.startEditing.bind(this);
         this.onUpdateToken = this.onUpdateToken.bind(this);
+        this.onUpdateUsername = this.onUpdateUsername.bind(this);
+        this.onUpdateEmail = this.onUpdateEmail.bind(this);
+        this.onUpdateLogin = this.onUpdateLogin.bind(this);
+        this.storeUserInfo = this.storeUserInfo.bind(this);
     }
 
     componentDidMount() {
@@ -30,9 +34,22 @@ class LoginForm extends React.Component<any, any> {
         });
     }
 
-    onUpdateToken (token: any) {
+    onUpdateToken(token: any) {
         this.props.onUpdateToken(token);
     }
+
+    onUpdateUsername(name: any) {
+        this.props.onUpdateName(name);
+    }
+
+    onUpdateLogin(login: any) {
+        this.props.onUpdateLogin(login);
+    }
+
+    onUpdateEmail(email: any) {
+        this.props.onUpdateEmail(email);
+    }
+
     render() {
         const logo = require('../img/logo.png');
         console.log(this.props);
@@ -88,6 +105,9 @@ class LoginForm extends React.Component<any, any> {
                                 onClick={this.startEditing}
                             />
                             <p> token => {this.props.token} </p>
+                            <p> name => {this.props.name} </p>
+                            <p> login => {this.props.login} </p>
+                            <p> email => {this.props.email} </p>
                             {this.state.showLabel && (
                                 <Label color='red' pointing='above'>Please authenticate first</Label>
                             )}
@@ -102,7 +122,6 @@ class LoginForm extends React.Component<any, any> {
     handleClick(event: any) {
         let {token} = this.state;
         console.log(token);
-        this.onUpdateToken(token);
         RequestModule.AuthWithToken(token);
     }
 
@@ -110,13 +129,33 @@ class LoginForm extends React.Component<any, any> {
         let {token} = this.state;
         RequestModule.isAuthenticated(token).then(authenticated => {
             if (authenticated) {
-                this.props.history.push("/user");
+                // this.props.history.push("/user");
+                this.storeUserInfo(token);
             } else {
                 console.log('not authenticated');
                 this.setState({
                     showLabel: true
                 });
             }
+        });
+    }
+
+    storeUserInfo(token: any) {
+        this.onUpdateToken(token);
+        /* Get Name */
+        RequestModule.getUserInfo('name', token).then(username => {
+            console.log(username);
+            this.onUpdateUsername(username);
+        });
+        /* Get login */
+        RequestModule.getUserInfo('login', token).then(login => {
+            console.log(login);
+            this.onUpdateLogin(login);
+        });
+        /* Get email */
+        RequestModule.getUserInfo('email', token).then(email => {
+            console.log(email);
+            this.onUpdateEmail(email);
         });
     }
 }
@@ -126,7 +165,10 @@ const mapStateToProps = (state) => {
 };
 
 const mapActionsToProps = {
-    onUpdateToken: updateToken
+    onUpdateToken: updateToken,
+    onUpdateName: updateName,
+    onUpdateLogin: updateLogin,
+    onUpdateEmail: updateEmail
 };
 
 const ConLoginForm = connect(mapStateToProps, mapActionsToProps)(LoginForm);
