@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Modal, Image, Header, Table} from 'semantic-ui-react';
+import {Modal, Image, Header, Table, Loader, Dimmer} from 'semantic-ui-react';
 import {UserModalProps} from '../components/interfaces/interfaces';
 import RequestModule from '../requests/RequestModule';
 
@@ -13,7 +13,8 @@ class UserModal extends React.Component<UserModalProps, any> {
     constructor(props: any) {
         super(props);
         this.state = {
-            userObject: {}
+            userObject: {},
+            loaded: false
         };
     }
 
@@ -21,13 +22,14 @@ class UserModal extends React.Component<UserModalProps, any> {
         RequestModule.getUserObject(this.props.login).then(object => {
             console.log(object);
             this.setState({
-                userObject: object
+                userObject: object,
+                loaded:true
             });
         });
     }
 
     render() {
-        let {userObject} = this.state;
+        let {userObject, loaded} = this.state;
         return (
             <div>
                 <Modal
@@ -54,42 +56,46 @@ class UserModal extends React.Component<UserModalProps, any> {
                             </Header.Content>
                         </Header>
                     </Modal.Header>
-                    <Modal.Content image={true}>
-                        <Modal.Description>
 
-                            <Table definition={true}>
-                                <Table.Row>
-                                    <Table.Cell>login</Table.Cell>
-                                    <Table.Cell>{userObject.login}</Table.Cell>
-                                </Table.Row>
-                                <Table.Row>
-                                    <Table.Cell>email</Table.Cell>
-                                    <Table.Cell>{userObject.email}</Table.Cell>
-                                </Table.Row>
-                                <Table.Row>
-                                    <Table.Cell>location</Table.Cell>
-                                    <Table.Cell>{userObject.location}</Table.Cell>
-                                </Table.Row>
-                                <Table.Row>
-                                    <Table.Cell>company</Table.Cell>
-                                    <Table.Cell>{userObject.company}</Table.Cell>
-                                </Table.Row>
-                                <Table.Row>
-                                    <Table.Cell>Public repos</Table.Cell>
-                                    <Table.Cell>{userObject.public_repos}</Table.Cell>
-                                </Table.Row>
-                                <Table.Row>
-                                    <Table.Cell>Followers</Table.Cell>
-                                    <Table.Cell>{userObject.followers}</Table.Cell>
-                                </Table.Row>
-                                <Table.Row>
-                                    <Table.Cell>Following</Table.Cell>
-                                    <Table.Cell>{userObject.following}</Table.Cell>
-                                </Table.Row>
-                            </Table>
-                        </Modal.Description>
+                    <Modal.Content>
+                        {loaded ?
+                            <Modal.Description>
+                                <Table definition={true}>
+                                    <Table.Row>
+                                        <Table.Cell>login</Table.Cell>
+                                        <Table.Cell>{userObject.login}</Table.Cell>
+                                    </Table.Row>
+                                    <Table.Row>
+                                        <Table.Cell>email</Table.Cell>
+                                        <Table.Cell>{userObject.email}</Table.Cell>
+                                    </Table.Row>
+                                    <Table.Row>
+                                        <Table.Cell>location</Table.Cell>
+                                        <Table.Cell>{userObject.location}</Table.Cell>
+                                    </Table.Row>
+                                    <Table.Row>
+                                        <Table.Cell>company</Table.Cell>
+                                        <Table.Cell>{userObject.company}</Table.Cell>
+                                    </Table.Row>
+                                    <Table.Row>
+                                        <Table.Cell>Public repos</Table.Cell>
+                                        <Table.Cell>{userObject.public_repos}</Table.Cell>
+                                    </Table.Row>
+                                    <Table.Row>
+                                        <Table.Cell>Followers</Table.Cell>
+                                        <Table.Cell>{userObject.followers}</Table.Cell>
+                                    </Table.Row>
+                                    <Table.Row>
+                                        <Table.Cell>Following</Table.Cell>
+                                        <Table.Cell>{userObject.following}</Table.Cell>
+                                    </Table.Row>
+                                </Table>
+                            </Modal.Description>
+                            : <Dimmer active={!loaded}>
+                                <Loader/>
+                            </Dimmer>
+                        }
                     </Modal.Content>
-
                 </Modal>
             </div>
         );
