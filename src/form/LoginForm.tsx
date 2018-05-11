@@ -138,7 +138,7 @@ class LoginForm extends React.Component<any, any> {
         let {token} = this.state;
         RequestModule.isAuthenticated(token).then(authenticated => {
             if (authenticated) {
-                // this.props.history.push("/user");
+                this.props.history.push("/user");
                 this.storeUserInfo(token);
             } else {
                 console.log('not authenticated');

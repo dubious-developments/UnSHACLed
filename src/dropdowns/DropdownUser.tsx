@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {Dropdown} from 'semantic-ui-react';
 import {Link} from "react-router-dom";
-
+import {connect} from 'react-redux';
 /*
     Component used to create a dropdown component for an authenticated user
 
@@ -13,12 +13,14 @@ class DropdownUser extends React.Component<any, any> {
     }
 
     render() {
+        console.log(this.props);
         return (
-            <Dropdown text='Username' pointing="top right">
+            <Dropdown text={this.props.name} pointing="top right">
                 <Dropdown.Menu>
-                    <Dropdown.Item text='Signed in as user'/>
+                    <Dropdown.Item>
+                        Signed in as <b> {this.props.login} </b>
+                    </Dropdown.Item>
                     <Dropdown.Item text='My Profile'/>
-                    <Dropdown.Item text='My Projects'/>
                     <Dropdown.Item  as={Link} to="/login">
                         Sign out
                     </Dropdown.Item>
@@ -28,4 +30,9 @@ class DropdownUser extends React.Component<any, any> {
     }
 }
 
-export default DropdownUser;
+const mapStateToProps = (state) => ({
+    name: state.name,
+    login: state.login
+});
+
+export default connect(mapStateToProps)(DropdownUser);
