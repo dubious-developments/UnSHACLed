@@ -23,7 +23,7 @@ export class WorkspaceParser implements Parser<ModelData> {
         this.clean();
 
         this.mimeTypes = new Collections.Set<string>();
-        this.mimeTypes.add("application/ld+json");
+        this.mimeTypes.add("application/json");
     }
 
     /**
@@ -51,9 +51,9 @@ export class WorkspaceParser implements Parser<ModelData> {
             );
 
             builder.push("{");
-            builder.push(this.serializeComponent(ModelComponent.SHACLShapesGraph, SHACLComponent) + ",",
-                this.serializeComponent(ModelComponent.DataGraph, dataComponent) + ",",
-                this.serializeComponent(ModelComponent.IO, ioComponent));
+            builder.push(this.serializeComponent(ModelComponent.SHACLShapesGraph, SHACLComponent) + ", ",
+                         this.serializeComponent(ModelComponent.DataGraph, dataComponent) + ", ",
+                         this.serializeComponent(ModelComponent.IO, ioComponent));
             builder.push("}");
 
             if (andThen) {
@@ -114,19 +114,23 @@ export class WorkspaceParser implements Parser<ModelData> {
         let builder = new Array<string>();
         let self = this;
 
-        builder.push("{ type: " + type.toString() + ", content : [");
+        builder.push('"' + type.toString() + '": [\n');
+        let parts = new Array<string>();
         component.getCompositeParts().forEach(p => {
-            builder.push("{ id:" + p[0] + ", triples: [");
+            let part = new Array<string>();
+            part.push('{\n"id": "' + p[0] + '",\n"triples": [\n');
             p[1].queryN3Store(store => {
                 let triples = new Array<string>();
                 store.getTriples().forEach(triple => {
                     triples.push(self.tripleToJSON(triple));
                 });
-                builder.push(triples.join(","));
+                part.push(triples.join(",\n"));
             });
-            builder.push("]}");
+            part.push("\n]\n}");
+            parts.push(part.join(""));
         });
-        builder.push("]}");
+        builder.push(parts.join(",\n"))
+        builder.push("\n]");
 
         return builder.join("");
     }
@@ -138,10 +142,10 @@ export class WorkspaceParser implements Parser<ModelData> {
      */
     private parseComponent(componentObj: any): Component<ImmutableGraph> {
         let component = new Component<ImmutableGraph>();
-        componentObj.content.forEach( p => {
+        componentObj.forEach( p => {
             let graph = new Graph();
             p.triples.forEach(t => {
-                console.log(t);
+                graph.addTriple(t.subject, t.predicate, t.object);
             });
             component = component.withPart(p.id, graph.asImmutable());
         });
@@ -158,8 +162,9 @@ export class WorkspaceParser implements Parser<ModelData> {
         let N3 = require("n3");
 
         return JSON.stringify({
-            "@id": triple.subject,
-            [triple.predicate]: N3.Util.isLiteral(triple.object)
+            "subject": triple.subject,
+            "predicate": triple.predicate,
+            "object": N3.Util.isLiteral(triple.object)
                 ? N3.Util.getLiteralValue(triple.object) : triple.object,
         }, null, '  ');
     }
