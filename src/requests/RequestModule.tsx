@@ -53,8 +53,23 @@ class RequestModule {
             .then(res => res.data);
     }
 
-    static getUerObject (login: any) {
+    /**
+     * Method to obatin user object from GitHub API
+     * @param login: login from authenticated user
+     * @returns {Promise<AxiosResponse<any>>}, return user object through a promise.
+     */
+    static getUerObject(login: any) {
         return axios.get('https://api.github.com/users/testfv')
+            .then(res => res.data);
+    }
+
+    /**
+     * Method to grab a list of a user's repositories
+     * @param token: token associated with authenticated user and obtained using getToken().
+     * @returns {Promise<AxiosResponse<any>>}, return list of repo through a promise.
+     */
+    static getUserRepos(token: any) {
+        return axios.get('http://193.190.127.184:8042/user/repo-list/' + token)
             .then(res => res.data);
     }
 }
