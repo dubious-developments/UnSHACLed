@@ -28,7 +28,7 @@ class DropdownUser extends React.Component<any, any> {
 
     closeModalCallback(data: any) {
         this.setState({
-            infoVisible:false
+            infoVisible: false
         });
     }
 
@@ -48,7 +48,11 @@ class DropdownUser extends React.Component<any, any> {
                         </Dropdown.Item>
                     </Dropdown.Menu>
                 </Dropdown>
-                <UserModal visible={infoVisible} login={this.props.login} onClose_cb={this.closeModalCallback}/>
+                {infoVisible ?
+                    <UserModal visible={infoVisible} login={this.props.login} onClose_cb={this.closeModalCallback}/>
+                    : null
+                }
+
             </div>
         );
     }

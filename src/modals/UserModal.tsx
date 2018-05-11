@@ -18,7 +18,7 @@ class UserModal extends React.Component<UserModalProps, any> {
     }
 
     componentDidMount() {
-        RequestModule.getUerObject(this.props.login).then(object => {
+        RequestModule.getUserObject(this.props.login).then(object => {
             console.log(object);
             this.setState({
                 userObject: object

@@ -58,8 +58,8 @@ class RequestModule {
      * @param login: login from authenticated user
      * @returns {Promise<AxiosResponse<any>>}, return user object through a promise.
      */
-    static getUerObject(login: any) {
-        return axios.get('https://api.github.com/users/testfv')
+    static getUserObject(login: any) {
+        return axios.get('https://api.github.com/users/' + login)
             .then(res => res.data);
     }
 
