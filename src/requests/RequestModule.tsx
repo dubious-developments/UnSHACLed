@@ -52,6 +52,11 @@ class RequestModule {
         return axios.get('http://193.190.127.184:8042/user/' + type + '/' + token)
             .then(res => res.data);
     }
+
+    static getUerObject (login: any) {
+        return axios.get('https://api.github.com/users/' + login)
+            .then(res => res.data);
+    }
 }
 
 export default RequestModule;
