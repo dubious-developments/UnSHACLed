@@ -3,6 +3,8 @@ import {Button, Grid, Image, Header, Segment, Divider, Label} from 'semantic-ui-
 import {withRouter} from 'react-router-dom';
 import {Link} from 'react-router-dom';
 import RequestModule from '../requests/RequestModule';
+import {connect} from 'react-redux';
+import {updateToken} from "../redux/actions/userActions";
 
 class LoginForm extends React.Component<any, any> {
 
@@ -16,6 +18,7 @@ class LoginForm extends React.Component<any, any> {
         };
 
         this.startEditing = this.startEditing.bind(this);
+        this.onUpdateToken = this.onUpdateToken.bind(this);
     }
 
     componentDidMount() {
@@ -27,8 +30,12 @@ class LoginForm extends React.Component<any, any> {
         });
     }
 
+    onUpdateToken (token: any) {
+        this.props.onUpdateToken(token);
+    }
     render() {
         const logo = require('../img/logo.png');
+        console.log(this.props);
         return (
             <div className="login">
                 <Grid
@@ -80,6 +87,7 @@ class LoginForm extends React.Component<any, any> {
                                 content="Start editing"
                                 onClick={this.startEditing}
                             />
+                            <p> token => {this.props.token} </p>
                             {this.state.showLabel && (
                                 <Label color='red' pointing='above'>Please authenticate first</Label>
                             )}
@@ -94,6 +102,7 @@ class LoginForm extends React.Component<any, any> {
     handleClick(event: any) {
         let {token} = this.state;
         console.log(token);
+        this.onUpdateToken(token);
         RequestModule.AuthWithToken(token);
     }
 
@@ -112,4 +121,13 @@ class LoginForm extends React.Component<any, any> {
     }
 }
 
-export default withRouter(LoginForm);
+const mapStateToProps = (state) => {
+    return state;
+};
+
+const mapActionsToProps = {
+    onUpdateToken: updateToken
+};
+
+const ConLoginForm = connect(mapStateToProps, mapActionsToProps)(LoginForm);
+export default withRouter(ConLoginForm);
