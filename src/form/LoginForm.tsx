@@ -39,7 +39,12 @@ class LoginForm extends React.Component<any, any> {
     }
 
     onUpdateUsername(name: any) {
-        this.props.onUpdateName(name);
+        if (name) {
+            this.props.onUpdateName(name);
+        } else {
+            this.props.onUpdateName("No name provided.");
+        }
+
     }
 
     onUpdateLogin(login: any) {
@@ -47,7 +52,11 @@ class LoginForm extends React.Component<any, any> {
     }
 
     onUpdateEmail(email: any) {
-        this.props.onUpdateEmail(email);
+        if (email) {
+            this.props.onUpdateEmail(email);
+        } else {
+            this.props.onUpdateEmail('private e-mail');
+        }
     }
 
     render() {
