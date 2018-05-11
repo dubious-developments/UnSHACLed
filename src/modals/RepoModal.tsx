@@ -1,24 +1,39 @@
 import * as React from 'react';
 import {Modal, Button, Icon, Dropdown} from 'semantic-ui-react';
 import {RepoModalProps} from '../components/interfaces/interfaces';
+import RequestModule from '../requests/RequestModule';
+import {connect} from 'react-redux';
 
 /*
     Component used to create a dropdown component for the file toolbar option
     Requires several props from the parent, which can be found in interfaces.d.ts
 
  */
-class RepoModal extends React.Component<RepoModalProps, any> {
+class RepoModal extends React.Component<RepoModalProps & any, any> {
 
     constructor(props: any) {
         super(props);
         this.state = {
             selected: true,
-            files: true
+            files: true,
+            repos: []
         };
         this.setSelected = this.setSelected.bind(this);
         this.setFilesSelected = this.setFilesSelected.bind(this);
         this.cancelModal = this.cancelModal.bind(this);
         this.confirmModal = this.confirmModal.bind(this);
+        this.getRepos = this.getRepos.bind(this);
+    }
+
+    componentDidMount() {
+        console.log(this.props);
+        console.log(this.props.token + 'on mounting');
+        RequestModule.getUserRepos(this.props.token).then(repoArray => {
+            console.log(repoArray);
+            this.setState({
+                repos: repoArray
+            });
+        });
     }
 
     setSelected() {
@@ -49,11 +64,22 @@ class RepoModal extends React.Component<RepoModalProps, any> {
         });
     }
 
+    getRepos(token: any) {
+        RequestModule.getUserRepos(this.props.token).then(repoArray => {
+            console.log(repoArray);
+            this.setState({
+                repos: repoArray
+            });
+        });
+    }
+
     render() {
-        let projects = [{text: " Project 1", value: "Project 1"}, {text: " Project 2", value: "Project 2"}];
         let graphs = [{text: " File 1", value: "File 1"}, {text: " File 2", value: "File 2"}];
         let {selected} = this.state;
         let {files} = this.state;
+        let {repos} = this.state;
+        console.log(repos);
+        console.log("can it be done this way??" + this.props.stateToken);
         return (
             <div>
                 <Modal
@@ -73,7 +99,7 @@ class RepoModal extends React.Component<RepoModalProps, any> {
                             placeholder='Select Project'
                             fluid={true}
                             selection={true}
-                            options={projects}
+                            options={graphs}
                             onChange={this.setSelected}
                         />
                         {selected === false && (
@@ -90,7 +116,7 @@ class RepoModal extends React.Component<RepoModalProps, any> {
                         <Button color='red' onClick={this.cancelModal}>
                             <Icon name='remove'/> Cancel
                         </Button>
-                        <Button color='green' onClick={this.confirmModal} disabled={files} >
+                        <Button color='green' onClick={this.confirmModal} disabled={files}>
                             <Icon name='checkmark'/> Open
                         </Button>
                     </Modal.Actions>
@@ -100,4 +126,15 @@ class RepoModal extends React.Component<RepoModalProps, any> {
     }
 }
 
-export default RepoModal;
+/**
+ * Map global store to props of this component.
+ * @param state: state retrieved from the global redux store.
+ * @returns {{token}}: sets props.token
+ */
+const mapStateToProps = (state, props) => {
+    return {
+        token: state.token
+    };
+};
+
+export default connect(mapStateToProps)(RepoModal);

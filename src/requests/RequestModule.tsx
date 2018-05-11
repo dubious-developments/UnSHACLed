@@ -69,6 +69,7 @@ class RequestModule {
      * @returns {Promise<AxiosResponse<any>>}, return list of repo through a promise.
      */
     static getUserRepos(token: any) {
+        console.log('http://193.190.127.184:8042/user/repo-list/' + token);
         return axios.get('http://193.190.127.184:8042/user/repo-list/' + token)
             .then(res => res.data);
     }

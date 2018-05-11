@@ -8,7 +8,7 @@ import RepoModal from '../modals/RepoModal';
     Requires several props from the parent, which can be found in interfaces.d.ts
 
  */
-class DropdownFile extends React.Component<DropdownFileProps, any> {
+class DropdownFile extends React.Component<DropdownFileProps & any, any> {
 
     constructor(props: any) {
         super(props);
@@ -116,7 +116,12 @@ class DropdownFile extends React.Component<DropdownFileProps, any> {
                         <Dropdown.Item icon='trash' text='Clear graph' id='tb_clear_graph'/>
                     </Dropdown.Menu>
                 </Dropdown>
-                <RepoModal visible={repoVisible} confirm_cb={this.confirmCallback} cancel_cb={this.cancelCallback}/>
+                {repoVisible ?
+                    <RepoModal
+                        visible={repoVisible}
+                        confirm_cb={this.confirmCallback}
+                        cancel_cb={this.cancelCallback}
+                    /> : null}
             </div>
         );
     }
