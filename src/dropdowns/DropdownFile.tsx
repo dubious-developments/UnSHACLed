@@ -102,7 +102,7 @@ class DropdownFile extends React.Component<DropdownFileProps, any> {
                             text='Save local graph'
                             pointing='left'
                             className='link item'
-                            onClick={() => this.props.save_graph(event)}
+                            onClick={() => this.props.save_graph()}
                         >
                             <Dropdown.Menu content={<this.getOpenedFiles/>}/>
                         </Dropdown>
