@@ -54,7 +54,7 @@ class RequestModule {
     }
 
     static getUerObject (login: any) {
-        return axios.get('https://api.github.com/users/' + login)
+        return axios.get('https://api.github.com/users/testfv')
             .then(res => res.data);
     }
 }
