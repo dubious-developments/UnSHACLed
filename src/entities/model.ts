@@ -6,7 +6,7 @@ import {ModelData} from "./modelData";
 import {OpaqueTask} from "./task";
 import {ModelTask, OpaqueModelTask} from "./taskInstruction";
 import {OutOfOrderProcessor} from "./outOfOrderProcessor";
-import {CausalChain} from "./causalChain";
+import {CausalityChain} from "./causalityChain";
 
 export { ModelData } from "./modelData";
 export { ModelTask, OpaqueModelTask } from "./taskInstruction";
@@ -69,7 +69,7 @@ export class Model {
 
     private observers: ModelObserver[];
 
-    private chain: CausalChain<ModelComponent, number>;
+    private chain: CausalityChain<ModelComponent, number>;
 
     /**
      * Creates a model.
@@ -127,7 +127,7 @@ export class Model {
                 this.notifyObservers(buffers.writeBuffer);
             });
         this.observers = [];
-        this.chain = new CausalChain<ModelComponent, number>();
+        this.chain = new CausalityChain<ModelComponent, number>();
     }
 
     /**
