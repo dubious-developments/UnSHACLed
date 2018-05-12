@@ -37,6 +37,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     private RDF: any = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
     private SH: any = $rdf.Namespace("http://www.w3.org/ns/shacl#");
     private SCHEMA: any = $rdf.Namespace("http://schema.org/");
+    private EX: any = $rdf.Namespace("http://example.com/ns#");
 
     constructor(props: any) {
         super(props);
@@ -581,6 +582,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 } else if (predicate === this.SH("path").uri) {
                     subjectBlock.name = object;
                     subjectBlock.realName = subject;
+                    console.log(subject);
                     subjectBlock.blockType = "Property";
                     subjectBlock.triple = triple;
                 } else {
@@ -870,25 +872,32 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         let model = graph.getModel();
         let block = this.nameToStandardCellDict.getValue('block');
         let row = this.nameToStandardCellDict.getValue('row');
+
+        // this.fileToGraphDict.setValue("added", ImmutableGraph.create());
+
         let funct = (g: any, evt: any, target: any, x: any, y: any) => {
             let v1 = model.cloneCell(block);
             let parent = graph.getDefaultParent();
 
             /* Create empty block */
             let b = v1.getValue();
-            b.realName = this.SCHEMA("NewShape").uri;
-            // todo make new file and add prefixes
-            b.name = this.placePrefixes(b.realName, this.fileToPrefixesDict.values()[0]);
 
             /* Set correct styling based on input */
+            let realName = this.SCHEMA("NewShape").uri;
+            // todo make new file and add prefixes
+            let name = this.placePrefixes(realName, this.fileToPrefixesDict.values()[0]);
             let style = 'NodeShape';
-            let triple = new Triple(b.realName, this.RDF("type").uri, this.SH("NodeShape").uri, "added");
+            let triple = new Triple(realName, this.RDF("type").uri, this.SH("NodeShape").uri, "added");
             triple.cell = v1;
             if (id.indexOf('Property') >= 0) {
-                triple = new Triple(b.realName, this.SH("path").uri, b.name, "added");
+                realName = "_:b" + (Math.floor(Math.random() * 1000000000) + 1000);
+                name = this.placePrefixes(this.EX("name").uri, this.fileToPrefixesDict.values()[0]);
+                triple = new Triple(realName, this.SH("path").uri, name, "added");
                 style = 'Property';
             }
             b.blockType = style;
+            b.realName = realName;
+            b.name = name;
 
             this.blockToCellDict.setValue(b, v1);
             this.subjectToBlockDict.setValue(b.realName, b);
