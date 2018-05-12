@@ -8,7 +8,7 @@ import {GraphParser} from "../src/persistence/graphParser";
 describe("WorkspaceParser Class", () => {
     it("should parse valid JSON and return a workspace containing the " +
         "components described therein.",
-        (done) => {
+        () => {
             let parser = new WorkspaceParser();
             parser.parse(generateJSON(),
                 "application/json", result => {
@@ -41,13 +41,17 @@ describe("WorkspaceParser Class", () => {
                 expect(SHACLGraph[0]).toEqual("shacl.ttl");
                 expect(dataGraph[0]).toEqual("data.ttl");
 
+                expect(Object.keys(SHACLGraph[1].getPrefixes()).length).toEqual(5);
+
                 SHACLGraph[1].queryN3Store(store => {
-                    expect(store.countTriples()).toEqual(15);
+                    expect(store.countTriples()).toEqual(6);
                 });
 
                 SHACLGraph[1].query(store => {
-                    expect(store.match().length).toEqual(15);
+                    expect(store.match().length).toEqual(6);
                 });
+
+                expect(Object.keys(dataGraph[1].getPrefixes()).length).toEqual(5);
 
                 dataGraph[1].queryN3Store(store => {
                     expect(store.countTriples()).toEqual(2);
@@ -59,8 +63,6 @@ describe("WorkspaceParser Class", () => {
 
                 expect(ioComponent.getCompositeParts()[0][0]).toEqual(SHACLGraph[0]);
                 expect(ioComponent.getCompositeParts()[1][0]).toEqual(dataGraph[0]);
-
-                done();
             });
         });
 
@@ -138,67 +140,44 @@ function generateJSON() {
         '        {\n' +
         '          "subject": "http://example.com/ns#PersonShape",\n' +
         '          "predicate": "http://www.w3.org/ns/shacl#property",\n' +
-        '          "object": "_:b25"\n' +
-        '        },\n' +
-        '        {\n' +
-        '          "subject": "http://example.com/ns#PersonShape",\n' +
-        '          "predicate": "http://www.w3.org/ns/shacl#property",\n' +
         '          "object": "_:b24"\n' +
         '        },\n' +
         '        {\n' +
-        '          "subject": "http://example.com/ns#PersonShape",\n' +
-        '          "predicate": "http://www.w3.org/ns/shacl#closed",\n' +
-        '          "object": "true"\n' +
-        '        },\n' +
-        '        {\n' +
-        '          "subject": "http://example.com/ns#PersonShape",\n' +
-        '          "predicate": "http://www.w3.org/ns/shacl#ignoredProperties",\n' +
-        '          "object": "_:b26"\n' +
-        '        },\n' +
-        '        {\n' +
         '          "subject": "_:b24",\n' +
-        '          "predicate": "http://www.w3.org/ns/shacl#path",\n' +
-        '          "object": "http://example.com/ns#ssn"\n' +
-        '        },\n' +
-        '        {\n' +
-        '          "subject": "_:b24",\n' +
-        '          "predicate": "http://www.w3.org/ns/shacl#maxCount",\n' +
-        '          "object": "1"\n' +
-        '        },\n' +
-        '        {\n' +
-        '          "subject": "_:b24",\n' +
-        '          "predicate": "http://www.w3.org/ns/shacl#datatype",\n' +
-        '          "object": "http://www.w3.org/2001/XMLSchema#string"\n' +
-        '        },\n' +
-        '        {\n' +
-        '          "subject": "_:b24",\n' +
-        '          "predicate": "http://www.w3.org/ns/shacl#pattern",\n' +
-        '          "object": "^\\\\d{3}-\\\\d{2}-\\\\d{4}$"\n' +
-        '        },\n' +
-        '        {\n' +
-        '          "subject": "_:b25",\n' +
         '          "predicate": "http://www.w3.org/ns/shacl#path",\n' +
         '          "object": "http://example.com/ns#worksFor"\n' +
         '        },\n' +
         '        {\n' +
-        '          "subject": "_:b25",\n' +
+        '          "subject": "_:b24",\n' +
         '          "predicate": "http://www.w3.org/ns/shacl#class",\n' +
         '          "object": "http://example.com/ns#Company"\n' +
         '        },\n' +
         '        {\n' +
-        '          "subject": "_:b25",\n' +
+        '          "subject": "_:b24",\n' +
         '          "predicate": "http://www.w3.org/ns/shacl#nodeKind",\n' +
         '          "object": "http://www.w3.org/ns/shacl#IRI"\n' +
+        '        }\n' +
+        '      ],\n' +
+        '      "prefixes": [\n' +
+        '        {\n' +
+        '          "prefix": "rdf",\n' +
+        '          "iri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#"\n' +
         '        },\n' +
         '        {\n' +
-        '          "subject": "_:b26",\n' +
-        '          "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",\n' +
-        '          "object": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"\n' +
+        '          "prefix": "rdfs",\n' +
+        '          "iri": "http://www.w3.org/2000/01/rdf-schema#"\n' +
         '        },\n' +
         '        {\n' +
-        '          "subject": "_:b26",\n' +
-        '          "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",\n' +
-        '          "object": "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"\n' +
+        '          "prefix": "sh",\n' +
+        '          "iri": "http://www.w3.org/ns/shacl#"\n' +
+        '        },\n' +
+        '        {\n' +
+        '          "prefix": "xsd",\n' +
+        '          "iri": "http://www.w3.org/2001/XMLSchema#"\n' +
+        '        },\n' +
+        '        {\n' +
+        '          "prefix": "ex",\n' +
+        '          "iri": "http://example.com/ns#"\n' +
         '        }\n' +
         '      ]\n' +
         '    }\n' +
@@ -216,6 +195,28 @@ function generateJSON() {
         '          "subject": "http://example.com/ns#Alice",\n' +
         '          "predicate": "http://example.com/ns#ssn",\n' +
         '          "object": "987-65-4323"\n' +
+        '        }\n' +
+        '      ],\n' +
+        '      "prefixes": [\n' +
+        '        {\n' +
+        '          "prefix": "rdf",\n' +
+        '          "iri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#"\n' +
+        '        },\n' +
+        '        {\n' +
+        '          "prefix": "rdfs",\n' +
+        '          "iri": "http://www.w3.org/2000/01/rdf-schema#"\n' +
+        '        },\n' +
+        '        {\n' +
+        '          "prefix": "sh",\n' +
+        '          "iri": "http://www.w3.org/ns/shacl#"\n' +
+        '        },\n' +
+        '        {\n' +
+        '          "prefix": "xsd",\n' +
+        '          "iri": "http://www.w3.org/2001/XMLSchema#"\n' +
+        '        },\n' +
+        '        {\n' +
+        '          "prefix": "ex",\n' +
+        '          "iri": "http://example.com/ns#"\n' +
         '        }\n' +
         '      ]\n' +
         '    }\n' +
@@ -237,67 +238,44 @@ function generateJSON() {
         '        {\n' +
         '          "subject": "http://example.com/ns#PersonShape",\n' +
         '          "predicate": "http://www.w3.org/ns/shacl#property",\n' +
-        '          "object": "_:b25"\n' +
-        '        },\n' +
-        '        {\n' +
-        '          "subject": "http://example.com/ns#PersonShape",\n' +
-        '          "predicate": "http://www.w3.org/ns/shacl#property",\n' +
         '          "object": "_:b24"\n' +
         '        },\n' +
         '        {\n' +
-        '          "subject": "http://example.com/ns#PersonShape",\n' +
-        '          "predicate": "http://www.w3.org/ns/shacl#closed",\n' +
-        '          "object": "true"\n' +
-        '        },\n' +
-        '        {\n' +
-        '          "subject": "http://example.com/ns#PersonShape",\n' +
-        '          "predicate": "http://www.w3.org/ns/shacl#ignoredProperties",\n' +
-        '          "object": "_:b26"\n' +
-        '        },\n' +
-        '        {\n' +
         '          "subject": "_:b24",\n' +
-        '          "predicate": "http://www.w3.org/ns/shacl#path",\n' +
-        '          "object": "http://example.com/ns#ssn"\n' +
-        '        },\n' +
-        '        {\n' +
-        '          "subject": "_:b24",\n' +
-        '          "predicate": "http://www.w3.org/ns/shacl#maxCount",\n' +
-        '          "object": "1"\n' +
-        '        },\n' +
-        '        {\n' +
-        '          "subject": "_:b24",\n' +
-        '          "predicate": "http://www.w3.org/ns/shacl#datatype",\n' +
-        '          "object": "http://www.w3.org/2001/XMLSchema#string"\n' +
-        '        },\n' +
-        '        {\n' +
-        '          "subject": "_:b24",\n' +
-        '          "predicate": "http://www.w3.org/ns/shacl#pattern",\n' +
-        '          "object": "^\\\\d{3}-\\\\d{2}-\\\\d{4}$"\n' +
-        '        },\n' +
-        '        {\n' +
-        '          "subject": "_:b25",\n' +
         '          "predicate": "http://www.w3.org/ns/shacl#path",\n' +
         '          "object": "http://example.com/ns#worksFor"\n' +
         '        },\n' +
         '        {\n' +
-        '          "subject": "_:b25",\n' +
+        '          "subject": "_:b24",\n' +
         '          "predicate": "http://www.w3.org/ns/shacl#class",\n' +
         '          "object": "http://example.com/ns#Company"\n' +
         '        },\n' +
         '        {\n' +
-        '          "subject": "_:b25",\n' +
+        '          "subject": "_:b24",\n' +
         '          "predicate": "http://www.w3.org/ns/shacl#nodeKind",\n' +
         '          "object": "http://www.w3.org/ns/shacl#IRI"\n' +
+        '        }\n' +
+        '      ],\n' +
+        '      "prefixes": [\n' +
+        '        {\n' +
+        '          "prefix": "rdf",\n' +
+        '          "iri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#"\n' +
         '        },\n' +
         '        {\n' +
-        '          "subject": "_:b26",\n' +
-        '          "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",\n' +
-        '          "object": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"\n' +
+        '          "prefix": "rdfs",\n' +
+        '          "iri": "http://www.w3.org/2000/01/rdf-schema#"\n' +
         '        },\n' +
         '        {\n' +
-        '          "subject": "_:b26",\n' +
-        '          "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",\n' +
-        '          "object": "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"\n' +
+        '          "prefix": "sh",\n' +
+        '          "iri": "http://www.w3.org/ns/shacl#"\n' +
+        '        },\n' +
+        '        {\n' +
+        '          "prefix": "xsd",\n' +
+        '          "iri": "http://www.w3.org/2001/XMLSchema#"\n' +
+        '        },\n' +
+        '        {\n' +
+        '          "prefix": "ex",\n' +
+        '          "iri": "http://example.com/ns#"\n' +
         '        }\n' +
         '      ]\n' +
         '    },\n' +
@@ -313,6 +291,28 @@ function generateJSON() {
         '          "subject": "http://example.com/ns#Alice",\n' +
         '          "predicate": "http://example.com/ns#ssn",\n' +
         '          "object": "987-65-4323"\n' +
+        '        }\n' +
+        '      ],\n' +
+        '      "prefixes": [\n' +
+        '        {\n' +
+        '          "prefix": "rdf",\n' +
+        '          "iri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#"\n' +
+        '        },\n' +
+        '        {\n' +
+        '          "prefix": "rdfs",\n' +
+        '          "iri": "http://www.w3.org/2000/01/rdf-schema#"\n' +
+        '        },\n' +
+        '        {\n' +
+        '          "prefix": "sh",\n' +
+        '          "iri": "http://www.w3.org/ns/shacl#"\n' +
+        '        },\n' +
+        '        {\n' +
+        '          "prefix": "xsd",\n' +
+        '          "iri": "http://www.w3.org/2001/XMLSchema#"\n' +
+        '        },\n' +
+        '        {\n' +
+        '          "prefix": "ex",\n' +
+        '          "iri": "http://example.com/ns#"\n' +
         '        }\n' +
         '      ]\n' +
         '    }\n' +
@@ -341,16 +341,8 @@ function getShapesGraph() {
         'a sh:NodeShape ;\n' +
         'sh:targetClass ex:Person ;\n' +
         'sh:property [\n' +
-        'sh:path ex:ssn ;\n' +
-        'sh:maxCount 1 ;\n' +
-        'sh:datatype xsd:string ;\n' +
-        'sh:pattern "^\\\\d{3}-\\\\d{2}-\\\\d{4}$" ;\n' +
-        '] ;\n' +
-        'sh:property [\n' +
         'sh:path ex:worksFor ;\n' +
         'sh:class ex:Company ;\n' +
         'sh:nodeKind sh:IRI ;\n' +
-        '] ;\n' +
-        'sh:closed true ;\n' +
-        'sh:ignoredProperties ( rdf:type ) .';
+        '] .';
 }

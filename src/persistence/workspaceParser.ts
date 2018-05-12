@@ -126,11 +126,18 @@ export class WorkspaceParser implements Parser<ModelData> {
                 });
                 part.push(triples.join(",\n"));
             });
-            part.push("\n]\n}");
+            part.push("\n]\n");
+            part.push(', "prefixes": [\n');
+            let prefixes = new Array<string>();
+            Object.keys(p[1].getPrefixes()).forEach(prefix => {
+                prefixes.push(self.prefixToJSON(prefix, p[1].getPrefixes()[prefix]));
+            });
+            part.push(prefixes.join(",\n"));
+            part.push("]\n}\n");
             parts.push(part.join(""));
         });
         builder.push(parts.join(",\n"))
-        builder.push("\n]");
+        builder.push("]");
 
         return builder.join("");
     }
@@ -142,19 +149,22 @@ export class WorkspaceParser implements Parser<ModelData> {
      */
     private parseComponent(componentObj: any): Component<ImmutableGraph> {
         let component = new Component<ImmutableGraph>();
-        componentObj.forEach( p => {
+        componentObj.forEach(part => {
             let graph = new Graph();
-            p.triples.forEach(t => {
+            part.triples.forEach(t => {
                 graph.addTriple(t.subject, t.predicate, t.object);
             });
-            component = component.withPart(p.id, graph.asImmutable());
+            part.prefixes.forEach(p => {
+                graph.addPrefix(p.prefix, p.iri);
+            });
+            component = component.withPart(part.id, graph.asImmutable());
         });
 
         return component;
     }
 
     /**
-     * Convert a triple to JSON-LD format.
+     * Convert a triple to JSON format.
      * @param triple
      * @returns {string}
      */
@@ -165,7 +175,20 @@ export class WorkspaceParser implements Parser<ModelData> {
             "subject": triple.subject,
             "predicate": triple.predicate,
             "object": N3.Util.isLiteral(triple.object)
-                ? N3.Util.getLiteralValue(triple.object) : triple.object,
+                ? N3.Util.getLiteralValue(triple.object) : triple.object
+        }, null, '  ');
+    }
+
+    /**
+     * Convert a prefix to JSON format.
+     * @param {string} prefix
+     * @param {string} iri
+     * @returns {string}
+     */
+    private prefixToJSON(prefix: string, iri: string): string {
+        return JSON.stringify( {
+            "prefix": prefix,
+            "iri": iri
         }, null, '  ');
     }
 }
