@@ -79,7 +79,7 @@ export class FileDAO implements DataAccessObject {
  * Provides basic input/output functionality w.r.t. files.
  * Requires a particular parser to modulate between file format and internal representation.
  */
-class IOFacilitator {
+export class IOFacilitator {
 
     private parsers: Collections.Dictionary<ModelComponent, Parser<any>>;
 
@@ -97,6 +97,14 @@ class IOFacilitator {
      */
     public registerParser(label: ModelComponent, parser: Parser<any>) {
         this.parsers.setValue(label, parser);
+    }
+
+    /**
+     * Retrieve the parsers associated with this IOFacilitator.
+     * @returns {Dictionary<ModelComponent, Parser<any>>}
+     */
+    public getParsers(): Collections.Dictionary<ModelComponent, Parser<any>> {
+        return this.parsers;
     }
 
     /**
@@ -309,7 +317,7 @@ class LoadWorkspaceTask extends Task<ModelData, ModelTaskMetadata> {
 
     public get metadata(): ModelTaskMetadata {
         return new ModelTaskMetadata([ModelComponent.SHACLShapesGraph, ModelComponent.DataGraph, ModelComponent.IO],
-            [ModelComponent.IO]);
+            [ModelComponent.SHACLShapesGraph, ModelComponent.DataGraph, ModelComponent.IO]);
     }
 
 }
@@ -372,7 +380,7 @@ class SaveWorkspaceTask extends Task<ModelData, ModelTaskMetadata> {
 
     public get metadata(): ModelTaskMetadata {
         return new ModelTaskMetadata([ModelComponent.SHACLShapesGraph, ModelComponent.DataGraph, ModelComponent.IO],
-            [ModelComponent.IO]);
+            [ModelComponent.SHACLShapesGraph, ModelComponent.DataGraph, ModelComponent.IO]);
     }
 
 }
