@@ -136,7 +136,7 @@ export class WorkspaceParser implements Parser<ModelData> {
             part.push("]\n}\n");
             parts.push(part.join(""));
         });
-        builder.push(parts.join(",\n"))
+        builder.push(parts.join(",\n"));
         builder.push("]");
 
         return builder.join("");
