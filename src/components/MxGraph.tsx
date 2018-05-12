@@ -34,8 +34,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
     private timer: TimingService;
 
-    private prefixes: PrefixMap = {};
-
     private RDF: any = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
     private SH: any = $rdf.Namespace("http://www.w3.org/ns/shacl#");
     private SCHEMA: any = $rdf.Namespace("http://schema.org/");
@@ -76,12 +74,25 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
         this.timer = new TimingService();
 
-        this.prefixes.rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-        this.prefixes.sh = "http://www.w3.org/ns/shacl#";
-        this.prefixes.schema = "http://schema.org/";
-        this.prefixes.ex = "http://example.com/ns#";
-        this.prefixes.rdfs = "http://www.w3.org/2000/01/rdf-schema#";
-        this.prefixes.xsd = "http://www.w3.org/2001/XMLSchema#";
+        let prefixes: PrefixMap = {};
+        prefixes.rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+        prefixes.sh = "http://www.w3.org/ns/shacl#";
+        prefixes.schema = "http://schema.org/";
+        prefixes.ex = "http://example.com/ns#";
+        prefixes.rdfs = "http://www.w3.org/2000/01/rdf-schema#";
+        prefixes.xsd = "http://www.w3.org/2001/XMLSchema#";
+
+        let addedShapes = ImmutableGraph.create();
+        addedShapes = addedShapes.addPrefixes(prefixes);
+        this.fileToGraphDict.setValue(this.addedShapesFile, addedShapes);
+        this.fileToPrefixesDict.setValue(this.addedShapesFile, prefixes);
+        this.fileToTypeDict.setValue(this.addedShapesFile, "SHACLShapesGraph");
+
+        let addedData = ImmutableGraph.create();
+        addedData = addedData.addPrefixes(prefixes);
+        this.fileToGraphDict.setValue(this.addedDataFile, addedData);
+        this.fileToPrefixesDict.setValue(this.addedDataFile, prefixes);
+        this.fileToTypeDict.setValue(this.addedDataFile, "DataGraph");
     }
 
     componentDidMount() {
@@ -880,12 +891,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         let block = this.nameToStandardCellDict.getValue('block');
         let row = this.nameToStandardCellDict.getValue('row');
 
-        let addedGraph = ImmutableGraph.create();
-        addedGraph = addedGraph.addPrefixes(this.prefixes);
-        this.fileToGraphDict.setValue(this.addedShapesFile, addedGraph);
-        this.fileToPrefixesDict.setValue(this.addedShapesFile, this.prefixes);
-        this.fileToTypeDict.setValue(this.addedShapesFile, "SHACLShapesGraph");
-
         let funct = (g: any, evt: any, target: any, x: any, y: any) => {
             let v1 = model.cloneCell(block);
             let parent = graph.getDefaultParent();
@@ -895,7 +900,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
             /* Set correct styling based on input */
             let realName = this.SCHEMA("NewShape").uri;
-            // todo make new file and add prefixes
             let name = this.placePrefixes(realName, this.fileToPrefixesDict.getValue(this.addedShapesFile) || {});
             let style = 'NodeShape';
             let triple = new Triple(realName, this.RDF("type").uri, this.SH("NodeShape").uri, this.addedShapesFile);
@@ -918,7 +922,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             this.triples.add(triple);
             this.cellToTriples.setValue(v1, triple);
 
-            // todo make new file
             let oldGraph = this.fileToGraphDict.getValue(this.addedShapesFile);
             let type = "SHACLShapesGraph";
 
@@ -1000,8 +1003,13 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             // Function that is executed when the image is dropped on
             // the graph. The cell argument points to the cell under
             // the mousepointer if there is one.
-            var funct = function (gr: any, evt: any, target: any, x: any, y: any, cell: any) {
+            var funct = (gr: any, evt: any, target: any, x: any, y: any, cell: any) => {
                 gr.setSelectionCells(gr.importCells(cells, x, y, cell));
+
+                for (let c of cells) {
+                    console.log(c);
+                    console.log(c.children);
+                }
             };
             // create sidebar entry
             // invoke callback on parent component, which will add entry to sidebar
