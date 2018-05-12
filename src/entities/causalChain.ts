@@ -145,8 +145,6 @@ export class CausalChain<S, T> {
 /**
  * A link in a causal chain, representing an event of type T,
  * with causes of type S and effects also of type S.
- *  TODO: At the moment, there is no recycling of identifiers,
- *  so this number will grow ad infinitum.
  */
 export class Link<S, T> {
 

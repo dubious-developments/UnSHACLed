@@ -175,6 +175,65 @@ describe("Graph Class", () => {
         expect(graph.getPrefixes()["dc"]).toEqual("http://purl.org/dc/elements/1.1/");
     });
 
+    it ("can undo a clear recent changes operation", () => {
+        let graph = new Graph();
+
+        graph.addTriple("http://en.wikipedia.org/wiki/Tony_Benn",
+            "http://purl.org/dc/elements/1.1/title",
+            '"Tony Benn"');
+
+        let oldImmutable = graph.asImmutable();
+
+        graph.clearRecentChanges();
+
+        expect(graph.getLatestAdditions().contains({subject: "http://en.wikipedia.org/wiki/Tony_Benn",
+            predicate: "http://purl.org/dc/elements/1.1/title",
+            object: '"Tony Benn"'})).toBeFalsy();
+
+        expect(oldImmutable.getLatestAdditions().contains({subject: "http://en.wikipedia.org/wiki/Tony_Benn",
+            predicate: "http://purl.org/dc/elements/1.1/title",
+            object: '"Tony Benn"'})).toBeTruthy();
+
+        expect(graph.getLatestAdditions().contains({subject: "http://en.wikipedia.org/wiki/Tony_Benn",
+            predicate: "http://purl.org/dc/elements/1.1/title",
+            object: '"Tony Benn"'})).toBeFalsy();
+    });
+
+    it ("can undo an incremental merge", () => {
+        let graph = new Graph();
+        let other = new Graph();
+
+        graph.addTriple("http://en.wikipedia.org/wiki/Tony_Benn",
+            "http://purl.org/dc/elements/1.1/title",
+            '"Tony Benn"');
+
+        other.addTriple("http://en.wikipedia.org/wiki/Tony_Benn",
+            "http://purl.org/dc/elements/1.1/publisher",
+            '"Wikipedia"');
+
+        let oldImmutable = graph.asImmutable();
+
+        graph.incrementalMerge(other);
+
+        expect(
+            graph.containsTriple(
+                "http://en.wikipedia.org/wiki/Tony_Benn",
+                "http://purl.org/dc/elements/1.1/publisher",
+                '"Wikipedia"')).toBeTruthy();
+
+        expect(
+            oldImmutable.containsTriple(
+                "http://en.wikipedia.org/wiki/Tony_Benn",
+                "http://purl.org/dc/elements/1.1/publisher",
+                '"Wikipedia"')).toBeFalsy();
+
+        expect(
+            graph.containsTriple(
+                "http://en.wikipedia.org/wiki/Tony_Benn",
+                "http://purl.org/dc/elements/1.1/publisher",
+                '"Wikipedia"')).toBeTruthy();
+    });
+
     it("should maintain a consistent store for persistence purposes.",
        () => {
             let graph = new Graph();

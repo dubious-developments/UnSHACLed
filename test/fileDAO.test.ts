@@ -4,7 +4,6 @@ import { FileDAO, FileModule, IOFacilitator } from "../src/persistence/fileDAO";
 import { GraphParser } from "../src/persistence/graphParser";
 import { Component } from "../src/persistence/component";
 import { Graph, ImmutableGraph } from "../src/persistence/graph";
-import {WorkspaceParser} from "../src/persistence/workspaceParser";
 
 describe("IOFacilitator Class", () => {
 
