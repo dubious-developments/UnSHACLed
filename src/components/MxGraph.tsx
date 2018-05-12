@@ -529,7 +529,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             }
 
             if (triple) {
-                console.log(triple);
                 // start an update task in the model
                 let oldGraph = instance.fileToGraphDict.getValue(file);
                 let type = instance.fileToTypeDict.getValue(file);
@@ -938,7 +937,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 horse.tasks.processAllTasks();
             }
 
-            // let temprow = model.cloneCell(row);
             b.traits = [];
 
             model.beginUpdate();
