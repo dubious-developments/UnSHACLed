@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as Collections from 'typescript-collections';
 import {ModelComponent, ModelTaskMetadata} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
-import {GetValidationReport, EditTriple, VisualizeComponent} from "../services/ModelTasks";
+import {GetValidationReport, EditTriple, VisualizeComponent, LoadFileTask} from "../services/ModelTasks";
 import TimingService from "../services/TimingService";
 import {ValidationReport} from "../conformance/wrapper/ValidationReport";
 import {MxGraphProps} from "./interfaces/interfaces";
@@ -34,10 +34,14 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
     private timer: TimingService;
 
+    private prefixes: PrefixMap = {};
+
     private RDF: any = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
     private SH: any = $rdf.Namespace("http://www.w3.org/ns/shacl#");
     private SCHEMA: any = $rdf.Namespace("http://schema.org/");
     private EX: any = $rdf.Namespace("http://example.com/ns#");
+    private addedShapesFile: string = "addedShapes.ttl";
+    private addedDataFile: string = "addedData.ttl";
 
     constructor(props: any) {
         super(props);
@@ -71,6 +75,13 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.fileToPrefixesDict = new Collections.Dictionary<string, PrefixMap>();
 
         this.timer = new TimingService();
+
+        this.prefixes.rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+        this.prefixes.sh = "http://www.w3.org/ns/shacl#";
+        this.prefixes.schema = "http://schema.org/";
+        this.prefixes.ex = "http://example.com/ns#";
+        this.prefixes.rdfs = "http://www.w3.org/2000/01/rdf-schema#";
+        this.prefixes.xsd = "http://www.w3.org/2001/XMLSchema#";
     }
 
     componentDidMount() {
@@ -492,24 +503,25 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         // Installs a handler for clicks on the overlay
         overlay.addListener(mxEvent.CLICK, function (sender: any, event: any) {
             let temprow = model.cloneCell(instance.nameToStandardCellDict.getValue('row'));
-            let blockName, trait, triple;
+            let block, file, triple;
             
             graph.clearSelection();
             model.beginUpdate();
             try {
-                blockName = event.properties.cell.value.realName;
-                // here the assumption is made that next row will belong to the same file as the first
-                // we just need to make sure that there is at least one row as well
-                // this also makes sense since a node without rows is pointless
-                trait = instance.cellToTriples.getValue(event.properties.cell.children[0]);
-                if (trait) {
-                    triple = new Triple(blockName, "predicate", "object", trait.file);
+                block = instance.subjectToBlockDict.getValue(event.properties.cell.value.realName);
+                if (block) {
+                    if (block.traits.length > 0) {
+                        file = block.traits[0].file;
+                    } else {
+                        file = block.triple.file || instance.addedDataFile;
+                    }
+
+                    triple = new Triple(block.realName, "predicate", "object", file);
                     triple.cell = temprow;
                     temprow.value.name = instance.nameFromTrait(triple);
 
                     cell.insert(temprow);
                 }
-
             } finally {
                 // Updates the display
                 model.endUpdate();
@@ -517,8 +529,8 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             }
 
             if (triple) {
+                console.log(triple);
                 // start an update task in the model
-                let file = triple.file;
                 let oldGraph = instance.fileToGraphDict.getValue(file);
                 let type = instance.fileToTypeDict.getValue(file);
                 if (oldGraph && type) {
@@ -536,14 +548,11 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 // update the data structures
                 instance.triples.add(triple);
                 instance.cellToTriples.setValue(temprow, triple);
-                let block = instance.subjectToBlockDict.getValue(blockName);
                 if (block) {
                     block.traits.push(triple);
                 } else {
-                    console.log("error: could not find block: " + blockName);
+                    console.log("error: could not find block: " + block.realName);
                 }
-    
-                console.log(block);
             }
         });
 
@@ -582,7 +591,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 } else if (predicate === this.SH("path").uri) {
                     subjectBlock.name = object;
                     subjectBlock.realName = subject;
-                    console.log(subject);
                     subjectBlock.blockType = "Property";
                     subjectBlock.triple = triple;
                 } else {
@@ -873,7 +881,11 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         let block = this.nameToStandardCellDict.getValue('block');
         let row = this.nameToStandardCellDict.getValue('row');
 
-        // this.fileToGraphDict.setValue("added", ImmutableGraph.create());
+        let addedGraph = ImmutableGraph.create();
+        addedGraph = addedGraph.addPrefixes(this.prefixes);
+        this.fileToGraphDict.setValue(this.addedShapesFile, addedGraph);
+        this.fileToPrefixesDict.setValue(this.addedShapesFile, this.prefixes);
+        this.fileToTypeDict.setValue(this.addedShapesFile, "SHACLShapesGraph");
 
         let funct = (g: any, evt: any, target: any, x: any, y: any) => {
             let v1 = model.cloneCell(block);
@@ -885,19 +897,22 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             /* Set correct styling based on input */
             let realName = this.SCHEMA("NewShape").uri;
             // todo make new file and add prefixes
-            let name = this.placePrefixes(realName, this.fileToPrefixesDict.values()[0]);
+            let name = this.placePrefixes(realName, this.fileToPrefixesDict.getValue(this.addedShapesFile) || {});
             let style = 'NodeShape';
-            let triple = new Triple(realName, this.RDF("type").uri, this.SH("NodeShape").uri, "added");
+            let triple = new Triple(realName, this.RDF("type").uri, this.SH("NodeShape").uri, this.addedShapesFile);
             triple.cell = v1;
             if (id.indexOf('Property') >= 0) {
                 realName = "_:b" + (Math.floor(Math.random() * 1000000000) + 1000);
-                name = this.placePrefixes(this.EX("name").uri, this.fileToPrefixesDict.values()[0]);
-                triple = new Triple(realName, this.SH("path").uri, name, "added");
+                name = this.placePrefixes(
+                    this.EX("name").uri, this.fileToPrefixesDict.getValue(this.addedShapesFile) || {}
+                    );
+                triple = new Triple(realName, this.SH("path").uri, name, this.addedShapesFile);
                 style = 'Property';
             }
             b.blockType = style;
             b.realName = realName;
             b.name = name;
+            b.triple = triple;
 
             this.blockToCellDict.setValue(b, v1);
             this.subjectToBlockDict.setValue(b.realName, b);
@@ -905,36 +920,29 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             this.cellToTriples.setValue(v1, triple);
 
             // todo make new file
-            let oldGraph = this.fileToGraphDict.values()[0];
+            let oldGraph = this.fileToGraphDict.getValue(this.addedShapesFile);
             let type = "SHACLShapesGraph";
 
             if (oldGraph && type) {
                 let newGraph = oldGraph.addTriple(triple.subject, triple.predicate, triple.object);
                 this.fileToGraphDict.setValue(
-                    this.fileToGraphDict.keys()[0],
+                    this.addedShapesFile,
                     newGraph
                 );
 
                 let horse = DataAccessProvider.getInstance().model;
                 horse.tasks.schedule(new EditTriple(
-                    newGraph, type, this.fileToGraphDict.keys()[0])
+                    newGraph, type, this.addedShapesFile)
                 );
+
                 horse.tasks.processAllTasks();
             }
 
-            /*
-            this.fileToGraphDict = new Collections.Dictionary<string, ImmutableGraph>();
-            this.fileToTypeDict = new Collections.Dictionary<string, string>();
-            this.fileToPrefixesDict = new Collections.Dictionary<string, PrefixMap>();
-            */
-
-            /* Create empty row */
-            let temprow = model.cloneCell(row);
+            // let temprow = model.cloneCell(row);
             b.traits = [];
 
             model.beginUpdate();
             try {
-                v1.insert(temprow);
                 v1.style = style;
                 v1.geometry.x = x;
                 v1.geometry.y = y;
@@ -942,6 +950,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 graph.addCell(v1, parent);
                 v1.geometry.alternateBounds =
                     new mxRectangle(0, 0, v1.geometry.width, v1.geometry.height);
+                this.addNewRowOverlay(graph, v1);
             } finally {
                 // Updates the display
                 model.endUpdate();
