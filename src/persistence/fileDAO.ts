@@ -69,7 +69,7 @@ export class FileDAO implements DataAccessObject {
     public findWorkspace(module: Module) {
         let self = this;
         this.io.readFromFile(module, function (result: ModelData) {
-            self.model.tasks.schedule(new LoadWorkspaceTask(result, module));
+            self.model.tasks.schedule(new LoadWorkspaceTask(result));
             self.model.tasks.processAllTasks();
         });
     }
@@ -278,8 +278,7 @@ class LoadTask extends Task<ModelData, ModelTaskMetadata> {
  */
 class LoadWorkspaceTask extends Task<ModelData, ModelTaskMetadata> {
 
-    public constructor(private readonly workspace: ModelData,
-                       private readonly module: Module) {
+    public constructor(private readonly workspace: ModelData) {
         super();
     }
 
