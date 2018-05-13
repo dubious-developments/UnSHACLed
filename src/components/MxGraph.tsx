@@ -451,6 +451,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 let [predicate, object] = 
                     instance.traitRestFromName(value, instance.fileToPrefixesDict.getValue(triple.file));
                 let newTriple = new Triple(triple.subject, predicate, object, triple.file);
+                newTriple.cell = triple.cell;
                 instance.editTriple(cell, triple, newTriple);
             } else {
                 // instance.editBlock(cell, value);
@@ -1165,6 +1166,15 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.triples.remove(oldTriple);
         this.triples.add(newTriple);
         this.cellToTriples.setValue(cell, newTriple);
+
+        // Update subjectToBlockDict by first removing the old triple
+        this.removeTripleFromBlocks(oldTriple);
+        // And then adding the new one
+        let block  = this.subjectToBlockDict.getValue(newTriple.subject);
+        if (block) {
+            // Dynamically update the values in this.subjectToBlockDict & this.blockToCellDict
+            block.traits.push(newTriple);
+        }
 
         // Edit triple in the model
         let oldGraph = this.fileToGraphDict.getValue(newTriple.file);
