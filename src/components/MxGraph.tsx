@@ -454,8 +454,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 newTriple.cell = triple.cell;
                 instance.editTriple(cell, triple, newTriple);
             } else {
-                // instance.editBlock(cell, value);
-                console.log('Edit blocking');
+                instance.editBlock(cell, value);
             }
 
             if (value.name != null) {
@@ -1200,20 +1199,39 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
     editBlock(cell: any, value: string) {
         let block = cell.getValue();
-        let subject: string;
+        let oldSubject = block.realName;
+        let subject: string = value; // This value should get replaced with the full version in the next if block
 
-        // Store prefixmap/prefixes when visualizing the file in the state
-        // Transfer prefix to full version
-        
-        subject = "TODO";
+        let storedBlock = this.subjectToBlockDict.getValue(oldSubject);
+        if (storedBlock) {
+            let filename = storedBlock.traits[0].file;
+            let prefixMap = this.fileToPrefixesDict.getValue(filename);
+            if (prefixMap) {
+                subject = this.replacePrefixes(value, prefixMap);
+                block.realName = subject;
+
+                this.blockToCellDict.remove(storedBlock);
+                this.blockToCellDict.setValue(block, cell);
+            } else {
+                console.log("Could not find PrefixMap for cell + file.", cell, filename);
+            }
+        } else {
+            console.log("No stored block found for cell", cell);
+        }
+
+        this.subjectToBlockDict.remove(oldSubject);
+        this.subjectToBlockDict.setValue(subject, block);
+
         let trait = this.cellToTriples.getValue(cell);
         if (trait) {
-            let newTrait = new Triple(subject, trait.predicate, trait.object, trait.file);
-            this.subjectToBlockDict.remove(trait.subject);
-            this.subjectToBlockDict.setValue(subject, block);
-
-            // TODO: CHECK, blockToCellDict zou niet moeten gewijzigd worden
-
+            // Special kind of triple
+            let newTrait;
+            if (block.blockType === "NodeShape") {
+                newTrait = new Triple(subject, trait.predicate, trait.object, trait.file);
+            } else {
+                newTrait = new Triple(trait.subject, trait.predicate, subject, trait.file);
+            } 
+            newTrait.cell = cell;
             this.editTriple(cell, trait, newTrait);
         }
 
@@ -1221,7 +1239,8 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             trait = this.cellToTriples.getValue(child);
             if (trait) {
                 let newTrait = new Triple(subject, trait.predicate, trait.object, trait.file);
-                this.editTriple(cell, trait, newTrait);
+                newTrait.cell = child;
+                this.editTriple(child, trait, newTrait);
             } else {
                 console.log("Error: edited cell has no linked triple");
             }
