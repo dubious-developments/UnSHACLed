@@ -3,7 +3,7 @@ import * as Collections from 'typescript-collections';
 import {ModelComponent, ModelTaskMetadata} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
 import {GetValidationReport, EditTriple, VisualizeComponent} from "../services/ModelTasks";
-import TimingService from "../services/TimingService";
+import TimingService from "../services/IdleUserDetection";
 import {ValidationReport} from "../conformance/wrapper/ValidationReport";
 import {MxGraphProps} from "./interfaces/interfaces";
 import {ModelObserver, Model} from "../entities/model";
