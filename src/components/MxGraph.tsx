@@ -10,6 +10,7 @@ import {ModelObserver, Model} from "../entities/model";
 import {Task} from "../entities/task";
 import {ModelData} from "../entities/modelData";
 import {ImmutableGraph, Graph, PrefixMap} from "../persistence/graph";
+import PollingService from "../services/PollingService";
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout, mxCellOverlay, mxImage,
@@ -943,6 +944,10 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     }
 
     main(container: HTMLElement | null): void {
+        // TODO remove after test
+        let ps = new PollingService(5000);
+        ps.startPolling();
+
         // Checks if the browser is supported
         if (!container) {
             mxUtils.error('Could not find \'graphContainer\'', 200, false);
