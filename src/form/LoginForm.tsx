@@ -46,6 +46,7 @@ class LoginForm extends React.Component<any, any> {
 
                                 >
                                     <Input
+                                        id="formUsernameField"
                                         size="large"
                                         required={true}
                                         fluid={true}
@@ -59,6 +60,7 @@ class LoginForm extends React.Component<any, any> {
                                     inline={true}
                                 >
                                     <Input
+                                        id="formPasswordField"
                                         size="large"
                                         required={true}
                                         fluid={true}
@@ -70,6 +72,7 @@ class LoginForm extends React.Component<any, any> {
                                 </Form.Field>
 
                                 <Button
+                                    id="formLoginButton"
                                     color="teal"
                                     fluid={true}
                                     inverted={true}

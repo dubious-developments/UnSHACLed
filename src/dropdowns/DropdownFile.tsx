@@ -14,16 +14,22 @@ class DropdownFile extends React.Component<DropdownFileProps, any> {
 
     render() {
         return (
-            <Dropdown text='File' pointing="top left">
+            <Dropdown id='openFileMenu' text='File' pointing="top left">
                 <Dropdown.Menu>
                     <Dropdown.Item text='New'/>
                     <Dropdown
+                        id='openLocalGraphButton'
                         text='Open local graph'
                         pointing='left'
-                        className='link item'
+                        className="link item"
                     >
                         <Dropdown.Menu>
-                            <Dropdown.Item onClick={() => this.props.import_cb("shacl")}> SHACL Graph </Dropdown.Item>
+                            <Dropdown.Item
+                                id='openSHACLGraphButton'
+                                onClick={() => this.props.import_cb("shacl")} 
+                            > 
+                                SHACL Graph
+                            </Dropdown.Item>
                             <Dropdown.Item onClick={() => this.props.import_cb("data")}> Data Graph</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown>

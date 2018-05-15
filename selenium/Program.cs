@@ -25,12 +25,12 @@ namespace SeleniumTests
         /// <summary>
         /// A sequence of all test cases to run.
         /// </summary>
-        private static readonly IEnumerable<TestCase> TestCases = SanityChecks.All;
+        private static ICollection<TestCase> TestCases = UploadFileTests.All;
 
         public static int Main(string[] args)
         {
             // Acquire a log for printing output.
-            var rawLog = new RecordingLog(TerminalLog.Acquire());
+            var rawLog = new RecordingLog();
 
             // Create a derived log for printing diagnostics.
             var log = CreateDiagnosticLog(rawLog);
@@ -78,7 +78,8 @@ namespace SeleniumTests
                 return 0;
             }
 
-            string testUrl = parsedOptions.GetValue<string>(Options.Url);
+            //string testUrl = parsedOptions.GetValue<string>(Options.Url);
+            string testUrl = "http://192.168.1.12:5000";
             bool noUrl = string.IsNullOrWhiteSpace(testUrl);
 
             if ((noUrl && !parsedOptions.ContainsOption(Options.BuildApplication))
