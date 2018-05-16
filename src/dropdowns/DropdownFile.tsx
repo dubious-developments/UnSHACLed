@@ -23,6 +23,7 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
         this.confirmCallback = this.confirmCallback.bind(this);
         this.showRepoModal = this.showRepoModal.bind(this);
         this.showNewModal = this.showNewModal.bind(this);
+        this.submitCallBack = this.submitCallBack.bind(this);
     }
 
     getOpenedFiles() {
@@ -67,25 +68,43 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
             newType: type
         });
     }
-    /* Function that will handle callback from child component
-    to adapt right state */
 
-    // TODO make dynamic for other modals
+    /**
+     *  Function that will handle callback from child component
+     to adapt right state
+     @param: type of submit callback. Can either be 'file' or 'project'
+     @param: name name of file/project to be created.
+     @param: project: name of project where the file should be added. Omitted if only a file is created.
+     */
+    submitCallBack(type: any, name: any, project: any) {
+        if (type === 'file') {
+            console.log('Create a new file with name' + name + ' in ' + project);
+        } else if (type === 'project') {
+            console.log('Create new project with name ' + name);
+        }
+        this.setState({
+            newVisible: false
+        });
+    }
+
+    /**
+     *  Function that will handle callback from child component
+     to adapt right state
+     */
+
     confirmCallback(type: any) {
-        console.log("Confirm clicked");
         this.setState({
             repoVisible: false
         });
     }
 
-    /* Function that will handle callback from child component
-        to adapt right state */
-
-    // TODO make dynamic for other modals
+    /**Function that will handle callback from child component
+     to adapt right state
+     */
     cancelCallback(type: any) {
-        console.log("Cancel clicked");
         this.setState({
-            repoVisible: false
+            repoVisible: false,
+            newVisible: false
         });
     }
 
@@ -95,7 +114,7 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
             <div>
                 <Dropdown text='File' pointing="top left">
                     <Dropdown.Menu>
-                        <Dropdown.Item text='New Project'/>
+                        <Dropdown.Item text='New Project' onClick={() => this.showNewModal('project')}/>
                         <Dropdown.Item text='New File' onClick={() => this.showNewModal('file')}/>
                         <Dropdown
                             text='Open local graph'
@@ -138,7 +157,7 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
                         visible={newVisible}
                         type={newType}
                         cancel_cb={this.cancelCallback}
-                        confirm_cb={this.confirmCallback}
+                        confirm_cb={this.submitCallBack}
                     />
                     : null
                 }

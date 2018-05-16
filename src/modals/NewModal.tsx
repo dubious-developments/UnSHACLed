@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Modal} from 'semantic-ui-react';
+import {Modal, Button, Icon, Input} from 'semantic-ui-react';
 import {NewModalProps} from '../components/interfaces/interfaces';
 import RequestModule from '../requests/RequestModule';
 import {connect} from 'react-redux';
@@ -15,8 +15,12 @@ class NewModal extends React.Component<NewModalProps & any, any> {
         super(props);
         this.state = {
             selected: true,
-            repos: []
+            repos: [],
+            name: ''
         };
+        this.cancelModal = this.cancelModal.bind(this);
+        this.confirmModal = this.confirmModal.bind(this);
+        this.onChange = this.onChange.bind(this);
     }
 
     componentDidMount() {
@@ -49,18 +53,24 @@ class NewModal extends React.Component<NewModalProps & any, any> {
     }
 
     cancelModal() {
-        this.props.cancel_cb("RepoModal");
+        this.props.cancel_cb("UserModal");
         this.setState({
-            files: true,
             selected: true
         });
     }
 
     confirmModal() {
-        this.props.confirm_cb("RepoModal");
+        this.props.confirm_cb(this.props.type, this.state.name, 'project1');
         this.setState({
-            files: true,
             selected: true
+        });
+    }
+
+    onChange(event: any) {
+        console.log(event.target.value);
+        this.setState({
+            name: event.target.value,
+            selected: false
         });
     }
 
@@ -77,13 +87,44 @@ class NewModal extends React.Component<NewModalProps & any, any> {
                         top: '50%',
                         transform: 'translateY(-50%)'
                     }}
+                    closeIcon={true}
+                    onClose={this.cancelModal}
                 >
-                    <Modal.Header>S Header</Modal.Header>
+                    <Modal.Header>Create a new {this.props.type} </Modal.Header>
                     <Modal.Content>
                         <Modal.Description>
-                            <p> Test </p>
+                            {this.props.type === 'file' ?
+                                <div>
+                                    <p>
+                                        Create a new file by selecting a project where you want to
+                                        add the file and fill in a name of your choice. After creation,
+                                        open the newly created file through the editor. {this.state.name}
+                                    </p>
+
+                                </div>
+                                :
+                                <p>
+                                    Create a new project by choosing a name of your choice. After creation,
+                                    add new files to your project through the editor
+                                </p>
+                            }
                         </Modal.Description>
+                        <Input
+                            icon='add'
+                            placeholder='Choose a name...'
+                            size='large'
+                            style={{marginTop: '1em'}}
+                            onChange={this.onChange}
+                        />
                     </Modal.Content>
+                    <Modal.Actions>
+                        <Button color='red' onClick={this.cancelModal}>
+                            <Icon name='remove'/> Cancel
+                        </Button>
+                        <Button color='green' onClick={this.confirmModal} disabled={this.state.selected}>
+                            <Icon name='checkmark'/> Open
+                        </Button>
+                    </Modal.Actions>
                 </Modal>
             </div>
         );
