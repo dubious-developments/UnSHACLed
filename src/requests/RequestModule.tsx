@@ -140,6 +140,21 @@ class RequestModule {
             .then(res => res.data);
     }
 
+    /**
+     * Method to release a lock on a file.
+     * @param repoOwner: owner of repository where file is located
+     * @param repoName: name of repository
+     * @param token: token associated with authenticated user and obtained using getToken().
+     * @param filePath: path of file to be created updated
+     * @returns {Promise<AxiosResponse<any>>}, return true if lock has been released, false otherwise through a Promise.
+     */
+    static releaseLock(repoOwner: any, repoName: any, token: any, filePath: any) {
+        const target = 'http://193.190.127.184:8042/repo/relinquish-lock/'
+            + repoOwner + '/' + repoName + '/' + token + '/' + filePath;
+        return axios.post(target)
+            .then(res => res.data);
+    }
+
 }
 
 export default RequestModule;
