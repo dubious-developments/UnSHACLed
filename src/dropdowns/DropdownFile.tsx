@@ -2,6 +2,7 @@ import * as React from 'react';
 import {Dropdown, Button} from 'semantic-ui-react';
 import {DropdownFileProps} from '../components/interfaces/interfaces';
 import RepoModal from '../modals/RepoModal';
+import NewModal from '../modals/NewModal';
 
 /*
     Component used to create a dropdown component for the file toolbar option
@@ -13,12 +14,15 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
     constructor(props: any) {
         super(props);
         this.state = {
-            repoVisible: false
+            repoVisible: false,
+            newvisible: false,
+            newType: ''
         };
         this.getOpenedFiles = this.getOpenedFiles.bind(this);
         this.cancelCallback = this.cancelCallback.bind(this);
         this.confirmCallback = this.confirmCallback.bind(this);
         this.showRepoModal = this.showRepoModal.bind(this);
+        this.showNewModal = this.showNewModal.bind(this);
     }
 
     getOpenedFiles() {
@@ -57,6 +61,12 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
         });
     }
 
+    showNewModal(type: any) {
+        this.setState({
+            newVisible: true,
+            newType: type
+        });
+    }
     /* Function that will handle callback from child component
     to adapt right state */
 
@@ -80,12 +90,13 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
     }
 
     render() {
-        let {repoVisible} = this.state;
+        let {repoVisible, newVisible, newType} = this.state;
         return (
             <div>
                 <Dropdown text='File' pointing="top left">
                     <Dropdown.Menu>
-                        <Dropdown.Item text='New'/>
+                        <Dropdown.Item text='New Project'/>
+                        <Dropdown.Item text='New File' onClick={() => this.showNewModal('file')}/>
                         <Dropdown
                             text='Open local graph'
                             pointing='left'
@@ -122,6 +133,15 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
                         confirm_cb={this.confirmCallback}
                         cancel_cb={this.cancelCallback}
                     /> : null}
+                {newVisible ?
+                    <NewModal
+                        visible={newVisible}
+                        type={newType}
+                        cancel_cb={this.cancelCallback}
+                        confirm_cb={this.confirmCallback}
+                    />
+                    : null
+                }
             </div>
         );
     }

@@ -82,3 +82,13 @@ export interface UserModalProps {
     login: any; // login of currently authenticated user
     onClose_cb: PropTypes.func; // callback function to parent when modal is closed
 }
+
+/**
+ * Props definition for new file/project creation modal.
+ */
+export interface NewModalProps {
+    type: any; // type of modal. Can either be 'file' or 'project'
+    visible: any; // state variable from parent that will determine visibility
+    cancel_cb: PropTypes.func; // callback function to parent when cancel is clicked
+    confirm_cb: PropTypes.func; // callback function  to parent when confirm is clicked
+}
