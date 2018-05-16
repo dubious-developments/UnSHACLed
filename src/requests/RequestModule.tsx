@@ -108,6 +108,22 @@ class RequestModule {
         axios.post(target, {file})
             .then(res => console.log(res));
     }
+
+    // {owner}/{repoName}/{token}/{filePath}
+    /**
+     *
+     * @param repoOwner: owner of repository where file is located
+     * @param repoName: name of repository
+     * @param token: token associated with authenticated user and obtained using getToken().
+     * @param filePath: path of file to be created updated
+     * @returns {Promise<AxiosResponse<any>>}, return true if lock has been granted, false otherwise through a Promise.
+     */
+    static getLock(repoOwner: any, repoName: any, token: any, filePath: any) {
+        const target =
+            'http://193.190.127.184:8042/repo/has-lock/' + repoOwner + '/' + repoName + '/' + token + '/' + filePath;
+        return axios.get(target)
+            .then(res => res.data);
+    }
 }
 
 export default RequestModule;

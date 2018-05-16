@@ -87,9 +87,12 @@ class NewModal extends React.Component<NewModalProps & any, any> {
             RequestModule.updateFile(
                 this.props.user, this.state.project, this.props.token, this.state.name, 'Hello World');
         } else if (type === 'project') {
+            // TODO
             console.log('Create new project with name ' + name);
         }
+        /* callback to parent */
         this.props.confirm_cb('UserModal');
+        /* set state */
         this.setState({
             selected: true
         });
@@ -102,7 +105,7 @@ class NewModal extends React.Component<NewModalProps & any, any> {
      * @param event: on change event
      */
     onChange(event: any) {
-        console.log(event.target.value);
+        /* set state */
         this.setState({
             name: event.target.value,
             selected: false
