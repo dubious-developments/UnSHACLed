@@ -4,7 +4,7 @@ import {DropdownFileProps} from '../components/interfaces/interfaces';
 import RepoModal from '../modals/RepoModal';
 import NewModal from '../modals/NewModal';
 
-/*
+/**
     Component used to create a dropdown component for the file toolbar option
     Requires several props from the parent, which can be found in interfaces.d.ts
 
@@ -26,11 +26,15 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
         this.submitCallBack = this.submitCallBack.bind(this);
     }
 
+    /**
+     * Component that contains the currently opened files in the editor.
+     * @param: none
+     * @return Button Group of all opened files, or a single button if no files are opened.
+     */
     getOpenedFiles() {
         let items: any[] = [];
 
         if (this.props.opened_files.length === 0) {
-            console.log('no files found in child component');
             items.push(<Button key="none" icon="ban" disabled={true} basic={true} content="No files opened"/>);
         }
 
@@ -56,12 +60,25 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
         );
     }
 
+    /**
+     * Method that will adapt the current state of the 'repoVisible' attribute
+     * which is used to determine if the repository modal should be made visible or not.
+     * @param: none
+     * @return: none
+     */
     showRepoModal() {
         this.setState({
             repoVisible: true
         });
     }
 
+    /**
+     * Method that will adapt the current state of the 'newVisible' and 'newType' attributes
+     * which are used to determine if the new creation modal should be made visible or not and
+     * what type of modal should be generated
+     * @param: type: type of modal to be shown.
+     * @return: none
+     */
     showNewModal(type: any) {
         this.setState({
             newVisible: true,
@@ -85,6 +102,7 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
     /**
      *  Function that will handle callback from child component
      to adapt right state
+     @param: type of modal firing the callback.
      */
 
     confirmCallback(type: any) {
@@ -95,6 +113,7 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
 
     /**Function that will handle callback from child component
      to adapt right state
+     @param: type of modal firing the callback.
      */
     cancelCallback(type: any) {
         this.setState({

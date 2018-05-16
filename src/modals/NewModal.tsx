@@ -32,7 +32,6 @@ class NewModal extends React.Component<NewModalProps & any, any> {
      */
     componentDidMount() {
         RequestModule.getUserRepos(this.props.token).then(repoArray => {
-            console.log(repoArray);
             this.processRepos(repoArray);
         });
     }
@@ -81,8 +80,6 @@ class NewModal extends React.Component<NewModalProps & any, any> {
      * @param: type: type of creation, either 'file' or  'project'
      */
     confirmModal(type: any) {
-        console.log(this.props);
-        console.log(this.props.user);
         if (type === 'file') {
             RequestModule.updateFile(
                 this.props.user, this.state.project, this.props.token, this.state.name, 'Hello World');

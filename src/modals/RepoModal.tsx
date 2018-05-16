@@ -4,9 +4,9 @@ import {RepoModalProps} from '../components/interfaces/interfaces';
 import RequestModule from '../requests/RequestModule';
 import {connect} from 'react-redux';
 
-/*
-    Component used to create a dropdown component for the file toolbar option
-    Requires several props from the parent, which can be found in interfaces.d.ts
+/**
+ Component used to create a modal for opening files from projects
+ Requires several props from the parent, which can be found in interfaces.d.ts
 
  */
 class RepoModal extends React.Component<RepoModalProps & any, any> {
@@ -22,15 +22,16 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
         this.setFilesSelected = this.setFilesSelected.bind(this);
         this.cancelModal = this.cancelModal.bind(this);
         this.confirmModal = this.confirmModal.bind(this);
-        this.getRepos = this.getRepos.bind(this);
         this.processRepos = this.processRepos.bind(this);
     }
 
+    /**
+     * Method immediately invoked when this component is mounted.
+     * Will request the repositories from the currently authenticated user through the Request module
+     * and set the component state according to its results.
+     */
     componentDidMount() {
-        console.log(this.props);
-        console.log(this.props.token + 'on mounting');
         RequestModule.getUserRepos(this.props.token).then(repoArray => {
-            console.log(repoArray);
             this.processRepos(repoArray);
         });
     }
@@ -47,18 +48,38 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
         });
     }
 
+    /**
+     * Method that will adapt the current state of the 'selected' attribute
+     * which is used to determine if a second dropdown should be visible or not.
+     * @param: none
+     * @return: none
+     */
     setSelected() {
         this.setState({
             selected: false
         });
     }
 
+    /**
+     * Method that will adapt the current state of the 'files' attribute
+     * which is used to determine wether the confirm button should be
+     * enable or disabled.
+     * @param: none
+     * @return: none
+     */
     setFilesSelected() {
         this.setState({
             files: false
         });
     }
 
+    /**
+     * Function fired when a user click the cancel button on the modal.
+     * Will adapt the current state to its initial settings and will call the callback
+     * function received from the parent which will handle the cancel functionality.
+     * @param: none
+     * @return: none
+     */
     cancelModal() {
         this.props.cancel_cb("RepoModal");
         this.setState({
@@ -67,6 +88,13 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
         });
     }
 
+    /**
+     * Function fired when a user click the confirm button on the modal.
+     * Will adapt the current state to its initial settings and will call the callback
+     * function received from the parent which will handle the confirm functionality.
+     * @param: none
+     * @return: none
+     */
     confirmModal() {
         this.props.confirm_cb("RepoModal");
         this.setState({
@@ -75,22 +103,9 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
         });
     }
 
-    getRepos(token: any) {
-        RequestModule.getUserRepos(this.props.token).then(repoArray => {
-            console.log(repoArray);
-            this.setState({
-                repos: repoArray
-            });
-        });
-    }
-
     render() {
         let graphs = [{text: " File 1", value: "File 1"}, {text: " File 2", value: "File 2"}];
-        let {selected} = this.state;
-        let {files} = this.state;
-        let {repos} = this.state;
-        console.log(repos);
-        console.log("can it be done this way??" + this.props.stateToken);
+        let {selected, files, repos} = this.state;
         return (
             <div>
                 <Modal
@@ -103,6 +118,8 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
                         top: '50%',
                         transform: 'translateY(-50%)'
                     }}
+                    closeIcon={true}
+                    onClose={this.cancelModal}
                 >
                     <Modal.Header>GitHub repo's</Modal.Header>
                     <Modal.Content>

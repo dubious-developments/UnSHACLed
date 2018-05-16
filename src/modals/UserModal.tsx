@@ -3,8 +3,8 @@ import {Modal, Image, Header, Table, Loader, Dimmer} from 'semantic-ui-react';
 import {UserModalProps} from '../components/interfaces/interfaces';
 import RequestModule from '../requests/RequestModule';
 
-/*
-    Component used to create a dropdown component for the file toolbar option
+/**
+    Component used to create a modal containing user info of the currently authenticated user.
     Requires several props from the parent, which can be found in interfaces.d.ts
 
  */
@@ -18,9 +18,13 @@ class UserModal extends React.Component<UserModalProps, any> {
         };
     }
 
+    /**
+     * Method immediately invoked when this component is mounted.
+     * Will request the user object from the currently authenticated user through the Request module
+     * and set the component state according to its results.
+     */
     componentDidMount() {
         RequestModule.getUserObject(this.props.login).then(object => {
-            console.log(object);
             this.setState({
                 userObject: object,
                 loaded:true
