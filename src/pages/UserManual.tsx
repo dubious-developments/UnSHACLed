@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {Header, Menu, Container, Image, List} from 'semantic-ui-react';
+import Section1 from './sections/Section1';
 
 class Home extends React.Component {
 
@@ -25,7 +26,7 @@ class Home extends React.Component {
                     <p><b> Table of Contents </b></p>
                     {/* Table of contents */}
                     <List ordered={true}>
-                        <List.Item>
+                            <List.Item>
                             <a>Introduction</a>
                             <List.List>
                                 <List.Item as='a'>Semantic Web</List.Item>
@@ -48,6 +49,8 @@ class Home extends React.Component {
                                 <List.Item as='a'>Save local files</List.Item>
                                 <List.Item as='a'>Open files from your account </List.Item>
                                 <List.Item as='a'>Save files to your account </List.Item>
+                                <List.Item as='a'>Create new projects </List.Item>
+                                <List.Item as='a'>Create new files in a project </List.Item>
                             </List.List>
                         </List.Item>
                         <List.Item>
@@ -60,6 +63,8 @@ class Home extends React.Component {
                         </List.Item>
                     </List>
 
+                    {/* Content */}
+                    <Section1/>
                 </Container>
 
             </div>
