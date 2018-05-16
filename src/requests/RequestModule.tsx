@@ -91,6 +91,23 @@ class RequestModule {
         }
         return result;
     }
+
+    /**
+     * Method to update or create a file. Lock on file is required to do so.
+     * @param repoOwner: owner of repository where file is located
+     * @param repoName: name of repository
+     * @param token: token associated with authenticated user and obtained using getToken().
+     * @param fileName: name of file to be created updated
+     * @param file: file content, incorporated in body of http request
+     */
+    static updateFile(repoOwner: any, repoName: any, token: any, fileName: any, file: any) {
+        console.log(
+            'http://193.190.127.184:8042/repo/file/' + repoOwner + '/' + repoName + '/' + token + '/' + fileName);
+        const target =
+            'http://193.190.127.184:8042/repo/file/' + repoOwner + '/' + repoName + '/' + token + '/' + fileName;
+        axios.post(target, {file})
+            .then(res => console.log(res));
+    }
 }
 
 export default RequestModule;

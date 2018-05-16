@@ -77,10 +77,19 @@ class NewModal extends React.Component<NewModalProps & any, any> {
      * Function fired when a user click the confirm button on the modal.
      * Will adapt the current state to its initial settings and will call the callback
      * function received from the parent which will handle the confirm functionality.
-     * @param: none
+     * It will also perform an API request to the collaboration server
+     * @param: type: type of creation, either 'file' or  'project'
      */
-    confirmModal() {
-        this.props.confirm_cb(this.props.type, this.state.name, this.state.project);
+    confirmModal(type: any) {
+        console.log(this.props);
+        console.log(this.props.user);
+        if (type === 'file') {
+            RequestModule.updateFile(
+                this.props.user, this.state.project, this.props.token, this.state.name, 'Hello World');
+        } else if (type === 'project') {
+            console.log('Create new project with name ' + name);
+        }
+        this.props.confirm_cb('UserModal');
         this.setState({
             selected: true
         });
@@ -154,8 +163,8 @@ class NewModal extends React.Component<NewModalProps & any, any> {
                         <Button color='red' onClick={this.cancelModal}>
                             <Icon name='remove'/> Cancel
                         </Button>
-                        <Button color='green' onClick={this.confirmModal} disabled={this.state.selected}>
-                            <Icon name='checkmark'/> Open
+                        <Button color='green' onClick={() => this.confirmModal("file")} disabled={this.state.selected}>
+                            <Icon name='checkmark'/> Create
                         </Button>
                     </Modal.Actions>
                 </Modal>
@@ -171,7 +180,8 @@ class NewModal extends React.Component<NewModalProps & any, any> {
  */
 const mapStateToProps = (state, props) => {
     return {
-        token: state.token
+        token: state.token,
+        user: state.login
     };
 };
 

@@ -77,11 +77,6 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
      @param: project: name of project where the file should be added. Omitted if only a file is created.
      */
     submitCallBack(type: any, name: any, project: any) {
-        if (type === 'file') {
-            console.log('Create a new file with name' + name + ' in ' + project);
-        } else if (type === 'project') {
-            console.log('Create new project with name ' + name);
-        }
         this.setState({
             newVisible: false
         });
