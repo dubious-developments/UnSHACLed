@@ -73,6 +73,24 @@ class RequestModule {
         return axios.get('http://193.190.127.184:8042/user/repo-list/' + token)
             .then(res => res.data);
     }
+
+    /**
+     * Method that will map an array of repos required from the API to
+     * an array able to be loaded in a Dropdown UI component.
+     * @param repoArray
+     */
+    static processRepos(repoArray: any) {
+        let result: any[] = [];
+        for (let i in repoArray) {
+            result.push(
+                {
+                    text: repoArray[i].split("/")[1],
+                    value: repoArray[i].split("/")[1]
+                }
+            );
+        }
+        return result;
+    }
 }
 
 export default RequestModule;

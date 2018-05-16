@@ -41,19 +41,9 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
      * @param repoArray
      */
     processRepos(repoArray: any) {
-        let result: any[] = [];
-        for (let i in repoArray) {
-            result.push(
-                {
-                    text: repoArray[i].split("/")[1],
-                    value: repoArray[i].split("/")[1]
-                }
-            );
-        }
-        console.log(result);
         /* set state */
         this.setState({
-           repos: result
+            repos: RequestModule.processRepos(repoArray)
         });
     }
 

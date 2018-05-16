@@ -43,19 +43,9 @@ class NewModal extends React.Component<NewModalProps & any, any> {
      * @param repoArray
      */
     processRepos(repoArray: any) {
-        let result: any[] = [];
-        for (let i in repoArray) {
-            result.push(
-                {
-                    text: repoArray[i].split("/")[1],
-                    value: repoArray[i].split("/")[1]
-                }
-            );
-        }
-        console.log(result);
         /* set state */
         this.setState({
-            repos: result
+            repos: RequestModule.processRepos(repoArray)
         });
     }
 
@@ -111,8 +101,7 @@ class NewModal extends React.Component<NewModalProps & any, any> {
     }
 
     render() {
-        // let {repos} = this.state;
-        let graphs = [{text: " File 1", value: "File 1"}, {text: " File 2", value: "File 2"}];
+        let {repos} = this.state;
         return (
             <div>
                 <Modal
@@ -137,13 +126,12 @@ class NewModal extends React.Component<NewModalProps & any, any> {
                                         Create a new file by selecting a project where you want to
                                         add the file and fill in a name of your choice. After creation,
                                         open the newly created file through the editor.
-                                        {this.state.name} {this.state.project}
                                     </p>
                                     <Dropdown
                                         placeholder='Select Project'
                                         fluid={true}
                                         selection={true}
-                                        options={graphs}
+                                        options={repos}
                                         onChange={this.setSelected}
                                     />
                                 </div>
