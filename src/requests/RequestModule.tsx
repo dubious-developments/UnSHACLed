@@ -4,6 +4,8 @@ import axios from 'axios';
  * RequestModule class which serves several http requests functions for interaction
  * with bot the collaboration server as well as the GitHub API to other components
  * of the application.
+ * for more info on how to use:
+ * https://github.com/dubious-developments/UnSHACLed/wiki/Interacting-with-the-collaboration-server#file-access
  */
 
 class RequestModule {
@@ -155,6 +157,25 @@ class RequestModule {
             .then(res => res.data);
     }
 
+    /**
+     * Method to set the contents of an authenticated user's workspace.
+     * @param token: token associated with authenticated user and obtained using getToken().
+     * @param content: the content of the current workspace
+     */
+    static setWorkspace(token: any, content: any) {
+        axios.post('http://193.190.127.184:8042/workspace/' + token, {content})
+            .then(res => res.data);
+    }
+
+    /**
+     * Method to fetch the contents of an authenticated user's workspace.
+     * @param token: token associated with authenticated user and obtained using getToken().
+     * @returns {Promise<AxiosResponse<any>>}, return the content as a string and through a Promise.
+     */
+    static fetchWorkspace(token: any) {
+        return axios.get('http://193.190.127.184:8042/workspace/' + token)
+            .then(res => res.data);
+    }
 }
 
 export default RequestModule;
