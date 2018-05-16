@@ -2,7 +2,7 @@ import * as Collections from "typescript-collections";
 import * as Immutable from "immutable";
 
 /**
- * A causal chain is a complex interconnection of links. Each link has a number of
+ * A causality chain is a complex interconnection of links. Each link has a number of
  * incoming links and a number of outgoing links. The chain keeps track of causal relations
  * between events of type T. By keeping track of these causal relationships, loops
  * (i.e. events causing themselves to reoccur, thereby potentially creating an
@@ -15,13 +15,13 @@ import * as Immutable from "immutable";
  * causality for any of the events at the tail end of the chain. If so, then all paths leading
  * (unidirectionally) to these events must be severed.
  */
-export class CausalChain<S, T> {
+export class CausalityChain<S, T> {
 
     private stagingArea: Collections.Set<Link<S, T>>;
     private tails: Collections.Set<Link<S, T>>;
 
     /**
-     * Create a new CausalChain.
+     * Create a new CausalityChain.
      */
     public constructor() {
         this.stagingArea = new Collections.Set<Link<S, T>>();
@@ -143,10 +143,8 @@ export class CausalChain<S, T> {
 }
 
 /**
- * A link in a causal chain, representing an event of type T,
+ * A link in a causality chain, representing an event of type T,
  * with causes of type S and effects also of type S.
- *  TODO: At the moment, there is no recycling of identifiers,
- *  so this number will grow ad infinitum.
  */
 export class Link<S, T> {
 

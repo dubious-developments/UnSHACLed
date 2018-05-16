@@ -1,8 +1,10 @@
+/// <reference path="./parser.ts"/>
+
 import * as Collections from "typescript-collections";
 import {Graph} from "./graph";
 
 /**
- * A Parser that takes care of (de)serialization for graph structures.
+ * A Parser that takes care of (de)serialization of graph structures.
  */
 export class GraphParser implements Parser<Graph> {
 
