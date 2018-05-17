@@ -61,7 +61,6 @@ class LoginForm extends React.Component<any, any> {
 
     render() {
         const logo = require('../img/logo.png');
-        console.log(this.props);
         return (
             <div className="login">
                 <Grid
@@ -106,17 +105,12 @@ class LoginForm extends React.Component<any, any> {
                             </Divider>
 
                             <Button
-                                icon="birthday"
                                 fluid={true}
                                 inverted={true}
                                 size="huge"
                                 content="Start editing"
                                 onClick={this.startEditing}
                             />
-                            <p> token => {this.props.token} </p>
-                            <p> name => {this.props.name} </p>
-                            <p> login => {this.props.login} </p>
-                            <p> email => {this.props.email} </p>
                             {this.state.showLabel && (
                                 <Label color='red' pointing='above'>Please authenticate first</Label>
                             )}
@@ -130,7 +124,6 @@ class LoginForm extends React.Component<any, any> {
 
     handleClick(event: any) {
         let {token} = this.state;
-        console.log(token);
         RequestModule.AuthWithToken(token);
     }
 
@@ -153,17 +146,14 @@ class LoginForm extends React.Component<any, any> {
         this.onUpdateToken(token);
         /* Get Name */
         RequestModule.getUserInfo('name', token).then(username => {
-            console.log(username);
             this.onUpdateUsername(username);
         });
         /* Get login */
         RequestModule.getUserInfo('login', token).then(login => {
-            console.log(login);
             this.onUpdateLogin(login);
         });
         /* Get email */
         RequestModule.getUserInfo('email', token).then(email => {
-            console.log(email);
             this.onUpdateEmail(email);
         });
     }
