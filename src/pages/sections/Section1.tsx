@@ -6,13 +6,15 @@ class Section1 extends React.Component<any, any> {
     render() {
         return (
             <div>
-                <Header> Introduction </Header>
+                <Header as="h1"> Introduction </Header>
                 <p> Welcome to the user manual of our UnSHACLed product! UnSHACLed is a visual IDE for Semantic Web
                     constraint languages where the current release supports the recently introduced constraint language
                     SHACL. If none of this sounds familiar, don't worry. The following sections should help you
-                    understand the goald and meaning of our product and its surrounding topics.
+                    understand the goald and meaning of our product and its surrounding topics. Each section is
+                    written such that it can be read independently of all other sections. If you only wish to read a
+                    certain section, you can navigate to your section of choice by using the table of contents.
                 </p>
-                <Header as='h3' color="teal"> Semantic Web </Header>
+                <Header as='h2' color="teal"> Semantic Web </Header>
                 <p>
                     The Semantic Web is an extension of the current Web expanding it with
                     meaning and allowing machines to reason about information in a human-like way.
@@ -23,7 +25,7 @@ class Section1 extends React.Component<any, any> {
                     conforms to the constraints, making the contract between collaborating entities
                     verifiable and offering more structure to the Semantic Web.
                 </p>
-                <Header as='h3' color="teal"> SHACL </Header>
+                <Header as='h2' color="teal"> SHACL </Header>
                 Shapes Constraint Language (SHACL) is a constraint language for validating RDF graphs against a set of
                 conditions (often called <b> constraints </b>). These conditions are represented in shapes in the form
                 of RDF graphs and for that reason are often called <b> shapes graphs </b>. Those shapes graphs are then
@@ -35,7 +37,7 @@ class Section1 extends React.Component<any, any> {
                     <List.Item as='a' to="https://www.w3.org/TR/shacl/">SHACL specification </List.Item>
                     <List.Item as='a' to="https://www.w3.org/RDF/">RDF info</List.Item>
                 </List>
-                <Header as='h3' color="teal"> UnSHACLed </Header>
+                <Header as='h2' color="teal"> UnSHACLed </Header>
                 <p> Current constraint editors are mostly text-based. The problem with these becomes clear looking at a
                     similar problem: imagine developing UML rules by typing them. You immediately feel that this would
                     be a slow and repetitive process in contrast to creating UML with a design tool. Our product solves

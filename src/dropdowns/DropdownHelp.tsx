@@ -20,7 +20,11 @@ class DropdownView extends React.Component<any, any> {
                 <Dropdown.Menu>
                     <Dropdown.Item icon='idea' text='Start Tutorial'/>
                     <Dropdown.Item icon='play' text='Quick Start video'/>
-                    <Dropdown.Item  icon='book' as={Link} to="/support" content="User Manual"/>
+                    <Dropdown.Item>
+                            <Link target="_blank" to="/support" style={{color:'black'}}>
+                                <Icon name="book"/> User Manual
+                            </Link>
+                    </Dropdown.Item>
                     <Modal
                         trigger={<Dropdown.Item icon='keyboard' text='Keyboard Shortcuts'/>}
                         closeIcon={true}
@@ -34,73 +38,73 @@ class DropdownView extends React.Component<any, any> {
                             transform: 'translateY(-50%)'
                         }}
                     >
-                        <Header icon='keyboard' content='Keyboard shortcuts' />
+                        <Header icon='keyboard' content='Keyboard shortcuts'/>
                         <Modal.Content>
                             <Table celled={true} striped={true}>
                                 <Table.Body>
                                     <Table.Row>
                                         <Table.Cell collapsing={true}>
-                                            <Icon name='reply' /> Undo last action
+                                            <Icon name='reply'/> Undo last action
                                         </Table.Cell>
                                         <Table.Cell> Ctr + Z</Table.Cell>
                                     </Table.Row>
                                     <Table.Row>
                                         <Table.Cell collapsing={true}>
-                                            <Icon name='share' /> Redo last action
+                                            <Icon name='share'/> Redo last action
                                         </Table.Cell>
                                         <Table.Cell> Ctr + Y</Table.Cell>
                                     </Table.Row>
                                     <Table.Row>
                                         <Table.Cell collapsing={true}>
-                                            <Icon name='trash' /> Delete selected components from graph
+                                            <Icon name='trash'/> Delete selected components from graph
                                         </Table.Cell>
                                         <Table.Cell> Del </Table.Cell>
                                     </Table.Row>
                                     <Table.Row>
                                         <Table.Cell collapsing={true}>
-                                            <Icon name='copy' /> Copy selected components to clipboard
+                                            <Icon name='copy'/> Copy selected components to clipboard
                                         </Table.Cell>
                                         <Table.Cell> Ctr + C</Table.Cell>
                                     </Table.Row>
 
                                     <Table.Row>
                                         <Table.Cell collapsing={true}>
-                                            <Icon name='paste' /> Paste components on clipboard into graph
+                                            <Icon name='paste'/> Paste components on clipboard into graph
                                         </Table.Cell>
                                         <Table.Cell> Ctr + V</Table.Cell>
                                     </Table.Row>
 
                                     <Table.Row>
                                         <Table.Cell collapsing={true}>
-                                            <Icon name='block layout' /> Select all graph components
+                                            <Icon name='block layout'/> Select all graph components
                                         </Table.Cell>
                                         <Table.Cell> Ctr + A</Table.Cell>
                                     </Table.Row>
 
                                     <Table.Row>
                                         <Table.Cell collapsing={true}>
-                                            <Icon name='zoom' /> Zoom in
+                                            <Icon name='zoom'/> Zoom in
                                         </Table.Cell>
-                                        <Table.Cell> + / Alt + Scroll  </Table.Cell>
+                                        <Table.Cell> + / Alt + Scroll </Table.Cell>
                                     </Table.Row>
 
                                     <Table.Row>
                                         <Table.Cell collapsing={true}>
-                                            <Icon name='zoom' /> Zoom out
+                                            <Icon name='zoom'/> Zoom out
                                         </Table.Cell>
                                         <Table.Cell> - / Alt + Scroll </Table.Cell>
                                     </Table.Row>
 
                                     <Table.Row>
                                         <Table.Cell collapsing={true}>
-                                            <Icon name='move' /> Move whole graph
+                                            <Icon name='move'/> Move whole graph
                                         </Table.Cell>
                                         <Table.Cell> Hold right mouse button </Table.Cell>
                                     </Table.Row>
 
                                     <Table.Row>
                                         <Table.Cell collapsing={true}>
-                                            <Icon name='resize horizontal' /> Pan to the left/right
+                                            <Icon name='resize horizontal'/> Pan to the left/right
                                         </Table.Cell>
                                         <Table.Cell> Shift + Scroll </Table.Cell>
                                     </Table.Row>
