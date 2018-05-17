@@ -27,7 +27,7 @@ class Home extends React.Component {
                     <p><b> Table of Contents </b></p>
                     {/* Table of contents */}
                     <List ordered={true}>
-                            <List.Item>
+                        <List.Item>
                             <a>Introduction</a>
                             <List.List>
                                 <List.Item as='a'>Semantic Web</List.Item>
@@ -55,15 +55,29 @@ class Home extends React.Component {
                             </List.List>
                         </List.Item>
                         <List.Item>
-                            <a>Editor functionality</a>
+                            <a>Editing</a>
                             <List.List>
-                                <List.Item as='a'>Semantic Web</List.Item>
-                                <List.Item as='a'>SHACL</List.Item>
-                                <List.Item as='a'>UnSHACLed</List.Item>
+                                <List.Item as='a'>Editor functionality</List.Item>
+                                <List.Item as='a'>In-graph editing</List.Item>
+                                <List.Item as='a'>Extra</List.Item>
+                            </List.List>
+                        </List.Item>
+                        <List.Item>
+                            <a>Extra</a>
+                            <List.List>
+                                <List.Item as='a'>View</List.Item>
+                                <List.Item as='a'>Support</List.Item>
+                                <List.Item as='a'>Info</List.Item>
+                            </List.List>
+                        </List.Item>
+                        <List.Item>
+                            <a>Troubleshooting</a>
+                            <List.List>
+                                <List.Item as='a'>Known Bugs</List.Item>
+                                <List.Item as='a'>Contact</List.Item>
                             </List.List>
                         </List.Item>
                     </List>
-
                     {/* Content */}
                     <Section1/>
                     <Section3/>
