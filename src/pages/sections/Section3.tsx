@@ -108,7 +108,9 @@ class Section3 extends React.Component<any, any> {
                 <Image src={s310} centered={true} style={this.imgMargin}/>
                 <p> Now select a file of your choice within your previously selected project in the appeared
                     selection menu. If you select both a project and file, the 'Open' button should no longer be
-                    disabled. If you are satisfied with your choice, click the 'Open' button. This will open
+                    disabled. After selecting a file, specify the type of file you want to upload. Choose 'data' if you
+                    want to open a data graph or choose 'SHACL' if you want to open a SHACL graph.
+                    If you are satisfied with your choice, click the 'Open' button. This will open
                     the remote file into the editor. If the selected file is a valid <b>.ttl</b> file and a valid
                     data or SHACL graph, the editor will load and represent your remote file as a graph.
                     If you want to cancel the process of creating a open a remote graph, you can either
