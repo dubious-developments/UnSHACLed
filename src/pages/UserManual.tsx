@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {Header, Menu, Container, Image, List} from 'semantic-ui-react';
 import Section1 from './sections/Section1';
+import Section2 from './sections/Section2';
 import Section3 from './sections/Section3';
 
 class Home extends React.Component {
@@ -80,6 +81,7 @@ class Home extends React.Component {
                     </List>
                     {/* Content */}
                     <Section1/>
+                    <Section2/>
                     <Section3/>
                 </Container>
 
