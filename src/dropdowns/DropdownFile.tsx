@@ -5,8 +5,8 @@ import RepoModal from '../modals/RepoModal';
 import NewModal from '../modals/NewModal';
 
 /**
-    Component used to create a dropdown component for the file toolbar option
-    Requires several props from the parent, which can be found in interfaces.d.ts
+ Component used to create a dropdown component for the file toolbar option
+ Requires several props from the parent, which can be found in interfaces.d.ts
 
  */
 class DropdownFile extends React.Component<DropdownFileProps & any, any> {
@@ -103,9 +103,11 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
      *  Function that will handle callback from child component
      to adapt right state
      @param: type of modal firing the callback.
+     @param: dataType: type of graph (either be SHACL or data)
+     @return: none
      */
 
-    confirmCallback(type: any) {
+    confirmCallback(type: any, dataType: any) {
         this.setState({
             repoVisible: false
         });

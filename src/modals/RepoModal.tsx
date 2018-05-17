@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Modal, Button, Icon, Dropdown} from 'semantic-ui-react';
+import {Modal, Button, Icon, Dropdown, Checkbox, Form} from 'semantic-ui-react';
 import {RepoModalProps} from '../components/interfaces/interfaces';
 import RequestModule from '../requests/RequestModule';
 import {connect} from 'react-redux';
@@ -16,13 +16,15 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
         this.state = {
             selected: true,
             files: true,
-            repos: []
+            repos: [],
+            type: ''
         };
         this.setSelected = this.setSelected.bind(this);
         this.setFilesSelected = this.setFilesSelected.bind(this);
         this.cancelModal = this.cancelModal.bind(this);
         this.confirmModal = this.confirmModal.bind(this);
         this.processRepos = this.processRepos.bind(this);
+        this.handleType = this.handleType.bind(this);
     }
 
     /**
@@ -74,6 +76,19 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
     }
 
     /**
+     * Method that will adapt the current state of the 'type' attribute
+     * which is used to determine which type of file the users wants to open
+     * @param: e : event
+     * @param: value: selected value in checkbox
+     * @return: none
+     */
+    handleType(e: any, {value}: any) {
+        this.setState({
+            type: value
+        });
+    }
+
+    /**
      * Function fired when a user click the cancel button on the modal.
      * Will adapt the current state to its initial settings and will call the callback
      * function received from the parent which will handle the cancel functionality.
@@ -96,7 +111,7 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
      * @return: none
      */
     confirmModal() {
-        this.props.confirm_cb("RepoModal");
+        this.props.confirm_cb("RepoModal", this.state.type);
         this.setState({
             files: true,
             selected: true
@@ -131,13 +146,36 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
                             onChange={this.setSelected}
                         />
                         {selected === false && (
-                            <Dropdown
-                                placeholder='Select Graph File'
-                                fluid={true}
-                                selection={true}
-                                options={graphs}
-                                onChange={this.setFilesSelected}
-                            />)
+                            <div style={{marginTop: '1em'}}>
+                                <Dropdown
+                                    placeholder='Select Graph File'
+                                    fluid={true}
+                                    selection={true}
+                                    options={graphs}
+                                    onChange={this.setFilesSelected}
+                                />
+                                <Form style={{marginTop: '1em'}}>
+                                    <Form.Field>
+                                        Selected type: <b>{this.state.type}</b>
+                                    </Form.Field>
+                                    <Form.Field>
+                                        <Checkbox
+                                            label='Data'
+                                            value='data'
+                                            checked={this.state.type === 'data'}
+                                            onChange={this.handleType}
+                                        />
+                                    </Form.Field>
+                                    <Form.Field>
+                                        <Checkbox
+                                            label='SHACL'
+                                            value='SHACL'
+                                            checked={this.state.type === 'SHACL'}
+                                            onChange={this.handleType}
+                                        />
+                                    </Form.Field>
+                                </Form>
+                            </div>)
                         }
                     </Modal.Content>
                     <Modal.Actions>
