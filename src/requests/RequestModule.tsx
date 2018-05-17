@@ -174,6 +174,27 @@ class RequestModule {
         return axios.get('http://193.190.127.184:8042/workspace/' + token)
             .then(res => res.data);
     }
+
+    /**
+     * Method to fetch files from a repository of choice for an authenticated user
+     * @param repoOwner: owner of repository where file is located
+     * @param repoName: name of repository
+     * @param token: token associated with authenticated user and obtained using getToken().
+     * @return {Promise<AxiosResponse<any>>}, returns list of files through a Promise
+     */
+    static getFilesFromRepo(repoOwner: any, repoName: any, token: any) {
+        const target =
+            'http://193.190.127.184:8042/repo/file-names/' + repoOwner + '/' + repoName + '/' + token;
+        return axios.get(target)
+            .then(res => res.data);
+    }
+
+    // POST /repo/create-repo/{repoName}/{token}
+    static createRepo(repoName: any, token: any) {
+        const target = 'http://193.190.127.184:8042/repo/create-repo/' + repoName + '/' + token;
+        axios.post(target)
+            .then(res => res.data);
+    }
 }
 
 export default RequestModule;
