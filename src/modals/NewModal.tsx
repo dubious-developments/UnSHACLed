@@ -84,8 +84,7 @@ class NewModal extends React.Component<NewModalProps & any, any> {
             RequestModule.updateFile(
                 this.props.user, this.state.project, this.props.token, this.state.name, 'Hello World');
         } else if (type === 'project') {
-            // TODO
-            console.log('Create new project with name ' + name);
+            RequestModule.createRepo(this.state.name, this.props.token);
         }
         /* callback to parent */
         this.props.confirm_cb('UserModal');
@@ -163,7 +162,11 @@ class NewModal extends React.Component<NewModalProps & any, any> {
                         <Button color='red' onClick={this.cancelModal}>
                             <Icon name='remove'/> Cancel
                         </Button>
-                        <Button color='green' onClick={() => this.confirmModal("file")} disabled={this.state.selected}>
+                        <Button
+                            color='green'
+                            onClick={() => this.confirmModal(this.props.type)}
+                            disabled={this.state.selected}
+                        >
                             <Icon name='checkmark'/> Create
                         </Button>
                     </Modal.Actions>

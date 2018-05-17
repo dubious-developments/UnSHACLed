@@ -17,13 +17,16 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
             selected: true,
             files: true,
             repos: [],
-            type: ''
+            fileList: [],
+            type: '',
+            projectName: ''
         };
         this.setSelected = this.setSelected.bind(this);
         this.setFilesSelected = this.setFilesSelected.bind(this);
         this.cancelModal = this.cancelModal.bind(this);
         this.confirmModal = this.confirmModal.bind(this);
         this.processRepos = this.processRepos.bind(this);
+        this.processFile = this.processFile.bind(this);
         this.handleType = this.handleType.bind(this);
     }
 
@@ -51,14 +54,30 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
     }
 
     /**
+     * Method that will map an array of files required from the API to
+     * an array able to be loaded in a Dropdown UI component.
+     * @param repoArray
+     */
+    processFile(files: any) {
+        /* set state */
+        this.setState({
+            fileList: RequestModule.processFiles(files)
+        });
+    }
+
+    /**
      * Method that will adapt the current state of the 'selected' attribute
      * which is used to determine if a second dropdown should be visible or not.
      * @param: none
      * @return: none
      */
-    setSelected() {
+    setSelected(e: any, {value}: any) {
+        RequestModule.getFilesFromRepo(this.props.user, value, this.props.token).then(files => {
+            this.processFile(files);
+        });
         this.setState({
-            selected: false
+            selected: false,
+            projectName: value
         });
     }
 
@@ -119,8 +138,7 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
     }
 
     render() {
-        let graphs = [{text: " File 1", value: "File 1"}, {text: " File 2", value: "File 2"}];
-        let {selected, files, repos} = this.state;
+        let {selected, files, repos, fileList} = this.state;
         return (
             <div>
                 <Modal
@@ -151,7 +169,7 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
                                     placeholder='Select Graph File'
                                     fluid={true}
                                     selection={true}
-                                    options={graphs}
+                                    options={fileList}
                                     onChange={this.setFilesSelected}
                                 />
                                 <Form style={{marginTop: '1em'}}>
@@ -199,7 +217,8 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
  */
 const mapStateToProps = (state, props) => {
     return {
-        token: state.token
+        token: state.token,
+        user: state.login
     };
 };
 

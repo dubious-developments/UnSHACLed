@@ -93,6 +93,19 @@ class RequestModule {
     }
 
     /**
+     * Method that will map an array of files required from the API to
+     * an array able to be loaded in a Dropdown UI component.
+     * @param files: files to be processed
+     */
+    static processFiles(files: any) {
+        let result: any[] = [];
+        for (let i in files) {
+            result.push({text: files[i], value: files[i]});
+        }
+        return result;
+    }
+
+    /**
      * Method to update or create a file. Lock on file is required to do so.
      * @param repoOwner: owner of repository where file is located
      * @param repoName: name of repository
@@ -185,13 +198,20 @@ class RequestModule {
     static getFilesFromRepo(repoOwner: any, repoName: any, token: any) {
         const target =
             'http://193.190.127.184:8042/repo/file-names/' + repoOwner + '/' + repoName + '/' + token;
+        console.log(target);
         return axios.get(target)
             .then(res => res.data);
     }
 
-    // POST /repo/create-repo/{repoName}/{token}
+    /**
+     * Method to create a new repo
+     * @param repoName: name of repo to be created
+     * @param token: token associated with authenticated user and obtained using getToken().
+     * @return none
+     */
     static createRepo(repoName: any, token: any) {
         const target = 'http://193.190.127.184:8042/repo/create-repo/' + repoName + '/' + token;
+        console.log(target);
         axios.post(target)
             .then(res => res.data);
     }
