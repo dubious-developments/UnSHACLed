@@ -13,15 +13,15 @@ import { ImmutableGraph, Graph } from "./graph";
 import {WorkspaceParser} from "./workspaceParser";
 
 /**
- * Provides basic DAO functionality at the file granularity level.
+ * Provides basic DAO functionality for accessing/altering local files.
  */
-export class FileDAO implements DataAccessObject {
+export class LocalFileDAO implements DataAccessObject {
 
     private model: Model;
     private io: IOFacilitator;
 
     /**
-     * Create a new FileDAO
+     * Create a new LocalFileDAO
      */
     public constructor(model: Model) {
         this.model = model;
@@ -37,7 +37,7 @@ export class FileDAO implements DataAccessObject {
      * Create a new file.
      * @param module
      */
-    public insert(module: Module) {
+    public insert(module: LocalFileModule) {
         this.model.tasks.schedule(new SaveTask(this.io, module));
         this.model.tasks.processAllTasks();
     }
@@ -45,7 +45,7 @@ export class FileDAO implements DataAccessObject {
     /**
      * Create a new file containing the current workspace.
      */
-    public insertWorkspace(module: Module) {
+    public insertWorkspace(module: LocalFileModule) {
         this.model.tasks.schedule(new SaveWorkspaceTask(this.io, module));
         this.model.tasks.processAllTasks();
     }
@@ -54,7 +54,7 @@ export class FileDAO implements DataAccessObject {
      * Load an existing file.
      * @param module
      */
-    public find(module: Module): void {
+    public find(module: LocalFileModule): void {
         let self = this;
         this.io.readFromFile(module, function (result: Graph) {
             self.model.tasks.schedule(new LoadTask(result.asImmutable(), module));
@@ -66,7 +66,7 @@ export class FileDAO implements DataAccessObject {
      * Load the workspace from a file.
      * @param {Module} module
      */
-    public findWorkspace(module: Module) {
+    public findWorkspace(module: LocalFileModule) {
         let self = this;
         this.io.readFromFile(module, function (result: ModelData) {
             self.model.tasks.schedule(new LoadWorkspaceTask(result));
@@ -113,7 +113,7 @@ export class IOFacilitator {
      * @param load
      */
 
-    public readFromFile(module: Module, load: (result: any) => void) {
+    public readFromFile(module: LocalFileModule, load: (result: any) => void) {
         let parser = this.parsers.getValue(module.getTarget());
         if (!parser) {
             throw new Error("Unsupported target " + module.getTarget());
@@ -138,7 +138,7 @@ export class IOFacilitator {
      * @param module
      * @param data
      */
-    public writeToFile(module: Module, data: any) {
+    public writeToFile(module: LocalFileModule, data: any) {
         let FileSaver = require("file-saver");
         let parser = this.parsers.getValue(module.getTarget());
         if (!parser) {
@@ -156,16 +156,15 @@ export class IOFacilitator {
 }
 
 /**
- * A single persistence directive.
- * Contains all the necessary information to carry out a persistence operation.
+ * A directive for accessing a local file.
  */
-export class FileModule implements Module {
+export class LocalFileModule implements Module {
     private target: ModelComponent;
     private filename: string;
     private file: Blob;
 
     /**
-     * Create a new FileModule.
+     * Create a new LocalFileModule.
      * @param {ModelComponent} target
      * @param {string} filename
      * @param {Blob} file
@@ -179,28 +178,28 @@ export class FileModule implements Module {
     /**
      * Return the designated ModelComponent.
      */
-    getTarget(): ModelComponent {
+    public getTarget(): ModelComponent {
         return this.target;
     }
 
     /**
      * Return the filename.
      */
-    getIdentifier(): string {
+    public getIdentifier(): string {
         return this.filename;
     }
 
     /**
      * Return the Blob representing the file.
      */
-    getContent(): Blob {
+    public getContent(): Blob {
         return this.file;
     }
 
     /**
      * Returns the MIME type
      */
-    getMime(): string {
+    public getMime(): string {
         let mime = this.file.type;
         // this happens when file type can not be determined
         if (mime === "") {
@@ -216,18 +215,16 @@ export class FileModule implements Module {
  * A Task that reads a file and adds its contents as a component to the Model.
  * Also adds to the pseudo IO component so that observers know IO changes have happened.
  */
-class LoadTask extends Task<ModelData, ModelTaskMetadata> {
+export class LoadTask extends Task<ModelData, ModelTaskMetadata> {
 
     /**
      * Create a new LoadTask.
-     * Contains a function that will execute on the model.
-     * This function saves information to the model, which was read from file.
      * @param result
-     * @param {FileModule} module
+     * @param {LocalFileModule} module
      */
     public constructor(
         private readonly result: ImmutableGraph,
-        public readonly module: Module) {
+        private readonly module: Module) {
 
         super();
     }
@@ -276,12 +273,20 @@ class LoadTask extends Task<ModelData, ModelTaskMetadata> {
 /**
  * A Task that loads a workspace from a file and sets the state of the Model accordingly.
  */
-class LoadWorkspaceTask extends Task<ModelData, ModelTaskMetadata> {
+export class LoadWorkspaceTask extends Task<ModelData, ModelTaskMetadata> {
 
+    /**
+     * Create a new LoadWorkspaceTask.
+     * @param {ModelData} workspace
+     */
     public constructor(private readonly workspace: ModelData) {
         super();
     }
 
+    /**
+     * Executes this task.
+     * @param data The data the task takes as input.
+     */
     public execute(data: ModelData): void {
         let SHACLComponent = this.workspace.getOrCreateComponent(
             ModelComponent.SHACLShapesGraph,
@@ -314,6 +319,9 @@ class LoadWorkspaceTask extends Task<ModelData, ModelTaskMetadata> {
         );
     }
 
+    /**
+     * Gets the metadata for this task.
+     */
     public get metadata(): ModelTaskMetadata {
         return new ModelTaskMetadata([ModelComponent.SHACLShapesGraph, ModelComponent.DataGraph, ModelComponent.IO],
             [ModelComponent.SHACLShapesGraph, ModelComponent.DataGraph, ModelComponent.IO]);
@@ -327,14 +335,12 @@ class LoadWorkspaceTask extends Task<ModelData, ModelTaskMetadata> {
 class SaveTask extends Task<ModelData, ModelTaskMetadata> {
     /**
      * Create a new SaveTask.
-     * Contains a function that will execute on the model.
-     * This function loads information from the model and writes this to file.
      * @param {IOFacilitator} io
-     * @param {FileModule} module
+     * @param {LocalFileModule} module
      */
     public constructor(
         private readonly io: IOFacilitator,
-        public readonly module: Module) {
+        private readonly module: LocalFileModule) {
 
         super();
     }
@@ -368,15 +374,27 @@ class SaveTask extends Task<ModelData, ModelTaskMetadata> {
  */
 class SaveWorkspaceTask extends Task<ModelData, ModelTaskMetadata> {
 
+    /**
+     * Create a new SaveWorkspaceTask.
+     * @param {IOFacilitator} io
+     * @param {LocalFileModule} module
+     */
     public constructor(private readonly io: IOFacilitator,
-                       private readonly module: Module) {
+                       private readonly module: LocalFileModule) {
         super();
     }
 
+    /**
+     * Executes this task.
+     * @param data The data the task takes as input.
+     */
     public execute(data: ModelData): void {
         this.io.writeToFile(this.module, data);
     }
 
+    /**
+     * Gets the metadata for this task.
+     */
     public get metadata(): ModelTaskMetadata {
         return new ModelTaskMetadata([ModelComponent.SHACLShapesGraph, ModelComponent.DataGraph, ModelComponent.IO],
             [ModelComponent.SHACLShapesGraph, ModelComponent.DataGraph, ModelComponent.IO]);

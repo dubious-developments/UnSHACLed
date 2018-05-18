@@ -1,0 +1,206 @@
+/**
+ * RequestModule class which serves several http requests functions for interaction
+ * with bot the collaboration server as well as the GitHub API to other components
+ * of the application.
+ * for more info on how to use:
+ * https://github.com/dubious-developments/UnSHACLed/wiki/Interacting-with-the-collaboration-server#file-access
+ */
+
+class RequestModule {
+
+    /**
+     * Method to receive a token from the collaboration server.
+     * A POST request is used to obtain the token in a plain text from the collaboration server.
+     * The obtained token is used for further authenticatio
+     * @returns {Promise<AxiosResponse<any>>}, Return the obtained token through a promise.
+     */
+    static getToken() {
+
+    }
+
+    /**
+     * Method to start authentication process through the collaboration server using
+     * a GET request with the earlier obtained token. The collaboration server will redirect
+     * to the GitHub login page and redirect if logged in succesfully
+     * @param token: token associated with authenticated user and obtained using getToken().
+     */
+    static AuthWithToken(token: any) {
+
+    }
+
+    /**
+     * Method to check wether or not a user with an obtained token is authenticated using a
+     * GET request to the collaboration server including the previously obtained token
+     * @param token: token associated with authenticated user and obtained using getToken().
+     * @returns {Promise<AxiosResponse<any>>}, Returns either true or false through a promise.
+     */
+    static isAuthenticated(token: any) {
+
+    }
+
+    /**
+     * Method to obtain user info for an authenticated user
+     * @param type: specifies type of user info, can be 'login', 'name' or 'email'.
+     * @param token: token associated with authenticated user and obtained using getToken().
+     * @returns {Promise<AxiosResponse<any>>}, Returns the requested user info through a promise.
+     */
+    static getUserInfo(type: any, token: any) {
+
+    }
+
+    /**
+     * Method to obatin user object from GitHub API
+     * @param login: login from authenticated user
+     * @returns {Promise<AxiosResponse<any>>}, return user object through a promise.
+     */
+    static getUserObject(login: any) {
+
+    }
+
+    /**
+     * Method to grab a list of a user's repositories
+     * @param token: token associated with authenticated user and obtained using getToken().
+     * @returns {Promise<AxiosResponse<any>>}, return list of repo through a promise.
+     */
+    static getUserRepos(token: any) {
+
+    }
+
+    /**
+     * Method to fetch files from a repository of choice for an authenticated user
+     * @param repoOwner: owner of repository where file is located
+     * @param repoName: name of repository
+     * @param token: token associated with authenticated user and obtained using getToken().
+     * @return {Promise<AxiosResponse<any>>}, returns list of files through a Promise
+     */
+    static getFilesFromRepo(repoOwner: any, repoName: any, token: any) {
+
+    }
+
+    /**
+     * Method to read a file from a repository.
+     * @param repoOwner: owner of repository where file is located
+     * @param repoName: name of repository
+     * @param token: token associated with authenticated user and obtained using getToken()
+     * @param fileName: name of file to be read
+     *  @return {Promise<AxiosResponse<any>>}, returns content of file as text
+     */
+    static readFile(repoOwner: any, repoName: any, token: any, fileName: any) {
+    }
+
+    /**
+     * Method to check wether user has a lock on a file.
+     * @param repoOwner: owner of repository where file is located
+     * @param repoName: name of repository
+     * @param token: token associated with authenticated user and obtained using getToken().
+     * @param filePath: path of file to be created updated
+     * @returns {Promise<AxiosResponse<any>>}, return true if lock has been granted, false otherwise through a Promise.
+     */
+    static hasLock(repoOwner: any, repoName: any, token: any, filePath: any) {
+
+    }
+
+    /**
+     * Method to request a lock on a file.
+     * @param repoOwner: owner of repository where file is located
+     * @param repoName: name of repository
+     * @param token: token associated with authenticated user and obtained using getToken().
+     * @param filePath: path of file to be created updated
+     * @returns {Promise<AxiosResponse<any>>}, return true if lock has been granted, false otherwise through a Promise.
+     */
+    static requestLock(repoOwner: any, repoName: any, token: any, filePath: any) {
+
+    }
+
+    /**
+     * Method to release a lock on a file.
+     * @param repoOwner: owner of repository where file is located
+     * @param repoName: name of repository
+     * @param token: token associated with authenticated user and obtained using getToken().
+     * @param filePath: path of file to be created updated
+     * @returns {Promise<AxiosResponse<any>>}, return true if lock has been released, false otherwise through a Promise.
+     */
+    static releaseLock(repoOwner: any, repoName: any, token: any, filePath: any) {
+
+    }
+
+    /**
+     * Method to update or create a file. Lock on file is required to do so.
+     * @param repoOwner: owner of repository where file is located
+     * @param repoName: name of repository
+     * @param token: token associated with authenticated user and obtained using getToken().
+     * @param fileName: name of file to be created updated
+     * @param file: file content, incorporated in body of http request
+     */
+    static updateFile(repoOwner: any, repoName: any, token: any, fileName: any, file: any) {
+
+    }
+
+    /**
+     * Method to stay up to date with the latest version of a file
+     * To allow for efficient polling, a timestamp can optionally be included as the request body.
+     * If the timestamp is omitted, the server acts as if the epoch was provided as a timestamp.
+     * @param repoOwner: owner of repository where file is located
+     * @param repoName: name of repository
+     * @param token: token associated with authenticated user and obtained using getToken().
+     * @param filePath: path of filename in directory
+     * @return {Promise<AxiosResponse<any>>}, returns following object through a promise:
+     * {
+              "isModified": true,
+              "lastChange": "2018-05-13T09:14:12.1477890-06:00",
+              "contents": "Edit for file polling testing purposes"
+            }
+     * If no changes were made, the reponse will ommit the content field.
+     */
+    static pollForChanges(repoOwner: any, repoName: any, token: any, filePath: any) {
+
+    }
+
+    /**
+     * Method to create a new repo
+     * @param repoName: name of repo to be created
+     * @param token: token associated with authenticated user and obtained using getToken().
+     * @return none
+     */
+    static createRepo(repoName: any, token: any) {
+
+    }
+
+    /**
+     * Method to set the contents of an authenticated user's workspace.
+     * @param token: token associated with authenticated user and obtained using getToken().
+     * @param content: the content of the current workspace
+     */
+    static setWorkspace(token: any, content: any) {
+
+    }
+
+    /**
+     * Method to fetch the contents of an authenticated user's workspace.
+     * @param token: token associated with authenticated user and obtained using getToken().
+     * @returns {Promise<AxiosResponse<any>>}, return the content as a string and through a Promise.
+     */
+    static fetchWorkspace(token: any) {
+    }
+
+    /* Non-API methods */
+    /**
+     * Method that will map an array of repos required from the API to
+     * an array able to be loaded in a Dropdown UI component.
+     * @param repoArray
+     */
+    static processRepos(repoArray: any) {
+
+    }
+
+    /**
+     * Method that will map an array of files required from the API to
+     * an array able to be loaded in a Dropdown UI component.
+     * @param files: files to be processed
+     */
+    static processFiles(files: any) {
+
+    }
+}
+
+export default RequestModule;

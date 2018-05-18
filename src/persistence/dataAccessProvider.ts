@@ -1,5 +1,5 @@
 import {Model} from "../entities/model";
-import {FileDAO} from "./fileDAO";
+import {LocalFileDAO} from "./localFileDAO";
 import {ValidationService} from "../conformance/ValidationService";
 
 /**
@@ -8,7 +8,7 @@ import {ValidationService} from "../conformance/ValidationService";
 export class DataAccessProvider {
 
     private static _instance: DataAccessProvider = new DataAccessProvider();
-    private fileDAO: FileDAO;
+    private fileDAO: LocalFileDAO;
     private validationService: ValidationService;
 
     // tmp field
@@ -43,13 +43,13 @@ export class DataAccessProvider {
 
     /**
      * Retrieve the file DAO.
-     * @returns {FileDAO}
+     * @returns {LocalFileDAO}
      */
-    public getFileDAO(): FileDAO {
+    public getFileDAO(): LocalFileDAO {
         if (this.fileDAO) {
             return this.fileDAO;
         } else {
-            this.fileDAO = new FileDAO(this._model);
+            this.fileDAO = new LocalFileDAO(this._model);
             return this.fileDAO;
         }
     }
