@@ -215,6 +215,44 @@ class RequestModule {
         axios.post(target)
             .then(res => res.data);
     }
+
+    /**
+     * Method to read a file from a repository.
+     * @param repoOwner: owner of repository where file is located
+     * @param repoName: name of repository
+     * @param token: token associated with authenticated user and obtained using getToken()
+     * @param fileName: name of file to be read
+     *  @return {Promise<AxiosResponse<any>>}, returns content of file as text
+     */
+    static readFile(repoOwner: any, repoName: any, token: any, fileName: any) {
+        const target =
+            'http://193.190.127.184:8042/repo/file/' + repoOwner + '/' + repoName + '/' + token + '/' + fileName;
+        return axios.get(target)
+            .then(res => res.data);
+    }
+
+    /**
+     * Method to stay up to date with the latest version of a file
+     * To allow for efficient polling, a timestamp can optionally be included as the request body.
+     * If the timestamp is omitted, the server acts as if the epoch was provided as a timestamp.
+     * @param repoOwner: owner of repository where file is located
+     * @param repoName: name of repository
+     * @param token: token associated with authenticated user and obtained using getToken().
+     * @param filePath: path of filename in directory
+     * @return {Promise<AxiosResponse<any>>}, returns following object through a promise:
+     * {
+              "isModified": true,
+              "lastChange": "2018-05-13T09:14:12.1477890-06:00",
+              "contents": "Edit for file polling testing purposes"
+            }
+     * If no changes were made, the reponse will ommit the content field.
+     */
+    static pollForChanges(repoOwner: any, repoName: any, token: any, filePath: any) {
+        const target =
+            'http://193.190.127.184:8042/repo/poll-file/' + repoOwner + '/' + repoName + '/' + token + '/' + filePath;
+        return axios.get(target)
+            .then(res => res.data);
+    }
 }
 
 export default RequestModule;
