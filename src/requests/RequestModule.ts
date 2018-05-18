@@ -75,54 +75,35 @@ class RequestModule {
     }
 
     /**
-     * Method that will map an array of repos required from the API to
-     * an array able to be loaded in a Dropdown UI component.
-     * @param repoArray
-     */
-    static processRepos(repoArray: any) {
-        let result: any[] = [];
-        for (let i in repoArray) {
-            result.push(
-                {
-                    text: repoArray[i].split("/")[1],
-                    value: repoArray[i].split("/")[1]
-                }
-            );
-        }
-        return result;
-    }
-
-    /**
-     * Method that will map an array of files required from the API to
-     * an array able to be loaded in a Dropdown UI component.
-     * @param files: files to be processed
-     */
-    static processFiles(files: any) {
-        let result: any[] = [];
-        for (let i in files) {
-            result.push({text: files[i], value: files[i]});
-        }
-        return result;
-    }
-
-    /**
-     * Method to update or create a file. Lock on file is required to do so.
+     * Method to fetch files from a repository of choice for an authenticated user
      * @param repoOwner: owner of repository where file is located
      * @param repoName: name of repository
      * @param token: token associated with authenticated user and obtained using getToken().
-     * @param fileName: name of file to be created updated
-     * @param file: file content, incorporated in body of http request
+     * @return {Promise<AxiosResponse<any>>}, returns list of files through a Promise
      */
-    static updateFile(repoOwner: any, repoName: any, token: any, fileName: any, file: any) {
-        console.log(
-            'http://193.190.127.184:8042/repo/file/' + repoOwner + '/' + repoName + '/' + token + '/' + fileName);
+    static getFilesFromRepo(repoOwner: any, repoName: any, token: any) {
         const target =
-            'http://193.190.127.184:8042/repo/file/' + repoOwner + '/' + repoName + '/' + token + '/' + fileName;
-        axios.post(target, {file})
-            .then(res => console.log(res));
+            'http://193.190.127.184:8042/repo/file-names/' + repoOwner + '/' + repoName + '/' + token;
+        console.log(target);
+        return axios.get(target)
+            .then(res => res.data);
     }
 
-    // TODO replace lock method with one generic method
+    /**
+     * Method to read a file from a repository.
+     * @param repoOwner: owner of repository where file is located
+     * @param repoName: name of repository
+     * @param token: token associated with authenticated user and obtained using getToken()
+     * @param fileName: name of file to be read
+     *  @return {Promise<AxiosResponse<any>>}, returns content of file as text
+     */
+    static readFile(repoOwner: any, repoName: any, token: any, fileName: any) {
+        const target =
+            'http://193.190.127.184:8042/repo/file/' + repoOwner + '/' + repoName + '/' + token + '/' + fileName;
+        return axios.get(target)
+            .then(res => res.data);
+    }
+
     /**
      * Method to check wether user has a lock on a file.
      * @param repoOwner: owner of repository where file is located
@@ -169,66 +150,20 @@ class RequestModule {
     }
 
     /**
-     * Method to set the contents of an authenticated user's workspace.
-     * @param token: token associated with authenticated user and obtained using getToken().
-     * @param content: the content of the current workspace
-     */
-    static setWorkspace(token: any, content: any) {
-        axios.post('http://193.190.127.184:8042/workspace/' + token, {content})
-            .then(res => res.data);
-    }
-
-    /**
-     * Method to fetch the contents of an authenticated user's workspace.
-     * @param token: token associated with authenticated user and obtained using getToken().
-     * @returns {Promise<AxiosResponse<any>>}, return the content as a string and through a Promise.
-     */
-    static fetchWorkspace(token: any) {
-        return axios.get('http://193.190.127.184:8042/workspace/' + token)
-            .then(res => res.data);
-    }
-
-    /**
-     * Method to fetch files from a repository of choice for an authenticated user
+     * Method to update or create a file. Lock on file is required to do so.
      * @param repoOwner: owner of repository where file is located
      * @param repoName: name of repository
      * @param token: token associated with authenticated user and obtained using getToken().
-     * @return {Promise<AxiosResponse<any>>}, returns list of files through a Promise
+     * @param fileName: name of file to be created updated
+     * @param file: file content, incorporated in body of http request
      */
-    static getFilesFromRepo(repoOwner: any, repoName: any, token: any) {
-        const target =
-            'http://193.190.127.184:8042/repo/file-names/' + repoOwner + '/' + repoName + '/' + token;
-        console.log(target);
-        return axios.get(target)
-            .then(res => res.data);
-    }
-
-    /**
-     * Method to create a new repo
-     * @param repoName: name of repo to be created
-     * @param token: token associated with authenticated user and obtained using getToken().
-     * @return none
-     */
-    static createRepo(repoName: any, token: any) {
-        const target = 'http://193.190.127.184:8042/repo/create-repo/' + repoName + '/' + token;
-        console.log(target);
-        axios.post(target)
-            .then(res => res.data);
-    }
-
-    /**
-     * Method to read a file from a repository.
-     * @param repoOwner: owner of repository where file is located
-     * @param repoName: name of repository
-     * @param token: token associated with authenticated user and obtained using getToken()
-     * @param fileName: name of file to be read
-     *  @return {Promise<AxiosResponse<any>>}, returns content of file as text
-     */
-    static readFile(repoOwner: any, repoName: any, token: any, fileName: any) {
+    static updateFile(repoOwner: any, repoName: any, token: any, fileName: any, file: any) {
+        console.log(
+            'http://193.190.127.184:8042/repo/file/' + repoOwner + '/' + repoName + '/' + token + '/' + fileName);
         const target =
             'http://193.190.127.184:8042/repo/file/' + repoOwner + '/' + repoName + '/' + token + '/' + fileName;
-        return axios.get(target)
-            .then(res => res.data);
+        axios.post(target, {file})
+            .then(res => console.log(res));
     }
 
     /**
@@ -252,6 +187,71 @@ class RequestModule {
             'http://193.190.127.184:8042/repo/poll-file/' + repoOwner + '/' + repoName + '/' + token + '/' + filePath;
         return axios.get(target)
             .then(res => res.data);
+    }
+
+    /**
+     * Method to create a new repo
+     * @param repoName: name of repo to be created
+     * @param token: token associated with authenticated user and obtained using getToken().
+     * @return none
+     */
+    static createRepo(repoName: any, token: any) {
+        const target = 'http://193.190.127.184:8042/repo/create-repo/' + repoName + '/' + token;
+        console.log(target);
+        axios.post(target)
+            .then(res => res.data);
+    }
+
+    /**
+     * Method to set the contents of an authenticated user's workspace.
+     * @param token: token associated with authenticated user and obtained using getToken().
+     * @param content: the content of the current workspace
+     */
+    static setWorkspace(token: any, content: any) {
+        axios.post('http://193.190.127.184:8042/workspace/' + token, {content})
+            .then(res => res.data);
+    }
+
+    /**
+     * Method to fetch the contents of an authenticated user's workspace.
+     * @param token: token associated with authenticated user and obtained using getToken().
+     * @returns {Promise<AxiosResponse<any>>}, return the content as a string and through a Promise.
+     */
+    static fetchWorkspace(token: any) {
+        return axios.get('http://193.190.127.184:8042/workspace/' + token)
+            .then(res => res.data);
+    }
+
+    /* Non-API methods */
+    /**
+     * Method that will map an array of repos required from the API to
+     * an array able to be loaded in a Dropdown UI component.
+     * @param repoArray
+     */
+    static processRepos(repoArray: any) {
+        let result: any[] = [];
+        for (let i in repoArray) {
+            result.push(
+                {
+                    text: repoArray[i].split("/")[1],
+                    value: repoArray[i].split("/")[1]
+                }
+            );
+        }
+        return result;
+    }
+
+    /**
+     * Method that will map an array of files required from the API to
+     * an array able to be loaded in a Dropdown UI component.
+     * @param files: files to be processed
+     */
+    static processFiles(files: any) {
+        let result: any[] = [];
+        for (let i in files) {
+            result.push({text: files[i], value: files[i]});
+        }
+        return result;
     }
 }
 
