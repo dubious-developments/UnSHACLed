@@ -3,6 +3,7 @@ import {Dropdown, Button} from 'semantic-ui-react';
 import {DropdownFileProps} from '../components/interfaces/interfaces';
 import RepoModal from '../modals/RepoModal';
 import NewModal from '../modals/NewModal';
+import {connect} from 'react-redux';
 
 /**
  Component used to create a dropdown component for the file toolbar option
@@ -19,6 +20,7 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
             newType: ''
         };
         this.getOpenedFiles = this.getOpenedFiles.bind(this);
+        this.getGitHubFiles = this.getGitHubFiles.bind(this);
         this.cancelCallback = this.cancelCallback.bind(this);
         this.confirmCallback = this.confirmCallback.bind(this);
         this.showRepoModal = this.showRepoModal.bind(this);
@@ -27,7 +29,7 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
     }
 
     /**
-     * Component that contains the currently opened files in the editor.
+     * Component that contains the currently opened files (local files ) in the editor.
      * @param: none
      * @return Button Group of all opened files, or a single button if no files are opened.
      */
@@ -47,6 +49,42 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
                     basic={true}
                     content={cur}
                     onClick={() => this.props.get_file_from_popup(cur)}
+                />
+            );
+        }
+
+        return (
+            <div style={{padding: 0, margin: 0}}>
+                <Button.Group vertical={true}>
+                    {items}
+                </Button.Group>
+            </div>
+        );
+    }
+
+    /**
+     * Component that contains the currently opened files (github files ) in the editor.
+     * @param: none
+     * @return Button Group of all opened files, or a single button if no files are opened.
+     */
+
+    getGitHubFiles() {
+        console.log(this.props);
+        let items: any[] = [];
+        let content = this.props.github_files.content;
+
+        if (content.length === 0) {
+            items.push(<Button key="none" icon="ban" disabled={true} basic={true} content="No files opened"/>);
+        }
+
+        for (let i = 0; i < content.length; i++) {
+            let cur = content[i];
+            items.push(
+                <Button
+                    key={cur.name + i}
+                    icon="save"
+                    basic={true}
+                    content={cur.name}
                 />
             );
         }
@@ -158,7 +196,13 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
                             onClick={this.showRepoModal}
                             text='Open graph from account'
                         />
-                        <Dropdown.Item icon='github' text='Save graph to account'/>
+                        <Dropdown
+                            text='Save graph to account'
+                            pointing='left'
+                            className='link item'
+                        >
+                            <Dropdown.Menu content={<this.getGitHubFiles/>}/>
+                        </Dropdown>
                         <Dropdown.Item icon='trash' text='Clear graph' id='tb_clear_graph'/>
                     </Dropdown.Menu>
                 </Dropdown>
@@ -182,4 +226,15 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
     }
 }
 
-export default DropdownFile;
+/**
+ * Map global store to props of this component.
+ * @param state: state retrieved from the global redux store.
+ * @returns {{token}}: sets props.token
+ */
+const mapStateToProps = (state, props) => {
+    return {
+        github_files: state.files
+    };
+};
+
+export default connect(mapStateToProps)(DropdownFile);
