@@ -20,7 +20,8 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
             repos: [],
             fileList: [],
             type: '',
-            projectName: ''
+            projectName: '',
+            fileName: ''
         };
         this.setSelected = this.setSelected.bind(this);
         this.setFilesSelected = this.setFilesSelected.bind(this);
@@ -29,6 +30,7 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
         this.processRepos = this.processRepos.bind(this);
         this.processFile = this.processFile.bind(this);
         this.handleType = this.handleType.bind(this);
+        this.appendFile = this.appendFile.bind(this);
     }
 
     /**
@@ -89,9 +91,10 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
      * @param: none
      * @return: none
      */
-    setFilesSelected() {
+    setFilesSelected(e: any, {value}: any) {
         this.setState({
-            files: false
+            files: false,
+            fileName: value
         });
     }
 
@@ -132,15 +135,33 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
      */
     confirmModal() {
         this.props.confirm_cb("RepoModal", this.state.type);
+        // Invoke backend method
+        // TODO
+        // Log openend file into global state (redux store)
+        this.appendFile(this.state.fileName, this.state.projectName, this.state.type);
+        // set state
         this.setState({
             files: true,
             selected: true
         });
     }
 
+    /**
+     * Method use to call the prop function which is bound to the action from the global
+     * store. This will update the global store with the newly opened file.
+     * @param fileName: name of file being opened and which should be added to the global sotre
+     * @param repoName: name of the repository the file resides in
+     * @param type: type of file. can either be 'SHACL' or 'data'.
+     * @return {any}
+     */
+    appendFile(fileName: any, repoName: any, type: any) {
+        // Dispatch action to the redux store
+        this.props.appendFile(fileName, repoName, type);
+        console.log(this.props);
+    }
+
     render() {
         let {selected, files, repos, fileList} = this.state;
-        console.log(this.props.files);
         return (
             <div>
                 <Modal
@@ -234,4 +255,4 @@ const mapActionsToProps = {
     appendFile: appendFile
 
 };
-export default connect(mapStateToProps)(RepoModal);
+export default connect(mapStateToProps, mapActionsToProps)(RepoModal);

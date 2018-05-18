@@ -1,3 +1,7 @@
+const initialState = {
+    content: []
+};
+
 /**
  * Redux reducers that will be dispatch by an event fired through an action.
  * This reducer will update the 'file' field in the globar store by appending the fileObject
@@ -6,13 +10,19 @@
  * @param action: the dispatched action
  * @return {any} new global state
  */
-export function fileReducer(state: any = [], action: any) {
+export function fileReducer(state: any = initialState, action: any) {
     switch (action.type) {
-        case 'updateOpenedFiles':
-            return {
-                ...state,
-                files: [...state.files, action.payload.fileObject]
-            }
+        case 'appendFile':
+            return Object.assign({}, state, {
+                content: [
+                    ...state.content,
+                    {
+                        name: action.payload.fileName,
+                        repo: action.payload.repoName,
+                        type: action.payload.type,
+                    }
+                ]
+            });
         default :
             return state;
     }
