@@ -3,6 +3,7 @@ import {Modal, Button, Icon, Dropdown, Checkbox, Form} from 'semantic-ui-react';
 import {RepoModalProps} from '../components/interfaces/interfaces';
 import RequestModule from '../requests/RequestModule';
 import {connect} from 'react-redux';
+import {appendFile} from "../redux/actions/fileActions";
 
 /**
  Component used to create a modal for opening files from projects
@@ -139,6 +140,7 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
 
     render() {
         let {selected, files, repos, fileList} = this.state;
+        console.log(this.props.files);
         return (
             <div>
                 <Modal
@@ -218,8 +220,18 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
 const mapStateToProps = (state, props) => {
     return {
         token: state.token,
-        user: state.login
+        user: state.login,
+        files: state.files
     };
 };
 
+/**
+ * Map redux actions to props of this component. A method call to the props function
+ * will automatically dispatch the action through redux without an explicit
+ * dispatch call to the global store
+ */
+const mapActionsToProps = {
+    appendFile: appendFile
+
+};
 export default connect(mapStateToProps)(RepoModal);
