@@ -1119,7 +1119,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                     }
                 }
 
-                this.debug();
             });
         }
     }
