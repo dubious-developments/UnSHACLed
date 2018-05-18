@@ -4,8 +4,8 @@ import {UserModalProps} from '../components/interfaces/interfaces';
 import RequestModule from '../requests/RequestModule';
 
 /**
-    Component used to create a modal containing user info of the currently authenticated user.
-    Requires several props from the parent, which can be found in interfaces.d.ts
+ Component used to create a modal containing user info of the currently authenticated user.
+ Requires several props from the parent, which can be found in interfaces.d.ts
 
  */
 class UserModal extends React.Component<UserModalProps, any> {
@@ -27,7 +27,7 @@ class UserModal extends React.Component<UserModalProps, any> {
         RequestModule.getUserObject(this.props.login).then(object => {
             this.setState({
                 userObject: object,
-                loaded:true
+                loaded: true
             });
         });
     }
@@ -65,34 +65,36 @@ class UserModal extends React.Component<UserModalProps, any> {
                         {loaded ?
                             <Modal.Description>
                                 <Table definition={true}>
-                                    <Table.Row>
-                                        <Table.Cell>login</Table.Cell>
-                                        <Table.Cell>{userObject.login}</Table.Cell>
-                                    </Table.Row>
-                                    <Table.Row>
-                                        <Table.Cell>email</Table.Cell>
-                                        <Table.Cell>{userObject.email}</Table.Cell>
-                                    </Table.Row>
-                                    <Table.Row>
-                                        <Table.Cell>location</Table.Cell>
-                                        <Table.Cell>{userObject.location}</Table.Cell>
-                                    </Table.Row>
-                                    <Table.Row>
-                                        <Table.Cell>company</Table.Cell>
-                                        <Table.Cell>{userObject.company}</Table.Cell>
-                                    </Table.Row>
-                                    <Table.Row>
-                                        <Table.Cell>Public repos</Table.Cell>
-                                        <Table.Cell>{userObject.public_repos}</Table.Cell>
-                                    </Table.Row>
-                                    <Table.Row>
-                                        <Table.Cell>Followers</Table.Cell>
-                                        <Table.Cell>{userObject.followers}</Table.Cell>
-                                    </Table.Row>
-                                    <Table.Row>
-                                        <Table.Cell>Following</Table.Cell>
-                                        <Table.Cell>{userObject.following}</Table.Cell>
-                                    </Table.Row>
+                                    <Table.Body>
+                                        <Table.Row>
+                                            <Table.Cell>login</Table.Cell>
+                                            <Table.Cell>{userObject.login}</Table.Cell>
+                                        </Table.Row>
+                                        <Table.Row>
+                                            <Table.Cell>email</Table.Cell>
+                                            <Table.Cell>{userObject.email}</Table.Cell>
+                                        </Table.Row>
+                                        <Table.Row>
+                                            <Table.Cell>location</Table.Cell>
+                                            <Table.Cell>{userObject.location}</Table.Cell>
+                                        </Table.Row>
+                                        <Table.Row>
+                                            <Table.Cell>company</Table.Cell>
+                                            <Table.Cell>{userObject.company}</Table.Cell>
+                                        </Table.Row>
+                                        <Table.Row>
+                                            <Table.Cell>Public repos</Table.Cell>
+                                            <Table.Cell>{userObject.public_repos}</Table.Cell>
+                                        </Table.Row>
+                                        <Table.Row>
+                                            <Table.Cell>Followers</Table.Cell>
+                                            <Table.Cell>{userObject.followers}</Table.Cell>
+                                        </Table.Row>
+                                        <Table.Row>
+                                            <Table.Cell>Following</Table.Cell>
+                                            <Table.Cell>{userObject.following}</Table.Cell>
+                                        </Table.Row>
+                                    </Table.Body>
                                 </Table>
                             </Modal.Description>
                             : <Dimmer active={!loaded}>
