@@ -3,7 +3,7 @@ import * as Collections from 'typescript-collections';
 import {ModelComponent, ModelTaskMetadata} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
 import {GetValidationReport, EditTriple, VisualizeComponent} from "../services/ModelTasks";
-import TimingService from "../services/IdleUserDetection";
+import TimingService, {default as IdleUserDetection} from "../services/IdleUserDetection";
 import {ValidationReport} from "../conformance/wrapper/ValidationReport";
 import {MxGraphProps} from "./interfaces/interfaces";
 import {ModelObserver, Model} from "../entities/model";
@@ -32,7 +32,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     private cellToTriples: Collections.Dictionary<any, Triple>;
     private invalidCells: Collections.Set<any>;
 
-    private timer: TimingService;
+    private timer: IdleUserDetection;
 
     constructor(props: any) {
         super(props);
@@ -64,7 +64,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.fileToGraphDict = new Collections.Dictionary<string, ImmutableGraph>();
         this.fileToTypeDict = new Collections.Dictionary<string, string>();
 
-        this.timer = new TimingService();
+        this.timer = new IdleUserDetection();
     }
 
     componentDidMount() {
