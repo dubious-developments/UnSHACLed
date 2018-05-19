@@ -18,8 +18,6 @@ class DropdownView extends React.Component<any, any> {
         return (
             <Dropdown text='Help' pointing="top left">
                 <Dropdown.Menu>
-                    <Dropdown.Item icon='idea' text='Start Tutorial'/>
-                    <Dropdown.Item icon='play' text='Quick Start video'/>
                     <Dropdown.Item>
                             <Link target="_blank" to="/support" style={{color:'black'}}>
                                 <Icon name="book"/> User Manual

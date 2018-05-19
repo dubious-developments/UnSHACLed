@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Dropdown, Button} from 'semantic-ui-react';
+import {Dropdown, Button, Icon} from 'semantic-ui-react';
 import {DropdownFileProps} from '../components/interfaces/interfaces';
 import RepoModal from '../modals/RepoModal';
 import NewModal from '../modals/NewModal';
@@ -192,7 +192,6 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
                         </Dropdown>
                         <Dropdown.Divider/>
                         <Dropdown.Item
-                            icon='github'
                             onClick={this.showRepoModal}
                             text='Open graph from account'
                         />
@@ -203,7 +202,7 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
                         >
                             <Dropdown.Menu content={<this.getGitHubFiles/>}/>
                         </Dropdown>
-                        <Dropdown.Item icon='trash' text='Clear graph' id='tb_clear_graph'/>
+                        <Dropdown.Item text='Clear graph' id='tb_clear_graph'/>
                     </Dropdown.Menu>
                 </Dropdown>
                 {repoVisible ?
