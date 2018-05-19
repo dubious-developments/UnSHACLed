@@ -5,7 +5,6 @@ import RepoModal from '../modals/RepoModal';
 import NewModal from '../modals/NewModal';
 import {connect} from 'react-redux';
 import {ModelComponent} from "../entities/modelTaskMetadata";
-import {FileModule} from "../persistence/fileDAO";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
 import {RemoteFileModule} from "../persistence/remoteFileDAO";
 
@@ -178,7 +177,12 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
      * workspace formatted file obtained by saving the workspace before hand.
      */
     loadWorkspace() {
-
+        console.log("loggin workspace");
+        // get remote file DAO
+        let remotefileDAO = DataAccessProvider.getInstance().getRemoteFileDAO();
+        // load remote workspace
+        remotefileDAO.findWorkspace(new RemoteFileModule
+        (ModelComponent.Workspace, this.props.user, this.state.fileName, this.state.projectName, this.props.token));
     }
 
     /**
@@ -186,7 +190,12 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
      * through the users browser in a valid workspace formatted file.
      */
     saveWorkspace() {
-
+        console.log("saving workspace");
+        // get remote file DAO
+        let remotefileDAO = DataAccessProvider.getInstance().getRemoteFileDAO();
+        // save remote workspace
+        remotefileDAO.insertWorkspace(new RemoteFileModule
+        (ModelComponent.Workspace, this.props.user, this.state.fileName, this.state.projectName, this.props.token));
     }
 
     /**
