@@ -4,12 +4,13 @@ import {ModelComponent, ModelTaskMetadata} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
 import {GetValidationReport, EditTriple, VisualizeComponent, LoadFileTask} from "../services/ModelTasks";
 import TimingService from "../services/TimingService";
-import {ValidationReport} from "../conformance/wrapper/ValidationReport";
+import {ValidationReport} from "../conformance/ValidationReport";
 import {MxGraphProps} from "./interfaces/interfaces";
 import {ModelObserver, Model} from "../entities/model";
 import {Task} from "../entities/task";
 import {ModelData} from "../entities/modelData";
 import {ImmutableGraph, Graph, PrefixMap} from "../persistence/graph";
+import RequestModule from '../requests/RequestModule';
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout, mxCellOverlay, mxImage,
@@ -31,6 +32,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
     private cellToTriples: Collections.Dictionary<any, Triple>;
     private invalidCells: Collections.Set<any>;
+    private noLockCells: Collections.DefaultDictionary<any, boolean>;
 
     private timer: TimingService;
 
@@ -68,6 +70,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.triples = new Collections.Set<Triple>((t) =>  t.subject + " " + t.predicate + " " + t.object);
         this.cellToTriples = new Collections.Dictionary<any, Triple>((c) => c.getId());
         this.invalidCells = new Collections.Set<any>();
+        this.noLockCells = new Collections.DefaultDictionary<any, boolean>(() => false);
         this.fileToGraphDict = new Collections.Dictionary<string, ImmutableGraph>();
         this.fileToTypeDict = new Collections.Dictionary<string, string>();
         this.fileToPrefixesDict = new Collections.Dictionary<string, PrefixMap>();
@@ -184,8 +187,44 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         });
     }
 
-    handleClick() {
+    /**
+     * Handles clicks anywhere on the canvas.
+     * If clicked on a node/cell, originating from a GitHub file, then a lock gets requested.
+     * If clicked anywhere outside of a node, then changes get sent.
+     * @param graph: graph object.
+     */
+    handleClick(graph: any) {
+        let instance = this;
+        graph.addListener(
+            mxEvent.CLICK,
+            function (sender: any, evt: any) {
+                let cell = evt.getProperty('cell');
 
+                if (cell != null) {
+                    // Request lock if clicked on GitHub file
+
+                    let triple;
+                    if (cell.getChildCount() > 0) {
+                        triple = instance.cellToTriples.getValue(cell.getChildAt(0));
+                    } else {
+                        triple = instance.cellToTriples.getValue(cell);
+                    }
+
+                    let filename;
+                    if (triple) {
+                        filename = triple.file;
+                    }
+                    
+                    // Checks if it is github file;
+                    console.log(filename);
+                    
+                } else {
+                    // Send changes to backend
+                    console.log("sendChanges");
+                }
+                evt.consume();
+            }
+        );
     }
 
     extendCanvas(graph: any) {
@@ -1082,6 +1121,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             this.initiateDragPreview();
             this.initDragAndDrop(graph);
             this.initToolBar(editor);
+            this.handleClick(graph);
             container.focus();
 
             // Get add template button
