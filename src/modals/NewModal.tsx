@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Modal, Button, Icon, Input, Dropdown} from 'semantic-ui-react';
+import {Modal, Button, Icon, Input, Dropdown, Form, Checkbox} from 'semantic-ui-react';
 import {NewModalProps} from '../components/interfaces/interfaces';
 import RequestModule from '../requests/RequestModule';
 import {connect} from 'react-redux';
@@ -17,13 +17,15 @@ class NewModal extends React.Component<NewModalProps & any, any> {
             selected: true,
             repos: [],
             name: '',
-            project: ''
+            project: '',
+            fileType: ''
         };
         this.cancelModal = this.cancelModal.bind(this);
         this.confirmModal = this.confirmModal.bind(this);
         this.onChange = this.onChange.bind(this);
         this.setSelected = this.setSelected.bind(this);
         this.createFile = this.createFile.bind(this);
+        this.handleType = this.handleType.bind(this);
     }
 
     /**
@@ -83,7 +85,7 @@ class NewModal extends React.Component<NewModalProps & any, any> {
     confirmModal(type: any) {
         if (type === 'file') {
             // request lock
-            let filePath = '/' + this.state.name;
+            let filePath = this.state.name;
             console.log(filePath);
             RequestModule.requestLock(this.props.user, this.state.project,
                 this.props.token, filePath).then(lock => {
@@ -125,7 +127,8 @@ class NewModal extends React.Component<NewModalProps & any, any> {
     createFile(lock: any) {
         if (lock === true) {
             // TODO RequestModuel.updateFile
-            let filePath = '/' + this.state.name;
+            console.log("creating a " + this.state.fileType + " file!");
+            let filePath = this.state.name;
             RequestModule.releaseLock(this.props.user, this.state.project,
                 this.props.token, filePath).then(response => {
                 console.log("releasing lock");
@@ -134,6 +137,19 @@ class NewModal extends React.Component<NewModalProps & any, any> {
         } else {
             console.log("No acquired lock to create a new file");
         }
+    }
+
+    /**
+     * Method that will adapt the current state of the 'fileType' attribute
+     * which is used to determine which type of file the users wants to create
+     * @param: e : event
+     * @param: value: selected value in checkbox
+     * @return: none
+     */
+    handleType(e: any, {value}: any) {
+        this.setState({
+            fileType: value
+        });
     }
 
     render() {
@@ -185,6 +201,28 @@ class NewModal extends React.Component<NewModalProps & any, any> {
                             style={{marginTop: '1em'}}
                             onChange={this.onChange}
                         />
+
+                        <Form style={{marginTop: '1em'}}>
+                            <Form.Field>
+                                Selected type: <b>{this.state.fileType}</b>
+                            </Form.Field>
+                            <Form.Field>
+                                <Checkbox
+                                    label='Data'
+                                    value='data'
+                                    checked={this.state.fileType === 'data'}
+                                    onChange={this.handleType}
+                                />
+                            </Form.Field>
+                            <Form.Field>
+                                <Checkbox
+                                    label='SHACL'
+                                    value='SHACL'
+                                    checked={this.state.fileType === 'SHACL'}
+                                    onChange={this.handleType}
+                                />
+                            </Form.Field>
+                        </Form>
                     </Modal.Content>
                     <Modal.Actions>
                         <Button color='red' onClick={this.cancelModal}>
