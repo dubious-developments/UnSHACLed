@@ -4,7 +4,7 @@ import {ModelComponent, ModelTaskMetadata} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
 import {GetValidationReport, EditTriple, VisualizeComponent, LoadFileTask} from "../services/ModelTasks";
 import TimingService from "../services/TimingService";
-import {ValidationReport} from "../conformance/wrapper/ValidationReport";
+import {ValidationReport} from "../conformance/ValidationReport";
 import {MxGraphProps} from "./interfaces/interfaces";
 import {ModelObserver, Model} from "../entities/model";
 import {Task} from "../entities/task";

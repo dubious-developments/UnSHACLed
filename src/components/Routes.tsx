@@ -7,6 +7,7 @@ import About from "../pages/About";
 import Contact from "../pages/Contact";
 import NotFound from "../pages/NotFound";
 import Signup from "../pages/Signup";
+import UserManual from "../pages/UserManual";
 
 class Routes extends React.Component<any, any> {
 
@@ -20,6 +21,7 @@ class Routes extends React.Component<any, any> {
                     <Route exact={true} path="/user" component={Work}/>
                     <Route exact={true} path="/about" component={About}/>
                     <Route exact={true} path="/contact" component={Contact}/>
+                    <Route exact={true} path="/support" component={UserManual}/>
                     <Route component={NotFound} />
                 </Switch>
             </div>

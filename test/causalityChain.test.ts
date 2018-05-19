@@ -1,11 +1,11 @@
 import * as Immutable from "immutable";
-import {CausalChain, Link} from "../src/entities/causalChain";
+import {CausalityChain, Link} from "../src/entities/causalityChain";
 import {ModelComponent} from "../src/entities/modelTaskMetadata";
 
-describe("CausalChain Class", () => {
+describe("CausalityChain Class", () => {
     it("should avoid loops.",
         () => {
-            let chain = new CausalChain<ModelComponent, number>();
+            let chain = new CausalityChain<ModelComponent, number>();
 
             let incoming = Immutable.Set<ModelComponent>([ModelComponent.DataGraph]);
             let outgoing = Immutable.Set<ModelComponent>([ModelComponent.DataGraph]);

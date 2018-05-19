@@ -12,6 +12,7 @@ module.exports = function(config) {
             { pattern: "src/dropdowns/**/*.tsx" },
             { pattern: "src/modals/**/*.tsx" },
             { pattern: "src/requests/**/*.tsx" },
+            { pattern: "src/redux/**/*.tsx" },
             { pattern: "test/**/*.ts" },
         ],
 

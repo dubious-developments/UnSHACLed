@@ -1,8 +1,10 @@
 import * as React from 'react';
-import {Button, Grid, Image, Header, Segment, Divider} from 'semantic-ui-react';
+import {Button, Grid, Image, Header, Segment, Divider, Label} from 'semantic-ui-react';
 import {withRouter} from 'react-router-dom';
 import {Link} from 'react-router-dom';
 import RequestModule from '../requests/RequestModule';
+import {connect} from 'react-redux';
+import {updateEmail, updateLogin, updateName, updateToken} from "../redux/actions/userActions";
 
 class LoginForm extends React.Component<any, any> {
 
@@ -11,16 +13,50 @@ class LoginForm extends React.Component<any, any> {
         this.state = {
             username: "",
             password: "",
-            token: ""
+            token: "",
+            showLabel: false
         };
+
+        this.startEditing = this.startEditing.bind(this);
+        this.onUpdateToken = this.onUpdateToken.bind(this);
+        this.onUpdateUsername = this.onUpdateUsername.bind(this);
+        this.onUpdateEmail = this.onUpdateEmail.bind(this);
+        this.onUpdateLogin = this.onUpdateLogin.bind(this);
+        this.storeUserInfo = this.storeUserInfo.bind(this);
     }
 
     componentDidMount() {
-        RequestModule.getToken();
-        let response = "ToKeN";
-        this.setState({
-            token: response
+        RequestModule.getToken().then(token => {
+            console.log("receive token =>" + token);
+            this.setState({
+                token: token
+            });
         });
+    }
+
+    onUpdateToken(token: any) {
+        this.props.onUpdateToken(token);
+    }
+
+    onUpdateUsername(name: any) {
+        if (name) {
+            this.props.onUpdateName(name);
+        } else {
+            this.props.onUpdateName("No name provided.");
+        }
+
+    }
+
+    onUpdateLogin(login: any) {
+        this.props.onUpdateLogin(login);
+    }
+
+    onUpdateEmail(email: any) {
+        if (email) {
+            this.props.onUpdateEmail(email);
+        } else {
+            this.props.onUpdateEmail('private e-mail');
+        }
     }
 
     render() {
@@ -45,28 +81,39 @@ class LoginForm extends React.Component<any, any> {
                             {' '}Log-in to your account
                         </Header>
                         <Segment inverted={true}>
-                            <Button
-                                color="teal"
-                                fluid={true}
-                                inverted={true}
-                                size="large"
-                                onClick={(event) => this.handleClick(event)}
-                                icon="github"
-                                content="Sign in with GitHub"
-                            />
-                            <Divider horizontal={true} inverted={true}>
-                                Or
-                            </Divider>
-                            <Link to="/signup">
+                            <Button.Group size='huge' fluid={true}>
                                 <Button
-                                    animated="fade"
-                                    fluid={true}
+                                    color="teal"
                                     inverted={true}
-                                    size="large"
+                                    size="huge"
+                                    onClick={(event) => this.handleClick(event)}
+                                    icon="github"
+                                    content="Sign in"
+                                />
+                                <Button.Or/>
+                                <Button
+                                    inverted={true}
+                                    size="huge"
                                     icon="signup"
                                     content="Sign up"
+                                    as={Link}
+                                    to="/signup"
                                 />
-                            </Link>
+                            </Button.Group>
+                            <Divider horizontal={true} inverted={true}>
+                                Authenticated?
+                            </Divider>
+
+                            <Button
+                                fluid={true}
+                                inverted={true}
+                                size="huge"
+                                content="Start editing"
+                                onClick={this.startEditing}
+                            />
+                            {this.state.showLabel && (
+                                <Label color='red' pointing='above'>Please authenticate first</Label>
+                            )}
                         </Segment>
                     </Grid.Column>
                 </Grid>
@@ -78,10 +125,50 @@ class LoginForm extends React.Component<any, any> {
     handleClick(event: any) {
         let {token} = this.state;
         RequestModule.AuthWithToken(token);
-        if (RequestModule.isAuthenticated(token)) {
-            this.props.history.push("/user");
-        }
+    }
+
+    startEditing(event: any) {
+        let {token} = this.state;
+        RequestModule.isAuthenticated(token).then(authenticated => {
+            if (authenticated) {
+                this.props.history.push("/user");
+                this.storeUserInfo(token);
+            } else {
+                console.log('not authenticated');
+                this.setState({
+                    showLabel: true
+                });
+            }
+        });
+    }
+
+    storeUserInfo(token: any) {
+        this.onUpdateToken(token);
+        /* Get Name */
+        RequestModule.getUserInfo('name', token).then(username => {
+            this.onUpdateUsername(username);
+        });
+        /* Get login */
+        RequestModule.getUserInfo('login', token).then(login => {
+            this.onUpdateLogin(login);
+        });
+        /* Get email */
+        RequestModule.getUserInfo('email', token).then(email => {
+            this.onUpdateEmail(email);
+        });
     }
 }
 
-export default withRouter(LoginForm);
+const mapStateToProps = (state) => {
+    return state;
+};
+
+const mapActionsToProps = {
+    onUpdateToken: updateToken,
+    onUpdateName: updateName,
+    onUpdateLogin: updateLogin,
+    onUpdateEmail: updateEmail
+};
+
+const ConLoginForm = connect(mapStateToProps, mapActionsToProps)(LoginForm);
+export default withRouter(ConLoginForm);
