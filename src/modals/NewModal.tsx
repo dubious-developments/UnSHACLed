@@ -218,28 +218,29 @@ class NewModal extends React.Component<NewModalProps & any, any> {
                             style={{marginTop: '1em'}}
                             onChange={this.onChange}
                         />
-
-                        <Form style={{marginTop: '1em'}}>
-                            <Form.Field>
-                                Selected type: <b>{this.state.fileType}</b>
-                            </Form.Field>
-                            <Form.Field>
-                                <Checkbox
-                                    label='Data'
-                                    value='data'
-                                    checked={this.state.fileType === 'data'}
-                                    onChange={this.handleType}
-                                />
-                            </Form.Field>
-                            <Form.Field>
-                                <Checkbox
-                                    label='SHACL'
-                                    value='SHACL'
-                                    checked={this.state.fileType === 'SHACL'}
-                                    onChange={this.handleType}
-                                />
-                            </Form.Field>
-                        </Form>
+                        {this.props.type === 'file' ?
+                            <Form style={{marginTop: '1em'}}>
+                                <Form.Field>
+                                    Selected type: <b>{this.state.fileType}</b>
+                                </Form.Field>
+                                <Form.Field>
+                                    <Checkbox
+                                        label='Data'
+                                        value='data'
+                                        checked={this.state.fileType === 'data'}
+                                        onChange={this.handleType}
+                                    />
+                                </Form.Field>
+                                <Form.Field>
+                                    <Checkbox
+                                        label='SHACL'
+                                        value='SHACL'
+                                        checked={this.state.fileType === 'SHACL'}
+                                        onChange={this.handleType}
+                                    />
+                                </Form.Field>
+                            </Form>
+                            : null}
                     </Modal.Content>
                     <Modal.Actions>
                         <Button color='red' onClick={this.cancelModal}>
