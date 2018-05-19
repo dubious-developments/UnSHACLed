@@ -28,6 +28,8 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
         this.submitCallBack = this.submitCallBack.bind(this);
         this.loadWorkspace = this.loadWorkspace.bind(this);
         this.saveWorkspace = this.saveWorkspace.bind(this);
+        this.saveFileToAccount = this.saveFileToAccount.bind(this);
+        this.getRepoFromFileName = this.getRepoFromFileName.bind(this);
     }
 
     /**
@@ -39,7 +41,7 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
         let items: any[] = [];
 
         if (this.props.opened_files.length === 0) {
-            items.push(<Button key="none" icon="ban" disabled={true} basic={true} content="No locks acquired"/>);
+            items.push(<Button key="none" icon="ban" disabled={true} basic={true} content="No files opened"/>);
         }
 
         for (let i = 0; i < this.props.opened_files.length; i++) {
@@ -76,7 +78,7 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
         let content = this.props.save_files.content;
 
         if (content.length === 0) {
-            items.push(<Button key="none" icon="ban" disabled={true} basic={true} content="No files opened"/>);
+            items.push(<Button key="none" icon="ban" disabled={true} basic={true} content="No locks acquired"/>);
         }
 
         for (let i = 0; i < content.length; i++) {
@@ -87,6 +89,7 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
                     icon="save"
                     basic={true}
                     content={cur.name}
+                    onClick={() => this.saveFileToAccount(cur.name)}
                 />
             );
         }
@@ -180,6 +183,36 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
 
     }
 
+    /**
+     * Method used to search for the repository name associated with a filename.
+     * The method will traverse through the list of openend files in the global state
+     * and return the associated repository.
+     * @param fileName: name of file for which the repository is requested.
+     * @return repo: name of repository associated with fileName.
+     */
+    getRepoFromFileName(fileName: any) {
+        // get list of opened files
+        let files = this.props.files.content;
+
+        for (let file of files) {
+            if (file.name === fileName) {
+                return file.repo;
+            }
+        }
+        return '';
+    }
+
+    /**
+     * Method that will invoke the backend to save the selected file to the remote account.
+     * @param fileName
+     */
+    saveFileToAccount(fileName: any) {
+        console.log(
+            "info for backend =>" + fileName + " , " + this.getRepoFromFileName(fileName) + ',' + this.props.token + ','
+            + this.props.login);
+        // TODO schedule task for model.
+    }
+
     render() {
         let {repoVisible, newVisible, newType} = this.state;
         return (
@@ -254,7 +287,10 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
  */
 const mapStateToProps = (state, props) => {
     return {
-        save_files: state.locks
+        save_files: state.locks,
+        files: state.files,
+        login: state.login,
+        token: state.token
     };
 };
 
