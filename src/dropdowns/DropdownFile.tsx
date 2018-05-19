@@ -37,7 +37,7 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
         let items: any[] = [];
 
         if (this.props.opened_files.length === 0) {
-            items.push(<Button key="none" icon="ban" disabled={true} basic={true} content="No files opened"/>);
+            items.push(<Button key="none" icon="ban" disabled={true} basic={true} content="No locks acquired"/>);
         }
 
         for (let i = 0; i < this.props.opened_files.length; i++) {
@@ -71,7 +71,7 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
     getGitHubFiles() {
         console.log(this.props);
         let items: any[] = [];
-        let content = this.props.github_files.content;
+        let content = this.props.save_files.content;
 
         if (content.length === 0) {
             items.push(<Button key="none" icon="ban" disabled={true} basic={true} content="No files opened"/>);
@@ -226,13 +226,15 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
 }
 
 /**
- * Map global store to props of this component.
+ * Map global store to props of this component. Here the locks
+ * in the global state are used. A user can only save files on which
+ * he/she acquired a lock.
  * @param state: state retrieved from the global redux store.
  * @returns {{token}}: sets props.token
  */
 const mapStateToProps = (state, props) => {
     return {
-        github_files: state.files
+        save_files: state.locks
     };
 };
 

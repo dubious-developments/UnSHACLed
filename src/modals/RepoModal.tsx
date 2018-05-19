@@ -177,7 +177,7 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
                     closeIcon={true}
                     onClose={this.cancelModal}
                 >
-                    <Modal.Header> Open graph from account </Modal.Header>
+                    <Modal.Header>GitHub repo's</Modal.Header>
                     <Modal.Content>
                         <Dropdown
                             placeholder='Select Project'
