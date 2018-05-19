@@ -18,9 +18,15 @@ describe("DataAccessProvider Class", () => {
             expect(dap.getValidationService()).toBeDefined();
         });
 
-    it("can retrieve a file DAO.",
+    it("can retrieve a local file DAO.",
         () => {
             let dap = DataAccessProvider.getInstance();
-            expect(dap.getFileDAO()).toBeDefined();
+            expect(dap.getLocalFileDAO()).toBeDefined();
+        });
+
+    it("can retrieve a remote file DAO.",
+        () => {
+            let dap = DataAccessProvider.getInstance();
+            expect(dap.getRemoteFileDAO()).toBeDefined();
         });
 });

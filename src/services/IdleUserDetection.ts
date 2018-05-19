@@ -2,7 +2,7 @@
  * This class is used to store the time since the last user action
  * A user action is a click or a key pressed
  */
-class TimingService {
+export default class IdleUserDetection {
 
     // number of milliseconds user needs to be inactive
     private ms: number = 2000;
@@ -23,5 +23,3 @@ class TimingService {
     }
 
 }
-
-export default TimingService;

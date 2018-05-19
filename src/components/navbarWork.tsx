@@ -2,7 +2,7 @@ import * as React from 'react';
 import {Menu, Icon, Popup, List, Image} from 'semantic-ui-react';
 import Auth from '../services/Auth';
 import {NavbarWorkProps} from './interfaces/interfaces';
-import {FileModule} from '../persistence/fileDAO';
+import {LocalFileModule} from '../persistence/localFileDAO';
 import {Model} from '../entities/model';
 import {DataAccessProvider} from '../persistence/dataAccessProvider';
 import {LoadFileTask, GetOpenedFilesTask, GetValidationReportNavbar} from '../services/ModelTasks';
@@ -99,10 +99,10 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
 
         if (input) {
             let files = input.files;
-            let fileDAO = DataAccessProvider.getInstance().getFileDAO();
+            let fileDAO = DataAccessProvider.getInstance().getLocalFileDAO();
             if (files) {
                 if (files[0]) {
-                    fileDAO.find(new FileModule(ModelComponent.DataGraph, files[0].name, files[0]));
+                    fileDAO.find(new LocalFileModule(ModelComponent.DataGraph, files[0].name, files[0]));
                 }
             } else {
                 console.log("error: no files found");
@@ -117,10 +117,10 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
 
         if (input) {
             let files = input.files;
-            let fileDAO = DataAccessProvider.getInstance().getFileDAO();
+            let fileDAO = DataAccessProvider.getInstance().getLocalFileDAO();
             if (files) {
                 if (files[0]) {
-                    fileDAO.find(new FileModule(ModelComponent.SHACLShapesGraph, files[0].name, files[0]));
+                    fileDAO.find(new LocalFileModule(ModelComponent.SHACLShapesGraph, files[0].name, files[0]));
                 }
             } else {
                 console.log("error: no files found");
