@@ -3,6 +3,9 @@ import {Modal, Button, Icon, Input, Dropdown, Form, Checkbox} from 'semantic-ui-
 import {NewModalProps} from '../components/interfaces/interfaces';
 import RequestModule from '../requests/RequestModule';
 import {connect} from 'react-redux';
+import {ModelComponent} from "../entities/modelTaskMetadata";
+import {DataAccessProvider} from "../persistence/dataAccessProvider";
+import {RemoteFileModule} from "../persistence/remoteFileDAO";
 
 /**
  Component used to create a model for new file/project creation.
@@ -126,8 +129,22 @@ class NewModal extends React.Component<NewModalProps & any, any> {
      */
     createFile(lock: any) {
         if (lock === true) {
-            // TODO RequestModuel.updateFile
-            console.log("creating a " + this.state.fileType + " file!");
+            // invoke backend method
+            let target;
+            // determine which type of model to target
+            if (this.state.fileType === 'data') {
+                target = ModelComponent.DataGraph;
+            } else if (this.state.fileType === 'SHACL') {
+                target = ModelComponent.SHACLShapesGraph;
+            } else {
+                console.log("invalid type");
+            }
+            // get remote file DAO
+            let remotefileDAO = DataAccessProvider.getInstance().getRemoteFileDAO();
+            // create remote file
+            remotefileDAO.insert(new RemoteFileModule
+            (target, this.props.user, this.state.name, this.state.project, this.props.token));
+            // Release lock
             let filePath = this.state.name;
             RequestModule.releaseLock(this.props.user, this.state.project,
                 this.props.token, filePath).then(response => {
