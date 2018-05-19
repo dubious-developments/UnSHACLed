@@ -7,6 +7,7 @@ import {appendFile} from "../redux/actions/fileActions";
 import {DataAccessProvider} from '../persistence/dataAccessProvider';
 import {RemoteFileModule} from '../persistence/remoteFileDAO';
 import {ModelComponent} from '../entities/modelTaskMetadata';
+import {appendLock} from "../redux/actions/lockActions";
 
 /**
  Component used to create a modal for opening files from projects
@@ -172,6 +173,7 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
     appendFile(fileName: any, repoName: any, type: any) {
         // Dispatch action to the redux store
         this.props.appendFile(fileName, repoName, type);
+        this.props.appendLock(fileName);
         console.log(this.props);
     }
 
@@ -267,7 +269,8 @@ const mapStateToProps = (state, props) => {
  * dispatch call to the global store
  */
 const mapActionsToProps = {
-    appendFile: appendFile
+    appendFile: appendFile,
+    appendLock: appendLock
 
 };
 export default connect(mapStateToProps, mapActionsToProps)(RepoModal);

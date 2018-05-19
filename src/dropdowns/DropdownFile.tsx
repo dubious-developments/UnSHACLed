@@ -6,6 +6,8 @@ import NewModal from '../modals/NewModal';
 import {connect} from 'react-redux';
 import {ModelComponent} from "../entities/modelTaskMetadata";
 import {FileModule} from "../persistence/fileDAO";
+import {DataAccessProvider} from "../persistence/dataAccessProvider";
+import {RemoteFileModule} from "../persistence/remoteFileDAO";
 
 /**
  Component used to create a dropdown component for the file toolbar option
@@ -33,7 +35,7 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
         this.loadWorkspace = this.loadWorkspace.bind(this);
         this.saveWorkspace = this.saveWorkspace.bind(this);
         this.saveFileToAccount = this.saveFileToAccount.bind(this);
-        this.getRepoFromFileName = this.getRepoFromFileName.bind(this);
+        this.getRepoAndType = this.getRepoAndType.bind(this);
         this.clickWorkspace = this.clickWorkspace.bind(this);
     }
 
@@ -214,19 +216,19 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
     }
 
     /**
-     * Method used to search for the repository name associated with a filename.
+     * Method used to search for the repository name and file type associated with a filename.
      * The method will traverse through the list of openend files in the global state
-     * and return the associated repository.
+     * and return the associated repository and type.
      * @param fileName: name of file for which the repository is requested.
-     * @return repo: name of repository associated with fileName.
+     * @return [repo, type ]
      */
-    getRepoFromFileName(fileName: any) {
+    getRepoAndType(fileName: any) {
         // get list of opened files
         let files = this.props.files.content;
 
         for (let file of files) {
             if (file.name === fileName) {
-                return file.repo;
+                return [file.repo, file.type];
             }
         }
         return '';
@@ -237,10 +239,25 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
      * @param fileName
      */
     saveFileToAccount(fileName: any) {
-        console.log(
-            "info for backend =>" + fileName + " , " + this.getRepoFromFileName(fileName) + ',' + this.props.token + ','
-            + this.props.login);
-        // TODO schedule task for model.
+        // get type and repo name for file
+        let o = this.getRepoAndType(fileName);
+        let repo = o[0];
+        let type = o[1];
+        // invoke backend method
+        let target;
+        // determine which type of model to target
+        if (type === 'data') {
+            target = ModelComponent.DataGraph;
+        } else if (type === 'SHACL') {
+            target = ModelComponent.SHACLShapesGraph;
+        } else {
+            console.log("invalid type");
+        }
+        // get remote file DAO
+        let remotefileDAO = DataAccessProvider.getInstance().getRemoteFileDAO();
+        // update remote file
+        remotefileDAO.insert(new RemoteFileModule
+        (target, this.props.user, this.state.fileName, this.state.projectName, this.props.token));
     }
 
     render() {
