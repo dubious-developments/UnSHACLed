@@ -1,3 +1,4 @@
+export const APPEND_FILE = 'files:appendFile';
 /**
  * Redux action used to be dispatched to the reducers which will update the store.
  * @param fileName: name of file being opened and which should be added to the global sotre
@@ -7,7 +8,7 @@
  */
 export function appendFile(fileName: any, repoName: any, type: any) {
     return{
-        type: 'appendFile',
+        type: APPEND_FILE,
         payload: {
             fileName: fileName,
             repoName: repoName,

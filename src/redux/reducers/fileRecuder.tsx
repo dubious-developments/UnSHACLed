@@ -1,3 +1,5 @@
+import {APPEND_FILE} from "../actions/fileActions";
+
 const initialState = {
     content: []
 };
@@ -12,7 +14,7 @@ const initialState = {
  */
 export function fileReducer(state: any = initialState, action: any) {
     switch (action.type) {
-        case 'appendFile':
+        case APPEND_FILE:
             return {
                 content: [
                     ...state.content,

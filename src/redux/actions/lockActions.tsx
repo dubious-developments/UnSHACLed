@@ -1,3 +1,5 @@
+export const APPEND_LOCK = 'locks:appendLock';
+export const FLUSH_LOCK = 'lock:flushLock';
 /**
  * Redux action used to be dispatched to the reducers which will update the store.
  * @param fileName: name of file being on which a lock has been acquired.
@@ -5,7 +7,7 @@
  */
 export function appendLock(fileName: any) {
     return {
-        type: 'appendLock',
+        type: APPEND_LOCK,
         payload: {
             fileName: fileName,
         }
@@ -21,6 +23,6 @@ export function appendLock(fileName: any) {
  */
 export function flushLocks() {
     return{
-        type: 'flushLocks'
+        type: FLUSH_LOCK
     };
 }
