@@ -26,6 +26,8 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
         this.showRepoModal = this.showRepoModal.bind(this);
         this.showNewModal = this.showNewModal.bind(this);
         this.submitCallBack = this.submitCallBack.bind(this);
+        this.loadWorkspace = this.loadWorkspace.bind(this);
+        this.saveWorkspace = this.saveWorkspace.bind(this);
     }
 
     /**
@@ -162,6 +164,22 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
         });
     }
 
+    /**
+     * Method to load a workspace. The user need to provide a valid
+     * workspace formatted file obtained by saving the workspace before hand.
+     */
+    loadWorkspace() {
+
+    }
+
+    /**
+     * Method to save the current workspace. The workspace will be downloaded
+     * through the users browser in a valid workspace formatted file.
+     */
+    saveWorkspace() {
+
+    }
+
     render() {
         let {repoVisible, newVisible, newType} = this.state;
         return (
@@ -202,7 +220,9 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
                         >
                             <Dropdown.Menu content={<this.getGitHubFiles/>}/>
                         </Dropdown>
-                        <Dropdown.Item text='Clear graph' id='tb_clear_graph'/>
+                        <Dropdown.Divider/>
+                        <Dropdown.Item text='Load workspace' onClick={this.loadWorkspace}/>
+                        <Dropdown.Item text='Save workspace' onClick={this.saveWorkspace}/>
                     </Dropdown.Menu>
                 </Dropdown>
                 {repoVisible ?
