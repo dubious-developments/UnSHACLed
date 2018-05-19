@@ -4,6 +4,9 @@ import {RepoModalProps} from '../components/interfaces/interfaces';
 import RequestModule from '../requests/RequestModule';
 import {connect} from 'react-redux';
 import {appendFile} from "../redux/actions/fileActions";
+import {DataAccessProvider} from '../persistence/dataAccessProvider';
+import {RemoteFileModule} from '../persistence/remoteFileDAO';
+import {ModelComponent} from '../entities/modelTaskMetadata';
 
 /**
  Component used to create a modal for opening files from projects
@@ -136,8 +139,20 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
     confirmModal() {
         this.props.confirm_cb("RepoModal", this.state.type);
         // Invoke backend method
-        // TODO
-        // Log openend file into global state (redux store)
+        let target;
+        // determine which type of model to target
+        if (this.state.type === 'data') {
+            target = ModelComponent.DataGraph;
+        } else if (this.state.type === 'SHACL') {
+            target = ModelComponent.SHACLShapesGraph;
+        } else {
+            console.log("invalid type");
+        }
+        let remotefileDAO = DataAccessProvider.getInstance().getRemoteFileDAO();
+        remotefileDAO.find(new RemoteFileModule
+        (target, this.props.user, this.state.fileName, this.state.projectName, this.props.token));
+
+        // Log opened file into global state (redux store)
         this.appendFile(this.state.fileName, this.state.projectName, this.state.type);
         // set state
         this.setState({
