@@ -2,7 +2,6 @@ import {DataAccessObject} from "./dataAccessObject";
 import {ModelComponent, ModelTaskMetadata} from "../entities/modelTaskMetadata";
 import {LoadTask, LoadWorkspaceTask, LocalFileModule} from "./localFileDAO";
 import {Model} from "../entities/model";
-import RequestModule from "./RequestModule";
 import * as Collections from "typescript-collections";
 import {GraphParser} from "./graphParser";
 import {WorkspaceParser} from "./workspaceParser";
@@ -10,6 +9,7 @@ import {Graph, ImmutableGraph} from "./graph";
 import {ModelData} from "../entities/modelData";
 import {Task} from "../entities/task";
 import {Component} from "./component";
+import RequestModule from "../requests/RequestModule";
 
 /**
  * Provides basic DAO functionality for accessing/altering remote files.
