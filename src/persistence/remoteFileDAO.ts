@@ -10,6 +10,7 @@ import {ModelData} from "../entities/modelData";
 import {Task} from "../entities/task";
 import {Component} from "./component";
 import RequestModule from "../requests/RequestModule";
+import PollingService from "../services/PollingService";
 
 /**
  * Provides basic DAO functionality for accessing/altering remote files.
@@ -51,6 +52,30 @@ export class RemoteFileDAO implements DataAccessObject {
     }
 
     /**
+     * Start listening for remote changes.
+     * @param {string} username
+     * @param reponame
+     * @param token
+     */
+    public start(username: string, reponame: string, token: string) {
+        let self = this;
+        let service = new PollingService(2000, function () {
+            RequestModule.getFilesFromRepo(username, reponame, token).then(files => {
+                files.forEach(file => {
+                    RequestModule.pollForChanges(username, reponame, token, file).then(changes => {
+                        if (changes.isModified) {
+                            // TODO: atm everything is put inside the DataGraph component!!!
+                            // Need a way to get this information from the server...
+                            self.find(new RemoteFileModule(ModelComponent.DataGraph, username, file, reponame, token));
+                        }
+                    });
+                });
+            });
+        });
+        service.startPolling();
+    }
+
+    /**
      * Create a new remote file.
      * @param {RemoteFileModule} module
      */
@@ -81,7 +106,7 @@ export class RemoteFileDAO implements DataAccessObject {
     public find(module: RemoteFileModule): void {
         let self = this;
         RequestModule.readFile(module.getUserName(),
-                               module.getRepo(),
+                               module.getRepoName(),
                                module.getToken(),
                                module.getIdentifier())
             .then(content => {
@@ -120,7 +145,7 @@ export class RemoteFileDAO implements DataAccessObject {
 export class RemoteFileModule extends LocalFileModule {
 
     private username: string;
-    private repo: string;
+    private reponame: string;
     private token: string;
 
     /**
@@ -132,11 +157,11 @@ export class RemoteFileModule extends LocalFileModule {
      * @param {string} token
      */
     public constructor(target: ModelComponent,
-                       username: string, filename: string, repo: string,
+                       username: string, filename: string, reponame: string,
                        token: string) {
         super(target, filename, new Blob([]));
         this.username = username;
-        this.repo = repo;
+        this.reponame = reponame;
         this.token = token;
     }
 
@@ -152,8 +177,8 @@ export class RemoteFileModule extends LocalFileModule {
      * Return the repository that is to be the database for remote access.
      * @returns {string}
      */
-    public getRepo(): string {
-        return this.repo;
+    public getRepoName(): string {
+        return this.reponame;
     }
 
     /**
@@ -193,7 +218,7 @@ class SaveTask extends Task<ModelData, ModelTaskMetadata> {
                 this.parser.serialize(part.toMutable(), this.module.getMime(), function(result: string) {
                     RequestModule.updateFile(
                         self.module.getUserName(),
-                        self.module.getRepo(),
+                        self.module.getRepoName(),
                         self.module.getToken(),
                         self.module.getIdentifier(),
                         result);
