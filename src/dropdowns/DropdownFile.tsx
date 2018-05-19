@@ -36,7 +36,6 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
         this.saveWorkspace = this.saveWorkspace.bind(this);
         this.saveFileToAccount = this.saveFileToAccount.bind(this);
         this.getRepoAndType = this.getRepoAndType.bind(this);
-        this.clickWorkspace = this.clickWorkspace.bind(this);
     }
 
     /**
@@ -175,36 +174,11 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
     }
 
     /**
-     * Method that will invoke the html input to load a workspace.
-     */
-    clickWorkspace() {
-        let input = document.getElementById("loadWorkspace");
-        if (input) {
-            input.click();
-        } else {
-            console.log("Could not find element 'loadWorkspace'");
-        }
-    }
-
-    /**
      * Method to load a workspace. The user need to provide a valid
      * workspace formatted file obtained by saving the workspace before hand.
      */
     loadWorkspace() {
-        let input = (document.getElementById("loadWorkspace") as HTMLInputElement);
 
-        if (input) {
-            let files = input.files;
-            if (files) {
-                if (files[0]) {
-                    console.log(files[0]);
-                }
-            } else {
-                console.log("error: no files found");
-            }
-        } else {
-            console.log("error: could not find loadWorkspace button");
-        }
     }
 
     /**
@@ -301,18 +275,11 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
                             <Dropdown.Menu content={<this.getGitHubFiles/>}/>
                         </Dropdown>
                         <Dropdown.Divider/>
-                        <Dropdown.Item text='Load workspace' onClick={this.clickWorkspace}/>
+                        <Dropdown.Item text='Load workspace' onClick={this.loadWorkspace}/>
                         <Dropdown.Item text='Save workspace' onClick={this.saveWorkspace}/>
 
                     </Dropdown.Menu>
                 </Dropdown>
-
-                <input
-                    onChange={this.loadWorkspace}
-                    type="file"
-                    id="loadWorkspace"
-                    style={{"display": "none"}}
-                />
 
                 {repoVisible ?
                     <RepoModal
