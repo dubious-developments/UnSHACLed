@@ -80,7 +80,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
 
         if (input) {
             let files = input.files;
-            let fileDAO = DataAccessProvider.getInstance().getFileDAO();
+            let fileDAO = DataAccessProvider.getInstance().getLocalFileDAO();
             if (files) {
                 if (files[0]) {
                     fileDAO.find(new LocalFileModule(ModelComponent.DataGraph, files[0].name, files[0]));
@@ -98,7 +98,7 @@ export class Navbar extends React.Component<NavbarWorkProps, {}> {
 
         if (input) {
             let files = input.files;
-            let fileDAO = DataAccessProvider.getInstance().getFileDAO();
+            let fileDAO = DataAccessProvider.getInstance().getLocalFileDAO();
             if (files) {
                 if (files[0]) {
                     fileDAO.find(new LocalFileModule(ModelComponent.SHACLShapesGraph, files[0].name, files[0]));

@@ -1,6 +1,7 @@
 import {Model} from "../entities/model";
 import {LocalFileDAO} from "./localFileDAO";
 import {ValidationService} from "../conformance/ValidationService";
+import {RemoteFileDAO} from "./remoteFileDAO";
 
 /**
  * This class provides access to most of the application's key components.
@@ -8,7 +9,8 @@ import {ValidationService} from "../conformance/ValidationService";
 export class DataAccessProvider {
 
     private static _instance: DataAccessProvider = new DataAccessProvider();
-    private fileDAO: LocalFileDAO;
+    private localFileDAO: LocalFileDAO;
+    private remoteFileDAO: RemoteFileDAO;
     private validationService: ValidationService;
 
     // tmp field
@@ -42,15 +44,28 @@ export class DataAccessProvider {
     }
 
     /**
-     * Retrieve the file DAO.
+     * Retrieve the local file DAO.
      * @returns {LocalFileDAO}
      */
-    public getFileDAO(): LocalFileDAO {
-        if (this.fileDAO) {
-            return this.fileDAO;
+    public getLocalFileDAO(): LocalFileDAO {
+        if (this.localFileDAO) {
+            return this.localFileDAO;
         } else {
-            this.fileDAO = new LocalFileDAO(this._model);
-            return this.fileDAO;
+            this.localFileDAO = new LocalFileDAO(this._model);
+            return this.localFileDAO;
+        }
+    }
+
+    /**
+     * Retrieve the remote file DAO.
+     * @returns {RemoteFileDAO}
+     */
+    public getRemoteFileDAO(): RemoteFileDAO {
+        if (this.remoteFileDAO) {
+            return this.remoteFileDAO;
+        } else {
+            this.remoteFileDAO = new RemoteFileDAO(this._model);
+            return this.remoteFileDAO;
         }
     }
 

@@ -24,7 +24,7 @@ export class RemoteFileDAO implements DataAccessObject {
      * @param {Model} model
      * @param requestModule
      */
-    public constructor(model: Model, requestModule: RequestModule) {
+    public constructor(model: Model) {
         this.model = model;
         this.parsers = new Collections.Dictionary<ModelComponent, Parser<any>>();
 
