@@ -162,7 +162,7 @@ class RequestModule {
             'http://193.190.127.184:8042/repo/file/' + repoOwner + '/' + repoName + '/' + token + '/' + fileName);
         const target =
             'http://193.190.127.184:8042/repo/file/' + repoOwner + '/' + repoName + '/' + token + '/' + fileName;
-        axios.post(target, {file})
+        axios.put(target, {file})
             .then(res => console.log(res));
     }
 
