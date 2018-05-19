@@ -7,7 +7,7 @@ import {Model} from '../entities/model';
 import {DataAccessProvider} from '../persistence/dataAccessProvider';
 import {LoadFileTask, GetOpenedFilesTask, GetValidationReportNavbar} from '../services/ModelTasks';
 import {ModelComponent} from '../entities/modelTaskMetadata';
-import {ValidationReport, ValidationError} from "../conformance/wrapper/ValidationReport";
+import {ValidationReport, ValidationError} from "../conformance/ValidationReport";
 import ToolbarIcon from './ToolbarIcon';
 import DropdownFile from '../dropdowns/DropdownFile';
 import DropdownEdit from '../dropdowns/DropdownEdit';

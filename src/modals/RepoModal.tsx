@@ -1,38 +1,123 @@
 import * as React from 'react';
-import {Modal, Button, Icon, Dropdown} from 'semantic-ui-react';
+import {Modal, Button, Icon, Dropdown, Checkbox, Form} from 'semantic-ui-react';
 import {RepoModalProps} from '../components/interfaces/interfaces';
+import RequestModule from '../requests/RequestModule';
+import {connect} from 'react-redux';
+import {appendFile} from "../redux/actions/fileActions";
 
-/*
-    Component used to create a dropdown component for the file toolbar option
-    Requires several props from the parent, which can be found in interfaces.d.ts
+/**
+ Component used to create a modal for opening files from projects
+ Requires several props from the parent, which can be found in interfaces.d.ts
 
  */
-class RepoModal extends React.Component<RepoModalProps, any> {
+class RepoModal extends React.Component<RepoModalProps & any, any> {
 
     constructor(props: any) {
         super(props);
         this.state = {
             selected: true,
-            files: true
+            files: true,
+            repos: [],
+            fileList: [],
+            type: '',
+            projectName: '',
+            fileName: ''
         };
         this.setSelected = this.setSelected.bind(this);
         this.setFilesSelected = this.setFilesSelected.bind(this);
         this.cancelModal = this.cancelModal.bind(this);
         this.confirmModal = this.confirmModal.bind(this);
+        this.processRepos = this.processRepos.bind(this);
+        this.processFile = this.processFile.bind(this);
+        this.handleType = this.handleType.bind(this);
+        this.appendFile = this.appendFile.bind(this);
     }
 
-    setSelected() {
-        this.setState({
-            selected: false
+    /**
+     * Method immediately invoked when this component is mounted.
+     * Will request the repositories from the currently authenticated user through the Request module
+     * and set the component state according to its results.
+     */
+    componentDidMount() {
+        RequestModule.getUserRepos(this.props.token).then(repoArray => {
+            this.processRepos(repoArray);
         });
     }
 
-    setFilesSelected() {
+    /**
+     * Method that will map an array of repos required from the API to
+     * an array able to be loaded in a Dropdown UI component.
+     * @param repoArray
+     */
+    processRepos(repoArray: any) {
+        /* set state */
         this.setState({
-            files: false
+            repos: RequestModule.processRepos(repoArray)
         });
     }
 
+    /**
+     * Method that will map an array of files required from the API to
+     * an array able to be loaded in a Dropdown UI component.
+     * @param repoArray
+     */
+    processFile(files: any) {
+        /* set state */
+        this.setState({
+            fileList: RequestModule.processFiles(files)
+        });
+    }
+
+    /**
+     * Method that will adapt the current state of the 'selected' attribute
+     * which is used to determine if a second dropdown should be visible or not.
+     * @param: none
+     * @return: none
+     */
+    setSelected(e: any, {value}: any) {
+        RequestModule.getFilesFromRepo(this.props.user, value, this.props.token).then(files => {
+            this.processFile(files);
+        });
+        this.setState({
+            selected: false,
+            projectName: value
+        });
+    }
+
+    /**
+     * Method that will adapt the current state of the 'files' attribute
+     * which is used to determine wether the confirm button should be
+     * enable or disabled.
+     * @param: none
+     * @return: none
+     */
+    setFilesSelected(e: any, {value}: any) {
+        this.setState({
+            files: false,
+            fileName: value
+        });
+    }
+
+    /**
+     * Method that will adapt the current state of the 'type' attribute
+     * which is used to determine which type of file the users wants to open
+     * @param: e : event
+     * @param: value: selected value in checkbox
+     * @return: none
+     */
+    handleType(e: any, {value}: any) {
+        this.setState({
+            type: value
+        });
+    }
+
+    /**
+     * Function fired when a user click the cancel button on the modal.
+     * Will adapt the current state to its initial settings and will call the callback
+     * function received from the parent which will handle the cancel functionality.
+     * @param: none
+     * @return: none
+     */
     cancelModal() {
         this.props.cancel_cb("RepoModal");
         this.setState({
@@ -41,19 +126,42 @@ class RepoModal extends React.Component<RepoModalProps, any> {
         });
     }
 
+    /**
+     * Function fired when a user click the confirm button on the modal.
+     * Will adapt the current state to its initial settings and will call the callback
+     * function received from the parent which will handle the confirm functionality.
+     * @param: none
+     * @return: none
+     */
     confirmModal() {
-        this.props.confirm_cb("RepoModal");
+        this.props.confirm_cb("RepoModal", this.state.type);
+        // Invoke backend method
+        // TODO
+        // Log openend file into global state (redux store)
+        this.appendFile(this.state.fileName, this.state.projectName, this.state.type);
+        // set state
         this.setState({
             files: true,
             selected: true
         });
     }
 
+    /**
+     * Method use to call the prop function which is bound to the action from the global
+     * store. This will update the global store with the newly opened file.
+     * @param fileName: name of file being opened and which should be added to the global sotre
+     * @param repoName: name of the repository the file resides in
+     * @param type: type of file. can either be 'SHACL' or 'data'.
+     * @return {any}
+     */
+    appendFile(fileName: any, repoName: any, type: any) {
+        // Dispatch action to the redux store
+        this.props.appendFile(fileName, repoName, type);
+        console.log(this.props);
+    }
+
     render() {
-        let projects = [{text: " Project 1", value: "Project 1"}, {text: " Project 2", value: "Project 2"}];
-        let graphs = [{text: " File 1", value: "File 1"}, {text: " File 2", value: "File 2"}];
-        let {selected} = this.state;
-        let {files} = this.state;
+        let {selected, files, repos, fileList} = this.state;
         return (
             <div>
                 <Modal
@@ -66,31 +174,56 @@ class RepoModal extends React.Component<RepoModalProps, any> {
                         top: '50%',
                         transform: 'translateY(-50%)'
                     }}
+                    closeIcon={true}
+                    onClose={this.cancelModal}
                 >
-                    <Modal.Header>GitHub repo's</Modal.Header>
+                    <Modal.Header> Open graph from account </Modal.Header>
                     <Modal.Content>
                         <Dropdown
                             placeholder='Select Project'
                             fluid={true}
                             selection={true}
-                            options={projects}
+                            options={repos}
                             onChange={this.setSelected}
                         />
                         {selected === false && (
-                            <Dropdown
-                                placeholder='Select Graph File'
-                                fluid={true}
-                                selection={true}
-                                options={graphs}
-                                onChange={this.setFilesSelected}
-                            />)
+                            <div style={{marginTop: '1em'}}>
+                                <Dropdown
+                                    placeholder='Select Graph File'
+                                    fluid={true}
+                                    selection={true}
+                                    options={fileList}
+                                    onChange={this.setFilesSelected}
+                                />
+                                <Form style={{marginTop: '1em'}}>
+                                    <Form.Field>
+                                        Selected type: <b>{this.state.type}</b>
+                                    </Form.Field>
+                                    <Form.Field>
+                                        <Checkbox
+                                            label='Data'
+                                            value='data'
+                                            checked={this.state.type === 'data'}
+                                            onChange={this.handleType}
+                                        />
+                                    </Form.Field>
+                                    <Form.Field>
+                                        <Checkbox
+                                            label='SHACL'
+                                            value='SHACL'
+                                            checked={this.state.type === 'SHACL'}
+                                            onChange={this.handleType}
+                                        />
+                                    </Form.Field>
+                                </Form>
+                            </div>)
                         }
                     </Modal.Content>
                     <Modal.Actions>
                         <Button color='red' onClick={this.cancelModal}>
                             <Icon name='remove'/> Cancel
                         </Button>
-                        <Button color='green' onClick={this.confirmModal} disabled={files} >
+                        <Button color='green' onClick={this.confirmModal} disabled={files}>
                             <Icon name='checkmark'/> Open
                         </Button>
                     </Modal.Actions>
@@ -100,4 +233,26 @@ class RepoModal extends React.Component<RepoModalProps, any> {
     }
 }
 
-export default RepoModal;
+/**
+ * Map global store to props of this component.
+ * @param state: state retrieved from the global redux store.
+ * @returns {{token}}: sets props.token
+ */
+const mapStateToProps = (state, props) => {
+    return {
+        token: state.token,
+        user: state.login,
+        files: state.files
+    };
+};
+
+/**
+ * Map redux actions to props of this component. A method call to the props function
+ * will automatically dispatch the action through redux without an explicit
+ * dispatch call to the global store
+ */
+const mapActionsToProps = {
+    appendFile: appendFile
+
+};
+export default connect(mapStateToProps, mapActionsToProps)(RepoModal);

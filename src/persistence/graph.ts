@@ -446,6 +446,9 @@ class GraphData {
 
     private prefixes: PrefixMap;
 
+    /**
+     * Create a new instance of graph data.
+     */
     public constructor() {
         let N3 = require("n3");
         this.n3Store = N3.Store();
