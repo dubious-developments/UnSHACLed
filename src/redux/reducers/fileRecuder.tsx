@@ -13,7 +13,7 @@ const initialState = {
 export function fileReducer(state: any = initialState, action: any) {
     switch (action.type) {
         case 'appendFile':
-            return Object.assign({}, state, {
+            return {
                 content: [
                     ...state.content,
                     {
@@ -22,7 +22,7 @@ export function fileReducer(state: any = initialState, action: any) {
                         type: action.payload.type,
                     }
                 ]
-            });
+            };
         default :
             return state;
     }
