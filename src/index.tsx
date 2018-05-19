@@ -8,6 +8,8 @@ import 'semantic-ui-css/semantic.min.css';
 import {createStore, combineReducers} from 'redux';
 import {userNameReducer, userLoginReducer, userEmailReducer, userTokenReducer} from './redux/reducers/userReducer';
 import {fileReducer} from "./redux/reducers/fileRecuder";
+import {lockReducer} from "./redux/reducers/lockReducer";
+
 import {Provider} from 'react-redux';
 
 const allReducers = combineReducers(
@@ -16,7 +18,8 @@ const allReducers = combineReducers(
         login: userLoginReducer,
         email: userEmailReducer,
         token: userTokenReducer,
-        files: fileReducer
+        files: fileReducer,
+        locks: lockReducer
     }
 );
 const store = createStore(allReducers);
