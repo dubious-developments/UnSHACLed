@@ -36,10 +36,10 @@
     </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="Pixie">
-      <HintPath>packages\Pixie.0.1.4\lib\net45\Pixie.dll</HintPath>
+      <HintPath>packages\Pixie.0.1.5\lib\net45\Pixie.dll</HintPath>
     </Reference>
     <Reference Include="Pixie.Terminal">
-      <HintPath>packages\Pixie.0.1.4\lib\net45\Pixie.Terminal.dll</HintPath>
+      <HintPath>packages\Pixie.0.1.5\lib\net45\Pixie.Terminal.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

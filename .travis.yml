@@ -17,6 +17,7 @@ addons:
     token:
       secure: $SONARCLOUD_KEY
   firefox: "latest"
+  chrome: stable
   apt:
     packages:
       # Install pip3 so we can install PyGitHub.
@@ -45,6 +46,8 @@ install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo pip3 install pygithub; fi
   # Install gulp.
   - npm install -g gulp
+  # Install serve, which we'll need for running the Selenium tests.
+  - npm install -g serve@6.5.3
   # Install npm dependencies.
   - npm install
 
@@ -54,8 +57,18 @@ script:
   # Run the tests.
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then XVFB_RUN=xvfb-run; fi
   - $XVFB_RUN gulp test
-  # Run the Selenium tests.
-  - pushd selenium && make nuget && make && $XVFB_RUN make TEST_OPTIONS="--no-build-app" run && popd
+  # Run the Selenium tests. Go with Firefox and Chrome on both Linux and Mac OS X.
+  - SELENIUM_BROWSERS="firefox chrome"
+  # TODO: maybe try to add Safari on Mac OS X? Safari seems to run just fine,
+  # but for some reason it can't find elements by their ID, causing the tests
+  # to fail.
+  # - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+  #     sudo safaridriver --enable;
+  #     SELENIUM_BROWSERS="firefox chrome safari";
+  #   else
+  #     SELENIUM_BROWSERS="firefox chrome";
+  #   fi
+  - pushd selenium && make nuget && make && $XVFB_RUN make TEST_OPTIONS="--no-build-app --color --browsers $SELENIUM_BROWSERS" run && popd
   # Run SonarCloud, but only on Linux.
   - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ ! -z "$SONARCLOUD_KEY" ]; then sonar-scanner; fi
   # Deploy a nightly build when all tests are successful for a master branch commit.
