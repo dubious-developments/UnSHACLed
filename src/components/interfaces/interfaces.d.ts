@@ -63,4 +63,32 @@ export interface LegendProps {
 export interface DropdownFileProps {
     opened_files: any; // currently opened files
     import_cb: PropTypes.func; // callback function to parent for importing either a shacl or data graph
+    save_graph: PropTypes.func; // callback function to parent for saving graph, will call this.saveGraph
+    get_file_from_popup: PropTypes.func; // callback function to parent for saving correct file
+
+}
+
+export interface RepoModalProps {
+    visible: any; // state variable from parent that will determine visibility
+    confirm_cb: PropTypes.func; // callback function  to parent when confirm is clicked
+    cancel_cb: PropTypes.func; // callback function to parent when cancel is clicked
+}
+
+/**
+ * Props definition for user info modal.
+ */
+export interface UserModalProps {
+    visible: any; // state variable from parent that will determine visibility
+    login: any; // login of currently authenticated user
+    onClose_cb: PropTypes.func; // callback function to parent when modal is closed
+}
+
+/**
+ * Props definition for new file/project creation modal.
+ */
+export interface NewModalProps {
+    type: any; // type of modal. Can either be 'file' or 'project'
+    visible: any; // state variable from parent that will determine visibility
+    cancel_cb: PropTypes.func; // callback function to parent when cancel is clicked
+    confirm_cb: PropTypes.func; // callback function  to parent when confirm is clicked
 }
