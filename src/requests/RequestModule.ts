@@ -146,7 +146,7 @@ class RequestModule {
         const target = 'http://193.190.127.184:8042/repo/relinquish-lock/'
             + repoOwner + '/' + repoName + '/' + token + '/' + filePath;
         return axios.post(target)
-            .then(res => res.data);
+            .then(res => res);
     }
 
     /**

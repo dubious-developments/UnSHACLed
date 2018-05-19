@@ -23,6 +23,7 @@ class NewModal extends React.Component<NewModalProps & any, any> {
         this.confirmModal = this.confirmModal.bind(this);
         this.onChange = this.onChange.bind(this);
         this.setSelected = this.setSelected.bind(this);
+        this.createFile = this.createFile.bind(this);
     }
 
     /**
@@ -81,8 +82,15 @@ class NewModal extends React.Component<NewModalProps & any, any> {
      */
     confirmModal(type: any) {
         if (type === 'file') {
-            RequestModule.updateFile(
-                this.props.user, this.state.project, this.props.token, this.state.name, 'Hello World');
+            // request lock
+            let filePath = '/' + this.state.name;
+            console.log(filePath);
+            RequestModule.requestLock(this.props.user, this.state.project,
+                this.props.token, filePath).then(lock => {
+                console.log('acquiring lock');
+                console.log(lock);
+                this.createFile(lock);
+            });
         } else if (type === 'project') {
             RequestModule.createRepo(this.state.name, this.props.token);
         }
@@ -106,6 +114,26 @@ class NewModal extends React.Component<NewModalProps & any, any> {
             name: event.target.value,
             selected: false
         });
+    }
+
+    /**
+     * Method that will invoke the API for the creation of a new file only if
+     * the user acquired a lock on that file first.
+     * @param lock: boolean, whether user acquired lock or not
+     * @return none
+     */
+    createFile(lock: any) {
+        if (lock === true) {
+            // TODO RequestModuel.updateFile
+            let filePath = '/' + this.state.name;
+            RequestModule.releaseLock(this.props.user, this.state.project,
+                this.props.token, filePath).then(response => {
+                console.log("releasing lock");
+                console.log(response);
+            });
+        } else {
+            console.log("No acquired lock to create a new file");
+        }
     }
 
     render() {
