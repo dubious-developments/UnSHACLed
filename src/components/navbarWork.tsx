@@ -5,7 +5,7 @@ import {NavbarWorkProps} from './interfaces/interfaces';
 import {LocalFileModule} from '../persistence/localFileDAO';
 import {Model} from '../entities/model';
 import {DataAccessProvider} from '../persistence/dataAccessProvider';
-import {LoadFileTask, GetOpenedFilesTask, GetValidationReportNavbar} from '../services/ModelTasks';
+import {SaveLocalFileTask, GetOpenedFilesTask, GetValidationReportNavbar} from '../services/ModelTasks';
 import {ModelComponent} from '../entities/modelTaskMetadata';
 import {ValidationReport, ValidationError} from "../conformance/ValidationReport";
 import ToolbarIcon from './ToolbarIcon';
@@ -146,7 +146,9 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
     getFileFromPopup(e: any) {
         let fileName = e;
         let model: Model = DataAccessProvider.getInstance().model;
-        model.tasks.schedule(new LoadFileTask([ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph], fileName));
+        model.tasks.schedule(
+            new SaveLocalFileTask([ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph], fileName)
+        );
         model.tasks.processAllTasks();
     }
 
