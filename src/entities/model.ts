@@ -164,8 +164,7 @@ export class Model {
         }
     }
 
-    /**
-     * Notify all registered observers.
+     /** Notify all registered observers.
      * @param {Set<ModelComponent>} changeBuffer
      */
     private notifyObservers(changeBuffer: Immutable.Set<ModelComponent>): void {

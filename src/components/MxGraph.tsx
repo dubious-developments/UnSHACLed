@@ -2,20 +2,20 @@ import * as React from 'react';
 import * as Collections from 'typescript-collections';
 import {ModelComponent, ModelTaskMetadata} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
-import {GetValidationReport, EditTriple, VisualizeComponent, SaveRemoteFileTask} from "../services/ModelTasks";
+import {EditTriple, GetValidationReport, SaveRemoteFileTask, VisualizeComponent} from "../services/ModelTasks";
 import {ValidationReport} from "../conformance/ValidationReport";
 import {MxGraphProps} from "./interfaces/interfaces";
-import {ModelObserver, Model} from "../entities/model";
+import {ModelObserver} from "../entities/model";
 import {Task} from "../entities/task";
 import {ModelData} from "../entities/modelData";
-import {ImmutableGraph, Graph, PrefixMap} from "../persistence/graph";
+import {ImmutableGraph, PrefixMap} from "../persistence/graph";
 import IdleUserDetection from "../services/IdleUserDetection";
 import RequestModule from '../requests/RequestModule';
 import {connect} from 'react-redux';
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout, mxCellOverlay, mxImage,
-    mxGraphModel, mxEffects, mxWindow: any;
+    mxGraphModel: any;
 
 let $rdf = require('rdflib');
 
@@ -998,7 +998,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
         // the mousepointer if there is one.
         let model = graph.getModel();
         let block = this.nameToStandardCellDict.getValue('block');
-        let row = this.nameToStandardCellDict.getValue('row');
+        // let row = this.nameToStandardCellDict.getValue('row');
 
         let funct = (g: any, evt: any, target: any, x: any, y: any) => {
             let v1 = model.cloneCell(block);
