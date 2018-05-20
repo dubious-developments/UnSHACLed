@@ -916,29 +916,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             b.realName = realName;
             b.name = name;
             b.triple = triple;
-
-            this.blockToCellDict.setValue(b, v1);
-            this.subjectToBlockDict.setValue(b.realName, b);
-            this.triples.add(triple);
-            this.cellToTriples.setValue(v1, triple);
-
-            let oldGraph = this.fileToGraphDict.getValue(this.addedShapesFile);
-            let type = "SHACLShapesGraph";
-
-            if (oldGraph && type) {
-                let newGraph = oldGraph.addTriple(triple.subject, triple.predicate, triple.object);
-                this.fileToGraphDict.setValue(
-                    this.addedShapesFile,
-                    newGraph
-                );
-
-                let horse = DataAccessProvider.getInstance().model;
-                horse.tasks.schedule(new EditTriple(
-                    newGraph, type, this.addedShapesFile)
-                );
-
-                horse.tasks.processAllTasks();
-            }
+            this.addBlock(b, v1, this.addedShapesFile);
 
             b.traits = [];
 
@@ -971,6 +949,35 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         ds.createDragElement = mxDragSource.prototype.createDragElement;
     }
 
+    addBlock(b: any, cell: any, file: string) {
+        this.blockToCellDict.setValue(b, cell);
+        this.subjectToBlockDict.setValue(b.realName, b);
+
+        if (b.triple) {
+            this.triples.add(b.triple);
+            this.cellToTriples.setValue(cell, b.triple);
+
+            let oldGraph = this.fileToGraphDict.getValue(file);
+            let type = this.fileToTypeDict.getValue(file);
+
+            if (oldGraph && type) {
+                let newGraph = oldGraph.addTriple(b.triple.subject, b.triple.predicate, b.triple.object);
+                this.fileToGraphDict.setValue(
+                    file,
+                    newGraph
+                );
+
+                let horse = DataAccessProvider.getInstance().model;
+                horse.tasks.schedule(new EditTriple(
+                    newGraph, type, file)
+                );
+
+                horse.tasks.processAllTasks();
+            }
+        }
+
+    }
+
     addTemplate() {
         let {graph} = this.state;
         let {templateCount} = this.state;
@@ -981,8 +988,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             // Creates a copy of the selection array to preserve its state
             var cells = graph.getSelectionCells();
             // var bounds = graph.getView().getBounds(cells);
-            console.log(cells);
-            console.log(cells[0].value);
             let cellname;
 
             // handle multiple cell selection
@@ -1007,9 +1012,45 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 gr.setSelectionCells(gr.importCells(cells, x, y, cell));
 
                 for (let c of cells) {
-                    console.log(c);
-                    console.log(c.children);
+                    // todo change realname and name
+                    let block = c.value;
+                    let file = this.addedDataFile;
+                    if (block.blockType === "NodeShape") {
+                        block.triple = new Triple(
+                            block.realName, this.RDF("type").uri, this.SH("NodeShape").uri, this.addedShapesFile
+                        );
+                        file = this.addedShapesFile;
+                    } else if (block.blockType === "Property") {
+                        block.triple = new Triple(
+                            block.realName, this.SH("path").uri, name, this.addedShapesFile
+                        );
+                        file = this.addedShapesFile;
+                    }
+
+                    this.addBlock(block, c, this.addedShapesFile);
+
+                    // todo add children
+                    // console.log(c.children);
                 }
+
+            /*
+            private triples: Collections.Set<Triple>;
+            private fileToGraphDict: Collections.Dictionary<string, ImmutableGraph>;
+            private fileToTypeDict: Collections.Dictionary<string, string>;
+            private fileToPrefixesDict: Collections.Dictionary<string, PrefixMap>;
+
+            private cellToTriples: Collections.Dictionary<any, Triple>;
+            private invalidCells: Collections.Set<any>;
+
+            private timer: TimingService;
+
+            private RDF: any = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+            private SH: any = $rdf.Namespace("http://www.w3.org/ns/shacl#");
+            private SCHEMA: any = $rdf.Namespace("http://schema.org/");
+            private EX: any = $rdf.Namespace("http://example.com/ns#");
+            private addedShapesFile: string = "addedShapes.ttl";
+            private addedDataFile: string = "addedData.ttl";
+            */
             };
             // create sidebar entry
             // invoke callback on parent component, which will add entry to sidebar
