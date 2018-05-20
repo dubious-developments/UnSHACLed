@@ -651,6 +651,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                 if (oldGraph && type) {
                     let backendModel = DataAccessProvider.getInstance().model;
                     let newGraph = oldGraph.addTriple(triple.subject, triple.predicate, triple.object);
+                    instance.fileToGraphDict.setValue(file, newGraph);
                     backendModel.tasks.schedule(new EditTriple(
                         newGraph, type, file)
                     );
@@ -1128,34 +1129,33 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                         file = this.addedShapesFile;
                     }
 
-                    this.addBlock(block, c, this.addedShapesFile);
-
-                    // todo add children
+                    this.addBlock(block, c, file);
 
                     for (let row of c.children) {
+                        let tripleString = this.traitRestFromName(
+                            row.value.name, this.fileToPrefixesDict.getValue(file)
+                        );
+                        let triple = new Triple(block.realName, tripleString[0].trim(), tripleString[1].trim(), file);
+                        triple.cell = row;
 
+                        block.traits.push(triple);
+                        this.triples.add(triple);
+                        this.cellToTriples.setValue(row, triple);
+
+                        let oldGraph = this.fileToGraphDict.getValue(file);
+                        let type = this.fileToTypeDict.getValue(file);
+                        if (oldGraph && type) {
+                            let horse = DataAccessProvider.getInstance().model;
+                            let newGraph = oldGraph.addTriple(triple.subject, triple.predicate, triple.object);
+                            this.fileToGraphDict.setValue(file, newGraph);
+                            horse.tasks.schedule(new EditTriple(
+                                newGraph, type, file)
+                            );
+                            horse.tasks.processAllTasks();
+                        }
                     }
-
                 }
 
-            /*
-            private triples: Collections.Set<Triple>;
-            private fileToGraphDict: Collections.Dictionary<string, ImmutableGraph>;
-            private fileToTypeDict: Collections.Dictionary<string, string>;
-            private fileToPrefixesDict: Collections.Dictionary<string, PrefixMap>;
-
-            private cellToTriples: Collections.Dictionary<any, Triple>;
-            private invalidCells: Collections.Set<any>;
-
-            private timer: TimingService;
-
-            private RDF: any = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-            private SH: any = $rdf.Namespace("http://www.w3.org/ns/shacl#");
-            private SCHEMA: any = $rdf.Namespace("http://schema.org/");
-            private EX: any = $rdf.Namespace("http://example.com/ns#");
-            private addedShapesFile: string = "addedShapes.ttl";
-            private addedDataFile: string = "addedData.ttl";
-            */
             };
             // create sidebar entry
             // invoke callback on parent component, which will add entry to sidebar
