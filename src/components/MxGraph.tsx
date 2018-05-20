@@ -243,13 +243,13 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                     // Send changes of remote files
                     let model = DataAccessProvider.getInstance().model;
 
-                    for (let filename in instance.props.locks.content) {
+                    for (let item of instance.props.files.content) {
                         model.tasks.schedule(
                             new SaveRemoteFileTask(
                                 [ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph],
-                                filename,
+                                item.name,
                                 instance.props.user,
-                                instance.getRepoFromFile(filename),
+                                item.repo,
                                 instance.props.token
                             )
                         );
@@ -1634,7 +1634,6 @@ const mapStateToProps = (state, props) => {
         token: state.token,
         user: state.login,
         files: state.files,
-        locks: state.locks,
     };
 };
 
