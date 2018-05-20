@@ -5,5 +5,6 @@ export var extensionToMIME = {
     "ttl": "text/turtle",
     "nq": "application/n-quads",
     "nt": "application/n-triples",
-    "trig": "application/trig"
+    "trig": "application/trig",
+    "json": "application/json"
 };

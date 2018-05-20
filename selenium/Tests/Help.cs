@@ -6,6 +6,8 @@ using System;
 using static System.IO.Directory;
 using static System.IO.Path;
 using OpenQA.Selenium.Support.UI;
+using System.Collections;
+using static System.Threading.Thread;
 
 namespace SeleniumTests.Tests
 {
@@ -41,28 +43,72 @@ namespace SeleniumTests.Tests
 
         public static void Login(this IWebDriver driver)
         {
+            String parentWindowHandler = driver.CurrentWindowHandle;
+            String popup = null;
             var elem = driver.FindElement(By.Id("homeLoginButton"),10);
             elem.Click();
             Assert.IsTrue(driver.Url.EndsWith("#/login"));
-            driver.FindElement(By.Id("formUsernameField"),10).SendKeys("username");
-            driver.FindElement(By.Id("formPasswordField"),10).SendKeys("password");
-            var login = driver.FindElement(By.Id("formLoginButton"));
-            login.Click();
+            Sleep(1000);
+            var loginButton = driver.FindElement(By.Id("formLoginButton"), 10);
+            loginButton.Click();
+            Sleep(2000);
+            IReadOnlyCollection<String> handles = driver.WindowHandles;
+            IEnumerator enumerator = handles.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                enumerator.MoveNext();
+                popup = (String)enumerator.Current;
+            }
+            driver.SwitchTo().Window(popup);
+            driver.FindElement(By.Id("login_field"),10).SendKeys("JonasBaes");
+            driver.FindElement(By.Id("password"),10).SendKeys("mijnPasswoord"); //werkt niet, passwoord ingeven
+            SendKeys.SendWait(@"{Enter}");
+            Sleep(4000);
+            driver.SwitchTo().Window(parentWindowHandler);
+            IWebElement startEdit = driver.FindElement(By.Id("startEditingButton"), 10);
+            startEdit.Click();
+            Sleep(2000);
+            Assert.IsTrue(driver.Url.EndsWith("#/user"));
+
+        }
+        
+        public static void ByPassLogin(this IWebDriver driver)
+        {
+            String currentUrl = driver.Url;
+            currentUrl = currentUrl + "user";
+            driver.Navigate().GoToUrl(currentUrl);
         }
 
-        public static void OpenFile(this IWebDriver driver, String fileName)
+
+        public static void OpenSHACLFile(this IWebDriver driver, String fileName)
         {
             var fileMenu = driver.FindElement(By.Id("openFileMenu"), 10);
             fileMenu.Click();
             var localGraph = driver.FindElement(By.Id("openLocalGraphButton"), 10);
             localGraph.Click();
-            var shaclGraph = driver.FindElement(By.Id("openSHACLGraphButton"), 10);
+            var shaclGraph = driver.FindElement(By.Id("SHACLGraphButton"), 10);
             shaclGraph.Click();
             String currentPath = GetParent(GetCurrentDirectory()).Parent.FullName;
             String path = Combine(currentPath, "testfiles\\");
             path = Combine(path, fileName);
             SendKeys.SendWait(path);
-            System.Threading.Thread.Sleep(500);
+            Sleep(700);
+            SendKeys.SendWait(@"{Enter}");
+        }
+
+        public static void OpenDataFile(this IWebDriver driver, String fileName)
+        {
+            var fileMenu = driver.FindElement(By.Id("openFileMenu"), 10);
+            fileMenu.Click();
+            var localGraph = driver.FindElement(By.Id("openLocalGraphButton"), 10);
+            localGraph.Click();
+            var shaclGraph = driver.FindElement(By.Id("DataGraphButton"), 10);
+            shaclGraph.Click();
+            String currentPath = GetParent(GetCurrentDirectory()).Parent.FullName;
+            String path = Combine(currentPath, "testfiles\\");
+            path = Combine(path, fileName);
+            SendKeys.SendWait(path);
+            Sleep(700);
             SendKeys.SendWait(@"{Enter}");
         }
 

@@ -6,7 +6,7 @@ import { Validator } from "./Validator";
 import { ModelComponent, ModelTaskMetadata } from "../entities/modelTaskMetadata";
 import { Task } from "../entities/task";
 import { Component } from "../persistence/component";
-import { ValidationReport } from "./wrapper/ValidationReport";
+import { ValidationReport } from "./ValidationReport";
 
 /**
  * A ValidationService is a managing entity, governing various registered validators.

@@ -4,7 +4,7 @@ import {ModelComponent, ModelTaskMetadata} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
 import {GetValidationReport, VisualizeComponent} from "../services/ModelTasks";
 import TimingService from "../services/TimingService";
-import {ValidationReport} from "../conformance/wrapper/ValidationReport";
+import {ValidationReport} from "../conformance/ValidationReport";
 import {MxGraphProps} from "./interfaces/interfaces";
 
 import {ModelObserver} from "../entities/model";
@@ -53,7 +53,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.nameToStandardCellDict = new Collections.Dictionary<string, any>();
         this.blockToCellDict = new Collections.Dictionary<Block, any>((b) => b.name);
         this.subjectToBlockDict = new Collections.Dictionary<string, Block>();
-        this.triples = new Collections.Set<Triple>((t) =>  t.subject + " " + t.predicate + " " + t.object);
+        this.triples = new Collections.Set<Triple>((t) => t.subject + " " + t.predicate + " " + t.object);
         this.cellToTriples = new Collections.Dictionary<any, Triple>((c) => c.value.name);
         this.invalidCells = new Collections.Set<any>();
 
@@ -62,6 +62,17 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
     componentDidMount() {
         this.handleLoad();
+        window.addEventListener('beforeunload', this.leaveAlert);
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('beforeunload', this.leaveAlert);
+    }
+
+    leaveAlert(e: any) {
+        const c = '';
+        e.returnValue = c;
+        return c;
     }
 
     componentWillReceiveProps(nextprops: any) {
@@ -405,7 +416,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     configureTooltips(graph: any) {
         // Installs a custom global tooltip
         graph.setTooltips(true);
-        graph.getTooltip = function(state: any) {
+        graph.getTooltip = function (state: any) {
             let cell = state.cell;
             // If the cell is invalid, then it will have an error
             // thus display the error message, else just show the label
@@ -430,7 +441,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.nameToStandardCellDict.setValue('row', row);
     }
 
-    addNewRowOverlay(graph:any, cell: any) {
+    addNewRowOverlay(graph: any, cell: any) {
         // Creates a new overlay in the middle with an image and a tooltip
         let overlay = new mxCellOverlay(
             new mxImage('../img/add.png', 24, 24), 'Add a new row', mxConstants.ALIGN_CENTER);
@@ -440,14 +451,14 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         let instance = this;
 
         // Installs a handler for clicks on the overlay
-        overlay.addListener(mxEvent.CLICK, function(sender: any, event: any) {
+        overlay.addListener(mxEvent.CLICK, function (sender: any, event: any) {
             graph.clearSelection();
             model.beginUpdate();
             try {
                 let temprow = model.cloneCell(instance.nameToStandardCellDict.getValue('row'));
                 temprow.value = {name: "", trait: "null"};
                 let parent = cell.getParent();
-                
+
                 instance.addNewRowOverlay(graph, temprow);
                 graph.removeCellOverlay(cell);
                 parent.insert(temprow);
@@ -671,6 +682,11 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     }
 
     initToolBar(editor: any) {
+        /* Defines new editor action*/
+        // Defines a new export action
+        editor.addAction('cleargraph', () => {
+            this.clear();
+        });
         /* Toolbar functionality */
         this.addToolbarButton(editor, toolbar, 'delete', '', 'delete');
         this.addToolbarButton(editor, toolbar, 'undo', '', 'undo');
@@ -678,9 +694,9 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.addToolbarButton(editor, toolbar, 'show', '', 'camera');
         this.addToolbarButton(editor, toolbar, 'zoomIn', '+', 'zoom in');
         this.addToolbarButton(editor, toolbar, 'zoomOut', '-', 'zoom out');
-        this.addToolbarButton(editor, toolbar, 'actualSize', '', 'actual size');
         this.addToolbarButton(editor, toolbar, 'fit', '', 'fit');
         /* Dropdown File toolbar */
+        this.addToolbarButton(editor, toolbar, 'cleargraph', '', 'tb_clear_graph');
         /* Dropdown Edit toolbar */
         this.addToolbarButton(editor, toolbar, 'undo', '', 'tb_undo');
         this.addToolbarButton(editor, toolbar, 'redo', '', 'tb_redo');
@@ -693,7 +709,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.addToolbarButton(editor, toolbar, 'show', '', 'tb_show');
         this.addToolbarButton(editor, toolbar, 'zoomIn', '', 'tb_zoomin');
         this.addToolbarButton(editor, toolbar, 'zoomOut', '', 'tb_zoomout');
-        this.addToolbarButton(editor, toolbar, 'actualSize', '', 'tb_actual');
         this.addToolbarButton(editor, toolbar, 'fit', '', 'tb_fit');
     }
 
@@ -854,8 +869,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
             // Set keyboard short cuts
             let kbsc = require('./config/keyhandler-minimal.xml');
-            let config = mxUtils.load(kbsc).
-            getDocumentElement();
+            let config = mxUtils.load(kbsc).getDocumentElement();
             editor.configure(config);
 
             // Enable Panning
@@ -881,7 +895,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             if (d2) {
                 d2.onclick = this.addTemplate;
             }
-          
+
             graph.addListener(mxEvent.CELLS_REMOVED, (sender: any, evt: any) => {
                 let cells = evt.getProperty("cells");
 
@@ -895,17 +909,17 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
         }
     }
-    
+
     public handleConformance(report: ValidationReport) {
         let invalidCellsToErrorDict = new Collections.DefaultDictionary<any, any>(() => []);
         // The keys function of a dictionary returns an array instead of a set, so keep an extra set aswell
-        let incInvalidCells = new Collections.Set<any>(); 
+        let incInvalidCells = new Collections.Set<any>();
         if (!report.isConforming()) {
             for (let error of report.getValidationErrors()) {
                 let block = this.subjectToBlockDict.getValue(error.getDataElement());
                 if (block) {
                     let cell = this.blockToCellDict.getValue(block);
-                    invalidCellsToErrorDict.getValue(cell).push(error); 
+                    invalidCellsToErrorDict.getValue(cell).push(error);
                     incInvalidCells.add(cell);
                 } else {
                     console.log(
@@ -988,7 +1002,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         let self = this;
 
         // notify that a user action took place
-        this.timer.userAction(function(this: MxGraph) {
+        this.timer.userAction(function (this: MxGraph) {
             model.tasks.schedule(new GetValidationReport(self));
             // process all tasks when idle
             model.tasks.processAllTasks();

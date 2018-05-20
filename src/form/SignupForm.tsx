@@ -1,7 +1,8 @@
 import * as React from 'react';
-import {Button, Form, Grid, Header, Image, Input, Segment} from 'semantic-ui-react';
+import {Grid, Header, Image, Container, List, Button} from 'semantic-ui-react';
 import {withRouter} from 'react-router-dom';
 import Auth from '../services/Auth';
+import {Link} from 'react-router-dom';
 
 class LoginForm extends React.Component<any, any> {
 
@@ -20,7 +21,7 @@ class LoginForm extends React.Component<any, any> {
             <div className="login">
                 <Grid
                     textAlign="center"
-                    style={{height: '100%', marginTop: '8em'}}
+                    style={{height: '100%', marginTop: '2em'}}
                     verticalAlign="middle"
                 >
                     <Grid.Column style={{maxWidth: 550}}>
@@ -35,52 +36,48 @@ class LoginForm extends React.Component<any, any> {
                             <Image src={logo}/>
                             {' '} Join UnSHACLed
                         </Header>
-                        <Form size="massive" inverted={true}>
-                            <Segment inverted={true}>
-                                <Form.Field inline={true}>
-                                    <Input
-                                        size="large"
-                                        required={true}
-                                        fluid={true}
-                                        label="Username"
-                                        labelPosition="left"
-                                        onChange={(event, newValue) => this.setState({username: newValue})}
-                                        placeholder="Username"
-                                    />
-                                </Form.Field>
-                                <Form.Field inline={true}>
-                                    <Input
-                                        size="large"
-                                        required={true}
-                                        fluid={true}
-                                        label="Email"
-                                        labelPosition="left"
-                                        type="email"
-                                        onChange={(event, newValue) => this.setState({email: newValue})}
-                                        placeholder="example@example.com"
-                                    />
-                                </Form.Field>
-                                <Form.Field inline={true}>
-                                    <Input
-                                        size="large"
-                                        required={true}
-                                        fluid={true}
-                                        label="Password"
-                                        labelPosition="left"
-                                        type="password"
-                                        onChange={(event, newValue) => this.setState({password: newValue})}
-                                    />
-                                </Form.Field>
-                                <Button
-                                    color="teal"
-                                    fluid={true}
-                                    inverted={true}
-                                    size="large"
-                                    onClick={(event) => this.handleClick(event)}
-                                > Create an account
-                                </Button>
-                            </Segment>
-                        </Form>
+                        <Container text={true} style={{marginTop: '2em'}} textAlign="left">
+                            <Header as="h3" inverted={true}>
+                                Set up a GitHub account
+                            </Header>
+                            <p>
+                                You will need a GitHub account in order to collaborate with others and
+                                save your constrains or data remotely.
+                                If you already have a GitHub account, you can login
+                                <Link to="/login"> here </Link>.
+                            </p>
+                            {/* Steps */}
+                            <List
+                                ordered={true}
+                                inverted={true}
+                                relaxed="very"
+                                style={{marginTop: '2em', marginBottom: '2em' }}
+                            >
+                                <List.Item>
+                                    Go to the GitHub sign up page by using the button below.
+                                </List.Item>
+                                <List.Item>
+                                    Pick a username, e-mail and password to create an account.
+                                </List.Item>
+                                <List.Item>
+                                    Follow the instructions to complete your GitHub registration.
+                                </List.Item>
+                                <List.Item>
+                                    <Link to="/login"> Login </Link> to UnSHACLed
+                                </List.Item>
+                            </List>
+                        </Container>
+                        {/* Button */}
+                        <Button
+                            color="teal"
+                            inverted={true}
+                            size="large"
+                            icon="github"
+                            content="Sign up for GitHub"
+                            as="a"
+                            href="https://github.com/join"
+                            target="_blank"
+                        />
                     </Grid.Column>
                 </Grid>
             </div>

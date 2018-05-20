@@ -14,9 +14,9 @@ namespace SeleniumTests.Tests
                {
                    driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
                     //Log in
-                    driver.Login();
+                    driver.ByPassLogin();
                     //Open a SHACL file
-                    driver.OpenFile("demo_shacl.ttl");
+                    driver.OpenSHACLFile("demo_shacl.ttl");
                    IWebElement shaclElement = driver.FindElement(By.XPath("//*[contains(text(),'PersonShape')]"), 10);
                    String shaclElementID = shaclElement.GetAttribute("id");
                    shaclElement.Click();
@@ -40,10 +40,10 @@ namespace SeleniumTests.Tests
                {
                    driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
                    //Log in
-                   driver.Login();
+                   driver.ByPassLogin();
                    //Open a SHACL file
-                   driver.OpenFile("demo_data_conforming.ttl");
-                   var dataElement = driver.FindElement(By.XPath("//*[contains(text(),'ex:Alice')]"), 10);
+                   driver.OpenDataFile("demo_data_conforming.ttl");
+                   var dataElement = driver.FindElement(By.XPath("//*[contains(text(),'Alice')]"), 10);
                    String elementID = dataElement.GetAttribute("id");
                    dataElement.Click();
                    SendKeys.SendWait("{DEL}");
@@ -65,10 +65,10 @@ namespace SeleniumTests.Tests
             {
                 driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
                 //Log in
-                driver.Login();
+                driver.ByPassLogin();
 
                 //Open a SHACL file
-                driver.OpenFile("demo_shacl.ttl");
+                driver.OpenSHACLFile("demo_shacl.ttl");
                 var shaclElement = driver.FindElement(By.XPath("//*[contains(text(),'sh:targetClass')]"), 10);
                 String elementID = shaclElement.GetAttribute("id");
                 Assert.IsTrue(shaclElement.Text == "sh:targetClass : ex:Person");
@@ -95,13 +95,13 @@ namespace SeleniumTests.Tests
           {
               driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
                 //Log in
-                driver.Login();
+                driver.ByPassLogin();
 
                 //Open a SHACL file
-                driver.OpenFile("demo_data_conforming.ttl");
-              var dataElement = driver.FindElement(By.XPath("//*[contains(text(),'rdf:type')]"), 10);
+                driver.OpenDataFile("demo_data_conforming.ttl");
+              var dataElement = driver.FindElement(By.XPath("//*[contains(text(),'Person')]"), 10);
               String elementID = dataElement.GetAttribute("id");
-              Assert.IsTrue(dataElement.Text == "rdf:type : ex:Person");
+              Assert.IsTrue(dataElement.Text.Contains("Person"));
               //Element is selected
               dataElement.Click();
               SendKeys.SendWait("{DEL}");

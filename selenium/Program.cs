@@ -25,7 +25,7 @@ namespace SeleniumTests
         /// <summary>
         /// A sequence of all test cases to run.
         /// </summary>
-        private static readonly IEnumerable<TestCase> TestCases = (EditGraphTests.All);
+        private static readonly IEnumerable<TestCase> TestCases = (SanityChecks.All);
 
         public static int Main(string[] args)
         {
@@ -191,6 +191,7 @@ namespace SeleniumTests
                     return new SafariDriver(options);
                 }
             }
+                
         };
 
         /// <summary>

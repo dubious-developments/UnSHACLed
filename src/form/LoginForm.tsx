@@ -1,7 +1,10 @@
 import * as React from 'react';
-import { Form, Button, Grid, Image, Header, Segment, Input, Divider } from 'semantic-ui-react';
+import {Button, Grid, Image, Header, Segment, Divider, Label} from 'semantic-ui-react';
 import {withRouter} from 'react-router-dom';
-import Auth from '../services/Auth';
+import {Link} from 'react-router-dom';
+import RequestModule from '../requests/RequestModule';
+import {connect} from 'react-redux';
+import {updateEmail, updateLogin, updateName, updateToken} from "../redux/actions/userActions";
 
 class LoginForm extends React.Component<any, any> {
 
@@ -9,8 +12,51 @@ class LoginForm extends React.Component<any, any> {
         super(props);
         this.state = {
             username: "",
-            password: ""
+            password: "",
+            token: "",
+            showLabel: false
         };
+
+        this.startEditing = this.startEditing.bind(this);
+        this.onUpdateToken = this.onUpdateToken.bind(this);
+        this.onUpdateUsername = this.onUpdateUsername.bind(this);
+        this.onUpdateEmail = this.onUpdateEmail.bind(this);
+        this.onUpdateLogin = this.onUpdateLogin.bind(this);
+        this.storeUserInfo = this.storeUserInfo.bind(this);
+    }
+
+    componentDidMount() {
+        RequestModule.getToken().then(token => {
+            console.log("receive token =>" + token);
+            this.setState({
+                token: token
+            });
+        });
+    }
+
+    onUpdateToken(token: any) {
+        this.props.onUpdateToken(token);
+    }
+
+    onUpdateUsername(name: any) {
+        if (name) {
+            this.props.onUpdateName(name);
+        } else {
+            this.props.onUpdateName("No name provided.");
+        }
+
+    }
+
+    onUpdateLogin(login: any) {
+        this.props.onUpdateLogin(login);
+    }
+
+    onUpdateEmail(email: any) {
+        if (email) {
+            this.props.onUpdateEmail(email);
+        } else {
+            this.props.onUpdateEmail('private e-mail');
+        }
     }
 
     render() {
@@ -19,10 +65,10 @@ class LoginForm extends React.Component<any, any> {
             <div className="login">
                 <Grid
                     textAlign="center"
-                    style={{height: '100%', marginTop: '8em'}}
+                    style={{height: '100%', marginTop: '2em'}}
                     verticalAlign="middle"
                 >
-                    <Grid.Column style={{maxWidth: 550}}>
+                    <Grid.Column style={{maxWidth: 400}}>
                         <Header
                             as="h2"
                             inverted={true}
@@ -34,74 +80,43 @@ class LoginForm extends React.Component<any, any> {
                             <Image src={logo}/>
                             {' '}Log-in to your account
                         </Header>
-                        <Form
-                            size="massive"
-                            inverted={true}
-                        >
-                            <Segment
-                                inverted={true}
-                            >
-                                <Form.Field
-                                    inline={true}
-
-                                >
-                                    <Input
-                                        id="formUsernameField"
-                                        size="large"
-                                        required={true}
-                                        fluid={true}
-                                        label="Username"
-                                        labelPosition="left"
-                                        onChange={(event, newValue) => this.setState({username: newValue})}
-                                    />
-                                </Form.Field>
-
-                                <Form.Field
-                                    inline={true}
-                                >
-                                    <Input
-                                        id="formPasswordField"
-                                        size="large"
-                                        required={true}
-                                        fluid={true}
-                                        label="Password"
-                                        labelPosition="left"
-                                        type="password"
-                                        onChange={(event, newValue) => this.setState({password: newValue})}
-                                    />
-                                </Form.Field>
-
+                        <Segment inverted={true}>
+                            <Button.Group size='huge' fluid={true}>
                                 <Button
                                     id="formLoginButton"
                                     color="teal"
-                                    fluid={true}
                                     inverted={true}
-                                    size="large"
+                                    size="huge"
                                     onClick={(event) => this.handleClick(event)}
-                                > Login
-                                </Button>
-
-                                <Divider
-                                    horizontal={true}
-                                    inverted={true}
-                                >Or
-                                </Divider>
+                                    icon="github"
+                                    content="Sign in"
+                                />
+                                <Button.Or/>
                                 <Button
-                                    animated="fade"
-                                    fluid={true}
                                     inverted={true}
-                                    size="large"
-                                >
-                                    <Button.Content visible={true}>
-                                    Sign-up
-                                    </Button.Content>
-                                    <Button.Content hidden={true}>
-                                        Coming soon!
-                                    </Button.Content>
-                                </Button>
+                                    size="huge"
+                                    icon="signup"
+                                    content="Sign up"
+                                    as={Link}
+                                    to="/signup"
+                                />
+                            </Button.Group>
+                            <Divider horizontal={true} inverted={true}>
+                                Authenticated?
+                            </Divider>
 
-                            </Segment>
-                        </Form>
+                            <Button
+                                id="startEditingButton"
+                                fluid={true}
+                                inverted={true}
+                                size="huge"
+                                content="Start editing"
+                                onClick={this.startEditing}
+                            />
+                            {this.state.showLabel && (
+                                <Label color='red' pointing='above'>Please authenticate first</Label>
+                            )}
+                        </Segment>
                     </Grid.Column>
                 </Grid>
             </div>
@@ -110,12 +125,52 @@ class LoginForm extends React.Component<any, any> {
     }
 
     handleClick(event: any) {
-        Auth.login();
-        if (this.state.username === "Admin" || this.state.password === "Admin10") {
-            console.log("invalid");
-        } else {
-            this.props.history.push("/user");
-        }
+        let {token} = this.state;
+        RequestModule.AuthWithToken(token);
+    }
+
+    startEditing(event: any) {
+        let {token} = this.state;
+        RequestModule.isAuthenticated(token).then(authenticated => {
+            if (authenticated) {
+                this.props.history.push("/user");
+                this.storeUserInfo(token);
+            } else {
+                console.log('not authenticated');
+                this.setState({
+                    showLabel: true
+                });
+            }
+        });
+    }
+
+    storeUserInfo(token: any) {
+        this.onUpdateToken(token);
+        /* Get Name */
+        RequestModule.getUserInfo('name', token).then(username => {
+            this.onUpdateUsername(username);
+        });
+        /* Get login */
+        RequestModule.getUserInfo('login', token).then(login => {
+            this.onUpdateLogin(login);
+        });
+        /* Get email */
+        RequestModule.getUserInfo('email', token).then(email => {
+            this.onUpdateEmail(email);
+        });
     }
 }
-export default withRouter(LoginForm);
+
+const mapStateToProps = (state) => {
+    return state;
+};
+
+const mapActionsToProps = {
+    onUpdateToken: updateToken,
+    onUpdateName: updateName,
+    onUpdateLogin: updateLogin,
+    onUpdateEmail: updateEmail
+};
+
+const ConLoginForm = connect(mapStateToProps, mapActionsToProps)(LoginForm);
+export default withRouter(ConLoginForm);
