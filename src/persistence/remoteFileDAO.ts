@@ -81,11 +81,11 @@ export class RemoteFileDAO implements DataAccessObject {
      * @param {RemoteFileModule} module
      */
     public insert(module: RemoteFileModule): void {
-        this.openedFiles.setValue(module.getIdentifier(), module.getTarget());
         let parser = this.parsers.getValue(module.getTarget());
         if (parser && parser instanceof GraphParser) {
             this.model.tasks.schedule(new SaveTask(parser, module));
             this.model.tasks.processAllTasks();
+            this.openedFiles.setValue(module.getIdentifier(), module.getTarget());
         }
     }
 
@@ -94,11 +94,11 @@ export class RemoteFileDAO implements DataAccessObject {
      * @param {RemoteFileModule} module
      */
     public insertWorkspace(module: RemoteFileModule): void {
-        this.openedFiles.setValue(module.getIdentifier(), ModelComponent.Workspace);
         let parser = this.parsers.getValue(ModelComponent.Workspace);
         if (parser && parser instanceof WorkspaceParser) {
             this.model.tasks.schedule(new SaveWorkspaceTask(parser, module));
             this.model.tasks.processAllTasks();
+            this.openedFiles.setValue(module.getIdentifier(), ModelComponent.Workspace);
         }
     }
 
@@ -108,7 +108,6 @@ export class RemoteFileDAO implements DataAccessObject {
      */
     public find(module: RemoteFileModule): void {
         let self = this;
-        this.openedFiles.setValue(module.getIdentifier(), module.getTarget());
         RequestModule.readFile(module.getUserName(),
             module.getRepoName(),
             module.getToken(),
@@ -119,6 +118,7 @@ export class RemoteFileDAO implements DataAccessObject {
                     parser.parse(content, module.getMime(), function (result: Graph) {
                         self.model.tasks.schedule(new LoadTask(result.asImmutable(), module));
                         self.model.tasks.processAllTasks();
+                        self.openedFiles.setValue(module.getIdentifier(), module.getTarget());
                     });
                 }
             });
@@ -130,7 +130,6 @@ export class RemoteFileDAO implements DataAccessObject {
      */
     public findWorkspace(module: RemoteFileModule): void {
         let self = this;
-        this.openedFiles.setValue(module.getIdentifier(), ModelComponent.Workspace);
         RequestModule.fetchWorkspace(module.getToken())
             .then(workspace => {
                 let parser = this.parsers.getValue(ModelComponent.Workspace);
@@ -138,6 +137,7 @@ export class RemoteFileDAO implements DataAccessObject {
                     parser.parse(workspace, "application/json", function (result: ModelData) {
                         self.model.tasks.schedule(new LoadWorkspaceTask(result));
                         self.model.tasks.processAllTasks();
+                        self.openedFiles.setValue(module.getIdentifier(), ModelComponent.Workspace);
                     });
                 }
             });
