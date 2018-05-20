@@ -137,8 +137,9 @@ class Section4 extends React.Component<any, any> {
                 </b> of the components in your grapnh.
                 </p>
                 <p>
-                    The first option to clear the graph is through the top toolbar containing the dropdowns.
-                    To clear the graph, click the 'Edit' dropdown as indicated below.
+                    The first option to select all or none of the components
+                    is through the top toolbar containing the dropdowns.
+                    To do so, click the 'Edit' dropdown as indicated below.
                 </p>
                 <Image src={s42} centered={true} style={this.imgMargin}/>
                 <p> This will bring up the following:</p>

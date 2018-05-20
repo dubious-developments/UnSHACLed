@@ -4,6 +4,7 @@ import Section1 from './sections/Section1';
 import Section2 from './sections/Section2';
 import Section3 from './sections/Section3';
 import Section4 from './sections/Section4';
+import Section5 from './sections/Section5';
 
 class Home extends React.Component {
 
@@ -19,7 +20,7 @@ class Home extends React.Component {
                                 src={logo}
                                 style={{marginRight: '1.5em'}}
                             />
-                            Unshacled: User Manual
+                            UnSHACLed: User Manual
                         </Menu.Item>
                     </Container>
                 </Menu>
@@ -37,7 +38,7 @@ class Home extends React.Component {
                                 <List.Item as='a'>UnSHACLed</List.Item>
                             </List.List>
                         </List.Item>
-                        <List.Item as='a'>
+                        <List.Item>
                             <a> Getting Started</a>
                             <List.List>
                                 <List.Item as='a'>Create an account</List.Item>
@@ -85,6 +86,7 @@ class Home extends React.Component {
                     <Section2/>
                     <Section3/>
                     <Section4/>
+                    <Section5/>
                 </Container>
 
             </div>
