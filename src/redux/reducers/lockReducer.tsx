@@ -1,3 +1,5 @@
+import {APPEND_LOCK, FLUSH_LOCK} from "../actions/lockActions";
+
 const initialState = {
     content: []
 };
@@ -14,7 +16,7 @@ const initialState = {
  */
 export function lockReducer(state: any = initialState, action: any) {
     switch (action.type) {
-        case 'appendLock':
+        case APPEND_LOCK:
             return {
                 content: [
                     ...state.content,
@@ -23,7 +25,7 @@ export function lockReducer(state: any = initialState, action: any) {
                     }
                 ]
             };
-        case 'flushLocks':
+        case FLUSH_LOCK:
             return [];
         default :
             return state;

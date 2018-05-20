@@ -106,9 +106,9 @@ export class RemoteFileDAO implements DataAccessObject {
     public find(module: RemoteFileModule): void {
         let self = this;
         RequestModule.readFile(module.getUserName(),
-                               module.getRepoName(),
-                               module.getToken(),
-                               module.getIdentifier())
+            module.getRepoName(),
+            module.getToken(),
+            module.getIdentifier())
             .then(content => {
                 let parser = this.parsers.getValue(module.getTarget());
                 if (parser) {
@@ -130,7 +130,7 @@ export class RemoteFileDAO implements DataAccessObject {
             .then(workspace => {
                 let parser = this.parsers.getValue(ModelComponent.Workspace);
                 if (parser) {
-                    parser.parse(workspace, "application/json", function(result: ModelData) {
+                    parser.parse(workspace, "application/json", function (result: ModelData) {
                         self.model.tasks.schedule(new LoadWorkspaceTask(result));
                         self.model.tasks.processAllTasks();
                     });
@@ -210,21 +210,26 @@ class SaveTask extends Task<ModelData, ModelTaskMetadata> {
      * @param data The data the task takes as input.
      */
     public execute(data: ModelData): void {
-        let component = data.getComponent<Component<ImmutableGraph>>(this.module.getTarget());
-        if (component) {
-            let part = component.getPart(this.module.getIdentifier());
-            if (part) {
-                let self = this;
-                this.parser.serialize(part.toMutable(), this.module.getMime(), function(result: string) {
-                    RequestModule.updateFile(
-                        self.module.getUserName(),
-                        self.module.getRepoName(),
-                        self.module.getToken(),
-                        self.module.getIdentifier(),
-                        result);
-                });
-            }
+        let component = data.getOrCreateComponent<Component<ImmutableGraph>>(
+            this.module.getTarget(),
+            () => new Component<ImmutableGraph>());
+
+        let part = component.getPart(this.module.getIdentifier());
+        if (!part) {
+            part = new Graph().asImmutable();
+            component.withPart(this.module.getTarget(), part);
+            data.setComponent(this.module.getTarget(), component);
         }
+
+        let self = this;
+        this.parser.serialize(part.toMutable(), this.module.getMime(), function (result: string) {
+            RequestModule.updateFile(
+                self.module.getUserName(),
+                self.module.getRepoName(),
+                self.module.getToken(),
+                self.module.getIdentifier(),
+                result);
+        });
     }
 
     /**
@@ -233,9 +238,8 @@ class SaveTask extends Task<ModelData, ModelTaskMetadata> {
     public get metadata(): ModelTaskMetadata {
         return new ModelTaskMetadata(
             [this.module.getTarget(), ModelComponent.IO],
-            [ModelComponent.IO]);
+            [this.module.getTarget(), ModelComponent.IO]);
     }
-
 }
 
 /**
@@ -257,7 +261,7 @@ class SaveWorkspaceTask extends Task<ModelData, ModelTaskMetadata> {
      */
     public execute(data: ModelData): void {
         let self = this;
-        this.parser.serialize(data, "application/json", function(result: string) {
+        this.parser.serialize(data, "application/json", function (result: string) {
             RequestModule.setWorkspace(self.module.getToken(), result);
         });
     }

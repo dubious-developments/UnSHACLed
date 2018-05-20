@@ -48,6 +48,7 @@ class Section1 extends React.Component<any, any> {
                     Our tool also allows for collaborative editing, so SHACL experts and non-experts can easily work
                     together and assist each other. To allow intuitive, fast development of constraints and a clear
                     detection of non-conforming data, our product offers several features:
+                </p>
                     <List bulleted={true} style={{marginTop: '1em'}}>
                         <List.Item>An innovative way of visualizing data and constraints</List.Item>
                         <List.Item>Intuitive building and editing of your own constraints in a visual manner</List.Item>
@@ -59,7 +60,7 @@ class Section1 extends React.Component<any, any> {
                         </List.Item>
                         <List.Item> Save and exchange your constructed formats</List.Item>
                     </List>
-                </p>
+
             </div>
         );
     }

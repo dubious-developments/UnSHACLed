@@ -1,34 +1,36 @@
 import {ModelComponent, ModelData, ModelTaskMetadata} from "../entities/model";
 import {LocalFileDAO, LocalFileModule} from "../persistence/localFileDAO";
+import {RemoteFileDAO, RemoteFileModule} from "../persistence/remoteFileDAO";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
 import {Navbar} from "../components/navbarWork";
 import { extensionToMIME } from "./extensionToMIME";
 import {Task} from "../entities/task";
-import MxGraph from "../components/MxGraph";
+// import MxGraph from "../components/MxGraph"; 
 import { ImmutableGraph } from "../persistence/graph";
 import { Component } from "../persistence/component";
 import SideBar from "../components/Sidebar";
 
 /**
- * First search the component which belongs to the fileName
- * Then load a file from the model using the fileName
+ * Abstract base save file task
  */
-export class LoadFileTask extends Task<ModelData, ModelTaskMetadata> {
+abstract class BaseSaveFileTask extends Task<ModelData, ModelTaskMetadata> {
 
-    private mComponent: ModelComponent;
+    protected mComponent: ModelComponent;
 
     /**
-     * Create a new load file task from Model
+     * Create a new load save task from Model
      * @param components
      * @param fileName
      */
-    public constructor(private components: ModelComponent[], private fileName: string) {
+    public constructor(protected components: ModelComponent[], protected fileName: string) {
         super();
-
     }
 
-    public execute(data: ModelData): void {
-        // first search for the component which contains the fileName
+    /**
+     * Searches for the component in the given ModelData which contains the filename
+     * @param data: modelData object
+     */
+    public setModelComponent(data: ModelData): void {
         for (let mComponent of this.components) {
             let comp: any = data.getComponent(mComponent);
             if (comp) {
@@ -39,6 +41,27 @@ export class LoadFileTask extends Task<ModelData, ModelTaskMetadata> {
                 }
             }
         }
+    }
+
+    abstract execute(data: ModelData): void;
+
+    public get metadata(): ModelTaskMetadata {
+        return new ModelTaskMetadata([ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph, ModelComponent.UI],
+            [ModelComponent.UI]);
+    }
+}
+
+/**
+ * Local save file task
+ */
+export class SaveLocalFileTask extends BaseSaveFileTask {
+
+    public constructor(protected components: ModelComponent[], protected fileName: string) {
+        super(components, fileName);
+    }
+
+    public execute(data: ModelData): void {
+        this.setModelComponent(data);
 
         // now store the file if the ModelComponent is found
         if (this.mComponent in ModelComponent) {
@@ -53,10 +76,36 @@ export class LoadFileTask extends Task<ModelData, ModelTaskMetadata> {
         }
 
     }
+}
 
-    public get metadata(): ModelTaskMetadata {
-        return new ModelTaskMetadata([ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph, ModelComponent.UI],
-            [ModelComponent.UI]);
+/**
+ * Remote save file task
+ */
+export class SaveRemoteFileTask extends BaseSaveFileTask {
+
+    public constructor(protected components: ModelComponent[], protected fileName: string,
+        private username: string, private reponame: string, private token: string) {
+        super(components, fileName);
+    }
+
+    public execute(data: ModelData): void {
+        this.setModelComponent(data);
+
+        // now store the file if the ModelComponent is found
+        if (this.mComponent in ModelComponent) {
+            let component = data.getComponent(this.mComponent);
+            if (component) {
+                let fileDAO: RemoteFileDAO = DataAccessProvider.getInstance().getRemoteFileDAO();
+                let fileModule: RemoteFileModule = new RemoteFileModule(
+                    this.mComponent,
+                    this.username,
+                    this.fileName,
+                    this.reponame,
+                    this.token
+                );
+                fileDAO.insert(fileModule);
+            }
+        }
     }
 }
 
@@ -94,7 +143,7 @@ export class GetOpenedFilesTask extends Task<ModelData, ModelTaskMetadata> {
     }
 
     public get metadata(): ModelTaskMetadata {
-        let tmp = this.components;
+        let tmp = this.components.concat();
         tmp.push(ModelComponent.IO);
         return new ModelTaskMetadata(tmp, [ModelComponent.IO]);
     }
@@ -111,30 +160,32 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
      * @param mComponent
      * @param mxGraph
      */
-    public constructor(private mComponent: ModelComponent, private mxGraph: MxGraph) {
+    public constructor(private mComponent: ModelComponent, private mxGraph: any) {
         super();
 
     }
 
     public execute(data: ModelData): void {
-        console.log("called");
-
         let component = data.getComponent<Component<ImmutableGraph>>(this.mComponent);
-        if (component) {
 
+        if (component) {
             for (let part of component.getAllKeys()) {
                 // handle the graph objects correctly
                 if (this.mxGraph) {
-                    let graph = component.getPart(part);
-                    graph.query(
-                        store => this.mxGraph.visualizeDataGraph(store, graph.getPrefixes()));
+                    if (part !== "ROOT") {
+                        let persistenceGraph = component.getPart(part);
 
-                    SideBar.setPrefixes(graph.getPrefixes());
+                        this.mxGraph.visualizeFile(
+                            persistenceGraph, ModelComponent[this.mComponent], part, persistenceGraph.getPrefixes()
+                        );
 
+                        SideBar.setPrefixes(persistenceGraph.getPrefixes());
+                    }
                 } else {
                     console.log("error: could not find MxGraph");
                 }
             }
+
         } else {
             console.log("Could not find the ModelComponent: ", component);
         }
@@ -154,7 +205,7 @@ export class GetValidationReport extends Task<ModelData, ModelTaskMetadata> {
      * Create a new GetValidationReport task from Model
      * @param mxGraph
      */
-    public constructor(private mxGraph: MxGraph) {
+    public constructor(private mxGraph: any) {
         super();
 
     }
@@ -208,5 +259,38 @@ export class GetValidationReportNavbar extends Task<ModelData, ModelTaskMetadata
 
     public get metadata(): ModelTaskMetadata {
         return new ModelTaskMetadata([ModelComponent.ValidationReport, ModelComponent.UI], [ModelComponent.UI]);
+    }
+}
+
+/**
+ * Edits a triple and updates the corresponding part in the model
+ * An edit here can be interpreted as a regular edit (e.g. change of predicate)
+ * but can also be interpreted as a remove of the entire triple
+ * This Task can be used for both
+ */
+export class EditTriple extends Task<ModelData, ModelTaskMetadata> {
+
+    public constructor(private graph: ImmutableGraph, private type: string, private file: string) {
+        super();
+    }
+
+    public execute(data: ModelData): void {
+        let dataComponent = data.getComponent<Component<ImmutableGraph>>(ModelComponent.DataGraph);
+
+        let shapesComponent = data.getComponent<Component<ImmutableGraph>>(ModelComponent.SHACLShapesGraph);
+
+        if (this.type === "DataGraph" && dataComponent) {
+            data.setComponent(ModelComponent.DataGraph, dataComponent.withPart(
+                this.file, this.graph));
+        } else if (shapesComponent) {
+            data.setComponent(ModelComponent.SHACLShapesGraph, shapesComponent.withPart(
+                this.file, this.graph));
+        }
+    }
+
+    public get metadata(): ModelTaskMetadata {
+        return new ModelTaskMetadata(
+            [ModelComponent.UI, ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph],
+            [ModelComponent.UI, ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph]);
     }
 }
