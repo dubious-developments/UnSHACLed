@@ -1,10 +1,10 @@
 import {ModelComponent, ModelData, ModelTaskMetadata} from "../entities/model";
-import {FileDAO, FileModule} from "../persistence/fileDAO";
+import {LocalFileDAO, LocalFileModule} from "../persistence/localFileDAO";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
 import {Navbar} from "../components/navbarWork";
 import { extensionToMIME } from "./extensionToMIME";
 import {Task} from "../entities/task";
-import MxGraph from "../components/MxGraph";
+// import MxGraph from "../components/MxGraph";
 import { ImmutableGraph } from "../persistence/graph";
 import { Component } from "../persistence/component";
 import SideBar from "../components/Sidebar";
@@ -44,11 +44,11 @@ export class LoadFileTask extends Task<ModelData, ModelTaskMetadata> {
         if (this.mComponent in ModelComponent) {
             let component = data.getComponent(this.mComponent);
             if (component) {
-                let fileDAO: FileDAO = DataAccessProvider.getInstance().getFileDAO();
+                let fileDAO: LocalFileDAO = DataAccessProvider.getInstance().getLocalFileDAO();
                 // get MIME based on extension
                 let splitted = this.fileName.split(".");
                 let blob = new Blob([], {type: extensionToMIME[splitted[splitted.length - 1]]});
-                fileDAO.insert(new FileModule(this.mComponent, this.fileName, blob));
+                fileDAO.insert(new LocalFileModule(this.mComponent, this.fileName, blob));
             }
         }
 
@@ -111,7 +111,7 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
      * @param mComponent
      * @param mxGraph
      */
-    public constructor(private mComponent: ModelComponent, private mxGraph: MxGraph) {
+    public constructor(private mComponent: ModelComponent, private mxGraph: any) {
         super();
 
     }
@@ -157,7 +157,7 @@ export class GetValidationReport extends Task<ModelData, ModelTaskMetadata> {
      * Create a new GetValidationReport task from Model
      * @param mxGraph
      */
-    public constructor(private mxGraph: MxGraph) {
+    public constructor(private mxGraph: any) {
         super();
 
     }
