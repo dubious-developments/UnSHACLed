@@ -23,7 +23,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     private blockToCellDict: Collections.Dictionary<Block, any>;
     private subjectToBlockDict: Collections.Dictionary<string, Block>;
     private triples: Collections.Set<Triple>;
-    private needToRender: boolean;
 
     private fileToGraphDict: Collections.Dictionary<string, ImmutableGraph>;
     private fileToTypeDict: Collections.Dictionary<string, string>;
@@ -586,8 +585,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         newTriples.difference(this.triples);
         this.triples.union(newTriples);
 
-        this.needToRender = !newTriples.isEmpty();
-
         newTriples.forEach((triple: any) => {
             let subject = triple.subject;
             let predicate = triple.predicate;
@@ -620,11 +617,11 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     }
 
     visualizeFile(persistenceGraph: any, type: string, file: string, prefixes: PrefixMap) {
-        let blocks = this.parseDataGraphToBlocks(persistenceGraph, file);
-
-        if (! this.needToRender) {
+        if (this.fileToGraphDict.containsKey(file)) {
             return;
         }
+
+        let blocks = this.parseDataGraphToBlocks(persistenceGraph, file);
 
         this.clearVisualisation();
         let {graph} = this.state;
@@ -997,7 +994,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                     cellname = cells[0].value;
                 } else {
                     cellname = cells[0].value.name.split("/").pop();
-                    console.log(cells[0]);
                     // set all block clear all block values
                     cells[0].value.traits = [];
                 }
@@ -1012,7 +1008,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 gr.setSelectionCells(gr.importCells(cells, x, y, cell));
 
                 for (let c of cells) {
-                    // todo change realname and name
                     let block = c.value;
                     let file = this.addedDataFile;
                     if (block.blockType === "NodeShape") {
@@ -1030,7 +1025,11 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                     this.addBlock(block, c, this.addedShapesFile);
 
                     // todo add children
-                    // console.log(c.children);
+
+                    for (let row of c.children) {
+
+                    }
+
                 }
 
             /*
@@ -1499,16 +1498,18 @@ export class Triple {
     public object: string;
     public file: string;
     public cell: any;
+    private id: string;
 
     constructor(subject: string, predicate: string, object: string, file: string) {
         this.subject = subject;
         this.predicate = predicate;
         this.object = object;
         this.file = file;
+        this.id = Guid.newGuid();
     }
 
     toString(): string {
-        return this.subject + " " + this.predicate + " " + this.object;
+        return this.subject + " " + this.predicate + " " + this.object + " " + this.file + " " + this.id;
     }
 }
 
@@ -1522,6 +1523,15 @@ class Row {
 
     clone() {
         return mxUtils.clone(this);
+    }
+}
+
+class Guid {
+    static newGuid() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c: any) {
+            let r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
     }
 }
 
