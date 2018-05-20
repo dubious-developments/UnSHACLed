@@ -56,6 +56,7 @@ class Home extends React.Component {
                                 <List.Item as='a'>Save files to your account </List.Item>
                                 <List.Item as='a'>Create new projects </List.Item>
                                 <List.Item as='a'>Create new files in a project </List.Item>
+                                <List.Item as='a'>Load and save workspace </List.Item>
                             </List.List>
                         </List.Item>
                         <List.Item>
