@@ -2,8 +2,7 @@ import * as React from 'react';
 import * as Collections from 'typescript-collections';
 import {ModelComponent, ModelTaskMetadata} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
-import {GetValidationReport, EditTriple, VisualizeComponent, LoadFileTask} from "../services/ModelTasks";
-import TimingService from "../services/TimingService";
+import {GetValidationReport, EditTriple, VisualizeComponent} from "../services/ModelTasks";
 import {ValidationReport} from "../conformance/ValidationReport";
 import {MxGraphProps} from "./interfaces/interfaces";
 import {ModelObserver, Model} from "../entities/model";
@@ -34,8 +33,6 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
     private cellToTriples: Collections.Dictionary<any, Triple>;
     private invalidCells: Collections.Set<any>;
     private noLockCells: Collections.DefaultDictionary<any, boolean>;
-
-    private timer: TimingService;
 
     private RDF: any = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
     private SH: any = $rdf.Namespace("http://www.w3.org/ns/shacl#");
@@ -75,8 +72,6 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
         this.fileToGraphDict = new Collections.Dictionary<string, ImmutableGraph>();
         this.fileToTypeDict = new Collections.Dictionary<string, string>();
         this.fileToPrefixesDict = new Collections.Dictionary<string, PrefixMap>();
-
-        this.timer = new TimingService();
 
         let prefixes: PrefixMap = {};
         prefixes.rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
@@ -1458,62 +1453,6 @@ class Block {
     public triple: Triple;
     public realName: string;
 
-    constructor(name?: string) {
-        this.name = name || "";
-        this.realName = name || "";
-        this.traits = [];
-    }
-
-    clone() {
-        return mxUtils.clone(this);
-    }
-}
-
-export class Triple {
-    public subject: string;
-    public predicate: string;
-    public object: string;
-    public file: string;
-    public cell: any;
-
-    constructor(subject: string, predicate: string, object: string, file: string) {
-        this.subject = subject;
-        this.predicate = predicate;
-        this.object = object;
-        this.file = file;
-    }
-
-    toString(): string {
-        return this.subject + " " + this.predicate + " " + this.object;
-    }
-}
-
-class Row {
-    name: string;
-    error: any;
-
-    constructor(name?: string) {
-        this.name = name || "";
-    }
-
-    clone() {
-        return mxUtils.clone(this);
-    }
-}
-
-/**
- * Map global store to props of this component.
- * @param state: state retrieved from the global redux store.
- * @returns {{token}}: sets props.token
- */
-const mapStateToProps = (state, props) => {
-    return {
-        token: state.token,
-        user: state.login,
-        files: state.files,
-        repos: state.repos,
-    };
-};
     constructor(name?: string) {
         this.name = name || "";
         this.realName = name || "";
