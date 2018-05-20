@@ -52,7 +52,20 @@ export class ModelObserver {
  * Models the data handled by the UnSHACLed application.
  */
 export class Model {
-    private readonly taskQueue: OutOfOrderProcessor;
+    /**
+     * The task processor for the model.
+     * 
+     * NOTE: don't try to run tasks on the Model immediately by calling
+     * `processTask`. There are two reasons for why this is a bad idea:
+     * 
+     *   * The UI should call `processTask` when it knows that
+     *     it has time to do some processing. Other components shouldn't.
+     * 
+     *   * More fundamentally, tasks are not processed in a LIFO order,
+     *     so the task you're trying to process using `processTask` may
+     *     not be the task you queued.
+     */
+    public readonly tasks: TaskProcessor<ModelData, ModelTaskMetadata>;
 
     private observers: ModelObserver[];
 
@@ -70,7 +83,7 @@ export class Model {
      */
     public constructor(data?: ModelData) {
         let wellDefinedData = !data ? new ModelData() : data;
-        this.taskQueue = new OutOfOrderProcessor(
+        this.tasks = new OutOfOrderProcessor(
             wellDefinedData,
             task => task,
             (task: ModelTask) => task,

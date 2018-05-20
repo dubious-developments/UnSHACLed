@@ -11,6 +11,7 @@ import {ModelData} from "../entities/modelData";
 import {ImmutableGraph, Graph, PrefixMap} from "../persistence/graph";
 import RequestModule from '../requests/RequestModule';
 import {connect} from 'react-redux';
+import TimingService from "../services/IdleUserDetection";
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout, mxCellOverlay, mxImage,
@@ -33,6 +34,8 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
     private cellToTriples: Collections.Dictionary<any, Triple>;
     private invalidCells: Collections.Set<any>;
     private noLockCells: Collections.DefaultDictionary<any, boolean>;
+
+    private timer: TimingService;
 
     private RDF: any = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
     private SH: any = $rdf.Namespace("http://www.w3.org/ns/shacl#");
