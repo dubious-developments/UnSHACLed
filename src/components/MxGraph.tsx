@@ -34,7 +34,6 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
     private cellToTriples: Collections.Dictionary<any, Triple>;
     private invalidCells: Collections.Set<any>;
     private grantedLockCellsDict: Collections.DefaultDictionary<any, boolean>;
-    private openRemoteFiles: Collections.Set<string>;
 
     private timer: IdleUserDetection;
     private timerLocks: IdleUserDetection;
@@ -74,7 +73,6 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
         this.cellToTriples = new Collections.Dictionary<any, Triple>((c) => c.getId());
         this.invalidCells = new Collections.Set<any>();
         this.grantedLockCellsDict = new Collections.DefaultDictionary<any, boolean>(() => false);
-        this.openRemoteFiles = new Collections.Set<string>();
 
         this.fileToGraphDict = new Collections.Dictionary<string, ImmutableGraph>();
         this.fileToTypeDict = new Collections.Dictionary<string, string>();
@@ -245,7 +243,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                     // Send changes of remote files
                     let model = DataAccessProvider.getInstance().model;
 
-                    for (let filename in instance.openRemoteFiles) {
+                    for (let filename in instance.props.locks.content) {
                         model.tasks.schedule(
                             new SaveRemoteFileTask(
                                 [ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph],
@@ -287,7 +285,6 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
      */
     processLock(cell:any, filename: string, lock: boolean) {
         if (lock) {
-            this.openRemoteFiles.add(filename);
             this.grantedLockCellsDict.setValue(cell, true);
         }
     }
@@ -1550,9 +1547,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                         filename
                     ).then(lock => {
                         // empty lock datastructures frontend
-                        self.grantedLockCellsDict = new Collections.DefaultDictionary<any, boolean>(() => false);
-                        self.openRemoteFiles = new Collections.Set<string>();
-
+                        self.grantedLockCellsDict.clear();
                         console.log("released locks");
                     }, reason => {
                         console.log("rejected: ", reason);
@@ -1639,7 +1634,7 @@ const mapStateToProps = (state, props) => {
         token: state.token,
         user: state.login,
         files: state.files,
-        repos: state.repos,
+        locks: state.locks,
     };
 };
 
