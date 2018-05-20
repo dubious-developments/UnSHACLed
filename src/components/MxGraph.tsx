@@ -508,6 +508,11 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
         graph.isCellResizable = function (cell: any) {
             return this.isSwimlane(cell);
         };
+
+        // todo add rows should also be disabled
+        graph.isCellEditable = (cell: any) => {
+            return this.grantedLockCellsDict.containsKey(cell);
+        };
     }
 
     configureLabels(graph: any) {
@@ -1219,11 +1224,6 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                 }
 
             });
-
-            // todo add rows should also be disabled
-            graph.isCellEditable = (cell: any) => {
-                return false;
-            };
 
             let instance = this;
 
