@@ -84,10 +84,8 @@ export class SaveLocalFileTask extends BaseSaveFileTask {
 export class SaveRemoteFileTask extends BaseSaveFileTask {
 
     public constructor(protected components: ModelComponent[], protected fileName: string,
-        private username: string, private filename: string, private reponame: string,
-        private token: string) {
+        private username: string, private reponame: string, private token: string) {
         super(components, fileName);
-
     }
 
     public execute(data: ModelData): void {
@@ -101,7 +99,7 @@ export class SaveRemoteFileTask extends BaseSaveFileTask {
                 let fileModule: RemoteFileModule = new RemoteFileModule(
                     this.mComponent,
                     this.username,
-                    this.filename,
+                    this.fileName,
                     this.reponame,
                     this.token
                 );

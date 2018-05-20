@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as Collections from 'typescript-collections';
 import {ModelComponent, ModelTaskMetadata} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
-import {GetValidationReport, EditTriple, VisualizeComponent} from "../services/ModelTasks";
+import {GetValidationReport, EditTriple, VisualizeComponent, SaveRemoteFileTask} from "../services/ModelTasks";
 import {ValidationReport} from "../conformance/ValidationReport";
 import {MxGraphProps} from "./interfaces/interfaces";
 import {ModelObserver, Model} from "../entities/model";
@@ -33,7 +33,8 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
 
     private cellToTriples: Collections.Dictionary<any, Triple>;
     private invalidCells: Collections.Set<any>;
-    private noLockCells: Collections.DefaultDictionary<any, boolean>;
+    private grantedLockCellsDict: Collections.DefaultDictionary<any, boolean>;
+    private openRemoteFiles: Collections.Set<string>;
 
     private timer: TimingService;
 
@@ -71,7 +72,9 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
         this.triples = new Collections.Set<Triple>((t) =>  t.subject + " " + t.predicate + " " + t.object);
         this.cellToTriples = new Collections.Dictionary<any, Triple>((c) => c.getId());
         this.invalidCells = new Collections.Set<any>();
-        this.noLockCells = new Collections.DefaultDictionary<any, boolean>(() => false);
+        this.grantedLockCellsDict = new Collections.DefaultDictionary<any, boolean>(() => false);
+        this.openRemoteFiles = new Collections.Set<string>();
+
         this.fileToGraphDict = new Collections.Dictionary<string, ImmutableGraph>();
         this.fileToTypeDict = new Collections.Dictionary<string, string>();
         this.fileToPrefixesDict = new Collections.Dictionary<string, PrefixMap>();
@@ -227,12 +230,28 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                             instance.props.token,
                             filename
                         ).then(lock => {
-                            instance.processLock(filename, lock);
+                            instance.processLock(cell, filename, lock);
                         });
+                    } else {
+                        instance.grantedLockCellsDict.setValue(cell, true);
                     }
                 } else {
                     // Send changes to backend
-                    console.log("sendChanges");
+                    let model = DataAccessProvider.getInstance().model;
+
+                    for (let filename in instance.openRemoteFiles) {
+                        model.tasks.schedule(
+                            new SaveRemoteFileTask(
+                                [ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph],
+                                filename,
+                                instance.props.user,
+                                instance.getRepoFromFile(filename),
+                                instance.props.token
+                            )
+                        );
+                    }
+                    model.tasks.processAllTasks();
+
                 }
                 evt.consume();
             }
@@ -256,11 +275,15 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
     /**
      * Processes the lock after the lock request.
      * TODO.
+     * @param cell: cell the user clicked on.
      * @param filename: name of the file for which the lock got granted.
      * @param lock: true means that the lock got assigned to the user, false means the opposite.
      */
-    processLock(filename: string, lock: boolean) {
-
+    processLock(cell:any, filename: string, lock: boolean) {
+        if (lock) {
+            this.openRemoteFiles.add(filename);
+            this.grantedLockCellsDict.setValue(cell, true);
+        }
     }
 
     extendCanvas(graph: any) {
