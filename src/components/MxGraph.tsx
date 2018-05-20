@@ -2,18 +2,19 @@ import * as React from 'react';
 import * as Collections from 'typescript-collections';
 import {ModelComponent, ModelTaskMetadata} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
-import {GetValidationReport, VisualizeComponent} from "../services/ModelTasks";
-import TimingService from "../services/IdleUserDetection";
+import {GetValidationReport, EditTriple, VisualizeComponent, LoadFileTask} from "../services/ModelTasks";
 import {ValidationReport} from "../conformance/ValidationReport";
 import {MxGraphProps} from "./interfaces/interfaces";
-
-import {ModelObserver} from "../entities/model";
-import {PrefixMap} from "../persistence/graph";
+import {ModelObserver, Model} from "../entities/model";
 import {Task} from "../entities/task";
 import {ModelData} from "../entities/modelData";
+import {ImmutableGraph, Graph, PrefixMap} from "../persistence/graph";
+import PollingService from "../services/PollingService";
+import IdleUserDetection from "../services/IdleUserDetection";
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
-    mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout, mxCellOverlay, mxImage: any;
+    mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout, mxCellOverlay, mxImage,
+    mxGraphModel: any;
 
 let $rdf = require('rdflib');
 
@@ -23,11 +24,24 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     private blockToCellDict: Collections.Dictionary<Block, any>;
     private subjectToBlockDict: Collections.Dictionary<string, Block>;
     private triples: Collections.Set<Triple>;
+    private needToRender: boolean;
+
+    private fileToGraphDict: Collections.Dictionary<string, ImmutableGraph>;
+    private fileToTypeDict: Collections.Dictionary<string, string>;
+    private fileToPrefixesDict: Collections.Dictionary<string, PrefixMap>;
 
     private cellToTriples: Collections.Dictionary<any, Triple>;
     private invalidCells: Collections.Set<any>;
 
-    private timer: TimingService;
+    private timer: IdleUserDetection;
+    private timerLocks: IdleUserDetection;
+
+    private RDF: any = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+    private SH: any = $rdf.Namespace("http://www.w3.org/ns/shacl#");
+    private SCHEMA: any = $rdf.Namespace("http://schema.org/");
+    private EX: any = $rdf.Namespace("http://example.com/ns#");
+    private addedShapesFile: string = "addedShapes.ttl";
+    private addedDataFile: string = "addedData.ttl";
 
     constructor(props: any) {
         super(props);
@@ -46,18 +60,44 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.initiateDragPreview = this.initiateDragPreview.bind(this);
         this.getGraphUnderMouse = this.getGraphUnderMouse.bind(this);
         this.makeDragSource = this.makeDragSource.bind(this);
-        this.visualizeDataGraph = this.visualizeDataGraph.bind(this);
+        this.visualizeFile = this.visualizeFile.bind(this);
         this.handleUserAction = this.handleUserAction.bind(this);
         this.addTemplate = this.addTemplate.bind(this);
 
         this.nameToStandardCellDict = new Collections.Dictionary<string, any>();
         this.blockToCellDict = new Collections.Dictionary<Block, any>((b) => b.name);
         this.subjectToBlockDict = new Collections.Dictionary<string, Block>();
-        this.triples = new Collections.Set<Triple>((t) => t.subject + " " + t.predicate + " " + t.object);
-        this.cellToTriples = new Collections.Dictionary<any, Triple>((c) => c.value.name);
+        this.triples = new Collections.Set<Triple>((t) =>  t.subject + " " + t.predicate + " " + t.object);
+        this.cellToTriples = new Collections.Dictionary<any, Triple>((c) => c.getId());
         this.invalidCells = new Collections.Set<any>();
+        this.fileToGraphDict = new Collections.Dictionary<string, ImmutableGraph>();
+        this.fileToTypeDict = new Collections.Dictionary<string, string>();
+        this.fileToPrefixesDict = new Collections.Dictionary<string, PrefixMap>();
 
-        this.timer = new TimingService();
+        // timer for conformance
+        this.timer = new IdleUserDetection(2000);
+        // timer for lock release
+        this.timerLocks = new IdleUserDetection(10000);
+
+        let prefixes: PrefixMap = {};
+        prefixes.rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+        prefixes.sh = "http://www.w3.org/ns/shacl#";
+        prefixes.schema = "http://schema.org/";
+        prefixes.ex = "http://example.com/ns#";
+        prefixes.rdfs = "http://www.w3.org/2000/01/rdf-schema#";
+        prefixes.xsd = "http://www.w3.org/2001/XMLSchema#";
+
+        let addedShapes = ImmutableGraph.create();
+        addedShapes = addedShapes.addPrefixes(prefixes);
+        this.fileToGraphDict.setValue(this.addedShapesFile, addedShapes);
+        this.fileToPrefixesDict.setValue(this.addedShapesFile, prefixes);
+        this.fileToTypeDict.setValue(this.addedShapesFile, "SHACLShapesGraph");
+
+        let addedData = ImmutableGraph.create();
+        addedData = addedData.addPrefixes(prefixes);
+        this.fileToGraphDict.setValue(this.addedDataFile, addedData);
+        this.fileToPrefixesDict.setValue(this.addedDataFile, prefixes);
+        this.fileToTypeDict.setValue(this.addedDataFile, "DataGraph");
     }
 
     componentDidMount() {
@@ -383,26 +423,52 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             if (cell.value != null && cell.value.name != null) {
                 return cell.value.name;
             }
-            return mxGraph.prototype.convertValueToString.apply(this, arguments); // "supercall"
+            // "supercall"
+            return mxGraph.prototype.convertValueToString.apply(this, arguments);
         };
 
-        let superCellLabelChanged = graph.cellLabelChanged;
-        graph.cellLabelChanged = function (cell: any, newValue: string, autoSize: any) {
-            if (mxUtils.isNode(cell.value.name)) {
-                // Clones the value for correct undo/redo
-                let elt = cell.value.cloneNode(true);
-                elt.setAttribute('label', newValue);
-                newValue = elt;
-            }
+        // let superCellLabelChanged = graph.cellLabelChanged;
+        // graph.cellLabelChanged = function (cell: any, newValue: string, autoSize: any) {
+        //     console.log(cell, newValue);
+        //     // if (cell.value) {
+        //     //     // Clones the value for correct undo/redo
+        //     //     // let elt = mxUtils.clone(cell.value);
+        //     //     let elt = cell.value.clone();
+        //     //     elt.setAttribute('name', newValue);
+        //     //     newValue = elt;
+        //     // }
 
-            superCellLabelChanged.apply(this, arguments);
-        };
+        //     superCellLabelChanged.apply(this, arguments);
+        // };
 
         graph.getLabel = function (cell: any) {
             if (this.isHtmlLabel(cell)) {
                 return mxUtils.htmlEntities(cell.value.name);
             }
             return mxGraph.prototype.getLabel.apply(this, arguments);
+        };
+
+        let instance = this;
+        // Text label changes will go into the name field of the user object
+        graph.model.valueForCellChanged = function(cell: any, value: any) {
+            let triple = instance.cellToTriples.getValue(cell);
+            if (triple && cell.style === "Row") {
+                let [predicate, object] = 
+                    instance.traitRestFromName(value, instance.fileToPrefixesDict.getValue(triple.file));
+                let newTriple = new Triple(triple.subject, predicate, object, triple.file);
+                newTriple.cell = triple.cell;
+                instance.editTriple(cell, triple, newTriple);
+            } else {
+                instance.editBlock(cell, value);
+            }
+
+            if (value.name != null) {
+                return mxGraphModel.prototype.valueForCellChanged.apply(this, arguments);
+            } else {
+                let old = cell.value.name;
+                cell.value.name = value;
+                return old;
+            }
         };
 
         // Properties are dynamically created HTML labels
@@ -444,7 +510,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     addNewRowOverlay(graph: any, cell: any) {
         // Creates a new overlay in the middle with an image and a tooltip
         let overlay = new mxCellOverlay(
-            new mxImage('../img/add.png', 24, 24), 'Add a new row', mxConstants.ALIGN_CENTER);
+            new mxImage('img/add.png', 24, 24), 'Add a new row', mxConstants.ALIGN_CENTER);
         overlay.cursor = 'hand';
 
         let model = graph.getModel();
@@ -452,20 +518,56 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
         // Installs a handler for clicks on the overlay
         overlay.addListener(mxEvent.CLICK, function (sender: any, event: any) {
+            let temprow = model.cloneCell(instance.nameToStandardCellDict.getValue('row'));
+            let block, file, triple;
+            
             graph.clearSelection();
             model.beginUpdate();
             try {
-                let temprow = model.cloneCell(instance.nameToStandardCellDict.getValue('row'));
-                temprow.value = {name: "", trait: "null"};
-                let parent = cell.getParent();
+                block = instance.subjectToBlockDict.getValue(event.properties.cell.value.realName);
+                if (block) {
+                    if (block.traits.length > 0) {
+                        file = block.traits[0].file;
+                    } else {
+                        file = block.triple.file || instance.addedDataFile;
+                    }
 
-                instance.addNewRowOverlay(graph, temprow);
-                graph.removeCellOverlay(cell);
-                parent.insert(temprow);
-                graph.view.refresh(parent);
+                    triple = new Triple(block.realName, "predicate", "object", file);
+                    triple.cell = temprow;
+                    temprow.value.name = instance.nameFromTrait(triple);
+
+                    cell.insert(temprow);
+                }
             } finally {
                 // Updates the display
                 model.endUpdate();
+                graph.refresh();
+            }
+
+            if (triple) {
+                // start an update task in the model
+                let oldGraph = instance.fileToGraphDict.getValue(file);
+                let type = instance.fileToTypeDict.getValue(file);
+                if (oldGraph && type) {
+                    let backendModel = DataAccessProvider.getInstance().model;
+                    let newGraph = oldGraph.addTriple(triple.subject, triple.predicate, triple.object);
+                    backendModel.tasks.schedule(new EditTriple(
+                        newGraph, type, file)
+                    );
+                    // TODO remove this after testing
+                    backendModel.tasks.processAllTasks();
+                } else {
+                    console.log("error: graph or type undefined");
+                }
+    
+                // update the data structures
+                instance.triples.add(triple);
+                instance.cellToTriples.setValue(temprow, triple);
+                if (block) {
+                    block.traits.push(triple);
+                } else {
+                    console.log("error: could not find block: " + block.realName);
+                }
             }
         });
 
@@ -473,26 +575,23 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         graph.addCellOverlay(cell, overlay);
     }
 
-    parseDataGraphToBlocks(store: any, prefixes: PrefixMap) {
-        // let DASH = $rdf.Namespace("http://datashapes.org/dash#");
-        let RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-        // let RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
-        // let SCHEMA = $rdf.Namespace("http://schema.org/");
-        let SH = $rdf.Namespace("http://www.w3.org/ns/shacl#");
-        // let XSD = $rdf.Namespace("http://www.w3.org/2001/XMLSchema#");
-
-        let triples = store.statements;
+    parseDataGraphToBlocks(persistenceGraph: any, file: string) {
+        let triples = persistenceGraph.query(store => store).statements;
+        this.fileToGraphDict.setValue(file, persistenceGraph);
         let newTriples = new Collections.Set<Triple>();
 
         triples.forEach((triple: any) => {
             if (!this.subjectToBlockDict.containsKey(triple.subject.value)) {
                 this.subjectToBlockDict.setValue(triple.subject.value, new Block(triple.subject.value));
             }
-            newTriples.add(new Triple(triple.subject.value, triple.predicate.value, triple.object.value));
+            newTriples.add(new Triple(
+                triple.subject.value, triple.predicate.value, triple.object.value, file));
         });
 
         newTriples.difference(this.triples);
         this.triples.union(newTriples);
+
+        this.needToRender = !newTriples.isEmpty();
 
         newTriples.forEach((triple: any) => {
             let subject = triple.subject;
@@ -501,11 +600,14 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
             let subjectBlock = this.subjectToBlockDict.getValue(subject);
             if (subjectBlock) {
-                if (predicate === RDF("type").uri && object === SH("NodeShape").uri) {
+                if (predicate === this.RDF("type").uri && object === this.SH("NodeShape").uri) {
                     subjectBlock.blockType = "NodeShape";
-                } else if (predicate === SH("path").uri) {
+                    subjectBlock.triple = triple;
+                } else if (predicate === this.SH("path").uri) {
                     subjectBlock.name = object;
+                    subjectBlock.realName = subject;
                     subjectBlock.blockType = "Property";
+                    subjectBlock.triple = triple;
                 } else {
                     subjectBlock.traits.push(triple);
                 }
@@ -515,58 +617,82 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         return this.subjectToBlockDict.values();
     }
 
-    clear() {
+    clearVisualisation() {
+        this.blockToCellDict.clear();
+        this.cellToTriples.clear();
         let {graph} = this.state;
         graph.removeCells(graph.getChildVertices(graph.getDefaultParent()));
-        this.blockToCellDict.clear();
     }
 
-    visualizeDataGraph(store: any, prefixes: PrefixMap) {
-        this.clear();
+    visualizeFile(persistenceGraph: any, type: string, file: string, prefixes: PrefixMap) {
+        let blocks = this.parseDataGraphToBlocks(persistenceGraph, file);
+
+        if (! this.needToRender) {
+            return;
+        }
+
+        this.clearVisualisation();
         let {graph} = this.state;
-        let blocks = this.parseDataGraphToBlocks(store, prefixes);
+        this.fileToTypeDict.setValue(file, type);
+        this.fileToPrefixesDict.setValue(file, prefixes);
+
         let model = graph.getModel();
         let parent = graph.getDefaultParent();
 
         blocks.forEach(b => {
+            b.name = this.placePrefixes(b.name, prefixes);
             let v1 = model.cloneCell(this.nameToStandardCellDict.getValue('block'));
-            v1.value = this.replacePrefixes(b.name, prefixes);
+            v1.value.name = b.name;
+            v1.value.realName = b.realName;
             this.blockToCellDict.setValue(b, v1);
         });
 
         blocks.forEach(b => {
-            let v1 = this.blockToCellDict.getValue(b);
+            let blockCell = this.blockToCellDict.getValue(b);
             model.beginUpdate();
+            let rows: any[] = []; // store rows temporarily, since they only get an id after the model updates
             try {
                 let longestname = 0;
                 b.traits.forEach(trait => {
-                    let temprow = model.cloneCell(this.nameToStandardCellDict.getValue('row'));
-                    let name = this.replacePrefixes(trait.predicate, prefixes)
-                        + " :  "
-                        + this.replacePrefixes(trait.object, prefixes);
-                    // let name = trait.predicate + " :  " + trait.object;
-                    longestname = Math.max(name.length, longestname);
-                    temprow.value = {name: name, trait: trait};
-                    v1.insert(temprow);
+                    let rowCell = model.cloneCell(this.nameToStandardCellDict.getValue('row'));
+                    let name = this.nameFromTrait(trait, prefixes);
 
-                    this.cellToTriples.setValue(temprow, trait);
+                    longestname = Math.max(name.length, longestname);
+                    rowCell.value.name = name;
+                    blockCell.insert(rowCell);
 
                     let b2 = this.subjectToBlockDict.getValue(trait.object);
                     if (b2) {
                         let v2 = this.blockToCellDict.getValue(b2);
-                        graph.insertEdge(graph.getDefaultParent(), null, '', temprow, v2);
+                        graph.insertEdge(graph.getDefaultParent(), null, '', rowCell, v2);
                     }
+                    rows.push(rowCell);
                 });
 
-                if (b.blockType === undefined) {
+                this.addNewRowOverlay(graph, blockCell);
+
+                if (!b.blockType) {
                     b.blockType = "Data";
                 }
-                v1.style = b.blockType;
-                v1.geometry.width += longestname * 4;
-                v1.geometry.alternateBounds = new mxRectangle(0, 0, v1.geometry.width, v1.geometry.height);
-                graph.addCell(v1, parent);
+
+                blockCell.value.blockType = b.blockType;
+                blockCell.style = b.blockType;
+                blockCell.geometry.width += longestname * 4;
+                blockCell.geometry.alternateBounds = 
+                    new mxRectangle(0, 0, blockCell.geometry.width, blockCell.geometry.height);
+                graph.addCell(blockCell, parent);
             } finally {
                 model.endUpdate();
+            }
+
+            for (let i = 0; i < rows.length; i++) {
+                this.cellToTriples.setValue(rows[i], b.traits[i]);
+                b.traits[i].cell = rows[i];
+            }
+
+            if (b.triple) {
+                this.cellToTriples.setValue(blockCell, b.triple);
+                b.triple.cell = blockCell;
             }
         });
 
@@ -575,13 +701,48 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     }
 
     /**
-     * Replaces prefixes where possible in the string s
+     * Get the name for a row based on trait
+     */
+    nameFromTrait(trait: any, prefixes?: PrefixMap) {
+        if (prefixes) {
+            return this.placePrefixes(trait.predicate, prefixes)
+                + " :  "
+                + this.placePrefixes(trait.object, prefixes);
+        } else {
+            return trait.predicate + " : " + trait.object;
+        }
+    }
+
+    /**
+     * Get the predicate and object of a trait for a row based on a name
+     */
+    traitRestFromName(name: string, prefixes?: PrefixMap) {
+        if (prefixes) {
+            name = this.replacePrefixes(name, prefixes);
+        }
+        return name.split(' : ');
+    }
+
+    /**
+     * Places prefixes where possible in the string s
+     * @param {string} s
+     * @param {PrefixMap} prefixes
+     */
+    placePrefixes(s: string, prefixes: PrefixMap): string {
+        Object.keys(prefixes).forEach(key => {
+            s = s.replace(prefixes[key], key + ":");
+        });
+        return s;
+    }
+
+    /**
+     * Replaces the prefixes where possible in the string with the full values
      * @param {string} s
      * @param {PrefixMap} prefixes
      */
     replacePrefixes(s: string, prefixes: PrefixMap): string {
         Object.keys(prefixes).forEach(key => {
-            s = s.replace(prefixes[key], key + ":");
+            s = s.replace(key + ":", prefixes[key]);
         });
         return s;
     }
@@ -685,7 +846,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         /* Defines new editor action*/
         // Defines a new export action
         editor.addAction('cleargraph', () => {
-            this.clear();
+            this.clearVisualisation();
         });
         /* Toolbar functionality */
         this.addToolbarButton(editor, toolbar, 'delete', '', 'delete');
@@ -734,28 +895,60 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         let model = graph.getModel();
         let block = this.nameToStandardCellDict.getValue('block');
         let row = this.nameToStandardCellDict.getValue('row');
-        let funct = function (g: any, evt: any, target: any, x: any, y: any) {
+
+        let funct = (g: any, evt: any, target: any, x: any, y: any) => {
             let v1 = model.cloneCell(block);
             let parent = graph.getDefaultParent();
+
+            /* Create empty block */
+            let b = v1.getValue();
+
             /* Set correct styling based on input */
+            let realName = this.SCHEMA("NewShape").uri;
+            let name = this.placePrefixes(realName, this.fileToPrefixesDict.getValue(this.addedShapesFile) || {});
             let style = 'NodeShape';
+            let triple = new Triple(realName, this.RDF("type").uri, this.SH("NodeShape").uri, this.addedShapesFile);
+            triple.cell = v1;
             if (id.indexOf('Property') >= 0) {
+                realName = "_:b" + (Math.floor(Math.random() * 1000000000) + 1000);
+                name = this.placePrefixes(
+                    this.EX("name").uri, this.fileToPrefixesDict.getValue(this.addedShapesFile) || {}
+                    );
+                triple = new Triple(realName, this.SH("path").uri, name, this.addedShapesFile);
                 style = 'Property';
             }
-            /* Create empty block */
-            let b = new Block();
-            b.name = "new " + id;
             b.blockType = style;
+            b.realName = realName;
+            b.name = name;
+            b.triple = triple;
 
-            /* Create empty row */
-            let temprow = model.cloneCell(row);
-            temprow.value = {name: "", trait: "null"};
-            b.traits = [temprow];
+            this.blockToCellDict.setValue(b, v1);
+            this.subjectToBlockDict.setValue(b.realName, b);
+            this.triples.add(triple);
+            this.cellToTriples.setValue(v1, triple);
+
+            let oldGraph = this.fileToGraphDict.getValue(this.addedShapesFile);
+            let type = "SHACLShapesGraph";
+
+            if (oldGraph && type) {
+                let newGraph = oldGraph.addTriple(triple.subject, triple.predicate, triple.object);
+                this.fileToGraphDict.setValue(
+                    this.addedShapesFile,
+                    newGraph
+                );
+
+                let horse = DataAccessProvider.getInstance().model;
+                horse.tasks.schedule(new EditTriple(
+                    newGraph, type, this.addedShapesFile)
+                );
+
+                horse.tasks.processAllTasks();
+            }
+
+            b.traits = [];
 
             model.beginUpdate();
             try {
-                v1.insert(temprow);
-                v1.value = b.name;
                 v1.style = style;
                 v1.geometry.x = x;
                 v1.geometry.y = y;
@@ -763,6 +956,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 graph.addCell(v1, parent);
                 v1.geometry.alternateBounds =
                     new mxRectangle(0, 0, v1.geometry.width, v1.geometry.height);
+                this.addNewRowOverlay(graph, v1);
             } finally {
                 // Updates the display
                 model.endUpdate();
@@ -785,8 +979,8 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     addTemplate() {
         let {graph} = this.state;
         let {templateCount} = this.state;
-        // TODO prevent multiple cell selection
-        // TODO positioning??
+        // TODO: prevent multiple cell selection
+        // TODO: positioning??
 
         if (!graph.isSelectionEmpty()) {
             // Creates a copy of the selection array to preserve its state
@@ -814,8 +1008,13 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             // Function that is executed when the image is dropped on
             // the graph. The cell argument points to the cell under
             // the mousepointer if there is one.
-            var funct = function (gr: any, evt: any, target: any, x: any, y: any, cell: any) {
+            var funct = (gr: any, evt: any, target: any, x: any, y: any, cell: any) => {
                 gr.setSelectionCells(gr.importCells(cells, x, y, cell));
+
+                for (let c of cells) {
+                    console.log(c);
+                    console.log(c.children);
+                }
             };
             // create sidebar entry
             // invoke callback on parent component, which will add entry to sidebar
@@ -836,6 +1035,10 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     }
 
     main(container: HTMLElement | null): void {
+        // TODO remove after test
+        let ps = new PollingService(5000);
+        ps.startPolling();
+
         // Checks if the browser is supported
         if (!container) {
             mxUtils.error('Could not find \'graphContainer\'', 200, false);
@@ -900,13 +1103,156 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 let cells = evt.getProperty("cells");
 
                 for (let i = 0; i < cells.length; i++) {
-                    let triple = this.cellToTriples.getValue(cells[i]);
-                    if (triple) {
-                        console.log(triple);
+                    let cell = cells[i];
+                    let triple = this.cellToTriples.getValue(cell);
+
+                    if (triple && cell.style === "Row") {
+                        // a row was removed
+                        this.removeTriple(triple, model);
+                    } else if (this.blockToCellDict.containsKey(cell.value)) {
+                        // a block was removed
+                        let block  = this.subjectToBlockDict.getValue(cell.value.realName);
+                        if (block) {
+                            if (block.triple) {
+                                // block is a property or shape, not data
+                                this.removeTriple(block.triple, model);
+                            }
+
+                            for (let trait of block.traits) {
+                                this.removeTriple(trait, model);
+                            }
+
+                            this.subjectToBlockDict.remove(block.realName);
+                            this.blockToCellDict.remove(block);
+                        }
                     }
                 }
-            });
 
+                this.debug();
+            });
+        }
+    }
+
+    debug() {
+        console.log(this.blockToCellDict);
+        console.log(this.subjectToBlockDict);
+        console.log(this.triples);
+        console.log(this.cellToTriples);
+    }
+
+    removeTriple(triple: Triple, model: any) {
+        this.removeTripleFromBlocks(triple);
+        this.triples.remove(triple);
+        this.cellToTriples.remove(triple.cell);
+
+        this.removeTripleFromModel(triple, model);
+    }
+
+    removeTripleFromModel(triple: Triple, model: any) {
+        let oldGraph = this.fileToGraphDict.getValue(triple.file);
+        let type = this.fileToTypeDict.getValue(triple.file);
+
+        if (oldGraph && type) {
+            let newGraph = oldGraph.removeTriple(triple.subject, triple.predicate, triple.object);
+            this.fileToGraphDict.setValue(
+                triple.file,
+                newGraph
+            );
+
+            model.tasks.schedule(new EditTriple(
+                newGraph, type, triple.file)
+            );
+
+            model.tasks.processAllTasks();
+        }
+    }
+
+    editTriple(cell: any, oldTriple: Triple, newTriple: Triple) {
+        let model = DataAccessProvider.getInstance().model;
+
+        // Update data structures
+        this.triples.remove(oldTriple);
+        this.triples.add(newTriple);
+        this.cellToTriples.setValue(cell, newTriple);
+
+        // Update subjectToBlockDict by first removing the old triple
+        this.removeTripleFromBlocks(oldTriple);
+        // And then adding the new one
+        let block  = this.subjectToBlockDict.getValue(newTriple.subject);
+        if (block) {
+            // Dynamically update the values in this.subjectToBlockDict & this.blockToCellDict
+            block.traits.push(newTriple);
+        }
+
+        // Edit triple in the model
+        let oldGraph = this.fileToGraphDict.getValue(newTriple.file);
+        let file = this.fileToTypeDict.getValue(newTriple.file);
+
+        if (oldGraph && file) {
+            // Use param object to adhere to interface of the backend graph structure
+            let param = {nSubject: newTriple.subject, nPredicate: newTriple.predicate, nObject: newTriple.object};
+            let newGraph = oldGraph.updateTriple(oldTriple.subject, oldTriple.predicate, oldTriple.object, param);
+
+            this.fileToGraphDict.setValue(
+                newTriple.file,
+                newGraph
+            );
+
+            model.tasks.schedule(new EditTriple(
+                newGraph, file, newTriple.file)
+            );
+
+            model.tasks.processAllTasks();
+        }
+    }
+
+    editBlock(cell: any, value: string) {
+        let block = cell.getValue();
+        let oldSubject = block.realName;
+        let subject: string = value; // This value should get replaced with the full version in the next if block
+
+        let storedBlock = this.subjectToBlockDict.getValue(oldSubject);
+        if (storedBlock) {
+            let filename = storedBlock.traits[0].file;
+            let prefixMap = this.fileToPrefixesDict.getValue(filename);
+            if (prefixMap) {
+                subject = this.replacePrefixes(value, prefixMap);
+                block.realName = subject;
+
+                this.blockToCellDict.remove(storedBlock);
+                this.blockToCellDict.setValue(block, cell);
+            } else {
+                console.log("Could not find PrefixMap for cell + file.", cell, filename);
+            }
+        } else {
+            console.log("No stored block found for cell", cell);
+        }
+
+        this.subjectToBlockDict.remove(oldSubject);
+        this.subjectToBlockDict.setValue(subject, block);
+
+        let trait = this.cellToTriples.getValue(cell);
+        if (trait) {
+            // Special kind of triple
+            let newTrait;
+            if (block.blockType === "NodeShape") {
+                newTrait = new Triple(subject, trait.predicate, trait.object, trait.file);
+            } else {
+                newTrait = new Triple(trait.subject, trait.predicate, subject, trait.file);
+            } 
+            newTrait.cell = cell;
+            this.editTriple(cell, trait, newTrait);
+        }
+
+        for (let child of cell.children) {
+            trait = this.cellToTriples.getValue(child);
+            if (trait) {
+                let newTrait = new Triple(subject, trait.predicate, trait.object, trait.file);
+                newTrait.cell = child;
+                this.editTriple(child, trait, newTrait);
+            } else {
+                console.log("Error: edited cell has no linked triple");
+            }
         }
     }
 
@@ -951,7 +1297,8 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             cell.children.forEach(rowCell => {
                 let found = false;
                 for (let error of errors) {
-                    if (error.getShapeProperty() === rowCell.value.trait.predicate) {
+                    if (rowCell.value.trait && 
+                        rowCell.value.trait.predicate === error.getShapeProperty()) {
                         rowCell.setStyle("InvalidRow");
                         rowCell.value.error = error;
 
@@ -972,13 +1319,23 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         }
     }
 
+    removeTripleFromBlocks(triple: Triple) {
+        this.blockToCellDict.forEach(block => {
+            block.traits = block.traits.filter(item => item !== triple);
+        });
+
+        this.subjectToBlockDict.forEach((subject: string, block: Block) => {
+            block.traits = block.traits.filter(item => item !== triple);
+        });
+    }
+
     turnCellValid(cell: any) {
         let graph = this.state.graph;
         let model = graph.getModel();
         model.beginUpdate();
         try {
             // Set style of block
-            cell.setStyle(cell.value.blockType);
+            cell.setStyle(cell.getValue().blockType);
 
             // Set style of rows
             cell.children.forEach(rowCell => {
@@ -1007,6 +1364,11 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             // process all tasks when idle
             model.tasks.processAllTasks();
         });
+
+        this.timerLocks.userAction(function (this: MxGraph) {
+            // TODO send request here
+            console.log("release locks");
+        });
     }
 
     render() {
@@ -1029,9 +1391,12 @@ class Block {
     public traits: Array<Triple>;
     public blockType: string;
     public name: string;
+    public triple: Triple;
+    public realName: string;
 
     constructor(name?: string) {
         this.name = name || "";
+        this.realName = name || "";
         this.traits = [];
     }
 
@@ -1040,15 +1405,18 @@ class Block {
     }
 }
 
-class Triple {
+export class Triple {
     public subject: string;
     public predicate: string;
     public object: string;
+    public file: string;
+    public cell: any;
 
-    constructor(subject: string, predicate: string, object: string) {
+    constructor(subject: string, predicate: string, object: string, file: string) {
         this.subject = subject;
         this.predicate = predicate;
         this.object = object;
+        this.file = file;
     }
 
     toString(): string {
@@ -1058,6 +1426,11 @@ class Triple {
 
 class Row {
     name: string;
+    error: any;
+
+    constructor(name?: string) {
+        this.name = name || "";
+    }
 
     clone() {
         return mxUtils.clone(this);

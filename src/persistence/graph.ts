@@ -265,6 +265,7 @@ export class ImmutableGraph {
      * @param object
      */
     public removeTriple(subject: string, predicate: string, object: string): ImmutableGraph {
+        console.log(subject, predicate, object);
         if (this.containsTriple(subject, predicate, object)) {
             return new ImmutableGraph(
                 this.capsule.modify(
@@ -487,8 +488,9 @@ class GraphData {
      * @param object
      */
     public removeTriple(subject: string, predicate: string, object: string) {
+        console.log(subject, predicate, object);
         this.n3Store.removeTriple(subject, predicate, object);
-        this.store.remove(new Statement(subject, predicate, object));
+        this.store.remove(subject, predicate, object);
         this.updateChanges(ChangeSet.REMOVE, ChangeSet.ADD, subject, predicate, object);
     }
 

@@ -94,7 +94,7 @@ export class GetOpenedFilesTask extends Task<ModelData, ModelTaskMetadata> {
     }
 
     public get metadata(): ModelTaskMetadata {
-        let tmp = this.components;
+        let tmp = this.components.concat();
         tmp.push(ModelComponent.IO);
         return new ModelTaskMetadata(tmp, [ModelComponent.IO]);
     }
@@ -117,24 +117,27 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
     }
 
     public execute(data: ModelData): void {
-        console.log("called");
-
         let component = data.getComponent<Component<ImmutableGraph>>(this.mComponent);
-        if (component) {
 
+        if (component) {
             for (let part of component.getAllKeys()) {
                 // handle the graph objects correctly
                 if (this.mxGraph) {
-                    let graph = component.getPart(part);
-                    graph.query(
-                        store => this.mxGraph.visualizeDataGraph(store, graph.getPrefixes()));
+                    if (part !== "ROOT") {
+                        let persistenceGraph = component.getPart(part);
 
-                    SideBar.setPrefixes(graph.getPrefixes());
+                        this.mxGraph.visualizeFile(
+                            persistenceGraph, ModelComponent[this.mComponent], part, persistenceGraph.getPrefixes()
+                        );
 
+                        SideBar.setPrefixes(persistenceGraph.getPrefixes());
+                    }
                 } else {
                     console.log("error: could not find MxGraph");
                 }
             }
+
+            this.mxGraph.debug();
         } else {
             console.log("Could not find the ModelComponent: ", component);
         }
@@ -208,5 +211,38 @@ export class GetValidationReportNavbar extends Task<ModelData, ModelTaskMetadata
 
     public get metadata(): ModelTaskMetadata {
         return new ModelTaskMetadata([ModelComponent.ValidationReport, ModelComponent.UI], [ModelComponent.UI]);
+    }
+}
+
+/**
+ * Edits a triple and updates the corresponding part in the model
+ * An edit here can be interpreted as a regular edit (e.g. change of predicate)
+ * but can also be interpreted as a remove of the entire triple
+ * This Task can be used for both
+ */
+export class EditTriple extends Task<ModelData, ModelTaskMetadata> {
+
+    public constructor(private graph: ImmutableGraph, private type: string, private file: string) {
+        super();
+    }
+
+    public execute(data: ModelData): void {
+        let dataComponent = data.getComponent<Component<ImmutableGraph>>(ModelComponent.DataGraph);
+
+        let shapesComponent = data.getComponent<Component<ImmutableGraph>>(ModelComponent.SHACLShapesGraph);
+
+        if (this.type === "DataGraph" && dataComponent) {
+            data.setComponent(ModelComponent.DataGraph, dataComponent.withPart(
+                this.file, this.graph));
+        } else if (shapesComponent) {
+            data.setComponent(ModelComponent.SHACLShapesGraph, shapesComponent.withPart(
+                this.file, this.graph));
+        }
+    }
+
+    public get metadata(): ModelTaskMetadata {
+        return new ModelTaskMetadata(
+            [ModelComponent.UI, ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph],
+            [ModelComponent.UI, ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph]);
     }
 }

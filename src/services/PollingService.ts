@@ -1,6 +1,7 @@
 /**
  * This class is used to poll at regular interval times
  */
+
 export default class PollingService<T> {
 
     // number of milliseconds between 2 consecutive polls
