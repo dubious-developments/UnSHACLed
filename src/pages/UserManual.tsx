@@ -6,6 +6,7 @@ import Section3 from './sections/Section3';
 import Section4 from './sections/Section4';
 import Section5 from './sections/Section5';
 import Section6 from './sections/Section6';
+import Section7 from './sections/Section7';
 
 class Home extends React.Component {
 
@@ -30,7 +31,7 @@ class Home extends React.Component {
                     <p>A visual IDE for Semantic Web constraint languages </p>
                     <p><b> Table of Contents </b></p>
                     {/* Table of contents */}
-                    <List ordered={true}>
+                    <List ordered={true} style={{columns: '2', WebkitColumns: '2', MozColumns: '2'}}>
                         <List.Item>
                             <a>Introduction</a>
                             <List.List>
@@ -56,6 +57,7 @@ class Home extends React.Component {
                                 <List.Item as='a'>Save files to your account </List.Item>
                                 <List.Item as='a'>Create new projects </List.Item>
                                 <List.Item as='a'>Create new files in a project </List.Item>
+                                <List.Item as='a'>Load and save workspace </List.Item>
                             </List.List>
                         </List.Item>
                         <List.Item>
@@ -64,6 +66,12 @@ class Home extends React.Component {
                                 <List.Item as='a'>Editor functionality</List.Item>
                                 <List.Item as='a'>In-graph editing</List.Item>
                                 <List.Item as='a'>Extra</List.Item>
+                            </List.List>
+                        </List.Item>
+                        <List.Item>
+                            <a>Conformance</a>
+                            <List.List>
+                                <List.Item as='a'>Visualize conformance errors</List.Item>
                             </List.List>
                         </List.Item>
                         <List.Item>
@@ -87,6 +95,7 @@ class Home extends React.Component {
                     <Section2/>
                     <Section3/>
                     <Section4/>
+                    <Section7/>
                     <Section5/>
                     <Section6/>
                 </Container>

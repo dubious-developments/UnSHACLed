@@ -191,6 +191,23 @@ class Section3 extends React.Component<any, any> {
                     click the 'Cancel' button or the closing icon in the top right corner of the pop-up.
                 </p>
 
+                {/** Load and save workspace **/}
+                <Header as='h2' color="teal"> Load and save workspace </Header>
+                <p> The following will guide you through the process of <b> loading or saving your current workspace
+                </b>
+                </p>
+                <Image src={s31} centered={true} style={this.imgMargin}/>
+                <p> First open the 'File' dropdown from the toolbar, as made visible in the figure above. This will
+                    bring up the following:</p>
+                <Image src={s32} centered={true} style={this.imgMargin}/>
+                <p> Next select the 'Load workspace' or'Save workspace' option from the dropdown.
+                </p>
+                <p>
+                    When 'Load workspace' is chosen, the last stored workspace of the authenticated user
+                    is loaded in from the server. You can now see where you left off the last time
+                    you saved your workspace. When 'Save workspace" is chosen, the current workspace
+                    is stored on the server which allows to load it back in during another sessions.
+                </p>
             </div>
         );
     }
