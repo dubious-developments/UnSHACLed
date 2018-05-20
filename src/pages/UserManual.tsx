@@ -5,6 +5,7 @@ import Section2 from './sections/Section2';
 import Section3 from './sections/Section3';
 import Section4 from './sections/Section4';
 import Section5 from './sections/Section5';
+import Section6 from './sections/Section6';
 
 class Home extends React.Component {
 
@@ -24,7 +25,7 @@ class Home extends React.Component {
                         </Menu.Item>
                     </Container>
                 </Menu>
-                <Container text={true} style={{marginTop: '7em'}}>
+                <Container text={true} style={{marginTop: '7em', marginBottom: '7em'}}>
                     <Header as='h1'> UnSHACLed Online User Manual</Header>
                     <p>A visual IDE for Semantic Web constraint languages </p>
                     <p><b> Table of Contents </b></p>
@@ -87,6 +88,7 @@ class Home extends React.Component {
                     <Section3/>
                     <Section4/>
                     <Section5/>
+                    <Section6/>
                 </Container>
 
             </div>
