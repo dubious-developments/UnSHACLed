@@ -7,7 +7,6 @@ import {OpaqueTask} from "./task";
 import {ModelTask, OpaqueModelTask} from "./taskInstruction";
 import {OutOfOrderProcessor} from "./outOfOrderProcessor";
 import {CausalityChain} from "./causalityChain";
-
 export { ModelData } from "./modelData";
 export { ModelTask, OpaqueModelTask } from "./taskInstruction";
 export { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";
@@ -52,20 +51,7 @@ export class ModelObserver {
  * Models the data handled by the UnSHACLed application.
  */
 export class Model {
-    /**
-     * The task processor for the model.
-     * 
-     * NOTE: don't try to run tasks on the Model immediately by calling
-     * `processTask`. There are two reasons for why this is a bad idea:
-     * 
-     *   * The UI should call `processTask` when it knows that
-     *     it has time to do some processing. Other components shouldn't.
-     * 
-     *   * More fundamentally, tasks are not processed in a LIFO order,
-     *     so the task you're trying to process using `processTask` may
-     *     not be the task you queued.
-     */
-    public readonly tasks: TaskProcessor<ModelData, ModelTaskMetadata>;
+    private readonly taskQueue: OutOfOrderProcessor;
 
     private observers: ModelObserver[];
 
@@ -83,7 +69,7 @@ export class Model {
      */
     public constructor(data?: ModelData) {
         let wellDefinedData = !data ? new ModelData() : data;
-        this.tasks = new OutOfOrderProcessor(
+        this.taskQueue = new OutOfOrderProcessor(
             wellDefinedData,
             task => task,
             (task: ModelTask) => task,
@@ -131,6 +117,23 @@ export class Model {
     }
 
     /**
+     * Gets the task processor for the model.
+     * 
+     * NOTE: don't try to run tasks on the Model immediately by calling
+     * `processTask`. There are two reasons for why this is a bad idea:
+     *
+     *   * The UI should call `processTask` when it knows that
+     *     it has time to do some processing. Other components shouldn't.
+     *
+     *   * More fundamentally, tasks are not processed in a LIFO order,
+     *     so the task you're trying to process using `processTask` may
+     *     not be the task you queued.
+     */
+    public get tasks(): TaskProcessor<ModelData, ModelTaskMetadata> {
+        return this.taskQueue;
+    }
+
+    /**
      * Creates a task for the model.
      * @param execute The task itself: a function that manipulates model data.
      * @param readSet The set of all values from which the model task may read.
@@ -166,6 +169,7 @@ export class Model {
     }
 
     /**
+
      * Notify all registered observers.
      * @param {Set<ModelComponent>} changeBuffer
      */
