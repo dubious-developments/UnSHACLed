@@ -7,6 +7,7 @@ import Section4 from './sections/Section4';
 import Section5 from './sections/Section5';
 import Section6 from './sections/Section6';
 import Section7 from './sections/Section7';
+import Section8 from './sections/Section8';
 
 class Home extends React.Component {
 
@@ -71,8 +72,12 @@ class Home extends React.Component {
                         <List.Item>
                             <a>Conformance</a>
                             <List.List>
+                                <List.Item as='a'>Conformance Workflow</List.Item>
                                 <List.Item as='a'>Visualize conformance errors</List.Item>
                             </List.List>
+                        </List.Item>
+                        <List.Item>
+                            <a>Collaborative editing</a>
                         </List.Item>
                         <List.Item>
                             <a>Extra</a>
@@ -96,6 +101,7 @@ class Home extends React.Component {
                     <Section3/>
                     <Section4/>
                     <Section7/>
+                    <Section8/>
                     <Section5/>
                     <Section6/>
                 </Container>
