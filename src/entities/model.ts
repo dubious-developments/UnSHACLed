@@ -7,7 +7,6 @@ import {OpaqueTask} from "./task";
 import {ModelTask, OpaqueModelTask} from "./taskInstruction";
 import {OutOfOrderProcessor} from "./outOfOrderProcessor";
 import {CausalityChain} from "./causalityChain";
-
 export { ModelData } from "./modelData";
 export { ModelTask, OpaqueModelTask } from "./taskInstruction";
 export { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";

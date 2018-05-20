@@ -186,7 +186,6 @@ export class VisualizeComponent extends Task<ModelData, ModelTaskMetadata> {
                 }
             }
 
-            this.mxGraph.debug();
         } else {
             console.log("Could not find the ModelComponent: ", component);
         }
