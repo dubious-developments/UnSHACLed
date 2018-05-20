@@ -2,14 +2,16 @@ import * as React from 'react';
 import * as Collections from 'typescript-collections';
 import {ModelComponent, ModelTaskMetadata} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
-import {GetValidationReport, EditTriple, VisualizeComponent, LoadFileTask} from "../services/ModelTasks";
-import TimingService from "../services/TimingService";
-import {ValidationReport} from "../conformance/wrapper/ValidationReport";
+import {EditTriple, GetValidationReport, SaveRemoteFileTask, VisualizeComponent} from "../services/ModelTasks";
+import {ValidationReport} from "../conformance/ValidationReport";
 import {MxGraphProps} from "./interfaces/interfaces";
-import {ModelObserver, Model} from "../entities/model";
+import {ModelObserver} from "../entities/model";
 import {Task} from "../entities/task";
 import {ModelData} from "../entities/modelData";
-import {ImmutableGraph, Graph, PrefixMap} from "../persistence/graph";
+import {ImmutableGraph, PrefixMap} from "../persistence/graph";
+import IdleUserDetection from "../services/IdleUserDetection";
+import RequestModule from '../requests/RequestModule';
+import {connect} from 'react-redux';
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout, mxCellOverlay, mxImage,
@@ -17,7 +19,7 @@ declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometr
 
 let $rdf = require('rdflib');
 
-class MxGraph extends React.Component<MxGraphProps, any> {
+class MxGraph extends React.Component<MxGraphProps & any, any> {
 
     private nameToStandardCellDict: Collections.Dictionary<string, any>;
     private blockToCellDict: Collections.Dictionary<Block, any>;
@@ -31,8 +33,11 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
     private cellToTriples: Collections.Dictionary<any, Triple>;
     private invalidCells: Collections.Set<any>;
+    private grantedLockCellsDict: Collections.DefaultDictionary<any, boolean>;
+    private openRemoteFiles: Collections.Set<string>;
 
-    private timer: TimingService;
+    private timer: IdleUserDetection;
+    private timerLocks: IdleUserDetection;
 
     private RDF: any = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
     private SH: any = $rdf.Namespace("http://www.w3.org/ns/shacl#");
@@ -68,11 +73,17 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         this.triples = new Collections.Set<Triple>((t) =>  t.subject + " " + t.predicate + " " + t.object);
         this.cellToTriples = new Collections.Dictionary<any, Triple>((c) => c.getId());
         this.invalidCells = new Collections.Set<any>();
+        this.grantedLockCellsDict = new Collections.DefaultDictionary<any, boolean>(() => false);
+        this.openRemoteFiles = new Collections.Set<string>();
+
         this.fileToGraphDict = new Collections.Dictionary<string, ImmutableGraph>();
         this.fileToTypeDict = new Collections.Dictionary<string, string>();
         this.fileToPrefixesDict = new Collections.Dictionary<string, PrefixMap>();
 
-        this.timer = new TimingService();
+        // timer for conformance
+        this.timer = new IdleUserDetection(2000);
+        // timer for lock release
+        this.timerLocks = new IdleUserDetection(10000);
 
         let prefixes: PrefixMap = {};
         prefixes.rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
@@ -184,8 +195,101 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         });
     }
 
-    handleClick() {
+    /**
+     * Handles clicks anywhere on the canvas.
+     * If clicked on a node/cell, originating from a GitHub file, then a lock gets requested.
+     * If clicked anywhere outside of a node, then changes get sent.
+     * @param graph: graph object.
+     */
+    handleClick(graph: any) {
+        let instance = this;
+        graph.addListener(
+            mxEvent.CLICK,
+            function (sender: any, evt: any) {
+                let cell = evt.getProperty('cell');
 
+                if (cell != null) {
+                    // Request lock if clicked on GitHub file
+
+                    let triple;
+                    if (cell.getChildCount() > 0) {
+                        triple = instance.cellToTriples.getValue(cell.getChildAt(0));
+                    } else {
+                        triple = instance.cellToTriples.getValue(cell);
+                    }
+
+                    let filename;
+                    if (triple) {
+                        filename = triple.file;
+                    } else {
+                        console.log("Error: no triple found for the cell", cell);
+                        return;
+                    }
+                    
+                    // Checks if it is a GitHub file
+                    let repo = instance.getRepoFromFile(filename);
+                    if (repo) {
+                        // Send a lock request
+                        RequestModule.requestLock(
+                            instance.props.user,
+                            repo,
+                            instance.props.token,
+                            filename
+                        ).then(lock => {
+                            instance.processLock(cell, filename, lock);
+                        });
+                    } else {
+                        instance.grantedLockCellsDict.setValue(cell, true);
+                    }
+                } else {
+                    // Send changes of remote files
+                    let model = DataAccessProvider.getInstance().model;
+
+                    for (let filename in instance.openRemoteFiles) {
+                        model.tasks.schedule(
+                            new SaveRemoteFileTask(
+                                [ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph],
+                                filename,
+                                instance.props.user,
+                                instance.getRepoFromFile(filename),
+                                instance.props.token
+                            )
+                        );
+                    }
+                    model.tasks.processAllTasks();
+
+                }
+                evt.consume();
+            }
+        );
+    }
+
+     /**
+     * Gets the repository belonging to the file
+     * @param filename: string value.
+     * @returns {string}, Returns either the name of the repository or '' if none found.
+     */
+    getRepoFromFile(filename: string): string {
+        for (let file of this.props.files.content) {
+            if (file.name === filename) {
+                return file.repo;
+            }
+        }
+        return '';
+    }
+
+    /**
+     * Processes the lock after the lock request.
+     * TODO.
+     * @param cell: cell the user clicked on.
+     * @param filename: name of the file for which the lock got granted.
+     * @param lock: true means that the lock got assigned to the user, false means the opposite.
+     */
+    processLock(cell:any, filename: string, lock: boolean) {
+        if (lock) {
+            this.openRemoteFiles.add(filename);
+            this.grantedLockCellsDict.setValue(cell, true);
+        }
     }
 
     extendCanvas(graph: any) {
@@ -409,6 +513,11 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         // Only shapes/tables are resizable, this fixes the style
         graph.isCellResizable = function (cell: any) {
             return this.isSwimlane(cell);
+        };
+
+        // todo add rows should also be disabled
+        graph.isCellEditable = (cell: any) => {
+            return this.grantedLockCellsDict.containsKey(cell);
         };
     }
 
@@ -889,7 +998,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         // the mousepointer if there is one.
         let model = graph.getModel();
         let block = this.nameToStandardCellDict.getValue('block');
-        let row = this.nameToStandardCellDict.getValue('row');
+        // let row = this.nameToStandardCellDict.getValue('row');
 
         let funct = (g: any, evt: any, target: any, x: any, y: any) => {
             let v1 = model.cloneCell(block);
@@ -1030,6 +1139,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     }
 
     main(container: HTMLElement | null): void {
+
         // Checks if the browser is supported
         if (!container) {
             mxUtils.error('Could not find \'graphContainer\'', 200, false);
@@ -1082,6 +1192,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             this.initiateDragPreview();
             this.initDragAndDrop(graph);
             this.initToolBar(editor);
+            this.handleClick(graph);
             container.focus();
 
             // Get add template button
@@ -1119,7 +1230,63 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                     }
                 }
 
-                this.debug();
+            });
+
+            let instance = this;
+
+            graph.addMouseListener(
+            {
+                    currentState: null,
+                    previousStyle: null,
+                    mouseDown: function(sender: any, me: any)
+                    {
+                        if (this.currentState != null) {
+                            this.dragLeave(me.getEvent(), this.currentState);
+                            this.currentState = null;
+                        }
+                    },
+
+                    mouseMove: function(sender: any, me: any)
+                    {
+                        if (this.currentState != null && me.getState() === this.currentState) {
+                            return;
+                        }
+
+                        let tmp = graph.view.getState(me.getCell());
+
+                        // Ignores everything but vertices
+                        if (graph.isMouseDown || (tmp != null && !graph.getModel().isVertex(tmp.cell))) {
+                            tmp = null;
+                        }
+
+                        if (tmp !== this.currentState) {
+                            if (this.currentState != null) {
+                                this.dragLeave(me.getEvent(), this.currentState);
+                            }
+
+                            this.currentState = tmp;
+
+                            if (this.currentState != null) {
+                                this.dragEnter(me.getEvent(), this.currentState);
+                            }
+                        }
+                    },
+                    mouseUp: function(sender: any, me: any) { },
+                    dragEnter: function(evt: any, state: any)
+                    {
+                        if (state != null) {
+                            let triple = instance.cellToTriples.getValue(state.cell);
+                            if (triple) {
+                                // alert(triple.file);
+                            }
+                        }
+                    },
+                    dragLeave: function(evt: any, state: any)
+                    {
+                        if (state != null) {
+
+                        }
+                    }
             });
         }
     }
@@ -1355,6 +1522,45 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             // process all tasks when idle
             model.tasks.processAllTasks();
         });
+
+        this.timerLocks.userAction(function (this: MxGraph) {
+            console.log("releasing all locks");
+
+            let filenames = self.fileToGraphDict.keys();
+            // remove files added by code
+            let index = filenames.indexOf(self.addedDataFile, 0);
+            let index2 = filenames.indexOf(self.addedShapesFile, 0);
+            if (index > -1) {
+                filenames.splice(index, 1);
+            }
+            if (index2 > -1) {
+                filenames.splice(index2, 1);
+            }
+
+            for (let filename of filenames) {
+                // Checks if it is a GitHub file
+                let repo = self.getRepoFromFile(filename);
+                console.log("release: " + filename);
+                if (repo) {
+                    // Send a lock request
+                    RequestModule.releaseLock(
+                        self.props.user,
+                        repo,
+                        self.props.token,
+                        filename
+                    ).then(lock => {
+                        // empty lock datastructures frontend
+                        self.grantedLockCellsDict = new Collections.DefaultDictionary<any, boolean>(() => false);
+                        self.openRemoteFiles = new Collections.Set<string>();
+
+                        console.log("released locks");
+                    }, reason => {
+                        console.log("rejected: ", reason);
+                    });
+                }
+            }
+
+        });
     }
 
     render() {
@@ -1423,4 +1629,18 @@ class Row {
     }
 }
 
-export default MxGraph;
+/**
+ * Map global store to props of this component.
+ * @param state: state retrieved from the global redux store.
+ * @returns {{token}}: sets props.token
+ */
+const mapStateToProps = (state, props) => {
+    return {
+        token: state.token,
+        user: state.login,
+        files: state.files,
+        repos: state.repos,
+    };
+};
+
+export default connect(mapStateToProps)(MxGraph);

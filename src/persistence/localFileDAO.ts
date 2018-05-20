@@ -10,16 +10,18 @@ import {Model} from "../entities/model";
 import {ModelData} from "../entities/modelData";
 import {extensionToMIME} from "../services/extensionToMIME";
 import { ImmutableGraph, Graph } from "./graph";
+import {WorkspaceParser} from "./workspaceParser";
 
 /**
- * Provides basic DAO functionality at the file granularity level.
+ * Provides basic DAO functionality for accessing/altering local files.
  */
-export class FileDAO implements DataAccessObject {
+export class LocalFileDAO implements DataAccessObject {
+
     private model: Model;
     private io: IOFacilitator;
 
     /**
-     * Create a new FileDAO
+     * Create a new LocalFileDAO
      */
     public constructor(model: Model) {
         this.model = model;
@@ -28,14 +30,23 @@ export class FileDAO implements DataAccessObject {
         // register parsers
         this.io.registerParser(ModelComponent.DataGraph, new GraphParser());
         this.io.registerParser(ModelComponent.SHACLShapesGraph, new GraphParser());
+        this.io.registerParser(ModelComponent.Workspace, new WorkspaceParser());
     }
 
     /**
      * Create a new file.
      * @param module
      */
-    public insert(module: Module) {
+    public insert(module: LocalFileModule) {
         this.model.tasks.schedule(new SaveTask(this.io, module));
+        this.model.tasks.processAllTasks();
+    }
+
+    /**
+     * Create a new file containing the current workspace.
+     */
+    public insertWorkspace(module: LocalFileModule) {
+        this.model.tasks.schedule(new SaveWorkspaceTask(this.io, module));
         this.model.tasks.processAllTasks();
     }
 
@@ -43,10 +54,22 @@ export class FileDAO implements DataAccessObject {
      * Load an existing file.
      * @param module
      */
-    public find(module: Module): void {
+    public find(module: LocalFileModule): void {
         let self = this;
         this.io.readFromFile(module, function (result: Graph) {
             self.model.tasks.schedule(new LoadTask(result.asImmutable(), module));
+            self.model.tasks.processAllTasks();
+        });
+    }
+
+    /**
+     * Load the workspace from a file.
+     * @param {Module} module
+     */
+    public findWorkspace(module: LocalFileModule) {
+        let self = this;
+        this.io.readFromFile(module, function (result: ModelData) {
+            self.model.tasks.schedule(new LoadWorkspaceTask(result));
             self.model.tasks.processAllTasks();
         });
     }
@@ -56,19 +79,32 @@ export class FileDAO implements DataAccessObject {
  * Provides basic input/output functionality w.r.t. files.
  * Requires a particular parser to modulate between file format and internal representation.
  */
-class IOFacilitator {
+export class IOFacilitator {
 
-    private parsers: Collections.Dictionary<ModelComponent, Parser<Graph>>;
+    private parsers: Collections.Dictionary<ModelComponent, Parser<any>>;
 
     /**
      * Create a new IOFacilitator.
      */
     public constructor() {
-        this.parsers = new Collections.Dictionary<ModelComponent, Parser<Graph>>();
+        this.parsers = new Collections.Dictionary<ModelComponent, Parser<any>>();
     }
 
-    public registerParser(label: ModelComponent, parser: Parser<Graph>) {
+    /**
+     * Register a parser with this IOFacilitator.
+     * @param {ModelComponent} label
+     * @param {Parser<Graph>} parser
+     */
+    public registerParser(label: ModelComponent, parser: Parser<any>) {
         this.parsers.setValue(label, parser);
+    }
+
+    /**
+     * Retrieve the parsers associated with this IOFacilitator.
+     * @returns {Dictionary<ModelComponent, Parser<any>>}
+     */
+    public getParsers(): Collections.Dictionary<ModelComponent, Parser<any>> {
+        return this.parsers;
     }
 
     /**
@@ -77,7 +113,7 @@ class IOFacilitator {
      * @param load
      */
 
-    public readFromFile(module: Module, load: (result: Graph) => void) {
+    public readFromFile(module: LocalFileModule, load: (result: any) => void) {
         let parser = this.parsers.getValue(module.getTarget());
         if (!parser) {
             throw new Error("Unsupported target " + module.getTarget());
@@ -102,7 +138,7 @@ class IOFacilitator {
      * @param module
      * @param data
      */
-    public writeToFile(module: Module, data: Graph) {
+    public writeToFile(module: LocalFileModule, data: any) {
         let FileSaver = require("file-saver");
         let parser = this.parsers.getValue(module.getTarget());
         if (!parser) {
@@ -120,16 +156,15 @@ class IOFacilitator {
 }
 
 /**
- * A single persistence directive.
- * Contains all the necessary information to carry out a persistence operation.
+ * A directive for accessing a local file.
  */
-export class FileModule implements Module {
+export class LocalFileModule implements Module {
     private target: ModelComponent;
     private filename: string;
     private file: Blob;
 
     /**
-     * Create a new FileModule.
+     * Create a new LocalFileModule.
      * @param {ModelComponent} target
      * @param {string} filename
      * @param {Blob} file
@@ -143,28 +178,28 @@ export class FileModule implements Module {
     /**
      * Return the designated ModelComponent.
      */
-    getTarget(): ModelComponent {
+    public getTarget(): ModelComponent {
         return this.target;
     }
 
     /**
      * Return the filename.
      */
-    getIdentifier(): string {
+    public getIdentifier(): string {
         return this.filename;
     }
 
     /**
      * Return the Blob representing the file.
      */
-    getContent(): Blob {
+    public getContent(): Blob {
         return this.file;
     }
 
     /**
      * Returns the MIME type
      */
-    getMime(): string {
+    public getMime(): string {
         let mime = this.file.type;
         // this happens when file type can not be determined
         if (mime === "") {
@@ -180,18 +215,16 @@ export class FileModule implements Module {
  * A Task that reads a file and adds its contents as a component to the Model.
  * Also adds to the pseudo IO component so that observers know IO changes have happened.
  */
-class LoadTask extends Task<ModelData, ModelTaskMetadata> {
+export class LoadTask extends Task<ModelData, ModelTaskMetadata> {
 
     /**
      * Create a new LoadTask.
-     * Contains a function that will execute on the model.
-     * This function saves information to the model, which was read from file.
      * @param result
-     * @param {FileModule} module
+     * @param {LocalFileModule} module
      */
     public constructor(
         private readonly result: ImmutableGraph,
-        public readonly module: Module) {
+        private readonly module: Module) {
 
         super();
     }
@@ -238,19 +271,76 @@ class LoadTask extends Task<ModelData, ModelTaskMetadata> {
 }
 
 /**
+ * A Task that loads a workspace from a file and sets the state of the Model accordingly.
+ */
+export class LoadWorkspaceTask extends Task<ModelData, ModelTaskMetadata> {
+
+    /**
+     * Create a new LoadWorkspaceTask.
+     * @param {ModelData} workspace
+     */
+    public constructor(private readonly workspace: ModelData) {
+        super();
+    }
+
+    /**
+     * Executes this task.
+     * @param data The data the task takes as input.
+     */
+    public execute(data: ModelData): void {
+        let SHACLComponent = this.workspace.getOrCreateComponent(
+            ModelComponent.SHACLShapesGraph,
+            () => new Component<ImmutableGraph>()
+        );
+
+        let dataComponent = this.workspace.getOrCreateComponent(
+            ModelComponent.DataGraph,
+            () => new Component<ImmutableGraph>()
+        );
+
+        let ioComponent = this.workspace.getOrCreateComponent(
+            ModelComponent.IO,
+            () => new Component<ImmutableGraph>()
+        );
+
+        data.setComponent(
+            ModelComponent.SHACLShapesGraph,
+            SHACLComponent
+        );
+
+        data.setComponent(
+            ModelComponent.DataGraph,
+            dataComponent
+        );
+
+        data.setComponent(
+            ModelComponent.IO,
+            ioComponent
+        );
+    }
+
+    /**
+     * Gets the metadata for this task.
+     */
+    public get metadata(): ModelTaskMetadata {
+        return new ModelTaskMetadata([ModelComponent.SHACLShapesGraph, ModelComponent.DataGraph, ModelComponent.IO],
+            [ModelComponent.SHACLShapesGraph, ModelComponent.DataGraph, ModelComponent.IO]);
+    }
+
+}
+
+/**
  * A Task that retrieves a component from the Model and writes its contents to a file.
  */
 class SaveTask extends Task<ModelData, ModelTaskMetadata> {
     /**
      * Create a new SaveTask.
-     * Contains a function that will execute on the model.
-     * This function loads information from the model and writes this to file.
      * @param {IOFacilitator} io
-     * @param {FileModule} module
+     * @param {LocalFileModule} module
      */
     public constructor(
         private readonly io: IOFacilitator,
-        public readonly module: Module) {
+        private readonly module: LocalFileModule) {
 
         super();
     }
@@ -277,4 +367,37 @@ class SaveTask extends Task<ModelData, ModelTaskMetadata> {
             [this.module.getTarget(), ModelComponent.IO],
             [ModelComponent.IO]);
     }
+}
+
+/**
+ * A task that saves the workspace to a file.
+ */
+class SaveWorkspaceTask extends Task<ModelData, ModelTaskMetadata> {
+
+    /**
+     * Create a new SaveWorkspaceTask.
+     * @param {IOFacilitator} io
+     * @param {LocalFileModule} module
+     */
+    public constructor(private readonly io: IOFacilitator,
+                       private readonly module: LocalFileModule) {
+        super();
+    }
+
+    /**
+     * Executes this task.
+     * @param data The data the task takes as input.
+     */
+    public execute(data: ModelData): void {
+        this.io.writeToFile(this.module, data);
+    }
+
+    /**
+     * Gets the metadata for this task.
+     */
+    public get metadata(): ModelTaskMetadata {
+        return new ModelTaskMetadata([ModelComponent.SHACLShapesGraph, ModelComponent.DataGraph, ModelComponent.IO],
+            [ModelComponent.SHACLShapesGraph, ModelComponent.DataGraph, ModelComponent.IO]);
+    }
+
 }

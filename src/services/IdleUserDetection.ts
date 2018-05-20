@@ -2,13 +2,18 @@
  * This class is used to store the time since the last user action
  * A user action is a click or a key pressed
  */
-class TimingService {
+export default class IdleUserDetection {
 
     // number of milliseconds user needs to be inactive
-    private ms: number = 2000;
+    // private ms: number = 2000;
+    private ms: number;
 
     // the timeout
     private plannedTimeout: any;
+
+    constructor(ms: number) {
+        this.ms = ms;
+    }
 
     /**
      * @param f the function to execute when the user becomes idle
@@ -23,5 +28,3 @@ class TimingService {
     }
 
 }
-
-export default TimingService;
