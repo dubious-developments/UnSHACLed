@@ -11,6 +11,7 @@ import {Task} from "../entities/task";
 import {ModelData} from "../entities/modelData";
 import {ImmutableGraph, Graph, PrefixMap} from "../persistence/graph";
 import RequestModule from '../requests/RequestModule';
+import {connect} from 'react-redux';
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout, mxCellOverlay, mxImage,
@@ -18,7 +19,7 @@ declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometr
 
 let $rdf = require('rdflib');
 
-class MxGraph extends React.Component<MxGraphProps, any> {
+class MxGraph extends React.Component<MxGraphProps & any, any> {
 
     private nameToStandardCellDict: Collections.Dictionary<string, any>;
     private blockToCellDict: Collections.Dictionary<Block, any>;
@@ -213,11 +214,24 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                     let filename;
                     if (triple) {
                         filename = triple.file;
+                    } else {
+                        console.log("Error: no triple found for the cell", cell);
+                        return;
                     }
                     
-                    // Checks if it is github file;
-                    console.log(filename);
-                    
+                    // Checks if it is a GitHub file
+                    let repo = instance.getRepoFromFile(filename);
+                    if (repo) {
+                        // Send a lock request
+                        RequestModule.requestLock(
+                            instance.props.user,
+                            repo,
+                            instance.props.token,
+                            filename
+                        ).then(lock => {
+                            instance.processLock(filename, lock);
+                        });
+                    }
                 } else {
                     // Send changes to backend
                     console.log("sendChanges");
@@ -225,6 +239,30 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                 evt.consume();
             }
         );
+    }
+
+     /**
+     * Gets the repository belonging to the file
+     * @param filename: string value.
+     * @returns {string}, Returns either the name of the repository or '' if none found.
+     */
+    getRepoFromFile(filename: string): string {
+        for (let file of this.props.files.content) {
+            if (file.name === filename) {
+                return file.repo;
+            }
+        }
+        return '';
+    }
+
+    /**
+     * Processes the lock after the lock request.
+     * TODO.
+     * @param filename: name of the file for which the lock got granted.
+     * @param lock: true means that the lock got assigned to the user, false means the opposite.
+     */
+    processLock(filename: string, lock: boolean) {
+
     }
 
     extendCanvas(graph: any) {
@@ -1463,4 +1501,74 @@ class Row {
     }
 }
 
-export default MxGraph;
+/**
+ * Map global store to props of this component.
+ * @param state: state retrieved from the global redux store.
+ * @returns {{token}}: sets props.token
+ */
+const mapStateToProps = (state, props) => {
+    return {
+        token: state.token,
+        user: state.login,
+        files: state.files,
+        repos: state.repos,
+    };
+};
+    constructor(name?: string) {
+        this.name = name || "";
+        this.realName = name || "";
+        this.traits = [];
+    }
+
+    clone() {
+        return mxUtils.clone(this);
+    }
+}
+
+export class Triple {
+    public subject: string;
+    public predicate: string;
+    public object: string;
+    public file: string;
+    public cell: any;
+
+    constructor(subject: string, predicate: string, object: string, file: string) {
+        this.subject = subject;
+        this.predicate = predicate;
+        this.object = object;
+        this.file = file;
+    }
+
+    toString(): string {
+        return this.subject + " " + this.predicate + " " + this.object;
+    }
+}
+
+class Row {
+    name: string;
+    error: any;
+
+    constructor(name?: string) {
+        this.name = name || "";
+    }
+
+    clone() {
+        return mxUtils.clone(this);
+    }
+}
+
+/**
+ * Map global store to props of this component.
+ * @param state: state retrieved from the global redux store.
+ * @returns {{token}}: sets props.token
+ */
+const mapStateToProps = (state, props) => {
+    return {
+        token: state.token,
+        user: state.login,
+        files: state.files,
+        repos: state.repos,
+    };
+};
+
+export default connect(mapStateToProps)(MxGraph);
