@@ -1,5 +1,5 @@
 import {ModelComponent, ModelData, ModelTaskMetadata} from "../entities/model";
-import {FileDAO, FileModule} from "../persistence/fileDAO";
+import {LocalFileDAO, LocalFileModule} from "../persistence/localFileDAO";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
 import {Navbar} from "../components/navbarWork";
 import { extensionToMIME } from "./extensionToMIME";
@@ -44,11 +44,11 @@ export class LoadFileTask extends Task<ModelData, ModelTaskMetadata> {
         if (this.mComponent in ModelComponent) {
             let component = data.getComponent(this.mComponent);
             if (component) {
-                let fileDAO: FileDAO = DataAccessProvider.getInstance().getFileDAO();
+                let fileDAO: LocalFileDAO = DataAccessProvider.getInstance().getLocalFileDAO();
                 // get MIME based on extension
                 let splitted = this.fileName.split(".");
                 let blob = new Blob([], {type: extensionToMIME[splitted[splitted.length - 1]]});
-                fileDAO.insert(new FileModule(this.mComponent, this.fileName, blob));
+                fileDAO.insert(new LocalFileModule(this.mComponent, this.fileName, blob));
             }
         }
 

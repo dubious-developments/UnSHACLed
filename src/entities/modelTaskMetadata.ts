@@ -30,7 +30,14 @@ export enum ModelComponent {
      * The validation report indicating which nodes
      * of the datagraph are conforming to active constraints.
      */
-    ValidationReport = "ValidationReport"
+    ValidationReport = "ValidationReport",
+
+    /**
+     * A component used to represent any number of individual components
+     * that make up "the workspace". This component is only here to allow the
+     * DAOs to keep working.
+     */
+    Workspace = "Workspace"
 }
 
 /**
