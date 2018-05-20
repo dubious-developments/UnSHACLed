@@ -6,9 +6,7 @@ import {ModelData} from "./modelData";
 import {OpaqueTask} from "./task";
 import {ModelTask, OpaqueModelTask} from "./taskInstruction";
 import {OutOfOrderProcessor} from "./outOfOrderProcessor";
-import {CausalChain} from "./causalChain";
-import { ModelTaskRewriter } from "./instructionMerger";
-
+import {CausalityChain} from "./causalityChain";
 export { ModelData } from "./modelData";
 export { ModelTask, OpaqueModelTask } from "./taskInstruction";
 export { ModelComponent, ModelTaskMetadata } from "./modelTaskMetadata";
@@ -22,15 +20,28 @@ export class ModelObserver {
     private static counter: number = 0;
     private identifier: number;
 
+    /**
+     * Create a new Model Observer.
+     * @param {(changeBuffer: Set<ModelComponent>) => Array<ModelTask>} observer
+     */
     public constructor(private readonly observer: (changeBuffer: Immutable.Set<ModelComponent>) => Array<ModelTask>) {
         this.identifier =
         ModelObserver.counter++;
     }
 
+    /**
+     * Retrieve the identifier.
+     * @returns {number}
+     */
     public getID(): number {
         return this.identifier;
     }
 
+    /**
+     * Observe changes reported by the model and react accordingly.
+     * @param {Set<ModelComponent>} changeBuffer
+     * @returns {Array<ModelTask>}
+     */
     public observe(changeBuffer: Immutable.Set<ModelComponent>): Array<ModelTask> {
         return this.observer(changeBuffer);
     }
@@ -40,11 +51,24 @@ export class ModelObserver {
  * Models the data handled by the UnSHACLed application.
  */
 export class Model {
-    private readonly taskQueue: OutOfOrderProcessor;
+    /**
+     * The task processor for the model.
+     * 
+     * NOTE: don't try to run tasks on the Model immediately by calling
+     * `processTask`. There are two reasons for why this is a bad idea:
+     * 
+     *   * The UI should call `processTask` when it knows that
+     *     it has time to do some processing. Other components shouldn't.
+     * 
+     *   * More fundamentally, tasks are not processed in a LIFO order,
+     *     so the task you're trying to process using `processTask` may
+     *     not be the task you queued.
+     */
+    public readonly tasks: TaskProcessor<ModelData, ModelTaskMetadata>;
 
     private observers: ModelObserver[];
 
-    private chain: CausalChain<ModelComponent, number>;
+    private chain: CausalityChain<ModelComponent, number>;
 
     /**
      * Creates a model.
@@ -58,7 +82,7 @@ export class Model {
      */
     public constructor(data?: ModelData) {
         let wellDefinedData = !data ? new ModelData() : data;
-        this.taskQueue = new OutOfOrderProcessor(
+        this.tasks = new OutOfOrderProcessor(
             wellDefinedData,
             task => task,
             (task: ModelTask) => task,
@@ -102,24 +126,7 @@ export class Model {
                 this.notifyObservers(buffers.writeBuffer);
             });
         this.observers = [];
-        this.chain = new CausalChain<ModelComponent, number>();
-    }
-
-    /**
-     * Gets the task processor for the model.
-     * 
-     * NOTE: don't try to run tasks on the Model immediately by calling
-     * `processTask`. There are two reasons for why this is a bad idea:
-     *
-     *   * The UI should call `processTask` when it knows that
-     *     it has time to do some processing. Other components shouldn't.
-     *
-     *   * More fundamentally, tasks are not processed in a LIFO order,
-     *     so the task you're trying to process using `processTask` may
-     *     not be the task you queued.
-     */
-    public get tasks(): TaskProcessor<ModelData, ModelTaskMetadata> {
-        return this.taskQueue;
+        this.chain = new CausalityChain<ModelComponent, number>();
     }
 
     /**
@@ -158,13 +165,9 @@ export class Model {
     }
 
     /**
-     * Registers a new task rewriter with this model.
-     * @param rewriter The rewriter to register.
+     * Notify all registered observers.
+     * @param {Set<ModelComponent>} changeBuffer
      */
-    public registerRewriter(rewriter: ModelTaskRewriter): void {
-        this.taskQueue.registerRewriter(rewriter);
-    }
-
     private notifyObservers(changeBuffer: Immutable.Set<ModelComponent>): void {
         this.observers.forEach(element => {
             element.observe(changeBuffer).forEach(newTask => {

@@ -1,5 +1,5 @@
 import SHACLValidator from "../src/conformance/shacl/index.js";
-import { ValidationReport } from "../src/conformance/wrapper/ValidationReport";
+import { ValidationReport } from "../src/conformance/ValidationReport";
 
 /*
  * Created by Matthias Langhendries on 06-Apr-18.

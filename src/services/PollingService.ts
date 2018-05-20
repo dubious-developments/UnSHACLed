@@ -5,11 +5,13 @@ export default class PollingService {
 
     // number of milliseconds between 2 consecutive polls
     private ms: number;
-
     private interval: any;
 
-    constructor(ms: number) {
+    private pollingFunc: () => void;
+
+    constructor(ms: number, pollingFunc: () => void) {
         this.ms = ms;
+        this.pollingFunc = pollingFunc;
     }
 
     public startPolling() {
@@ -25,7 +27,6 @@ export default class PollingService {
     }
 
     private sendPoll() {
-        // TODO send request here
-        console.log("pol");
+        this.pollingFunc();
     }
 }
