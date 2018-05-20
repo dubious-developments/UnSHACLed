@@ -240,7 +240,7 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
         let remotefileDAO = DataAccessProvider.getInstance().getRemoteFileDAO();
         // update remote file
         remotefileDAO.insert(new RemoteFileModule
-        (target, this.props.user, this.state.fileName, this.state.projectName, this.props.token));
+        (target, this.props.login, fileName, repo, this.props.token));
     }
 
     render() {
