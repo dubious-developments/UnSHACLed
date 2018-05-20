@@ -101,3 +101,5 @@ obj/
 
 # MonoDevelop preferences
 *.userprefs
+
+.vs/

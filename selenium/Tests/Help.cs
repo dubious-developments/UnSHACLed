@@ -3,6 +3,8 @@ using OpenQA.Selenium;
 using System.Windows.Forms;
 using OpenQA.Selenium.Interactions;
 using System;
+using static System.IO.Directory;
+using static System.IO.Path;
 using OpenQA.Selenium.Support.UI;
 
 namespace SeleniumTests.Tests
@@ -39,16 +41,16 @@ namespace SeleniumTests.Tests
 
         public static void Login(this IWebDriver driver)
         {
-            var elem = driver.FindElement(By.Id("homeLoginButton"));
+            var elem = driver.FindElement(By.Id("homeLoginButton"),10);
             elem.Click();
             Assert.IsTrue(driver.Url.EndsWith("#/login"));
-            driver.FindElement(By.Id("formUsernameField")).SendKeys("username");
-            driver.FindElement(By.Id("formPasswordField")).SendKeys("password");
+            driver.FindElement(By.Id("formUsernameField"),10).SendKeys("username");
+            driver.FindElement(By.Id("formPasswordField"),10).SendKeys("password");
             var login = driver.FindElement(By.Id("formLoginButton"));
             login.Click();
         }
 
-        public static void OpenFile(this IWebDriver driver, String path)
+        public static void OpenFile(this IWebDriver driver, String fileName)
         {
             var fileMenu = driver.FindElement(By.Id("openFileMenu"), 10);
             fileMenu.Click();
@@ -56,10 +58,13 @@ namespace SeleniumTests.Tests
             localGraph.Click();
             var shaclGraph = driver.FindElement(By.Id("openSHACLGraphButton"), 10);
             shaclGraph.Click();
+            String currentPath = GetParent(GetCurrentDirectory()).Parent.FullName;
+            String path = Combine(currentPath, "testfiles\\");
+            path = Combine(path, fileName);
             SendKeys.SendWait(path);
             System.Threading.Thread.Sleep(500);
             SendKeys.SendWait(@"{Enter}");
-            System.Threading.Thread.Sleep(1000);
         }
+
     }
 }

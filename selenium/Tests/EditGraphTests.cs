@@ -5,7 +5,7 @@ using System.Windows.Forms;
 
 namespace SeleniumTests.Tests
 {
-    class EditGraphTests
+    public static class EditGraphTests
     {
         public static readonly TestCase DeleteSHACLShape =
            new TestCase(
@@ -15,17 +15,17 @@ namespace SeleniumTests.Tests
                    driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
                     //Log in
                     driver.Login();
-                   String currentPath = System.IO.Directory.GetParent(System.IO.Directory.GetCurrentDirectory()).Parent.FullName;
-                   String path = currentPath + @"\testfiles\demo_shacl.ttl";
                     //Open a SHACL file
-                    driver.OpenFile(path);
+                    driver.OpenFile("demo_shacl.ttl");
                    IWebElement shaclElement = driver.FindElement(By.XPath("//*[contains(text(),'PersonShape')]"), 10);
+                   String shaclElementID = shaclElement.GetAttribute("id");
                    shaclElement.Click();
                    SendKeys.SendWait("{DEL}");
                    System.Threading.Thread.Sleep(500);
                    try
                    {
-                       IReadOnlyCollection<IWebElement> elements = driver.FindElements(By.Id(shaclElement.GetAttribute("Id")));
+                       
+                       IReadOnlyCollection<IWebElement> elements = driver.FindElements(By.Id(shaclElementID));
                        Assert.IsTrue(elements.Count == 0);
                    }
                    catch (StaleElementReferenceException) {
@@ -41,26 +41,90 @@ namespace SeleniumTests.Tests
                    driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
                    //Log in
                    driver.Login();
-                   String currentPath = System.IO.Directory.GetParent(System.IO.Directory.GetCurrentDirectory()).Parent.FullName;
-                   String path = currentPath + @"\testfiles\demo_data_conforming.ttl";
                    //Open a SHACL file
-                   driver.OpenFile(path);
+                   driver.OpenFile("demo_data_conforming.ttl");
                    var dataElement = driver.FindElement(By.XPath("//*[contains(text(),'ex:Alice')]"), 10);
+                   String elementID = dataElement.GetAttribute("id");
                    dataElement.Click();
                    SendKeys.SendWait("{DEL}");
                    System.Threading.Thread.Sleep(500);
                    try
                    {
-                       bool b = dataElement.Displayed;
-                       Assert.IsTrue(false);
+                       IReadOnlyCollection<IWebElement> elements = driver.FindElements(By.Id(elementID));
+                       Assert.IsTrue(elements.Count == 0);
                    }
-                   catch (OpenQA.Selenium.StaleElementReferenceException) { }
+                   catch (OpenQA.Selenium.StaleElementReferenceException) {
+                       Assert.IsTrue(true);
+                   }
                });
+
+        public static readonly TestCase DeleteSHACLProperty =
+          new TestCase(
+            "SHACL properties can be deleted",
+            (driver, log) =>
+            {
+                driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+                //Log in
+                driver.Login();
+
+                //Open a SHACL file
+                driver.OpenFile("demo_shacl.ttl");
+                var shaclElement = driver.FindElement(By.XPath("//*[contains(text(),'sh:targetClass')]"), 10);
+                String elementID = shaclElement.GetAttribute("id");
+                Assert.IsTrue(shaclElement.Text == "sh:targetClass : ex:Person");
+                //Element is selected
+                shaclElement.Click();
+                SendKeys.SendWait("{DEL}");
+                System.Threading.Thread.Sleep(500);
+                try
+                {
+                    IReadOnlyCollection<IWebElement> elements = driver.FindElements(By.Id(elementID));
+                    Assert.IsTrue(elements.Count == 0);
+                }
+                catch (OpenQA.Selenium.StaleElementReferenceException)
+                {
+                    Assert.IsTrue(true);
+                }
+
+            });
+
+        public static readonly TestCase DeleteDataAttribute=
+        new TestCase(
+          "SHACL properties can be deleted",
+          (driver, log) =>
+          {
+              driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+                //Log in
+                driver.Login();
+
+                //Open a SHACL file
+                driver.OpenFile("demo_data_conforming.ttl");
+              var dataElement = driver.FindElement(By.XPath("//*[contains(text(),'rdf:type')]"), 10);
+              String elementID = dataElement.GetAttribute("id");
+              Assert.IsTrue(dataElement.Text == "rdf:type : ex:Person");
+              //Element is selected
+              dataElement.Click();
+              SendKeys.SendWait("{DEL}");
+              System.Threading.Thread.Sleep(500);
+              try
+              {
+                  IReadOnlyCollection<IWebElement> elements = driver.FindElements(By.Id(elementID));
+                  Assert.IsTrue(elements.Count == 0);
+              }
+              catch (OpenQA.Selenium.StaleElementReferenceException)
+              {
+                  Assert.IsTrue(true);
+              }
+
+          });
 
         public static readonly ICollection<TestCase> All =
         new[]
     {
-            DeleteSHACLShape
+            DeleteSHACLShape,
+            DeleteDataShape,
+            DeleteSHACLProperty,
+            DeleteDataAttribute
     };
     }
 }

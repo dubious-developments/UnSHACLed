@@ -50,7 +50,6 @@
     <Compile Include="TestCase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tests\EditGraphTests.cs" />
-    <Compile Include="Tests\GraphTests.cs" />
     <Compile Include="Tests\Help.cs" />
     <Compile Include="Tests\SanityChecks.cs" />
     <Compile Include="Tests\UploadFileTests.cs" />

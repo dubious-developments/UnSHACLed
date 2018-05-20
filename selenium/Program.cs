@@ -25,7 +25,7 @@ namespace SeleniumTests
         /// <summary>
         /// A sequence of all test cases to run.
         /// </summary>
-        private static ICollection<TestCase> TestCases = UploadFileTests.All;
+        private static readonly IEnumerable<TestCase> TestCases = (EditGraphTests.All);
 
         public static int Main(string[] args)
         {
@@ -78,8 +78,8 @@ namespace SeleniumTests
                 return 0;
             }
 
-            //string testUrl = parsedOptions.GetValue<string>(Options.Url);
-            string testUrl = "http://192.168.1.12:5000";
+            
+            string testUrl = parsedOptions.GetValue<string>(Options.Url);
             bool noUrl = string.IsNullOrWhiteSpace(testUrl);
 
             if ((noUrl && !parsedOptions.ContainsOption(Options.BuildApplication))
