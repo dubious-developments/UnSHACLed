@@ -152,12 +152,16 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
         } else if (this.state.type === 'SHACL') {
             target = ModelComponent.SHACLShapesGraph;
         } else {
-            console.log("invalid type");
+            console.error("invalid type selected");
         }
+        // get repoOwner
+        let repoOwner = RequestModule.getRepoOwnerFromRepo(this.state.projectName, this.state.repos);
+        // invoke backend to open file
         let remotefileDAO = DataAccessProvider.getInstance().getRemoteFileDAO();
         remotefileDAO.find(new RemoteFileModule
-        (target, this.props.user, this.state.fileName, this.state.projectName, this.props.token));
-
+        (target, repoOwner, this.state.fileName, this.state.projectName, this.props.token));
+        // start polling service for file
+        remotefileDAO.start(repoOwner, this.state.projectName, this.props.token, this.state.fileName, target);
         // Log opened file into global state (redux store)
         this.appendFile(this.state.fileName, this.state.projectName, this.state.type);
         // set state
@@ -180,7 +184,6 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
         let repoOwner = RequestModule.getRepoOwnerFromRepo(repoName, this.state.repos);
         this.props.appendFile(fileName, repoName, repoOwner, type);
         this.props.appendLock(fileName);
-        console.log(this.props);
     }
 
     render() {

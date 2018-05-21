@@ -7,11 +7,11 @@ export default class PollingService {
     private ms: number;
     private interval: any;
 
-    private pollingFunc: () => void;
+    private sendPoll: () => void;
 
-    constructor(ms: number, pollingFunc: () => void) {
+    constructor(ms: number, sendPoll: () => void) {
         this.ms = ms;
-        this.pollingFunc = pollingFunc;
+        this.sendPoll = sendPoll;
     }
 
     public startPolling() {
@@ -24,9 +24,5 @@ export default class PollingService {
 
     private schedulePoll() {
         this.interval = setInterval(this.sendPoll, this.ms);
-    }
-
-    private sendPoll() {
-        this.pollingFunc();
     }
 }
