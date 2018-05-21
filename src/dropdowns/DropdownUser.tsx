@@ -11,6 +11,10 @@ import {DataAccessProvider} from "../persistence/dataAccessProvider";
  */
 class DropdownUser extends React.Component<any, any> {
 
+    /**
+     * Constructor of component
+     * @param props
+     */
     constructor(props: any) {
         super(props);
         this.state = {
@@ -19,15 +23,23 @@ class DropdownUser extends React.Component<any, any> {
         this.closeModalCallback = this.closeModalCallback.bind(this);
         this.showUserModal = this.showUserModal.bind(this);
         this.stopPollingService = this.stopPollingService.bind(this);
-
     }
 
+    /**
+     * Method to toggle the visibility of the user modal (child component).
+     * Invoken on clicking 'My Profile' option.
+     */
     showUserModal() {
         this.setState({
             infoVisible: true
         });
     }
 
+    /**
+     * Callback function to child component, which is called when the child modal is closed.
+     * Will set the child modal visibility to false
+     * @param data: callback data received from the child
+     */
     closeModalCallback(data: any) {
         this.setState({
             infoVisible: false
@@ -43,6 +55,7 @@ class DropdownUser extends React.Component<any, any> {
         remotefileDAO.stop();
     }
 
+    /** Render component **/
     render() {
         let {infoVisible} = this.state;
         console.log(this.props);
@@ -69,6 +82,10 @@ class DropdownUser extends React.Component<any, any> {
     }
 }
 
+/**
+ * Map global store to props of this component.
+ * @param state: state retrieved from the global redux store.
+ */
 const mapStateToProps = (state) => ({
     name: state.name,
     login: state.login

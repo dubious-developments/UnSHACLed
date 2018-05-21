@@ -16,8 +16,10 @@ import RequestModule from "../requests/RequestModule";
  */
 class DropdownFile extends React.Component<DropdownFileProps & any, any> {
 
-    allowedExtensions = ".n3,.ttl,.rdf";
-
+    /**
+     * Constructor of component
+     * @param props
+     */
     constructor(props: any) {
         super(props);
         this.state = {
@@ -262,6 +264,7 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
 
     }
 
+    /** Render component **/
     render() {
         let {repoVisible, newVisible, newType} = this.state;
         return (
