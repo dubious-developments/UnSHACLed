@@ -35,7 +35,7 @@ export enum ModelComponent {
     /**
      * A component used to represent any number of individual components
      * that make up "the workspace". This component is only here to allow the
-     * FileDAO to keep working.
+     * DAOs to keep working.
      */
     Workspace = "Workspace"
 }

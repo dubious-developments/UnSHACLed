@@ -1,8 +1,11 @@
 import * as React from 'react';
-import {Modal, Button, Icon, Input, Dropdown} from 'semantic-ui-react';
+import {Modal, Button, Icon, Input, Dropdown, Form, Checkbox} from 'semantic-ui-react';
 import {NewModalProps} from '../components/interfaces/interfaces';
 import RequestModule from '../requests/RequestModule';
 import {connect} from 'react-redux';
+import {ModelComponent} from "../entities/modelTaskMetadata";
+import {DataAccessProvider} from "../persistence/dataAccessProvider";
+import {RemoteFileModule} from "../persistence/remoteFileDAO";
 
 /**
  Component used to create a model for new file/project creation.
@@ -17,12 +20,15 @@ class NewModal extends React.Component<NewModalProps & any, any> {
             selected: true,
             repos: [],
             name: '',
-            project: ''
+            project: '',
+            fileType: ''
         };
         this.cancelModal = this.cancelModal.bind(this);
         this.confirmModal = this.confirmModal.bind(this);
         this.onChange = this.onChange.bind(this);
         this.setSelected = this.setSelected.bind(this);
+        this.createFile = this.createFile.bind(this);
+        this.handleType = this.handleType.bind(this);
     }
 
     /**
@@ -81,8 +87,15 @@ class NewModal extends React.Component<NewModalProps & any, any> {
      */
     confirmModal(type: any) {
         if (type === 'file') {
-            RequestModule.updateFile(
-                this.props.user, this.state.project, this.props.token, this.state.name, 'Hello World');
+            // request lock
+            let filePath = this.state.name;
+            console.log(filePath);
+            RequestModule.requestLock(this.props.user, this.state.project,
+                this.props.token, filePath).then(lock => {
+                console.log('acquiring lock');
+                console.log(lock);
+                this.createFile(lock);
+            });
         } else if (type === 'project') {
             RequestModule.createRepo(this.state.name, this.props.token);
         }
@@ -105,6 +118,47 @@ class NewModal extends React.Component<NewModalProps & any, any> {
         this.setState({
             name: event.target.value,
             selected: false
+        });
+    }
+
+    /**
+     * Method that will invoke the API for the creation of a new file only if
+     * the user acquired a lock on that file first.
+     * @param lock: boolean, whether user acquired lock or not
+     * @return none
+     */
+    createFile(lock: any) {
+        if (lock === true) {
+            // invoke backend method
+            let target;
+            // determine which type of model to target
+            if (this.state.fileType === 'data') {
+                target = ModelComponent.DataGraph;
+            } else if (this.state.fileType === 'SHACL') {
+                target = ModelComponent.SHACLShapesGraph;
+            } else {
+                console.log("invalid type");
+            }
+            // get remote file DAO
+            let remotefileDAO = DataAccessProvider.getInstance().getRemoteFileDAO();
+            // create remote file
+            remotefileDAO.insert(new RemoteFileModule
+            (target, this.props.user, this.state.name, this.state.project, this.props.token));
+        } else {
+            console.log("No acquired lock to create a new file");
+        }
+    }
+
+    /**
+     * Method that will adapt the current state of the 'fileType' attribute
+     * which is used to determine which type of file the users wants to create
+     * @param: e : event
+     * @param: value: selected value in checkbox
+     * @return: none
+     */
+    handleType(e: any, {value}: any) {
+        this.setState({
+            fileType: value
         });
     }
 
@@ -157,6 +211,29 @@ class NewModal extends React.Component<NewModalProps & any, any> {
                             style={{marginTop: '1em'}}
                             onChange={this.onChange}
                         />
+                        {this.props.type === 'file' ?
+                            <Form style={{marginTop: '1em'}}>
+                                <Form.Field>
+                                    Selected type: <b>{this.state.fileType}</b>
+                                </Form.Field>
+                                <Form.Field>
+                                    <Checkbox
+                                        label='Data'
+                                        value='data'
+                                        checked={this.state.fileType === 'data'}
+                                        onChange={this.handleType}
+                                    />
+                                </Form.Field>
+                                <Form.Field>
+                                    <Checkbox
+                                        label='SHACL'
+                                        value='SHACL'
+                                        checked={this.state.fileType === 'SHACL'}
+                                        onChange={this.handleType}
+                                    />
+                                </Form.Field>
+                            </Form>
+                            : null}
                     </Modal.Content>
                     <Modal.Actions>
                         <Button color='red' onClick={this.cancelModal}>
