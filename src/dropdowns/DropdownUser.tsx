@@ -5,7 +5,7 @@ import {connect} from 'react-redux';
 import UserModal from '../modals/UserModal';
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
 
-/*
+/**
     Component used to create a dropdown component for an authenticated user
 
  */
