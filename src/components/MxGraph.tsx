@@ -1314,15 +1314,15 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                         if (state != null) {
                             let triple = instance.cellToTriples.getValue(state.cell);
                             if (triple) {
-                                // alert(triple.file);
+                                if (!instance.grantedLockCellsDict.getValue(evt.getProperty('cell'))) {
+                                    alert("File is locked by another user.");
+                                }
                             }
                         }
                     },
                     dragLeave: function(evt: any, state: any)
                     {
-                        if (state != null) {
-
-                        }
+                        return;
                     }
             });
         }
