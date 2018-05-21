@@ -1343,8 +1343,9 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                     mouseUp: function(sender: any, me: any) { },
                     dragEnter: function(evt: any, state: any)
                     {
-                        if (state != null) {
-                            if (!instance.grantedLockCellsDict.getValue(evt.getProperty('cell'))) {
+                        let cell = evt.getProperty('cell');
+                        if (state != null && cell) {
+                            if (!instance.grantedLockCellsDict.getValue(cell)) {
                                 instance.setState({showLockModal: true});
                             }
                         }
