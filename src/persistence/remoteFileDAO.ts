@@ -19,6 +19,7 @@ export class RemoteFileDAO implements DataAccessObject {
 
     private model: Model;
     private parsers: Collections.Dictionary<ModelComponent, Parser<any>>;
+    private openedFiles: Collections.Dictionary<string, ModelComponent>;
 
     /**
      * Create a new RemoteFileDAO.
@@ -27,6 +28,7 @@ export class RemoteFileDAO implements DataAccessObject {
     public constructor(model: Model) {
         this.model = model;
         this.parsers = new Collections.Dictionary<ModelComponent, Parser<any>>();
+        this.openedFiles = new Collections.Dictionary<string, ModelComponent>();
 
         // register parsers
         this.registerParser(ModelComponent.DataGraph, new GraphParser());
@@ -60,15 +62,14 @@ export class RemoteFileDAO implements DataAccessObject {
     public start(username: string, reponame: string, token: string) {
         let self = this;
         let service = new PollingService(2000, function () {
-            RequestModule.getFilesFromRepo(username, reponame, token).then(files => {
-                files.forEach(file => {
-                    RequestModule.pollForChanges(username, reponame, token, file).then(changes => {
-                        if (changes.isModified) {
-                            // TODO: atm everything is put inside the DataGraph component!!!
-                            // Need a way to get this information from the server...
-                            self.find(new RemoteFileModule(ModelComponent.DataGraph, username, file, reponame, token));
+            self.openedFiles.keys().forEach(file => {
+                RequestModule.pollForChanges(username, reponame, token, file).then(changes => {
+                    if (changes.isModified) {
+                        let target = self.openedFiles.getValue(file);
+                        if (target) {
+                            self.find(new RemoteFileModule(target, username, file, reponame, token));
                         }
-                    });
+                    }
                 });
             });
         });
@@ -84,6 +85,7 @@ export class RemoteFileDAO implements DataAccessObject {
         if (parser && parser instanceof GraphParser) {
             this.model.tasks.schedule(new SaveTask(parser, module));
             this.model.tasks.processAllTasks();
+            this.openedFiles.setValue(module.getIdentifier(), module.getTarget());
         }
     }
 
@@ -96,6 +98,7 @@ export class RemoteFileDAO implements DataAccessObject {
         if (parser && parser instanceof WorkspaceParser) {
             this.model.tasks.schedule(new SaveWorkspaceTask(parser, module));
             this.model.tasks.processAllTasks();
+            this.openedFiles.setValue(module.getIdentifier(), ModelComponent.Workspace);
         }
     }
 
@@ -115,6 +118,7 @@ export class RemoteFileDAO implements DataAccessObject {
                     parser.parse(content, module.getMime(), function (result: Graph) {
                         self.model.tasks.schedule(new LoadTask(result.asImmutable(), module));
                         self.model.tasks.processAllTasks();
+                        self.openedFiles.setValue(module.getIdentifier(), module.getTarget());
                     });
                 }
             });
@@ -133,6 +137,7 @@ export class RemoteFileDAO implements DataAccessObject {
                     parser.parse(workspace, "application/json", function (result: ModelData) {
                         self.model.tasks.schedule(new LoadWorkspaceTask(result));
                         self.model.tasks.processAllTasks();
+                        self.openedFiles.setValue(module.getIdentifier(), ModelComponent.Workspace);
                     });
                 }
             });
