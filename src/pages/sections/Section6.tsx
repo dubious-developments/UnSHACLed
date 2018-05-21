@@ -1,8 +1,12 @@
 import * as React from 'react';
 import {Header} from 'semantic-ui-react';
 import {Link} from 'react-router-dom';
-class Section6 extends React.Component<any, any> {
 
+/**
+ * Component containing the sixth section of the user manual.
+ */
+class Section6 extends React.Component<any, any> {
+    /** Render component **/
     render() {
         return (
             <div style={{marginTop: '2em'}}>

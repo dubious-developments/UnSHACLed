@@ -1,6 +1,9 @@
 import * as React from 'react';
 import {Header, Image} from 'semantic-ui-react';
 
+/**
+ * Component containing the third section of the user manual.
+ */
 class Section3 extends React.Component<any, any> {
 
     const;
@@ -9,6 +12,7 @@ class Section3 extends React.Component<any, any> {
         marginBottom: '1em'
     };
 
+    /** Render component **/
     render() {
         const s31 = require('../../img/user_manual/s3_1.png');
         const s32 = require('../../img/user_manual/s3_2.png');

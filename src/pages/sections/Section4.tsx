@@ -1,13 +1,15 @@
 import * as React from 'react';
 import {Header, Image, List} from 'semantic-ui-react';
-
+/**
+ * Component containing the fourth section of the user manual.
+ */
 class Section4 extends React.Component<any, any> {
 
     imgMargin = {
         marginTop: '1em',
         marginBottom: '1em'
     };
-
+    /** Render component **/
     render() {
         // const s41 = require('../../img/user_manual/s4_1.png');
         const s42 = require('../../img/user_manual/s4_2.png');

@@ -1,13 +1,16 @@
 import * as React from 'react';
 import {Header, List} from 'semantic-ui-react';
 
+/**
+ * Component containing the eighth section of the user manual.
+ */
 class Section8 extends React.Component<any, any> {
 
     imgMargin = {
         marginTop: '1em',
         marginBottom: '1em'
     };
-
+    /** Render component **/
     render() {
         return (
             <div style={{marginTop: '2em'}} id="collab">
