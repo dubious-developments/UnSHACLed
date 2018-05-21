@@ -240,7 +240,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                             instance.props.token,
                             filename
                         ).then(lockGranted => {
-                            console.log(lockGranted);
+                            console.log("User has lock: ", lockGranted);
                             // If user does not have a lock yet, send a lock request
                             if (!lockGranted) {
                                 console.log("requesting lock");
@@ -250,9 +250,6 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                                     instance.props.token,
                                     filename
                                 ).then(lock => {
-                                    // add lock to global store
-                                    instance.props.appendLock(filename);
-                                    console.log(instance.props.locks);
                                     instance.processLock(cell, filename, lock);
                                 });
                             }
@@ -289,7 +286,11 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
      */
     processLock(cell: any, filename: string, lock: boolean) {
         if (lock) {
+            // add lock to global store
+            this.props.appendLock(filename);
             this.grantedLockCellsDict.setValue(cell, true);
+            console.log("Lock granted");
+            console.log(this.props.locks);
         } else {
             this.setState({showLockModal: true});
         }
