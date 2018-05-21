@@ -236,12 +236,11 @@ class SaveTask extends Task<ModelData, ModelTaskMetadata> {
                 self.module.getToken(),
                 self.module.getIdentifier(),
                 result).then(response => {
-                    if (response.status === 200 || response.status === 201) {
-                        RequestModule.releaseLock(self.module.getUserName(),
-                                                  self.module.getRepoName(),
-                                                  self.module.getToken(),
-                                                  self.module.getIdentifier());
-                    }
+                RequestModule.releaseLock(self.module.getUserName(),
+                    self.module.getRepoName(),
+                    self.module.getToken(),
+                    self.module.getIdentifier());
+
             });
         });
     }

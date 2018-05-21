@@ -7,6 +7,7 @@ import {connect} from 'react-redux';
 import {ModelComponent} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
 import {RemoteFileModule} from "../persistence/remoteFileDAO";
+import RequestModule from "../requests/RequestModule";
 
 /**
  Component used to create a dropdown component for the file toolbar option
@@ -236,11 +237,29 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
         } else {
             console.log("invalid type");
         }
+        // check if lock on file
+        let repoOwner = RequestModule.getRepoOwnerFromFile(fileName, this.props.files.content);
+        // release lock
         // get remote file DAO
         let remotefileDAO = DataAccessProvider.getInstance().getRemoteFileDAO();
-        // update remote file
-        remotefileDAO.insert(new RemoteFileModule
-        (target, this.props.login, fileName, repo, this.props.token));
+        RequestModule.hasLock(repoOwner, repo, this.props.token, fileName).then(bool => {
+            if (!bool) {
+                console.log('dont have a lock so request');
+                RequestModule.requestLock(repoOwner, repo, this.props.token, fileName).then(lock => {
+                    if (lock === true) {
+
+                        // update remote file
+                        remotefileDAO.insert(new RemoteFileModule
+                        (target, repoOwner, fileName, repo, this.props.token));
+                    }
+                });
+            } else {
+                // update remote file
+                remotefileDAO.insert(new RemoteFileModule
+                (target, repoOwner, fileName, repo, this.props.token));
+            }
+        });
+
     }
 
     render() {
