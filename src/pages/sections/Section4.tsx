@@ -23,18 +23,20 @@ class Section4 extends React.Component<any, any> {
         const s412 = require('../../img/user_manual/s4_12.png');
         const s413 = require('../../img/user_manual/s4_13.png');
         const s414 = require('../../img/user_manual/s4_14.png');
+        const s415 = require('../../img/user_manual/s4_15.png');
         return (
             <div style={{marginTop: '2em'}}>
                 <Header as="h1" id='4'> Editing </Header>
                 <p> Editing is the core of UnSHACLed, hence the following sections contain a detailed description
                     on how to edit using UnSHACLed. Besides the built in functionality of our editor, the in-graph
-                    editing is also included and discussed in detail. Reading through this section as a whole
-                    should give you a good grasp of the core concept of UnSHACLed. </p>
+                    editing is also included and discussed. Reading through this section as a whole
+                    should give you a good grasp on the core concept of UnSHACLed. </p>
 
                 {/** Editor functionality **/}
                 <Header as="h2" id='4.1'> Editor Functionality </Header>
-                <p> The following section contains information on the built in functionality that allows
-                    easy-to-use icons and functions to perform actions on the current graph. Each edit function
+                <p> The following section contains information on the built-in functionality that allows
+                    to perform actions on the current graph through
+                    easy-to-use icons and functions. Each edit function
                     is discussed individually and all options to perform that function are provided. </p>
                 {/** Undo and redo actions **/}
                 <Header as='h3' color="teal"> Undo and redo actions </Header>
@@ -42,21 +44,21 @@ class Section4 extends React.Component<any, any> {
                     your graph.
                 </p>
                 <p> To undo or redo the last action performed on the graph via the edit buttons, simply click
-                    the undo or redo icons in the toolbar on top of the screen. These icon are highlighted in red
+                    the undo or redo icons in the toolbar on top of the screen. These icons are highlighted in red
                     in the figure below. When these icon are clicked, the editor will revert to a previous state
-                    of the graph or convert to a future state depending on which function was chosen.
+                    of the graph or convert to a future state depending on which function you choose.
                 </p>
                 <Image src={s44} centered={true} style={this.imgMargin}/>
                 <p> The second option to execute the undo or redo function is via the top toolbar containing the
-                    drop downs. This time click the 'Edit' drop down as indicated below </p>
+                    drop downs. This time click the 'Edit' drop down as indicated below. </p>
                 <Image src={s42} centered={true} style={this.imgMargin}/>
                 <p> This will bring up the following:</p>
                 <Image src={s43} centered={true} style={this.imgMargin}/>
                 <p> From the drop down menu, you can now choose either the undo function or the redo function.
-                    Again the editor will perform the same actions as described above. Besides this second option
+                    Again, the editor will perform the same actions as described above. Besides this second option,
                     a third option is also available. The undo function can be used by performing the keyboard
                     shortcuts 'CTRL+Z' while the redo function is done by using the 'CTRL+Y' keyboard keys.
-                    The keyboard shortcuts are also visible in the figure above.
+                    These keyboard shortcuts are also visible in the figure above.
                 </p>
                 {/** Delete components **/}
                 <Header as='h3' color="teal"> Delete components </Header>
@@ -72,16 +74,16 @@ class Section4 extends React.Component<any, any> {
                     from the graph as expected.
                 </p>
                 <Image src={s45} centered={true} style={this.imgMargin}/>
-                <p> The second option to execute the undo or redo funcion is via the top toolbar containing the
+                <p> The second option to execute the delete function is via the top toolbar containing the
                     drop downs. This time click the 'Edit' drop down as indicated below </p>
                 <Image src={s42} centered={true} style={this.imgMargin}/>
                 <p> This will bring up the following:</p>
                 <Image src={s43} centered={true} style={this.imgMargin}/>
                 <p> From the drop down menu, you can now choose the delete function.
-                    Again the editor will perform the same actions as described above. Besides this second option
+                    Again, the editor will perform the same actions as described above. Besides this second option
                     a third option is also available. The delete function on selected components
                     can be used by performing the keyboard shortcuts 'delete' or 'Del'.
-                    The keyboard shortcuts are also visible in the figure above.
+                    These keyboard shortcuts are also visible in the figure above.
                 </p>
                 {/** Copy and paste components **/}
                 <Header as='h3' color="teal"> Copy and paste components </Header>
@@ -103,7 +105,7 @@ class Section4 extends React.Component<any, any> {
                     Besides this option
                     a second option is also available. The copy function on selected components
                     can be used by performing the keyboard shortcuts 'CTRL+C' while the paste function
-                    can be used by 'CTRL+V'.The keyboard shortcuts are also visible in the figure above.
+                    can be used by 'CTRL+V'. These keyboard shortcuts are also visible in the figure above.
                 </p>
                 {/** Clear graph**/}
                 <Header as='h3' color="teal"> Clear graph </Header>
@@ -117,30 +119,30 @@ class Section4 extends React.Component<any, any> {
                 <Image src={s42} centered={true} style={this.imgMargin}/>
                 <p> This will bring up the following:</p>
                 <Image src={s43} centered={true} style={this.imgMargin}/>
-                <p> From the dropdown menu, you can now choose the clear graph.
-                    On click, the editor will clear the entire state of the current graph. Please be careful
-                    when using this function. To clear the graph using keyboard shortcuts, press
+                <p> From the drop down menu, you can now choose the clear graph.
+                    On click, the editor will clear the entire state of the current graph. <b> Please be careful
+                        when using this function.</b> To clear the graph using keyboard shortcuts, press
                     'CTRL+A' to select all components followed by 'delete' to remove all of them.
                 </p>
                 {/** Select all or select none **/}
                 <Header as='h3' color="teal"> Select all or select none </Header>
-                <p> The following will guide you through the process of <b> select all or select none
-                </b> of the components in your grapnh.
+                <p> The following will guide you through the process of <b> selecting all or selecting none
+                </b> of the components in your graph.
                 </p>
                 <p>
                     The first option to select all or none of the components
-                    is through the top toolbar containing the dropdowns.
-                    To do so, click the 'Edit' dropdown as indicated below.
+                    is through the top toolbar containing the drop downs.
+                    To do so, click the 'Edit' drop down as indicated below.
                 </p>
                 <Image src={s42} centered={true} style={this.imgMargin}/>
                 <p> This will bring up the following:</p>
                 <Image src={s43} centered={true} style={this.imgMargin}/>
-                <p> From the dropdown menu, you can now choose the select all or select none function.
+                <p> From the drop down menu, you can now choose the select all or select none function.
                     On click, the editor will select all or select none of the components residing in your graph.
-                    These function can come in handy when combined with other functionality requiring
+                    These functions can come in handy when combined with other functionality requiring
                     selection of components. Besides this option,
                     a second option is also available. The select all function
-                    can be used by performing the keyboard shortcuts 'CTRL+A', no shortcuts is available for
+                    can be used by performing the keyboard shortcuts 'CTRL+A', no shortcuts are available for
                     the select none function. The keyboard shortcuts are also visible in the figure above.
                 </p>
 
@@ -158,7 +160,7 @@ class Section4 extends React.Component<any, any> {
                 <Image src={s46} centered={true} style={this.imgMargin}/>
                 <p> To drag and drop a component into the graph, simply hover over the component you wish to add.
                     A pop-up will appear with a preview of the component you are about to drop into the graph.
-                    An example of how this should like is given below. When you selected your component of choice,
+                    An example of how this should like, is given below. When you selected your component of choice,
                     click and hold the left mouse button while dragging your mouse pointer into the graph canvas. On
                     release of your left mouse button, the editor will draw the component on that position in the
                     graph and you successfully dropped a component.
@@ -168,8 +170,8 @@ class Section4 extends React.Component<any, any> {
                 <p>
                     To avoid repetitive workflow and increase the productivity, the editor offers a template
                     functionality. This functionality includes creating templates from selected graph components.
-                    These templates then can be used to quickly drag-and-drop a template component into the graph.
-                    These template components can be used to quickly construct a graph component which is similar
+                    These templates then can be used to quickly drag-and-drop a template components into the graph.
+                    These template components can be used to quickly construct a graph component similar
                     to another one. Instead of starting from scratch, which can be repetitive at some point, you
                     simply select the component or components you which to add as a template. After doing so, you
                     click the 'Add template from selection' button as seen in the figure below.
@@ -198,7 +200,7 @@ class Section4 extends React.Component<any, any> {
                             canvas.
                         </List.Item>
                         <List.Item> Click and hold the right mouse button and move the mouse pointer to
-                            a different location.
+                            a different location. This will move the graph as a whole.
                         </List.Item>
                     </List>
 
@@ -207,12 +209,12 @@ class Section4 extends React.Component<any, any> {
                 </b> within your graph.
                 </p>
                 <p>
-                    To keep a clear overview of the overall graph, an end-user can choose to collapse
+                    To keep a clear overview of the overall graph, an end-user can opt for collapsing
                     certain graph components. To do so, simply click the little minus icon located
                     on the top-left corner within a graph component. The editor will minimize the graph
                     component and hence preserve more canvas space for other components. An example
                     of a collapsed and expanded graph component can be seen in the figure below. The minus icon
-                    will turn into a plus icon when collapsed.
+                    will turn into a plus icon once collapsed.
                 </p>
                 <Image src={s410} centered={true} style={this.imgMargin}/>
                 <Image src={s411} centered={true} style={this.imgMargin}/>
@@ -220,7 +222,7 @@ class Section4 extends React.Component<any, any> {
                     To expand the graph component again, click the plus icon to perform the inverse operation.
                 </p>
                 <Header as='h3' color="teal"> Edit node name/properties </Header>
-                <p> The following will guide you through the process of <b> editing the name of graph component
+                <p> The following will guide you through the process of <b> editing the name of graph components
                     or the value of its properties.
                 </b>
                 </p>
@@ -241,10 +243,21 @@ class Section4 extends React.Component<any, any> {
                 </p>
                 <Image src={s413} centered={true} style={this.imgMargin}/>
                 <p> After adding a new property, a new row appears in the graph component which now can be
-                    edited to according to the desired value of the newly added property. An addition of a property
+                    edited according to the desired value of the newly added property. An addition of a property
                     to a graph component should look like the following:
                 </p>
                 <Image src={s414} centered={true} style={this.imgMargin}/>
+
+                <Header as='h3' color="teal"> Delete property </Header>
+                <p> The following will guide you through the process of <b> deleting a property to a graph component
+                </b>
+                </p>
+                <p>
+                    To delete a property from a graph component, you need to click the specific property first.
+                    After selecting the desired property, simply folow the steps as described in the 'Delete component'
+                    section. An example of how the deletion of a property should look like is given below:
+                </p>
+                <Image src={s415} centered={true} style={this.imgMargin} size="big"/>
 
             </div>
         );
