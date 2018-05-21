@@ -1,0 +1,454 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>dp2</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.js" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">dp2</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1> dp2</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<h1 id="unshacled-web-application">UnSHACLed web application</h1>
+				<p>Hi there! UnSHACLed is a visual editor for SHACL, still in its early stages.</p>
+				<h2 id="trying-unshacled-live">Trying UnSHACLed live</h2>
+				<p>You can try out UnSHACLed&#39;s <a href="http://193.190.127.184">latest release</a> or its <a href="http://193.190.127.184:8800">latest nightly release</a> from the comfort of your favorite browser.</p>
+				<h2 id="ci">CI</h2>
+				<table>
+					<thead>
+						<tr>
+							<th>CI engine</th>
+							<th>Status</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Travis (Linux, Mac OS X)</td>
+							<td><a href="https://travis-ci.org/dubious-developments/UnSHACLed"><img src="https://travis-ci.org/dubious-developments/UnSHACLed.svg?branch=master" alt="Build Status"></a></td>
+						</tr>
+						<tr>
+							<td>AppVeyor (Windows)</td>
+							<td><a href="https://ci.appveyor.com/project/jonathanvdc/unshacled"><img src="https://ci.appveyor.com/api/projects/status/9jhin9m8rocfm0p4/branch/master?svg=true" alt="Build status"></a></td>
+						</tr>
+						<tr>
+							<td>Codacy</td>
+							<td><a href="https://app.codacy.com/app/jonathanvdc/UnSHACLed?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dubious-developments/UnSHACLed&amp;utm_campaign=badger"><img src="https://api.codacy.com/project/badge/Grade/5cde9768428f421b94abbb9b36962959" alt="Codacy Badge"></a></td>
+						</tr>
+					</tbody>
+				</table>
+				<p>SonarCloud dashboard can be found <a href="https://sonarcloud.io/dashboard?id=org.dubious-developments.unshacled">here</a>. For some reason, SonarCloud won&#39;t show an accurate test coverage report. You can find an accurate report <a href="http://193.190.127.184:8800/coverage/index.html">here</a>.</p>
+				<h2 id="building-unshacled">Building UnSHACLed</h2>
+				<p>Dependencies:</p>
+				<ul>
+					<li><code>npm</code> (<code>sudo apt install npm</code>)</li>
+					<li><code>gulp</code> (<code>sudo npm install -g gulp</code>)</li>
+				</ul>
+				<p>Build instructions:</p>
+				<ul>
+					<li>Install all other dependencies by running <code>npm install</code>.</li>
+					<li>Lint, build and test by typing <code>gulp</code>.</li>
+				</ul>
+				<p>To view the website, open <code>index.html</code> with your favorite web browser.</p>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+					<li class="label tsd-is-external">
+						<span>Internals</span>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_components_app_.html">"components/<wbr>App"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_components_legend_.html">"components/<wbr>Legend"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_components_login_.html">"components/<wbr>Login"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_components_mxgraph_.html">"components/<wbr>MxGraph"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_components_routes_.html">"components/<wbr>Routes"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_components_sidebar_.html">"components/<wbr>Sidebar"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_components_slider_.html">"components/<wbr>Slider"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_components_toolbaricon_.html">"components/<wbr>Toolbar<wbr>Icon"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_components_containerhome_.html">"components/container<wbr>Home"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_components_navbarhome_.html">"components/navbar<wbr>Home"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_components_navbarwork_.html">"components/navbar<wbr>Work"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_components_sidebarpopup_.html">"components/sidebar<wbr>Popup"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_components_treeview_.html">"components/tree<wbr>View"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_conformance_shaclvalidator_.html">"conformance/SHACLValidator"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_conformance_validationreport_.html">"conformance/<wbr>Validation<wbr>Report"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_conformance_validationservice_.html">"conformance/<wbr>Validation<wbr>Service"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_conformance_validator_.html">"conformance/<wbr>Validator"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_dropdowns_dropdownedit_.html">"dropdowns/<wbr>Dropdown<wbr>Edit"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_dropdowns_dropdownfile_.html">"dropdowns/<wbr>Dropdown<wbr>File"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_dropdowns_dropdownhelp_.html">"dropdowns/<wbr>Dropdown<wbr>Help"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_dropdowns_dropdownuser_.html">"dropdowns/<wbr>Dropdown<wbr>User"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_dropdowns_dropdownview_.html">"dropdowns/<wbr>Dropdown<wbr>View"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_entities_causalitychain_.html">"entities/causality<wbr>Chain"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_entities_instructionmerger_.html">"entities/instruction<wbr>Merger"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_entities_model_.html">"entities/model"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_entities_modeldata_.html">"entities/model<wbr>Data"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_entities_modeltaskmetadata_.html">"entities/model<wbr>Task<wbr>Metadata"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_entities_outoforderprocessor_.html">"entities/out<wbr>OfOrder<wbr>Processor"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_entities_prioritypartitionedqueue_.html">"entities/priority<wbr>Partitioned<wbr>Queue"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_entities_task_.html">"entities/task"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_entities_taskinstruction_.html">"entities/task<wbr>Instruction"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_entities_taskprocessor_.html">"entities/task<wbr>Processor"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_entities_taskqueue_.html">"entities/task<wbr>Queue"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_entities_taskrewriter_.html">"entities/task<wbr>Rewriter"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_entities_timecapsule_.html">"entities/time<wbr>Capsule"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_form_loginform_.html">"form/<wbr>Login<wbr>Form"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_form_signupform_.html">"form/<wbr>Signup<wbr>Form"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_index_.html">"index"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_modals_newmodal_.html">"modals/<wbr>New<wbr>Modal"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_modals_repomodal_.html">"modals/<wbr>Repo<wbr>Modal"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_modals_usermodal_.html">"modals/<wbr>User<wbr>Modal"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_pages_about_.html">"pages/<wbr>About"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_pages_contact_.html">"pages/<wbr>Contact"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_pages_home_.html">"pages/<wbr>Home"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_pages_login_.html">"pages/<wbr>Login"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_pages_notfound_.html">"pages/<wbr>Not<wbr>Found"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_pages_signup_.html">"pages/<wbr>Signup"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_pages_usermanual_.html">"pages/<wbr>User<wbr>Manual"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_pages_work_.html">"pages/<wbr>Work"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_pages_sections_section1_.html">"pages/sections/<wbr>Section1"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_pages_sections_section2_.html">"pages/sections/<wbr>Section2"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_pages_sections_section3_.html">"pages/sections/<wbr>Section3"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_pages_sections_section4_.html">"pages/sections/<wbr>Section4"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_persistence_component_.html">"persistence/component"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_persistence_dataaccessobject_.html">"persistence/data<wbr>Access<wbr>Object"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_persistence_dataaccessprovider_.html">"persistence/data<wbr>Access<wbr>Provider"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_persistence_graph_.html">"persistence/graph"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_persistence_graphparser_.html">"persistence/graph<wbr>Parser"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_persistence_localfiledao_.html">"persistence/local<wbr>FileDAO"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_persistence_parser_.html">"persistence/parser"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_persistence_remotefiledao_.html">"persistence/remote<wbr>FileDAO"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_persistence_workspaceparser_.html">"persistence/workspace<wbr>Parser"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_redux_actions_fileactions_.html">"redux/actions/file<wbr>Actions"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_redux_actions_lockactions_.html">"redux/actions/lock<wbr>Actions"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_redux_actions_useractions_.html">"redux/actions/user<wbr>Actions"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_redux_reducers_filerecuder_.html">"redux/reducers/file<wbr>Recuder"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_redux_reducers_lockreducer_.html">"redux/reducers/lock<wbr>Reducer"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_redux_reducers_userreducer_.html">"redux/reducers/user<wbr>Reducer"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_registerserviceworker_.html">"register<wbr>Service<wbr>Worker"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_requests_requestmodule_.html">"requests/<wbr>Request<wbr>Module"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_services_auth_.html">"services/<wbr>Auth"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_services_idleuserdetection_.html">"services/<wbr>Idle<wbr>User<wbr>Detection"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_services_modeltasks_.html">"services/<wbr>Model<wbr>Tasks"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_services_pollingservice_.html">"services/<wbr>Polling<wbr>Service"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_services_extensiontomime_.html">"services/extension<wbr>ToMIME"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_style_treeview_.html">"style/tree<wbr>View"</a>
+					</li>
+					<li class="label tsd-is-external">
+						<span>Externals</span>
+					</li>
+					<li class=" tsd-kind-external-module tsd-is-external">
+						<a href="modules/_conformance_shacl_index_.html">"conformance/shacl/index"</a>
+					</li>
+					<li class=" tsd-kind-external-module tsd-is-external">
+						<a href="modules/_conformance_shacl_src_libraries_.html">"conformance/shacl/src/libraries"</a>
+					</li>
+					<li class=" tsd-kind-external-module tsd-is-external">
+						<a href="modules/_conformance_shacl_src_rdflib_graph_.html">"conformance/shacl/src/rdflib-<wbr>graph"</a>
+					</li>
+					<li class=" tsd-kind-external-module tsd-is-external">
+						<a href="modules/_conformance_shacl_src_rdfquery_.html">"conformance/shacl/src/rdfquery"</a>
+					</li>
+					<li class=" tsd-kind-external-module tsd-is-external">
+						<a href="modules/_conformance_shacl_src_rdfquery_term_factory_.html">"conformance/shacl/src/rdfquery/term-<wbr>factory"</a>
+					</li>
+					<li class=" tsd-kind-external-module tsd-is-external">
+						<a href="modules/_conformance_shacl_src_shapes_graph_.html">"conformance/shacl/src/shapes-<wbr>graph"</a>
+					</li>
+					<li class=" tsd-kind-external-module tsd-is-external">
+						<a href="modules/_conformance_shacl_src_validation_engine_.html">"conformance/shacl/src/validation-<wbr>engine"</a>
+					</li>
+					<li class=" tsd-kind-external-module tsd-is-external">
+						<a href="modules/_conformance_shacl_src_validation_function_.html">"conformance/shacl/src/validation-<wbr>function"</a>
+					</li>
+					<li class=" tsd-kind-external-module tsd-is-external">
+						<a href="modules/_conformance_shacl_src_validation_report_.html">"conformance/shacl/src/validation-<wbr>report"</a>
+					</li>
+					<li class=" tsd-kind-external-module tsd-is-external">
+						<a href="modules/_conformance_shacl_src_vocabularies_.html">"conformance/shacl/src/vocabularies"</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-module"><span class="tsd-kind-icon">Module</span></li>
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
+				<li class="tsd-kind-enum-member"><span class="tsd-kind-icon">Enumeration member</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-enum"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-enum"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-interface"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-class"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
+				<li class="tsd-kind-call-signature tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="http://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="assets/js/search.js"><' + '/script>');</script>
+</body>
+</html>

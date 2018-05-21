@@ -72,6 +72,7 @@
     "karma-typescript-es6-transform": "^1.0.4",
     "run-sequence": "^1.2.2",
     "tslint": "5.3.2",
+    "typedoc": "^0.11.1",
     "typescript": "^2.7.2",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
