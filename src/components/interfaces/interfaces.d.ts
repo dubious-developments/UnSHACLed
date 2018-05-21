@@ -1,23 +1,26 @@
-/*
+/**
 This file contains all interfaces needed for React Components.
 Interfaces should be defined to able to pass props to child components.
 How to?
 1. Define an interface in this file
 2. Import this file in the child component as " import { **choose prop ** } from './interfaces/interfaces'; "
 3. Update class header as extends React.Component<**choose prop**, {}>
-
  */
 
 import PropTypes from 'prop-types';
 
-/* Props defintion for navbar in workspace */
+/**
+ * Props defintion for navbar in workspace
+ */
 
 export interface NavbarWorkProps {
     visible: boolean;
     callback: PropTypes.func;
 }
 
-/* Props definition for sidebar in workspace */
+/**
+ *  Props definition for sidebar in workspace
+ */
 export interface SidebarProps {
     visible: boolean;
     callback: PropTypes.func;
@@ -25,13 +28,19 @@ export interface SidebarProps {
     showLabel: any;
 }
 
-/* Props definition for mxgraph component */
+/**
+ * Props definition for mxgraph component
+ */
+
 export interface MxGraphProps {
     callback: PropTypes.func;
     setLabel: PropTypes.func;
 }
 
-/* Props definition for ToolbarIcon component */
+/**
+ * Props definition for ToolbarIcon component
+ */
+
 export interface ToolbarIconProps {
     /* Pop Up */
     p_size: any; // size of the pop-up
@@ -42,7 +51,10 @@ export interface ToolbarIconProps {
     icon_name: any; // name of the used icon within the menu item (trigger)
 }
 
-/* Props definition for SidebarPopup component */
+/**
+ * Props definition for SidebarPopup component
+ */
+
 export interface SidebarPopupProps {
     /* Pop Up */
     p_size: any; // size of the pop-up
@@ -51,7 +63,10 @@ export interface SidebarPopupProps {
     trigger: any; // trigger for the pop-op
 }
 
-/* Props definition for Legend component */
+/**
+ * Props definition for Legend component
+ */
+
 export interface LegendProps {
     header_title: any; // title besides the checkbox
     colors: any; // array of colors representing the color for each legend entry
@@ -59,7 +74,9 @@ export interface LegendProps {
     /* Colors and text at same array index make up one legend entry ! */
 }
 
-/* Props definition for DropdownFile component */
+/**
+ * Props definition for DropdownFile component
+ */
 export interface DropdownFileProps {
     opened_files: any; // currently opened files
     import_cb: PropTypes.func; // callback function to parent for importing either a shacl or data graph
@@ -68,6 +85,9 @@ export interface DropdownFileProps {
 
 }
 
+/**
+ * Props definition for RepoModal component
+ */
 export interface RepoModalProps {
     visible: any; // state variable from parent that will determine visibility
     confirm_cb: PropTypes.func; // callback function  to parent when confirm is clicked
@@ -75,7 +95,7 @@ export interface RepoModalProps {
 }
 
 /**
- * Props definition for user info modal.
+ * Props definition for UserModal component
  */
 export interface UserModalProps {
     visible: any; // state variable from parent that will determine visibility
