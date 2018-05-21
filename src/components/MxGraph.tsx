@@ -231,7 +231,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
 
                     // Checks if it is a GitHub file
                     let repo = instance.getRepoFromFile(filename);
-
+                    console.log(repo);
                     if (repo) {
                         // Check if user has lock
                         RequestModule.hasLock(
@@ -240,8 +240,10 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                             instance.props.token,
                             filename
                         ).then(lockGranted => {
+                            console.log(lockGranted);
                             // If user does not have a lock yet, send a lock request
                             if (!lockGranted) {
+                                console.log("requesting lock");
                                 RequestModule.requestLock(
                                     RequestModule.getRepoOwnerFromFile(filename, instance.props.files.content),
                                     repo,
@@ -250,6 +252,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                                 ).then(lock => {
                                     // add lock to global store
                                     instance.props.appendLock(filename);
+                                    console.log(instance.props.locks);
                                     instance.processLock(cell, filename, lock);
                                 });
                             }
