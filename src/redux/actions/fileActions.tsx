@@ -6,12 +6,13 @@ export const APPEND_FILE = 'files:appendFile';
  * @param type: type of file. can either be 'SHACL' or 'data'.
  * @return {{type: string; payload: {fileObject: any}}}
  */
-export function appendFile(fileName: any, repoName: any, type: any) {
+export function appendFile(fileName: any, repoName: any, repoOwner: any, type: any) {
     return{
         type: APPEND_FILE,
         payload: {
             fileName: fileName,
             repoName: repoName,
+            repoOwner: repoOwner,
             type: type
         }
     };

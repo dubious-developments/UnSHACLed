@@ -21,6 +21,7 @@ export function fileReducer(state: any = initialState, action: any) {
                     {
                         name: action.payload.fileName,
                         repo: action.payload.repoName,
+                        repoOwner: action.payload.repoOwner,
                         type: action.payload.type,
                     }
                 ]

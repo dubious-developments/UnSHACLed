@@ -261,7 +261,7 @@ class RequestModule {
      * @param content: the content of the current workspace
      */
     static setWorkspace(token: any, content: any) {
-        axios.put('http://193.190.127.184:8042/workspace/' + token, {content})
+        axios.put('http://193.190.127.184:8042/workspace/' + token, content)
             .then(res => res.data)
             .catch(error => {
                 console.log("setWorkspace refused: " + error.message);
@@ -277,7 +277,10 @@ class RequestModule {
      */
     static fetchWorkspace(token: any) {
         return axios.get('http://193.190.127.184:8042/workspace/' + token)
-            .then(res => res.data)
+            .then(res => {
+                console.log(res.data);
+                return res.data;
+            })
             .catch(error => {
                 console.log("fetchWorkspace refused: " + error.message);
                 return error.status;
@@ -295,8 +298,10 @@ class RequestModule {
         for (let i in repoArray) {
             result.push(
                 {
+                    key: repoArray[i].split("/")[1],
                     text: repoArray[i].split("/")[1],
-                    value: repoArray[i].split("/")[1]
+                    value: repoArray[i].split("/")[1],
+                    owner: repoArray[i].split("/")[0],
                 }
             );
         }
@@ -314,6 +319,36 @@ class RequestModule {
             result.push({text: files[i], value: files[i]});
         }
         return result;
+    }
+
+    /**
+     * Gets the owner of a repository
+     * @param repoName: name of repository
+     * @param: repos: repository list return from processRepos !!!!!
+     * @returns {string}, Returns either the name of the repository or '' if none found.
+     */
+    static getRepoOwnerFromRepo(repoName: string, repos:any): string {
+        for (let r of repos) {
+            if (r.text === repoName) {
+                return r.owner;
+            }
+        }
+        return '';
+    }
+
+    /**
+     * Gets the repoOwner belonging to the file
+     * @param filename: string value.
+     * @param files: list of openend files from the redux store!!!!
+     * @returns {string}, Returns either the name of the repository or '' if none found.
+     */
+    static getRepoOwnerFromFile(filename: string, files:any): string {
+        for (let file of files) {
+            if (file.name === filename) {
+                return file.repoOwner;
+            }
+        }
+        return '';
     }
 }
 

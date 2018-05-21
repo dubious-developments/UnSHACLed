@@ -144,13 +144,6 @@ class NewModal extends React.Component<NewModalProps & any, any> {
             // create remote file
             remotefileDAO.insert(new RemoteFileModule
             (target, this.props.user, this.state.name, this.state.project, this.props.token));
-            // Release lock
-            let filePath = this.state.name;
-            RequestModule.releaseLock(this.props.user, this.state.project,
-                this.props.token, filePath).then(response => {
-                console.log("releasing lock");
-                console.log(response);
-            });
         } else {
             console.log("No acquired lock to create a new file");
         }

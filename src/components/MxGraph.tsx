@@ -231,7 +231,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                     if (repo) {
                         // Send a lock request
                         RequestModule.requestLock(
-                            instance.props.user,
+                            RequestModule.getRepoOwnerFromFile(filename, instance.props.files.content),
                             repo,
                             instance.props.token,
                             filename
@@ -250,7 +250,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                             new SaveRemoteFileTask(
                                 [ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph],
                                 filename,
-                                instance.props.user,
+                                RequestModule.getRepoOwnerFromFile(filename, instance.props.files.content),
                                 instance.getRepoFromFile(filename),
                                 instance.props.token
                             )
@@ -1544,7 +1544,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                 if (repo) {
                     // Send a lock request
                     RequestModule.releaseLock(
-                        self.props.user,
+                        RequestModule.getRepoOwnerFromFile(filename, self.props.files.content),
                         repo,
                         self.props.token,
                         filename
