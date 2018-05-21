@@ -18,6 +18,7 @@ import PollingService from "../services/PollingService";
 export class RemoteFileDAO implements DataAccessObject {
 
     private model: Model;
+    private service: PollingService;
     private parsers: Collections.Dictionary<ModelComponent, Parser<any>>;
     private openedFiles: Collections.Dictionary<string, ModelComponent>;
 
@@ -74,6 +75,16 @@ export class RemoteFileDAO implements DataAccessObject {
             });
         });
         service.startPolling();
+        this.service = service;
+    }
+
+    /**
+     * Stop listening for remote changes.
+     */
+    public stop() {
+        if (this.service) {
+            this.service.stopPolling();
+        }
     }
 
     /**
