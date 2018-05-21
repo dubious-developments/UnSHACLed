@@ -10,10 +10,11 @@ import {ModelObserver, Model} from "../entities/model";
 import {Task} from "../entities/task";
 import {ModelData} from "../entities/modelData";
 import {ImmutableGraph, Graph, PrefixMap} from "../persistence/graph";
+import LockModal from "../modals/LockModal";
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout, mxCellOverlay, mxImage,
-    mxGraphModel, mxEffects, mxWindow: any;
+    mxGraphModel: any;
 
 let $rdf = require('rdflib');
 
@@ -48,7 +49,8 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             preview: null,
             dragElement: null,
             dragElList: ["Shape", "Node Shape", "Property Shape"],
-            templateCount: 0
+            templateCount: 0,
+            showLockModal: false
         };
         this.handleLoad = this.handleLoad.bind(this);
         this.saveGraph = this.saveGraph.bind(this);
@@ -1211,6 +1213,7 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                         if (state != null) {
                             let triple = instance.cellToTriples.getValue(state.cell);
                             if (triple) {
+                                instance.setState({showLockModal: true});
                             }
                         }
                     },
@@ -1457,7 +1460,17 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         });
     }
 
+    closeLockModal() {
+        console.log("closed");
+    }
+
     render() {
+        if (this.state.showLockModal) {
+            setTimeout(() => {
+                this.setState({ showLockModal: false });
+            }, 2000);
+        }
+
         const grid = require('../img/grid.gif');
         return (
             <div
@@ -1468,7 +1481,12 @@ class MxGraph extends React.Component<MxGraphProps, any> {
                     height: '100%',
                     overflow: 'auto',
                 }}
-            />
+            >
+                <LockModal
+                    open={this.state.showLockModal}
+                    onClose={this.closeLockModal()}
+                />
+            </div>
         );
     }
 }
