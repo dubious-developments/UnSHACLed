@@ -1,11 +1,17 @@
 import * as React from 'react';
 import {Grid, Header, Image, Container, List, Button} from 'semantic-ui-react';
 import {withRouter} from 'react-router-dom';
-import Auth from '../services/Auth';
 import {Link} from 'react-router-dom';
 
+/**
+ *  Component that will hold the content of the signup page
+ */
 class LoginForm extends React.Component<any, any> {
 
+    /**
+     * Constructor of component
+     * @param props
+     */
     constructor(props: string) {
         super(props);
         this.state = {
@@ -15,6 +21,7 @@ class LoginForm extends React.Component<any, any> {
         };
     }
 
+    /** Render component **/
     render() {
         const logo = require('../img/logo.png');
         return (
@@ -51,7 +58,7 @@ class LoginForm extends React.Component<any, any> {
                                 ordered={true}
                                 inverted={true}
                                 relaxed="very"
-                                style={{marginTop: '2em', marginBottom: '2em' }}
+                                style={{marginTop: '2em', marginBottom: '2em'}}
                             >
                                 <List.Item>
                                     Go to the GitHub sign up page by using the button below.
@@ -83,11 +90,6 @@ class LoginForm extends React.Component<any, any> {
             </div>
         )
             ;
-    }
-
-    handleClick(event: any) {
-        Auth.login();
-        this.props.history.push("/user");
     }
 }
 
