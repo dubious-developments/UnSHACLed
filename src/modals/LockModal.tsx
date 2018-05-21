@@ -26,7 +26,7 @@ class LockModal extends React.Component<any, any> {
                 <Header icon='lock' content='Lock warning'/>
                 <Modal.Content>
                     <p>
-                        File is locked by another user.
+                        You have no lock on this file.
                     </p>
                 </Modal.Content>
             </Modal>
