@@ -233,7 +233,14 @@ class SaveTask extends Task<ModelData, ModelTaskMetadata> {
                 self.module.getRepoName(),
                 self.module.getToken(),
                 self.module.getIdentifier(),
-                result);
+                result).then(response => {
+                    if (response.status === 200 || response.status === 201) {
+                        RequestModule.releaseLock(self.module.getUserName(),
+                                                  self.module.getRepoName(),
+                                                  self.module.getToken(),
+                                                  self.module.getIdentifier());
+                    }
+            });
         });
     }
 
@@ -267,6 +274,7 @@ class SaveWorkspaceTask extends Task<ModelData, ModelTaskMetadata> {
     public execute(data: ModelData): void {
         let self = this;
         this.parser.serialize(data, "application/json", function (result: string) {
+            console.log(result);
             RequestModule.setWorkspace(self.module.getToken(), result);
         });
     }
