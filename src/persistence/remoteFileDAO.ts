@@ -267,6 +267,7 @@ class SaveWorkspaceTask extends Task<ModelData, ModelTaskMetadata> {
     public execute(data: ModelData): void {
         let self = this;
         this.parser.serialize(data, "application/json", function (result: string) {
+            console.log(result);
             RequestModule.setWorkspace(self.module.getToken(), result);
         });
     }

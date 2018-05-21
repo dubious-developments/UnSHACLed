@@ -488,7 +488,7 @@ class GraphData {
      */
     public removeTriple(subject: string, predicate: string, object: string) {
         this.n3Store.removeTriple(subject, predicate, object);
-        this.store.remove(subject, predicate, object);
+        this.store.remove(new Statement(subject, predicate, object));
         this.updateChanges(ChangeSet.REMOVE, ChangeSet.ADD, subject, predicate, object);
     }
 
