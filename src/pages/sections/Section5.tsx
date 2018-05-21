@@ -31,18 +31,19 @@ class Section5 extends React.Component<any, any> {
         const s520 = require('../../img/user_manual/s5_20.png');
         const s521 = require('../../img/user_manual/s5_21.png');
         const s522 = require('../../img/user_manual/s5_22.png');
-        const s523 = require('../../img/user_manual/s5_22.png');
+        const s523 = require('../../img/user_manual/s5_23.png');
         return (
-            <div>
-                <Header as="h1"> Extra </Header>
-                <p> The following section contain all functionality that does not fit into the editing part of our
+            <div style={{marginTop: '2em'}}>
+                <Header as="h1" id="5"> Extra </Header>
+                <p> The following section contains all functionality that does not fit into the editing part of our
                     editor. In this section, you will find a detailed description on several topics ranging from
-                    adapting the editors view, displaying additional informations sources as well as some support
+                    adapting the editors view, displaying additional information sources as well as some support
                     features.
                 </p>
-                <Header as='h2' color="teal"> View </Header>
-                <p> The following section contains how to change the view on the graph. Changing the view
-                    includes zooming, zooming out, panning and fitting graph to the screen. These functions
+                <Header as='h2' color="teal" id="5.1"> View </Header>
+                <p> The following section contains a description on how to change the view on the graph.
+                    Changing the view
+                    includes zooming, zooming out, panning and fitting the graph to the screen. These functions
                     aide in keeping an overview of the graph as a whole.
                 </p>
                 {/** Zooming in and out **/}
@@ -62,19 +63,23 @@ class Section5 extends React.Component<any, any> {
                 <p> This will bring up the following:</p>
                 <Image src={s53} centered={true} style={this.imgMargin}/>
                 <p> From the dropdown menu, you can now choose either to zoom in or zoom out.
-                    Again the editor will perform the same actions as described above. Besides this second option
+                    Again, the editor will perform the same actions as described above. Besides this second option
                     a third option is also available. Zooming in can also be done using the keyboard
                     shortcut '+' or 'Alt+Scroll' while zooming out is done by using the '-' or 'Alt+Scroll'
                     keyboard keys.
-                    The keyboard shortcuts are also visible in the figure above.
+                    These keyboard shortcuts are also visible in the figure above.
                 </p>
                 {/** Panning **/}
                 <Header as='h3' color="teal"> Panning </Header>
                 <p> The following will guide you through the process of <b> panning </b>
-                    your graph to the left or right.
+                    your graph to different directions
                 </p>
                 <p> To pan the graph to the left, position your mouse pointer into the graph canvas and
-                    scroll the mouse wheel backwards while holding 'SHIFT'. To pan the graph to the right, follow
+                scroll the mouse wheel backwards while holding 'SHIFT'. To pan the graph to the right, follow
+                the same steps except for scrolling the mouse wheel which now requires scrolling forward.
+                </p>
+                <p> To pan the graph upwards, position your mouse pointer into the graph canvas and
+                    scroll the mouse wheel backwards. To pan the graph downwards, follow
                     the same steps except for scrolling the mouse wheel which now requires scrolling forward.
                 </p>
                 {/** Fit graph to screen **/}
@@ -83,33 +88,33 @@ class Section5 extends React.Component<any, any> {
                     onto your screen.
                 </p>
                 <p> To fit the graph to your screens via the edit buttons, simply click
-                    the fit icon in the toolbar on top of the screen. These icon are highlighted in red
-                    in the figure below. When these icon are clicked, the editor will make the graph fit the screen
+                    the fit icon in the toolbar on top of the screen. This icon is highlighted in red
+                    in the figure below. When tis icon is clicked, the editor will make the graph fit the screen
                     and position it in the top-left corner.
                 </p>
                 <Image src={s54} centered={true} style={this.imgMargin}/>
-                <p> The second option to execute make the graph fit the screen, is via the top toolbar containing the
+                <p> The second option to make the graph fit the screen, is via the top toolbar containing the
                     drop downs. This time click the 'View' drop down as indicated below: </p>
                 <Image src={s51} centered={true} style={this.imgMargin}/>
                 <p> This will bring up the following:</p>
                 <Image src={s53} centered={true} style={this.imgMargin}/>
-                <p> From the dropdown menu, you can now choose 'Fit to screen' option.
-                    Again the editor will perform the same actions as described above.
-                    The effect of the fitting the graph to your screen is illustrated below:
+                <p> From the drop down menu, you can now choose 'Fit to screen' option.
+                    Again, the editor will perform the same actions as described above.
+                    The effect of fitting the graph to your screen is illustrated below:
                 </p>
                 <Image src={s56} centered={true} style={this.imgMargin} size="big"/>
 
                 {/** Collapse sidebar **/}
-                <Header as='h3' color="teal"> Fit graph to screen </Header>
+                <Header as='h3' color="teal"> Collapse sidebar </Header>
                 <p> The following will guide you through the process of <b> collapsing the sidebar </b>
                 </p>
-                <p> To sidebar can be shown or hidden. Both options are done by simply clicking the
+                <p> The sidebar can be shown or hidden. Both options are done by simply clicking the
                     collapse icon in the toolbar on top of the screen. The icon is highlighted in the figure below.
                     If the sidebar is shown, a click will hide the sidebar and vice versa.
                 </p>
                 <Image src={s523} centered={true} style={this.imgMargin}/>
 
-                <Header as='h2' color="teal"> Info Sources </Header>
+                <Header as='h2' color="teal" id="5.2"> Info Sources </Header>
                 <p> The following section includes a detailed description on how to enable
                     additional information sources ranging from editing to account info.
                 </p>
@@ -181,8 +186,8 @@ class Section5 extends React.Component<any, any> {
                 of the current graph </b>
                 </p>
                 <p> To generate of snapshot of the graph via the edit buttons, simply click
-                    the camera icon in the toolbar on top of the screen. These icon are highlighted in red
-                    in the figure below. When these icon are clicked, the editor will generate a snapshot
+                    the camera icon in the toolbar on top of the screen. This icon is highlighted in red
+                    in the figure below. When this icon is clicked, the editor will generate a snapshot
                     in a newly opened tab in your browser.
                 </p>
                 <Image src={s516} centered={true} style={this.imgMargin}/>
@@ -191,7 +196,7 @@ class Section5 extends React.Component<any, any> {
                 <Image src={s51} centered={true} style={this.imgMargin}/>
                 <p> This will bring up the following:</p>
                 <Image src={s53} centered={true} style={this.imgMargin}/>
-                <p> From the dropdown menu, you can now choose the 'Print Graph' option.
+                <p> From the drop down menu, you can now choose the 'Print Graph' option.
                     Again the editor will perform the same actions as described above. The result
                     of a generated snapshot can be seen in the figure below:
                 </p>
@@ -209,7 +214,8 @@ class Section5 extends React.Component<any, any> {
                 <Image src={s518} centered={true} style={this.imgMargin} />
                 <p> The result of a user filtering building block by providing a search string is given below: </p>
                 <Image src={s519} centered={true} style={this.imgMargin} />
-                <Header as='h2' color="teal"> Support </Header>
+
+                <Header as='h2' color="teal" id="5.3"> Support </Header>
                 <p> The following section includes a detailed description on how to acquire
                     support while using the editor.
                 </p>
