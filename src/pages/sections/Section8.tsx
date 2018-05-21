@@ -10,8 +10,8 @@ class Section8 extends React.Component<any, any> {
 
     render() {
         return (
-            <div style={{marginTop: '2em'}}>
-                <Header as="h1"> Collaborative editing </Header>
+            <div style={{marginTop: '2em'}} id="collab">
+                <Header as="h1" id="8"> Collaborative editing </Header>
                 <p> A strong feature of the UnSHACLed editor is the possibility to collaboratively
                     work on editing data or constraints. The following section will contain a short
                     description on several situations that can occur when working collaboratively.
@@ -19,7 +19,7 @@ class Section8 extends React.Component<any, any> {
                     consult our other documentation.
                 </p>
                 {/** Collaborative workflow  */}
-                <Header as="h2" color="teal"> Collaborative situations </Header>
+                <Header as="h2" color="teal" id="8.1"> Collaborative situations </Header>
                 <p>
                     When working collaboratively with other people, the following examples could occur.
                     However, these are example situations and hence real-life situations could differ slightly.

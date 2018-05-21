@@ -33,14 +33,14 @@ class Section5 extends React.Component<any, any> {
         const s522 = require('../../img/user_manual/s5_22.png');
         const s523 = require('../../img/user_manual/s5_22.png');
         return (
-            <div>
-                <Header as="h1"> Extra </Header>
+            <div style={{marginTop: '2em'}}>
+                <Header as="h1" id="5"> Extra </Header>
                 <p> The following section contain all functionality that does not fit into the editing part of our
                     editor. In this section, you will find a detailed description on several topics ranging from
                     adapting the editors view, displaying additional informations sources as well as some support
                     features.
                 </p>
-                <Header as='h2' color="teal"> View </Header>
+                <Header as='h2' color="teal" id="5.1"> View </Header>
                 <p> The following section contains how to change the view on the graph. Changing the view
                     includes zooming, zooming out, panning and fitting graph to the screen. These functions
                     aide in keeping an overview of the graph as a whole.
@@ -109,7 +109,7 @@ class Section5 extends React.Component<any, any> {
                 </p>
                 <Image src={s523} centered={true} style={this.imgMargin}/>
 
-                <Header as='h2' color="teal"> Info Sources </Header>
+                <Header as='h2' color="teal" id="5.2"> Info Sources </Header>
                 <p> The following section includes a detailed description on how to enable
                     additional information sources ranging from editing to account info.
                 </p>
@@ -209,7 +209,8 @@ class Section5 extends React.Component<any, any> {
                 <Image src={s518} centered={true} style={this.imgMargin} />
                 <p> The result of a user filtering building block by providing a search string is given below: </p>
                 <Image src={s519} centered={true} style={this.imgMargin} />
-                <Header as='h2' color="teal"> Support </Header>
+
+                <Header as='h2' color="teal" id="5.3"> Support </Header>
                 <p> The following section includes a detailed description on how to acquire
                     support while using the editor.
                 </p>

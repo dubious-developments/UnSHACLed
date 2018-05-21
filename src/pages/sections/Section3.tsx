@@ -22,7 +22,7 @@ class Section3 extends React.Component<any, any> {
         const s310 = require('../../img/user_manual/s3_10.png');
         return (
             <div style={{marginTop: '2em'}}>
-                <Header as="h1"> File Handling </Header>
+                <Header as="h1" id="3"> File Handling </Header>
                 <p> There are a number of possible ways to store or retrieve files in the UnSHACLed editor. Two
                     main options are offered to the end user. First of all a local/offline option where a user
                     can load data/ SHACL graphs from their computer and store them locally as well. After the
@@ -40,7 +40,7 @@ class Section3 extends React.Component<any, any> {
 
                 {/** Open local files **/}
 
-                <Header as='h2' color="teal"> Open local files </Header>
+                <Header as='h2' color="teal" id="3.1"> Open local files </Header>
                 <p> The following will guide you through the process of <b> opening local files </b> into the editor.
                 </p>
                 <Image src={s31} centered={true} style={this.imgMargin}/>
@@ -64,7 +64,7 @@ class Section3 extends React.Component<any, any> {
 
                 {/** Save local files**/}
 
-                <Header as='h2' color="teal"> Save local files </Header>
+                <Header as='h2' color="teal" id="3.2"> Save local files </Header>
                 <p> The following will guide you through the process of <b> saving local files </b>. </p>
                 <Image src={s31} centered={true} style={this.imgMargin}/>
                 <p> First open the 'File' dropdown from the toolbar, as made visible in the figure above. This will
@@ -89,7 +89,7 @@ class Section3 extends React.Component<any, any> {
 
                 {/** Open files to your account **/}
 
-                <Header as='h2' color="teal"> Open files from your account </Header>
+                <Header as='h2' color="teal" id="3.3"> Open files from your account </Header>
                 <p> The following will guide you through the process of <b> opening from your remote account </b>
                     into the editor.
                 </p>
@@ -119,7 +119,7 @@ class Section3 extends React.Component<any, any> {
 
                 {/** Save files to your account**/}
 
-                <Header as='h2' color="teal"> Save files to your account </Header>
+                <Header as='h2' color="teal" id="3.4"> Save files to your account </Header>
                 <p> The following will guide you through the process of <b> saving files to your remote account</b>
                 </p>
                 <Image src={s31} centered={true} style={this.imgMargin}/>
@@ -144,7 +144,7 @@ class Section3 extends React.Component<any, any> {
                 </p>
 
                 {/** Create new project **/}
-                <Header as='h2' color="teal"> Create new projects </Header>
+                <Header as='h2' color="teal" id="3.5"> Create new project </Header>
                 <p> The following will guide you through the process of <b> creating new project for your
                     remote account </b>
                 </p>
@@ -167,7 +167,7 @@ class Section3 extends React.Component<any, any> {
 
                 {/** Create new files in a project **/}
 
-                <Header as='h2' color="teal"> Create new files in a project </Header>
+                <Header as='h2' color="teal" id="3.6"> Create new files in a project </Header>
                 <p> The following will guide you through the process of <b> creating new files for a project linked
                     to your remote account </b>
                 </p>
@@ -192,7 +192,7 @@ class Section3 extends React.Component<any, any> {
                 </p>
 
                 {/** Load and save workspace **/}
-                <Header as='h2' color="teal"> Load and save workspace </Header>
+                <Header as='h2' color="teal" id="3.7"> Load and save workspace </Header>
                 <p> The following will guide you through the process of <b> loading or saving your current workspace
                 </b>
                 </p>

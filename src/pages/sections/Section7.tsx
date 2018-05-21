@@ -15,21 +15,21 @@ class Section7 extends React.Component<any, any> {
         const s74 = require('../../img/user_manual/s7_4.png');
         return (
             <div style={{marginTop: '2em'}}>
-                <Header as="h1"> Conformance </Header>
+                <Header as="h1" id='7'> Conformance </Header>
                 <p> As UnSHACLed supports the constraint languages
                     SHACL as a proof of concept, conformance of data against constraints
                 is the second core concept of the application. In the following section a detailed
                 description is provided on how conformance works and how conformance
                 is visualized to the end-user</p>
                 {/** Visualize conformance**/}
-                <Header as="h2" color="teal"> Conformance workflow </Header>
+                <Header as="h2" color="teal" id='7.1'> Conformance workflow </Header>
                 <p>
                     To ensure the end-user is creating valid constraints and valid data conforming to those
                     constraints, the editor performs a conformance check every two seconds. This value has been
                     chosen such that the end-user is not overload with error messages while editing but still is
                     able to notice when something went wrong.
                 </p>
-                <Header as="h2"  color="teal"> Visualize conformance </Header>
+                <Header as="h2"  color="teal" id='7.2'> Visualize conformance </Header>
                 <p> The following contains a description on how the conformance is visualized
                 in the graph and how an end-user can interpret possible conformance errors.</p>
                 <p>

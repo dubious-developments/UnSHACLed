@@ -25,14 +25,14 @@ class Section4 extends React.Component<any, any> {
         const s414 = require('../../img/user_manual/s4_14.png');
         return (
             <div style={{marginTop: '2em'}}>
-                <Header as="h1"> Editing </Header>
+                <Header as="h1" id='4'> Editing </Header>
                 <p> Editing is the core of UnSHACLed, hence the following sections contain a detailed description
                     on how to edit using UnSHACLed. Besides the built in functionality of our editor, the in-graph
                     editing is also included and discussed in detail. Reading through this section as a whole
                     should give you a good grasp of the core concept of UnSHACLed. </p>
 
                 {/** Editor functionality **/}
-                <Header as="h2"> Editor Functionality </Header>
+                <Header as="h2" id='4.1'> Editor Functionality </Header>
                 <p> The following section contains information on the built in functionality that allows
                     easy-to-use icons and functions to perform actions on the current graph. Each edit function
                     is discussed individually and all options to perform that function are provided. </p>
@@ -145,7 +145,7 @@ class Section4 extends React.Component<any, any> {
                 </p>
 
                 {/** In-graph editing **/}
-                <Header as="h2"> In-graph editing</Header>
+                <Header as="h2" id='4.2'> In-graph editing</Header>
                 <Header as='h3' color="teal"> Drag-n-Drop components </Header>
                 <p> The following will guide you through the process of <b> drag-and-dropping components
                 </b> into your graph.
