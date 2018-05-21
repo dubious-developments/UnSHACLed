@@ -1235,7 +1235,6 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                         }
                     }
                 }
-
             });
 
             let instance = this;
@@ -1408,16 +1407,65 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
             this.editTriple(cell, trait, newTrait);
         }
 
-        for (let child of cell.children) {
-            trait = this.cellToTriples.getValue(child);
-            if (trait) {
-                let newTrait = new Triple(subject, trait.predicate, trait.object, trait.file);
-                newTrait.cell = child;
-                this.editTriple(child, trait, newTrait);
-            } else {
-                console.log("Error: edited cell has no linked triple");
+        // if block has children
+        if (cell.children) {
+            for (let child of cell.children) {
+                trait = this.cellToTriples.getValue(child);
+                if (trait) {
+                    let newTrait = new Triple(subject, trait.predicate, trait.object, trait.file);
+                    newTrait.cell = child;
+                    this.editTriple(child, trait, newTrait);
+                } else {
+                    console.log("Error: edited cell has no linked triple");
+                }
             }
         }
+
+        this.addEdges(cell, subject);
+    }
+
+    /**
+     * Add edges to the particular cell.
+     * @param cell: cell object where the edges have to point to.
+     */
+     addEdges(cell: any, subject: string) {
+        let graph = this.state.graph;
+        let model = graph.getModel();
+
+        // First remove all existing edges
+        for (let index = 0; index < cell.getEdgeCount(); index++) {
+            let edge = cell.getEdgeAt(index);
+            let isOutgoing = edge.source === cell;
+
+            model.beginUpdate();
+            try {
+                cell.removeEdge(edge, isOutgoing);
+            } finally {
+                // Updates the display
+                model.endUpdate();
+                graph.refresh();
+            }
+        }
+
+        // Add all cells that have a triple with same predicate as subject
+        let edgeCells: any[] = [];
+        this.cellToTriples.forEach((c, trip) => {
+            if (trip.object === subject) {
+                edgeCells.push(c);
+            }
+        });
+
+        // Draw the edges
+        edgeCells.forEach(element => {
+            model.beginUpdate();
+            try {
+                graph.insertEdge(graph.getDefaultParent(), null, '', element, cell);
+            } finally {
+                // Updates the display
+                model.endUpdate();
+                graph.refresh();
+            } 
+        });
     }
 
     public handleConformance(report: ValidationReport) {
