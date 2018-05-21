@@ -25,7 +25,7 @@ namespace SeleniumTests
         /// <summary>
         /// A sequence of all test cases to run.
         /// </summary>
-        private static readonly IEnumerable<TestCase> TestCases = (SanityChecks.All);
+        private static readonly IEnumerable<TestCase> TestCases = (ConformanceTests.All);
 
         public static int Main(string[] args)
         {

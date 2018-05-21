@@ -2,6 +2,7 @@
 using OpenQA.Selenium;
 using System;
 using System.Windows.Forms;
+using static System.Diagnostics.Stopwatch;
 
 namespace SeleniumTests.Tests
 {

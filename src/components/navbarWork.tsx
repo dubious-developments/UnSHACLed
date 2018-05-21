@@ -388,7 +388,7 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
                     />
 
                     <Popup
-                        trigger={<Menu.Item as="a" onClick={this.getConformanceErrors}>Conformance
+                        trigger={<Menu.Item id="conformance"as="a" onClick={this.getConformanceErrors}>Conformance
                             errors</Menu.Item>}
                         on="click"
                         inverted={false}

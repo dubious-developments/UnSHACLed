@@ -92,8 +92,9 @@ namespace SeleniumTests.Tests
             String path = Combine(currentPath, "testfiles\\");
             path = Combine(path, fileName);
             SendKeys.SendWait(path);
-            Sleep(700);
+            Sleep(1000);
             SendKeys.SendWait(@"{Enter}");
+            Sleep(500);
         }
 
         public static void OpenDataFile(this IWebDriver driver, String fileName)
@@ -108,8 +109,9 @@ namespace SeleniumTests.Tests
             String path = Combine(currentPath, "testfiles\\");
             path = Combine(path, fileName);
             SendKeys.SendWait(path);
-            Sleep(700);
+            Sleep(1000);
             SendKeys.SendWait(@"{Enter}");
+            Sleep(500);
         }
 
     }
