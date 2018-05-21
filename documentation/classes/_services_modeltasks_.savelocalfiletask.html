@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>LoadFileTask | dp2</title>
+	<title>SaveLocalFileTask | dp2</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -59,10 +59,10 @@
 					<a href="../modules/_services_modeltasks_.html">&quot;services/ModelTasks&quot;</a>
 				</li>
 				<li>
-					<a href="_services_modeltasks_.loadfiletask.html">LoadFileTask</a>
+					<a href="_services_modeltasks_.savelocalfiletask.html">SaveLocalFileTask</a>
 				</li>
 			</ul>
-			<h1>Class LoadFileTask</h1>
+			<h1>Class SaveLocalFileTask</h1>
 		</div>
 	</div>
 </header>
@@ -72,8 +72,7 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>First search the component which belongs to the fileName
-						Then load a file from the model using the fileName</p>
+						<p>Local save file task</p>
 					</div>
 				</div>
 			</section>
@@ -81,10 +80,10 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<a href="_entities_task_.task.html" class="tsd-signature-type">Task</a><span class="tsd-signature-symbol">&lt;</span><a href="_entities_modeldata_.modeldata.html" class="tsd-signature-type">ModelData</a><span class="tsd-signature-symbol">, </span><a href="_entities_modeltaskmetadata_.modeltaskmetadata.html" class="tsd-signature-type">ModelTaskMetadata</a><span class="tsd-signature-symbol">&gt;</span>
+						<a href="_services_modeltasks_.basesavefiletask.html" class="tsd-signature-type">BaseSaveFileTask</a>
 						<ul class="tsd-hierarchy">
 							<li>
-								<span class="target">LoadFileTask</span>
+								<span class="target">SaveLocalFileTask</span>
 							</li>
 						</ul>
 					</li>
@@ -97,29 +96,30 @@
 						<section class="tsd-index-section ">
 							<h3>Constructors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite"><a href="_services_modeltasks_.loadfiletask.html#constructor" class="tsd-kind-icon">constructor</a></li>
+								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite"><a href="_services_modeltasks_.savelocalfiletask.html#constructor" class="tsd-kind-icon">constructor</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_services_modeltasks_.loadfiletask.html#components" class="tsd-kind-icon">components</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_services_modeltasks_.loadfiletask.html#filename" class="tsd-kind-icon">file<wbr>Name</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="_services_modeltasks_.loadfiletask.html#index" class="tsd-kind-icon">index</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_services_modeltasks_.loadfiletask.html#mcomponent" class="tsd-kind-icon">m<wbr>Component</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-overwrite tsd-is-protected"><a href="_services_modeltasks_.savelocalfiletask.html#components" class="tsd-kind-icon">components</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-overwrite tsd-is-protected"><a href="_services_modeltasks_.savelocalfiletask.html#filename" class="tsd-kind-icon">file<wbr>Name</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="_services_modeltasks_.savelocalfiletask.html#index" class="tsd-kind-icon">index</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-protected"><a href="_services_modeltasks_.savelocalfiletask.html#mcomponent" class="tsd-kind-icon">m<wbr>Component</a></li>
 							</ul>
 						</section>
-						<section class="tsd-index-section ">
+						<section class="tsd-index-section tsd-is-inherited">
 							<h3>Accessors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-overwrite"><a href="_services_modeltasks_.loadfiletask.html#metadata" class="tsd-kind-icon">metadata</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="_services_modeltasks_.savelocalfiletask.html#metadata" class="tsd-kind-icon">metadata</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="_services_modeltasks_.loadfiletask.html#execute" class="tsd-kind-icon">execute</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_services_modeltasks_.loadfiletask.html#tostring" class="tsd-kind-icon">to<wbr>String</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="_services_modeltasks_.savelocalfiletask.html#execute" class="tsd-kind-icon">execute</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_services_modeltasks_.savelocalfiletask.html#setmodelcomponent" class="tsd-kind-icon">set<wbr>Model<wbr>Component</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_services_modeltasks_.savelocalfiletask.html#tostring" class="tsd-kind-icon">to<wbr>String</a></li>
 							</ul>
 						</section>
 					</div>
@@ -131,21 +131,16 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Load<wbr>File<wbr>Task<span class="tsd-signature-symbol">(</span>components<span class="tsd-signature-symbol">: </span><a href="../enums/_entities_modeltaskmetadata_.modelcomponent.html" class="tsd-signature-type">ModelComponent</a><span class="tsd-signature-symbol">[]</span>, fileName<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_services_modeltasks_.loadfiletask.html" class="tsd-signature-type">LoadFileTask</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Save<wbr>Local<wbr>File<wbr>Task<span class="tsd-signature-symbol">(</span>components<span class="tsd-signature-symbol">: </span><a href="../enums/_entities_modeltaskmetadata_.modelcomponent.html" class="tsd-signature-type">ModelComponent</a><span class="tsd-signature-symbol">[]</span>, fileName<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_services_modeltasks_.savelocalfiletask.html" class="tsd-signature-type">SaveLocalFileTask</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Overrides <a href="_entities_task_.task.html">Task</a>.<a href="_entities_task_.task.html#constructor">constructor</a></p>
+								<p>Overrides <a href="_services_modeltasks_.basesavefiletask.html">BaseSaveFileTask</a>.<a href="_services_modeltasks_.basesavefiletask.html#constructor">constructor</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/mweyns/UnSHACLed/blob/5ca1a40/src/services/ModelTasks.ts#L18">services/ModelTasks.ts:18</a></li>
+									<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/services/ModelTasks.ts#L57">services/ModelTasks.ts:57</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Create a new load file task from Model</p>
-								</div>
-							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
@@ -153,42 +148,36 @@
 								</li>
 								<li>
 									<h5>fileName: <span class="tsd-signature-type">string</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<div class="lead">
-										</div>
-									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="_services_modeltasks_.loadfiletask.html" class="tsd-signature-type">LoadFileTask</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="_services_modeltasks_.savelocalfiletask.html" class="tsd-signature-type">SaveLocalFileTask</a></h4>
 						</li>
 					</ul>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-overwrite tsd-is-protected">
 					<a name="components" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagPrivate">Private</span> components</h3>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> components</h3>
 					<div class="tsd-signature tsd-kind-icon">components<span class="tsd-signature-symbol">:</span> <a href="../enums/_entities_modeltaskmetadata_.modelcomponent.html" class="tsd-signature-type">ModelComponent</a><span class="tsd-signature-symbol">[]</span></div>
 					<aside class="tsd-sources">
+						<p>Overrides <a href="_services_modeltasks_.basesavefiletask.html">BaseSaveFileTask</a>.<a href="_services_modeltasks_.basesavefiletask.html#components">components</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/mweyns/UnSHACLed/blob/5ca1a40/src/services/ModelTasks.ts#L25">services/ModelTasks.ts:25</a></li>
+							<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/services/ModelTasks.ts#L59">services/ModelTasks.ts:59</a></li>
 						</ul>
 					</aside>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-overwrite tsd-is-protected">
 					<a name="filename" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagPrivate">Private</span> file<wbr>Name</h3>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> file<wbr>Name</h3>
 					<div class="tsd-signature tsd-kind-icon">file<wbr>Name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
+						<p>Overrides <a href="_services_modeltasks_.basesavefiletask.html">BaseSaveFileTask</a>.<a href="_services_modeltasks_.basesavefiletask.html#filename">fileName</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/mweyns/UnSHACLed/blob/5ca1a40/src/services/ModelTasks.ts#L25">services/ModelTasks.ts:25</a></li>
+							<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/services/ModelTasks.ts#L59">services/ModelTasks.ts:59</a></li>
 						</ul>
 					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-						</div>
-					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
 					<a name="index" class="tsd-anchor"></a>
@@ -197,7 +186,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="_entities_task_.task.html">Task</a>.<a href="_entities_task_.task.html#index">index</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/mweyns/UnSHACLed/blob/5ca1a40/src/entities/task.ts#L18">entities/task.ts:18</a></li>
+							<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/entities/task.ts#L18">entities/task.ts:18</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -213,31 +202,33 @@
 						have.</p>
 					</div>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
 					<a name="mcomponent" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagPrivate">Private</span> m<wbr>Component</h3>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> m<wbr>Component</h3>
 					<div class="tsd-signature tsd-kind-icon">m<wbr>Component<span class="tsd-signature-symbol">:</span> <a href="../enums/_entities_modeltaskmetadata_.modelcomponent.html" class="tsd-signature-type">ModelComponent</a></div>
 					<aside class="tsd-sources">
+						<p>Inherited from <a href="_services_modeltasks_.basesavefiletask.html">BaseSaveFileTask</a>.<a href="_services_modeltasks_.basesavefiletask.html#mcomponent">mComponent</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/mweyns/UnSHACLed/blob/5ca1a40/src/services/ModelTasks.ts#L18">services/ModelTasks.ts:18</a></li>
+							<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/services/ModelTasks.ts#L18">services/ModelTasks.ts:18</a></li>
 						</ul>
 					</aside>
 				</section>
 			</section>
-			<section class="tsd-panel-group tsd-member-group ">
+			<section class="tsd-panel-group tsd-member-group tsd-is-inherited">
 				<h2>Accessors</h2>
-				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class tsd-is-overwrite">
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
 					<a name="metadata" class="tsd-anchor"></a>
 					<h3>metadata</h3>
-					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class tsd-is-overwrite">
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
 						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> metadata<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_entities_modeltaskmetadata_.modeltaskmetadata.html" class="tsd-signature-type">ModelTaskMetadata</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
+								<p>Inherited from <a href="_services_modeltasks_.basesavefiletask.html">BaseSaveFileTask</a>.<a href="_services_modeltasks_.basesavefiletask.html#metadata">metadata</a></p>
 								<p>Overrides <a href="_entities_task_.task.html">Task</a>.<a href="_entities_task_.task.html#metadata">metadata</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/mweyns/UnSHACLed/blob/5ca1a40/src/services/ModelTasks.ts#L57">services/ModelTasks.ts:57</a></li>
+									<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/services/ModelTasks.ts#L48">services/ModelTasks.ts:48</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <a href="_entities_modeltaskmetadata_.modeltaskmetadata.html" class="tsd-signature-type">ModelTaskMetadata</a></h4>
@@ -256,11 +247,40 @@
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Overrides <a href="_entities_task_.task.html">Task</a>.<a href="_entities_task_.task.html#execute">execute</a></p>
+								<p>Overrides <a href="_services_modeltasks_.basesavefiletask.html">BaseSaveFileTask</a>.<a href="_services_modeltasks_.basesavefiletask.html#execute">execute</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/mweyns/UnSHACLed/blob/5ca1a40/src/services/ModelTasks.ts#L30">services/ModelTasks.ts:30</a></li>
+									<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/services/ModelTasks.ts#L63">services/ModelTasks.ts:63</a></li>
 								</ul>
 							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>data: <a href="_entities_modeldata_.modeldata.html" class="tsd-signature-type">ModelData</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<a name="setmodelcomponent" class="tsd-anchor"></a>
+					<h3>set<wbr>Model<wbr>Component</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Model<wbr>Component<span class="tsd-signature-symbol">(</span>data<span class="tsd-signature-symbol">: </span><a href="_entities_modeldata_.modeldata.html" class="tsd-signature-type">ModelData</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="_services_modeltasks_.basesavefiletask.html">BaseSaveFileTask</a>.<a href="_services_modeltasks_.basesavefiletask.html#setmodelcomponent">setModelComponent</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/services/ModelTasks.ts#L33">services/ModelTasks.ts:33</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Searches for the component in the given ModelData which contains the filename</p>
+								</div>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
@@ -282,7 +302,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="_entities_task_.task.html">Task</a>.<a href="_entities_task_.task.html#tostring">toString</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/mweyns/UnSHACLed/blob/5ca1a40/src/entities/task.ts#L47">entities/task.ts:47</a></li>
+									<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/entities/task.ts#L47">entities/task.ts:47</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -309,6 +329,12 @@
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
+					<li class=" tsd-kind-class tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="_services_modeltasks_.basesavefiletask.html" class="tsd-kind-icon">Base<wbr>Save<wbr>File<wbr>Task</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-external-module">
+						<a href="_services_modeltasks_.edittriple.html" class="tsd-kind-icon">Edit<wbr>Triple</a>
+					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-external-module">
 						<a href="_services_modeltasks_.getopenedfilestask.html" class="tsd-kind-icon">Get<wbr>Opened<wbr>Files<wbr>Task</a>
 					</li>
@@ -321,36 +347,42 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-class tsd-parent-kind-external-module">
-						<a href="_services_modeltasks_.loadfiletask.html" class="tsd-kind-icon">Load<wbr>File<wbr>Task</a>
+						<a href="_services_modeltasks_.savelocalfiletask.html" class="tsd-kind-icon">Save<wbr>Local<wbr>File<wbr>Task</a>
 						<ul>
 							<li class=" tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
-								<a href="_services_modeltasks_.loadfiletask.html#constructor" class="tsd-kind-icon">constructor</a>
+								<a href="_services_modeltasks_.savelocalfiletask.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
-								<a href="_services_modeltasks_.loadfiletask.html#components" class="tsd-kind-icon">components</a>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-overwrite tsd-is-protected">
+								<a href="_services_modeltasks_.savelocalfiletask.html#components" class="tsd-kind-icon">components</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
-								<a href="_services_modeltasks_.loadfiletask.html#filename" class="tsd-kind-icon">file<wbr>Name</a>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-overwrite tsd-is-protected">
+								<a href="_services_modeltasks_.savelocalfiletask.html#filename" class="tsd-kind-icon">file<wbr>Name</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-								<a href="_services_modeltasks_.loadfiletask.html#index" class="tsd-kind-icon">index</a>
+								<a href="_services_modeltasks_.savelocalfiletask.html#index" class="tsd-kind-icon">index</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
-								<a href="_services_modeltasks_.loadfiletask.html#mcomponent" class="tsd-kind-icon">m<wbr>Component</a>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+								<a href="_services_modeltasks_.savelocalfiletask.html#mcomponent" class="tsd-kind-icon">m<wbr>Component</a>
 							</li>
-							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-overwrite">
-								<a href="_services_modeltasks_.loadfiletask.html#metadata" class="tsd-kind-icon">metadata</a>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
+								<a href="_services_modeltasks_.savelocalfiletask.html#metadata" class="tsd-kind-icon">metadata</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
-								<a href="_services_modeltasks_.loadfiletask.html#execute" class="tsd-kind-icon">execute</a>
+								<a href="_services_modeltasks_.savelocalfiletask.html#execute" class="tsd-kind-icon">execute</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="_services_modeltasks_.loadfiletask.html#tostring" class="tsd-kind-icon">to<wbr>String</a>
+								<a href="_services_modeltasks_.savelocalfiletask.html#setmodelcomponent" class="tsd-kind-icon">set<wbr>Model<wbr>Component</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="_services_modeltasks_.savelocalfiletask.html#tostring" class="tsd-kind-icon">to<wbr>String</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
+					<li class=" tsd-kind-class tsd-parent-kind-external-module">
+						<a href="_services_modeltasks_.saveremotefiletask.html" class="tsd-kind-icon">Save<wbr>Remote<wbr>File<wbr>Task</a>
+					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-external-module">
 						<a href="_services_modeltasks_.visualizecomponent.html" class="tsd-kind-icon">Visualize<wbr>Component</a>
 					</li>

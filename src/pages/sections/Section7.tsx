@@ -1,6 +1,9 @@
 import * as React from 'react';
 import {Header, Image} from 'semantic-ui-react';
 
+/**
+ * Component containing the seventh section of the user manual.
+ */
 class Section7 extends React.Component<any, any> {
 
     imgMargin = {
@@ -8,6 +11,7 @@ class Section7 extends React.Component<any, any> {
         marginBottom: '1em'
     };
 
+    /** Render component **/
     render() {
         const s71 = require('../../img/user_manual/s7_1.png');
         const s72 = require('../../img/user_manual/s7_2.png');
@@ -18,9 +22,9 @@ class Section7 extends React.Component<any, any> {
                 <Header as="h1" id='7'> Conformance </Header>
                 <p> As UnSHACLed supports the constraint languages
                     SHACL as a proof of concept, conformance of data against constraints
-                is the second core concept of the application. In the following section a detailed
-                description is provided on how conformance works and how conformance
-                is visualized to the end-user</p>
+                    is the second core concept of the application. In the following section a detailed
+                    description is provided on how conformance works and how conformance
+                    is visualized to the end-user</p>
                 {/** Visualize conformance**/}
                 <Header as="h2" color="teal" id='7.1'> Conformance workflow </Header>
                 <p>
@@ -29,9 +33,9 @@ class Section7 extends React.Component<any, any> {
                     chosen such that the end-user is not overloaded with error messages while editing but still is
                     able to notice when something went wrong.
                 </p>
-                <Header as="h2"  color="teal" id='7.2'> Visualize conformance </Header>
+                <Header as="h2" color="teal" id='7.2'> Visualize conformance </Header>
                 <p> The following contains a description on how the conformance is visualized
-                in the graph and how an end-user can interpret possible conformance errors.</p>
+                    in the graph and how an end-user can interpret possible conformance errors.</p>
                 <p>
                     When there are no conformance errors, every graph component has its original color coding.
                     However, if a constraint violation did appear during editing or on load of a file, the conformance

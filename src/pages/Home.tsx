@@ -1,10 +1,13 @@
 import * as React from 'react';
-import { Segment} from 'semantic-ui-react';
+import {Segment} from 'semantic-ui-react';
 import Navbar from '../components/navbarHome';
 import HomeCon from '../components/containerHome';
 
+/**
+ * Component containing the content of the home page.
+ */
 class Home extends React.Component {
-
+    /** Render component **/
     render() {
         return (
             <div className="homePage">
@@ -27,4 +30,5 @@ class Home extends React.Component {
         );
     }
 }
+
 export default Home;

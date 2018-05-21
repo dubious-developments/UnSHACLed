@@ -14,6 +14,11 @@ import {RemoteFileModule} from "../persistence/remoteFileDAO";
  */
 class NewModal extends React.Component<NewModalProps & any, any> {
 
+    /**
+     * Constructor of component
+     * @param props
+     */
+
     constructor(props: any) {
         super(props);
         this.state = {
@@ -161,7 +166,7 @@ class NewModal extends React.Component<NewModalProps & any, any> {
             fileType: value
         });
     }
-
+    /** Render component **/
     render() {
         let {repos} = this.state;
         return (

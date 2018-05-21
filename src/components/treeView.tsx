@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Treebeard, decorators } from 'react-treebeard';
+import {Treebeard, decorators} from 'react-treebeard';
 import {Icon} from 'semantic-ui-react';
 import customStyle from '../style/treeView';
 
@@ -46,15 +46,15 @@ const data = {
         {
             name: 'constraints',
             children: [
-                { name: 'building.shacl' },
-                { name: 'person.shacl' }
+                {name: 'building.shacl'},
+                {name: 'person.shacl'}
             ],
         },
         {
             name: 'graph',
             children: [
-                { name: 'graph1.mx' },
-                { name: 'graph2.mx' }
+                {name: 'graph1.mx'},
+                {name: 'graph2.mx'}
             ],
         }
 
@@ -63,12 +63,21 @@ const data = {
 
 class Tree extends React.Component<any, any> {
 
+    /**
+     * Constructor of component
+     * @param props
+     */
     constructor(props: any) {
         super(props);
         this.state = {};
         this.onToggle = this.onToggle.bind(this);
     }
 
+    /**
+     * Method that will handle onToggle
+     * @param node
+     * @param toggled
+     */
     onToggle(node: any, toggled: any) {
         if (this.state.cursor) {
             this.state.cursor.active = false;
@@ -82,6 +91,7 @@ class Tree extends React.Component<any, any> {
         });
     }
 
+    /** Render component **/
     render() {
         return (
             <div>
@@ -95,4 +105,5 @@ class Tree extends React.Component<any, any> {
         );
     }
 }
+
 export default Tree;

@@ -1,6 +1,9 @@
 import * as React from 'react';
 import {Header, Image} from 'semantic-ui-react';
 
+/**
+ * Component containing the fifth section of the user manual.
+ */
 class Section5 extends React.Component<any, any> {
 
     imgMargin = {
@@ -8,6 +11,7 @@ class Section5 extends React.Component<any, any> {
         marginBottom: '1em'
     };
 
+    /** Render component **/
     render() {
 
         const s51 = require('../../img/user_manual/s5_1.png');
@@ -75,8 +79,8 @@ class Section5 extends React.Component<any, any> {
                     your graph to different directions
                 </p>
                 <p> To pan the graph to the left, position your mouse pointer into the graph canvas and
-                scroll the mouse wheel backwards while holding 'SHIFT'. To pan the graph to the right, follow
-                the same steps except for scrolling the mouse wheel which now requires scrolling forward.
+                    scroll the mouse wheel backwards while holding 'SHIFT'. To pan the graph to the right, follow
+                    the same steps except for scrolling the mouse wheel which now requires scrolling forward.
                 </p>
                 <p> To pan the graph upwards, position your mouse pointer into the graph canvas and
                     scroll the mouse wheel backwards. To pan the graph downwards, follow
@@ -150,7 +154,7 @@ class Section5 extends React.Component<any, any> {
                 {/** Show prefixes **/}
                 <Header as='h3' color="teal"> Show prefixes </Header>
                 <p> The following will guide you through the process of <b> displaying the prefixes of graph
-                components</b>
+                    components</b>
                 </p>
                 <p>
                     To make sure the graph overview is clear to read, all prefixes are left out in the graph
@@ -183,7 +187,7 @@ class Section5 extends React.Component<any, any> {
                 {/** Get snapshot of graph **/}
                 <Header as='h3' color="teal"> Get snapshot of graph </Header>
                 <p> The following will guide you through the process of <b>generating a snapshot
-                of the current graph </b>
+                    of the current graph </b>
                 </p>
                 <p> To generate of snapshot of the graph via the edit buttons, simply click
                     the camera icon in the toolbar on top of the screen. This icon is highlighted in red
@@ -204,16 +208,16 @@ class Section5 extends React.Component<any, any> {
                 {/** Search for building blocks **/}
                 <Header as='h3' color="teal"> Search for building blocks </Header>
                 <p> The following will guide you through the process of <b> filtering building blocks
-                    </b> for drag-and-dropping graph components.
+                </b> for drag-and-dropping graph components.
                 </p>
                 <p>
                     To filter the building block based on a search string, the sidebar provided
                     a search field. An empty search field will generate all available building
                     blocks in the system. The search field is located as seen below:
                 </p>
-                <Image src={s518} centered={true} style={this.imgMargin} />
+                <Image src={s518} centered={true} style={this.imgMargin}/>
                 <p> The result of a user filtering building block by providing a search string is given below: </p>
-                <Image src={s519} centered={true} style={this.imgMargin} />
+                <Image src={s519} centered={true} style={this.imgMargin}/>
 
                 <Header as='h2' color="teal" id="5.3"> Support </Header>
                 <p> The following section includes a detailed description on how to acquire

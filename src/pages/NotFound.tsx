@@ -2,8 +2,11 @@ import * as React from 'react';
 import {Segment, Header} from 'semantic-ui-react';
 import Navbar from '../components/navbarHome';
 
+/**
+ * Component containing the content of the not-found page.
+ */
 class NotFound extends React.Component {
-
+    /** Render component **/
     render() {
         return (
             <div className="homePage">
@@ -32,7 +35,7 @@ class NotFound extends React.Component {
                         }}
                     />
 
-                    <p 
+                    <p
                         style={{
                             fontSize: '1.5em',
                             marginTop: '1.5em'
@@ -45,4 +48,5 @@ class NotFound extends React.Component {
         );
     }
 }
+
 export default NotFound;

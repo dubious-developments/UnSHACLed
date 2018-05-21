@@ -13,6 +13,7 @@ import RequestModule from '../requests/RequestModule';
 import {connect} from 'react-redux';
 import {ImmutableGraph, Graph, PrefixMap} from "../persistence/graph";
 import LockModal from "../modals/LockModal";
+import {appendLock, flushLocks} from "../redux/actions/lockActions";
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout, mxCellOverlay, mxImage,
@@ -70,7 +71,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
         this.nameToStandardCellDict = new Collections.Dictionary<string, any>();
         this.blockToCellDict = new Collections.Dictionary<Block, any>((b) => b.name);
         this.subjectToBlockDict = new Collections.Dictionary<string, Block>();
-        this.triples = new Collections.Set<Triple>((t) =>  t.subject + " " + t.predicate + " " + t.object);
+        this.triples = new Collections.Set<Triple>((t) => t.subject + " " + t.predicate + " " + t.object);
         this.cellToTriples = new Collections.Dictionary<any, Triple>((c) => c.getId());
         this.invalidCells = new Collections.Set<any>();
         this.grantedLockCellsDict = new Collections.DefaultDictionary<any, boolean>(() => false);
@@ -201,7 +202,6 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
     /**
      * Handles clicks anywhere on the canvas.
      * If clicked on a node/cell, originating from a GitHub file, then a lock gets requested.
-     * If clicked anywhere outside of a node, then changes get sent.
      * @param graph: graph object.
      */
     handleClick(graph: any) {
@@ -228,10 +228,9 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                         console.log("Error: no triple found for the cell", cell);
                         return;
                     }
-                    
+
                     // Checks if it is a GitHub file
                     let repo = instance.getRepoFromFile(filename);
-
                     if (repo) {
                         // Check if user has lock
                         RequestModule.hasLock(
@@ -240,14 +239,19 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                             instance.props.token,
                             filename
                         ).then(lockGranted => {
+                            console.log("User has lock: ", lockGranted);
                             // If user does not have a lock yet, send a lock request
                             if (!lockGranted) {
+                                console.log("Don't have one, so requesting a lock for" + filename);
                                 RequestModule.requestLock(
                                     RequestModule.getRepoOwnerFromFile(filename, instance.props.files.content),
                                     repo,
                                     instance.props.token,
                                     filename
                                 ).then(lock => {
+                                    // add lock to global store
+
+                                    console.log(instance.props.locks);
                                     instance.processLock(cell, filename, lock);
                                 });
                             }
@@ -255,30 +259,13 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                     } else {
                         instance.grantedLockCellsDict.setValue(cell, true);
                     }
-                } else {
-                    // Send changes of remote files
-                    let model = DataAccessProvider.getInstance().model;
-
-                    for (let item of instance.props.files.content) {
-                        model.tasks.schedule(
-                            new SaveRemoteFileTask(
-                                [ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph],
-                                item.name,
-                                RequestModule.getRepoOwnerFromFile(item.name, instance.props.files.content),
-                                instance.getRepoFromFile(item.name),
-                                instance.props.token
-                            )
-                        );
-                    }
-                    model.tasks.processAllTasks();
-
                 }
                 evt.consume();
             }
         );
     }
 
-     /**
+    /**
      * Gets the repository belonging to the file
      * @param filename: string value.
      * @returns {string}, Returns either the name of the repository or '' if none found.
@@ -299,9 +286,15 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
      * @param filename: name of the file for which the lock got granted.
      * @param lock: true means that the lock got assigned to the user, false means the opposite.
      */
-    processLock(cell:any, filename: string, lock: boolean) {
+    processLock(cell: any, filename: string, lock: boolean) {
         if (lock) {
+            // add lock to global store
+            this.props.appendLock(filename);
             this.grantedLockCellsDict.setValue(cell, true);
+            console.log("Lock granted");
+            console.log(this.props.locks);
+        } else {
+            this.setState({showLockModal: true});
         }
     }
 
@@ -568,13 +561,20 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
         let instance = this;
         // Text label changes will go into the name field of the user object
         graph.model.valueForCellChanged = function(cell: any, value: any) {
+            let reject = false;
             let triple = instance.cellToTriples.getValue(cell);
             if (triple && cell.style === "Row") {
-                let [predicate, object] = 
+                let [predicate, object] =
                     instance.traitRestFromName(value, instance.fileToPrefixesDict.getValue(triple.file));
-                let newTriple = new Triple(triple.subject, predicate, object, triple.file);
-                newTriple.cell = triple.cell;
-                instance.editTriple(cell, triple, newTriple);
+
+                // Reject changes that do not conform to the syntax of a row value
+                if (predicate && object) {
+                    let newTriple = new Triple(triple.subject, predicate, object, triple.file);
+                    newTriple.cell = triple.cell;
+                    instance.editTriple(cell, triple, newTriple);
+                } else {
+                    reject = true;
+                }
             } else {
                 instance.editBlock(cell, value);
             }
@@ -583,7 +583,11 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                 return mxGraphModel.prototype.valueForCellChanged.apply(this, arguments);
             } else {
                 let old = cell.value.name;
-                cell.value.name = value;
+                if (reject) {
+                    cell.value.name = old;
+                } else {
+                    cell.value.name = value;
+                }
                 return old;
             }
         };
@@ -637,7 +641,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
         overlay.addListener(mxEvent.CLICK, function (sender: any, event: any) {
             let temprow = model.cloneCell(instance.nameToStandardCellDict.getValue('row'));
             let block, file, triple;
-            
+
             graph.clearSelection();
             model.beginUpdate();
             try {
@@ -677,7 +681,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                 } else {
                     console.log("error: graph or type undefined");
                 }
-    
+
                 // update the data structures
                 instance.triples.add(triple);
                 instance.cellToTriples.setValue(temprow, triple);
@@ -809,7 +813,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                 blockCell.value.blockType = b.blockType;
                 blockCell.style = b.blockType;
                 blockCell.geometry.width += longestname * 4;
-                blockCell.geometry.alternateBounds = 
+                blockCell.geometry.alternateBounds =
                     new mxRectangle(0, 0, blockCell.geometry.width, blockCell.geometry.height);
                 graph.addCell(blockCell, parent);
             } finally {
@@ -1044,7 +1048,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                 realName = "_:b" + (Math.floor(Math.random() * 1000000000) + 1000);
                 name = this.placePrefixes(
                     this.EX("name").uri, this.fileToPrefixesDict.getValue(this.addedShapesFile) || {}
-                    );
+                );
                 triple = new Triple(realName, this.SH("path").uri, name, this.addedShapesFile);
                 style = 'Property';
             }
@@ -1248,6 +1252,10 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
             // Enable Panning
             graph.panningHandler.ignoreCell = false;
             graph.setPanning(true);
+            
+            // Edge configurations
+            graph.setCellsDisconnectable(false);
+            graph.setAllowDanglingEdges(false);
 
             this.extendCanvas(graph);
             new mxRubberband(graph); // Enables rubberband selection
@@ -1282,7 +1290,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                         this.removeTriple(triple, model);
                     } else if (this.blockToCellDict.containsKey(cell.value)) {
                         // a block was removed
-                        let block  = this.subjectToBlockDict.getValue(cell.value.realName);
+                        let block = this.subjectToBlockDict.getValue(cell.value.realName);
                         if (block) {
                             if (block.triple) {
                                 // block is a property or shape, not data
@@ -1298,25 +1306,22 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                         }
                     }
                 }
-
             });
 
             let instance = this;
 
             graph.addMouseListener(
-            {
+                {
                     currentState: null,
                     previousStyle: null,
-                    mouseDown: function(sender: any, me: any)
-                    {
+                    mouseDown: function (sender: any, me: any) {
                         if (this.currentState != null) {
                             this.dragLeave(me.getEvent(), this.currentState);
                             this.currentState = null;
                         }
                     },
 
-                    mouseMove: function(sender: any, me: any)
-                    {
+                    mouseMove: function (sender: any, me: any) {
                         if (this.currentState != null && me.getState() === this.currentState) {
                             return;
                         }
@@ -1340,20 +1345,21 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                             }
                         }
                     },
-                    mouseUp: function(sender: any, me: any) { },
-                    dragEnter: function(evt: any, state: any)
-                    {
-                        if (state != null) {
-                            if (!instance.grantedLockCellsDict.getValue(evt.getProperty('cell'))) {
-                                instance.setState({showLockModal: true});
-                            }
+                    mouseUp: function (sender: any, me: any) {
+                    },
+                    dragEnter: function (evt: any, state: any) {
+                        if (state != null && state.cell) {
+                            setTimeout(function () {
+                                if (!instance.grantedLockCellsDict.getValue(state.cell)) {
+                                    instance.setState({showLockModal: true});
+                                }
+                            }, 1000);
                         }
                     },
-                    dragLeave: function(evt: any, state: any)
-                    {
+                    dragLeave: function (evt: any, state: any) {
                         return;
                     }
-            });
+                });
         }
     }
 
@@ -1402,7 +1408,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
         // Update subjectToBlockDict by first removing the old triple
         this.removeTripleFromBlocks(oldTriple);
         // And then adding the new one
-        let block  = this.subjectToBlockDict.getValue(newTriple.subject);
+        let block = this.subjectToBlockDict.getValue(newTriple.subject);
         if (block) {
             // Dynamically update the values in this.subjectToBlockDict & this.blockToCellDict
             block.traits.push(newTriple);
@@ -1463,21 +1469,70 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                 newTrait = new Triple(subject, trait.predicate, trait.object, trait.file);
             } else {
                 newTrait = new Triple(trait.subject, trait.predicate, subject, trait.file);
-            } 
+            }
             newTrait.cell = cell;
             this.editTriple(cell, trait, newTrait);
         }
 
-        for (let child of cell.children) {
-            trait = this.cellToTriples.getValue(child);
-            if (trait) {
-                let newTrait = new Triple(subject, trait.predicate, trait.object, trait.file);
-                newTrait.cell = child;
-                this.editTriple(child, trait, newTrait);
-            } else {
-                console.log("Error: edited cell has no linked triple");
+        // if block has children
+        if (cell.children) {
+            for (let child of cell.children) {
+                trait = this.cellToTriples.getValue(child);
+                if (trait) {
+                    let newTrait = new Triple(subject, trait.predicate, trait.object, trait.file);
+                    newTrait.cell = child;
+                    this.editTriple(child, trait, newTrait);
+                } else {
+                    console.log("Error: edited cell has no linked triple");
+                }
             }
         }
+
+        this.addEdges(cell, subject);
+    }
+
+    /**
+     * Add edges to the particular cell.
+     * @param cell: cell object where the edges have to point to.
+     */
+     addEdges(cell: any, subject: string) {
+        let graph = this.state.graph;
+        let model = graph.getModel();
+
+        // First remove all existing edges
+        for (let index = 0; index < cell.getEdgeCount(); index++) {
+            let edge = cell.getEdgeAt(index);
+            let isOutgoing = edge.source === cell;
+
+            model.beginUpdate();
+            try {
+                cell.removeEdge(edge, isOutgoing);
+            } finally {
+                // Updates the display
+                model.endUpdate();
+                graph.refresh();
+            }
+        }
+
+        // Add all cells that have a triple with same predicate as subject
+        let edgeCells: any[] = [];
+        this.cellToTriples.forEach((c, trip) => {
+            if (trip.object === subject) {
+                edgeCells.push(c);
+            }
+        });
+
+        // Draw the edges
+        edgeCells.forEach(element => {
+            model.beginUpdate();
+            try {
+                graph.insertEdge(graph.getDefaultParent(), null, '', element, cell);
+            } finally {
+                // Updates the display
+                model.endUpdate();
+                graph.refresh();
+            } 
+        });
     }
 
     public handleConformance(report: ValidationReport) {
@@ -1521,7 +1576,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
             cell.children.forEach(rowCell => {
                 let found = false;
                 for (let error of errors) {
-                    if (rowCell.value.trait && 
+                    if (rowCell.value.trait &&
                         rowCell.value.trait.predicate === error.getShapeProperty()) {
                         rowCell.setStyle("InvalidRow");
                         rowCell.value.error = error;
@@ -1590,47 +1645,30 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
         });
 
         this.timerLocks.userAction(function (this: MxGraph) {
-            console.log("releasing all locks");
+            console.log("saving all changes and releasing all locks");
 
-            let filenames = self.fileToGraphDict.keys();
-            // remove files added by code
-            let index = filenames.indexOf(self.addedDataFile, 0);
-            let index2 = filenames.indexOf(self.addedShapesFile, 0);
-            if (index > -1) {
-                filenames.splice(index, 1);
+            // Send changes of remote files and thus release the locks
+            for (let item of self.props.locks.content) {
+                console.log("Sending changes for " + item);
+                model.tasks.schedule(
+                    new SaveRemoteFileTask(
+                        [ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph],
+                        item.name,
+                        RequestModule.getRepoOwnerFromFile(item.name, self.props.files.content),
+                        self.getRepoFromFile(item.name),
+                        self.props.token
+                    )
+                );
             }
-            if (index2 > -1) {
-                filenames.splice(index2, 1);
-            }
-
-            for (let filename of filenames) {
-                // Checks if it is a GitHub file
-                let repo = self.getRepoFromFile(filename);
-                console.log("release: " + filename);
-                if (repo) {
-                    // Send a lock request
-                    RequestModule.releaseLock(
-                        RequestModule.getRepoOwnerFromFile(filename, self.props.files.content),
-                        repo,
-                        self.props.token,
-                        filename
-                    ).then(lock => {
-                        // empty lock datastructures frontend
-                        self.grantedLockCellsDict.clear();
-                        console.log("released locks");
-                    }, reason => {
-                        console.log("rejected: ", reason);
-                    });
-                }
-            }
-
+            self.props.flushLocks();
+            model.tasks.processAllTasks();
         });
     }
 
     render() {
         if (this.state.showLockModal) {
             setTimeout(() => {
-                this.setState({ showLockModal: false });
+                this.setState({showLockModal: false});
             }, 2000);
         }
 
@@ -1715,16 +1753,28 @@ const mapStateToProps = (state, props) => {
         token: state.token,
         user: state.login,
         files: state.files,
+        locks: state.locks
     };
+};
+
+/**
+ * Map redux actions to props of this component. A method call to the props function
+ * will automatically dispatch the action through redux without an explicit
+ * dispatch call to the global store
+ */
+const mapActionsToProps = {
+    appendLock: appendLock,
+    flushLocks: flushLocks,
+
 };
 
 class Guid {
     static newGuid() {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c: any) {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c: any) {
             let r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);
         });
     }
 }
 
-export default connect(mapStateToProps)(MxGraph);
+export default connect(mapStateToProps, mapActionsToProps)(MxGraph);

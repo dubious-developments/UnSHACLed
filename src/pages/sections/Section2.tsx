@@ -1,6 +1,9 @@
 import * as React from 'react';
 import {Header, Image} from 'semantic-ui-react';
 
+/**
+ * Component containing the second section of the user manual.
+ */
 class Section2 extends React.Component<any, any> {
 
     const;
@@ -9,6 +12,7 @@ class Section2 extends React.Component<any, any> {
         marginBottom: '1em'
     };
 
+    /** Render component **/
     render() {
         const s21 = require('../../img/user_manual/s2_1.png');
         const s22 = require('../../img/user_manual/s2_2.png');
@@ -29,7 +33,7 @@ class Section2 extends React.Component<any, any> {
 
                 {/** Create an account **/}
 
-                <Header as='h2' color="teal"  id="2.1"> Create an account </Header>
+                <Header as='h2' color="teal" id="2.1"> Create an account </Header>
                 <p>
                     The first step in joining UnSHACLed is creating an account to authenticate. This account enables
                     the end user to remotely store or fetch files and work collaboratively with others. To create an
@@ -67,7 +71,7 @@ class Section2 extends React.Component<any, any> {
 
                 {/** Login to UnSHACLed **/}
 
-                <Header as='h2' color="teal"  id="2.2"> Login to UnSHACLed </Header>
+                <Header as='h2' color="teal" id="2.2"> Login to UnSHACLed </Header>
                 <p> The following will guide you through the process of <b> creating an account </b>.</p>
                 <p> After you successfully set up an account to login, you can navigate to the login-page by clicking
                     the 'Login' button on our home page as indicated in the figure below. If you do not have an account
@@ -106,7 +110,7 @@ class Section2 extends React.Component<any, any> {
                 </p>
 
                 {/** Logout from UnSHACLed **/}
-                <Header as='h2' color="teal"  id="2.3"> Logout </Header>
+                <Header as='h2' color="teal" id="2.3"> Logout </Header>
                 <p> The following will guide you through the process of <b> logging out from the editor </b>.</p>
                 <p>
                     If you are done editing, or want to switch to a different account you can log out from the

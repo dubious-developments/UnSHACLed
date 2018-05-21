@@ -9,8 +9,12 @@ import NotFound from "../pages/NotFound";
 import Signup from "../pages/Signup";
 import UserManual from "../pages/UserManual";
 
+/**
+ *  Component which contains all the routes in the application, used by React Router.
+ */
 class Routes extends React.Component<any, any> {
 
+    /** Render component **/
     render() {
         return (
             <div style={{height:'100%'}}>

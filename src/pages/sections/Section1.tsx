@@ -1,8 +1,12 @@
 import * as React from 'react';
 import {Header, List} from 'semantic-ui-react';
 
+/**
+ * Component containing the first section of the user manual.
+ */
 class Section1 extends React.Component<any, any> {
 
+    /** Render component **/
     render() {
         return (
             <div id="1">

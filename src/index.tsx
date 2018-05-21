@@ -9,9 +9,10 @@ import {createStore, combineReducers} from 'redux';
 import {userNameReducer, userLoginReducer, userEmailReducer, userTokenReducer} from './redux/reducers/userReducer';
 import {fileReducer} from "./redux/reducers/fileRecuder";
 import {lockReducer} from "./redux/reducers/lockReducer";
-
+import {authReducer} from "./redux/reducers/userReducer";
 import {Provider} from 'react-redux';
 
+/** Gather all redux reducers in a combinedreducer */
 const allReducers = combineReducers(
     {
         name: userNameReducer,
@@ -19,13 +20,13 @@ const allReducers = combineReducers(
         email: userEmailReducer,
         token: userTokenReducer,
         files: fileReducer,
-        locks: lockReducer
+        locks: lockReducer,
+        auth: authReducer
     }
 );
+/** Create the global redux store by passing all redux reducers as a combined reducer */
 const store = createStore(allReducers);
-
 console.log(store.getState());
-
 ReactDOM.render(
     <Provider store={store}>
         <HashRouter>

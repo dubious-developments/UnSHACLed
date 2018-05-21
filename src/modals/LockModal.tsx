@@ -1,12 +1,21 @@
 import * as React from "react";
 import {Header, Modal} from "semantic-ui-react";
 
+/**
+ * Component used to provide a modal mechanism to inform the user he/she lacks a lock.
+ */
 class LockModal extends React.Component<any, any> {
+
+    /**
+     * Constructor of component
+     * @param props
+     */
 
     constructor(props: any) {
         super(props);
     }
 
+    /** Render component **/
     render() {
         return (
             <Modal
@@ -26,7 +35,7 @@ class LockModal extends React.Component<any, any> {
                 <Header icon='lock' content='Lock warning'/>
                 <Modal.Content>
                     <p>
-                        File is locked by another user.
+                        You have no lock on this file.
                     </p>
                 </Modal.Content>
             </Modal>

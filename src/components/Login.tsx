@@ -1,8 +1,14 @@
 import * as React from 'react';
 import { withRouter } from 'react-router-dom';
 
+/** Deprecated login component **/
+
 class Login extends React.Component<any, any> {
 
+    /**
+     * Constructor of component
+     * @param props
+     */
     constructor(props: string) {
         super(props);
         this.state = {
@@ -11,6 +17,7 @@ class Login extends React.Component<any, any> {
         };
     }
 
+    /** Render component **/
     render() {
         return(
             <div>
