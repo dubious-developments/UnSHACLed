@@ -239,6 +239,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                             instance.props.token,
                             filename
                         ).then(lockGranted => {
+                            console.log("User has lock: ", lockGranted);
                             // If user does not have a lock yet, send a lock request
                             if (!lockGranted) {
                                 console.log("Don't have one, so requesting a lock for" + filename);
@@ -287,8 +288,13 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
      */
     processLock(cell: any, filename: string, lock: boolean) {
         if (lock) {
-            this.grantedLockCellsDict.setValue(cell, true);
+            // add lock to global store
             this.props.appendLock(filename);
+            this.grantedLockCellsDict.setValue(cell, true);
+            console.log("Lock granted");
+            console.log(this.props.locks);
+        } else {
+            this.setState({showLockModal: true});
         }
     }
 
@@ -554,14 +560,21 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
 
         let instance = this;
         // Text label changes will go into the name field of the user object
-        graph.model.valueForCellChanged = function (cell: any, value: any) {
+        graph.model.valueForCellChanged = function(cell: any, value: any) {
+            let reject = false;
             let triple = instance.cellToTriples.getValue(cell);
             if (triple && cell.style === "Row") {
                 let [predicate, object] =
                     instance.traitRestFromName(value, instance.fileToPrefixesDict.getValue(triple.file));
-                let newTriple = new Triple(triple.subject, predicate, object, triple.file);
-                newTriple.cell = triple.cell;
-                instance.editTriple(cell, triple, newTriple);
+
+                // Reject changes that do not conform to the syntax of a row value
+                if (predicate && object) {
+                    let newTriple = new Triple(triple.subject, predicate, object, triple.file);
+                    newTriple.cell = triple.cell;
+                    instance.editTriple(cell, triple, newTriple);
+                } else {
+                    reject = true;
+                }
             } else {
                 instance.editBlock(cell, value);
             }
@@ -570,7 +583,11 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                 return mxGraphModel.prototype.valueForCellChanged.apply(this, arguments);
             } else {
                 let old = cell.value.name;
-                cell.value.name = value;
+                if (reject) {
+                    cell.value.name = old;
+                } else {
+                    cell.value.name = value;
+                }
                 return old;
             }
         };
@@ -1235,6 +1252,10 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
             // Enable Panning
             graph.panningHandler.ignoreCell = false;
             graph.setPanning(true);
+            
+            // Edge configurations
+            graph.setCellsDisconnectable(false);
+            graph.setAllowDanglingEdges(false);
 
             this.extendCanvas(graph);
             new mxRubberband(graph); // Enables rubberband selection
@@ -1285,7 +1306,6 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                         }
                     }
                 }
-
             });
 
             let instance = this;
@@ -1454,16 +1474,65 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
             this.editTriple(cell, trait, newTrait);
         }
 
-        for (let child of cell.children) {
-            trait = this.cellToTriples.getValue(child);
-            if (trait) {
-                let newTrait = new Triple(subject, trait.predicate, trait.object, trait.file);
-                newTrait.cell = child;
-                this.editTriple(child, trait, newTrait);
-            } else {
-                console.log("Error: edited cell has no linked triple");
+        // if block has children
+        if (cell.children) {
+            for (let child of cell.children) {
+                trait = this.cellToTriples.getValue(child);
+                if (trait) {
+                    let newTrait = new Triple(subject, trait.predicate, trait.object, trait.file);
+                    newTrait.cell = child;
+                    this.editTriple(child, trait, newTrait);
+                } else {
+                    console.log("Error: edited cell has no linked triple");
+                }
             }
         }
+
+        this.addEdges(cell, subject);
+    }
+
+    /**
+     * Add edges to the particular cell.
+     * @param cell: cell object where the edges have to point to.
+     */
+     addEdges(cell: any, subject: string) {
+        let graph = this.state.graph;
+        let model = graph.getModel();
+
+        // First remove all existing edges
+        for (let index = 0; index < cell.getEdgeCount(); index++) {
+            let edge = cell.getEdgeAt(index);
+            let isOutgoing = edge.source === cell;
+
+            model.beginUpdate();
+            try {
+                cell.removeEdge(edge, isOutgoing);
+            } finally {
+                // Updates the display
+                model.endUpdate();
+                graph.refresh();
+            }
+        }
+
+        // Add all cells that have a triple with same predicate as subject
+        let edgeCells: any[] = [];
+        this.cellToTriples.forEach((c, trip) => {
+            if (trip.object === subject) {
+                edgeCells.push(c);
+            }
+        });
+
+        // Draw the edges
+        edgeCells.forEach(element => {
+            model.beginUpdate();
+            try {
+                graph.insertEdge(graph.getDefaultParent(), null, '', element, cell);
+            } finally {
+                // Updates the display
+                model.endUpdate();
+                graph.refresh();
+            } 
+        });
     }
 
     public handleConformance(report: ValidationReport) {
