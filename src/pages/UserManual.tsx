@@ -10,8 +10,11 @@ import Section7 from './sections/Section7';
 import Section8 from './sections/Section8';
 import {HashLink as Link} from 'react-router-hash-link';
 
+/**
+ * Component containing the content of the user-manual page.
+ */
 class Home extends React.Component {
-
+    /** Render component **/
     render() {
         const logo = require('../img/logo.png');
         return (

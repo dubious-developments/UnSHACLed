@@ -1,9 +1,13 @@
 import * as React from 'react';
-import { Segment, Container, Header, List} from 'semantic-ui-react';
+import {Segment, Container, Header, List} from 'semantic-ui-react';
 import Navbar from '../components/navbarHome';
 
+/**
+ * Component containing the content of the about page.
+ */
 class About extends React.Component<any, any> {
 
+    /** Render component **/
     render() {
         return (
             <div>
@@ -19,14 +23,14 @@ class About extends React.Component<any, any> {
                         <p>
                             <small>
                                 The Semantic Web is an extension of the current Web expanding it with
-                            meaning and allowing machines to reason about information in a human-like way.
-                            Despite its good intention, the abundance of unstructured data within the Semantic Web
-                            hampers the collaboration between different entities. To overcome this, SHACL
-                            allows people to set up constraints for what their data should look like so one can
-                            ascertain its exact format and look. Crucially, machines can also check whether data
-                            conforms to the constraints, making the contract between collaborating entities
-                            verifiable and offering more structure to the Semantic Web.
-                        </small>
+                                meaning and allowing machines to reason about information in a human-like way.
+                                Despite its good intention, the abundance of unstructured data within the Semantic Web
+                                hampers the collaboration between different entities. To overcome this, SHACL
+                                allows people to set up constraints for what their data should look like so one can
+                                ascertain its exact format and look. Crucially, machines can also check whether data
+                                conforms to the constraints, making the contract between collaborating entities
+                                verifiable and offering more structure to the Semantic Web.
+                            </small>
                         </p>
                     </Container>
 
@@ -34,19 +38,19 @@ class About extends React.Component<any, any> {
                         <Header as='h3' color="teal">Why UnSHACLed?</Header>
                         <p>
                             <small>
-                            Current constraint editors are mostly text-based.
-                            The problem with these becomes clear looking at a similar problem: imagine
-                            developing UML rules by typing them. You immediately feel that this would
-                            be a slow and repetitive process in contrast to creating UML with a design tool.
-                            Our product solves a similar issue, but with SHACL instead of UML.
+                                Current constraint editors are mostly text-based.
+                                The problem with these becomes clear looking at a similar problem: imagine
+                                developing UML rules by typing them. You immediately feel that this would
+                                be a slow and repetitive process in contrast to creating UML with a design tool.
+                                Our product solves a similar issue, but with SHACL instead of UML.
 
-                            Using a visual editor/IDE enables users to easily adopt an unfamiliar technology
-                            due to its intuitive visualization which abstracts most of the complexity of the
-                            underlying technology. In addition, it increases productivity,
-                            allowing for faster development.
+                                Using a visual editor/IDE enables users to easily adopt an unfamiliar technology
+                                due to its intuitive visualization which abstracts most of the complexity of the
+                                underlying technology. In addition, it increases productivity,
+                                allowing for faster development.
 
-                            Our tool also allows for collaborative editing,
-                            so SHACL experts and non-experts can easily work together and assist each other.
+                                Our tool also allows for collaborative editing,
+                                so SHACL experts and non-experts can easily work together and assist each other.
                             </small>
                         </p>
                     </Container>
@@ -55,8 +59,8 @@ class About extends React.Component<any, any> {
                         <Header as='h3' color="teal">Features</Header>
                         <p>
                             <small>
-                            To allow intuitive, fast development of constraints and a clear
-                            detection of non-conforming data, our product offers several features:
+                                To allow intuitive, fast development of constraints and a clear
+                                detection of non-conforming data, our product offers several features:
                             </small>
                         </p>
                         <List bulleted={true}>
@@ -68,7 +72,8 @@ class About extends React.Component<any, any> {
                             </List.Item>
                             <List.Item>
                                 <small>Pointing out errors clearly, giving users the context
-                                    they need to understand why their data is non-conforming.</small>
+                                    they need to understand why their data is non-conforming.
+                                </small>
                             </List.Item>
                             <List.Item>
                                 <small>
@@ -93,4 +98,5 @@ class About extends React.Component<any, any> {
             ;
     }
 }
+
 export default About;

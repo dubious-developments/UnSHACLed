@@ -4,8 +4,14 @@ import SideBar from '../components/Sidebar';
 import MxGraph from '../components/MxGraph';
 import {Sidebar, Segment, Menu} from 'semantic-ui-react';
 
+/**
+ * Component containing the content of the user-manual page.
+ */
 class Workspace extends React.Component<any, any> {
-
+    /**
+     * Constructor of component
+     * @param props
+     */
     constructor(props: any) {
         super(props);
         this.state = {
@@ -15,29 +21,41 @@ class Workspace extends React.Component<any, any> {
             templates: [],
             errorLabel: false
         };
-
+        // bind methods
         this.callBackNavBar = this.callBackNavBar.bind(this);
         this.idCallback = this.idCallback.bind(this);
         this.templateCallback = this.templateCallback.bind(this);
         this.setLabel = this.setLabel.bind(this);
     }
 
+    /**
+     * Callback function invoked when a child component does a callback.
+     * Will toggle the visiblity of the sidebar (menuVisible).
+     * @param {boolean} childData: data received from the child
+     */
     callBackNavBar(childData: boolean) {
         this.setState({
             menuVisible: childData
         });
     }
 
+    /**
+     * Callback function invoked when a child component does a callback.
+     * Will toggle the value of the dragid.
+     * @param {boolean} childData: data received from the child
+     */
     idCallback(childData: string) {
         this.setState({
             dragid: childData
         });
     }
 
-    /*
-      Callback function to set content of template sidebar entry according
-      to click events from the mxGraph component, templates is passed to the child
-      component Sidebar, which is a sibling component of mxGraph.
+    /**
+     Callback function to set content of template sidebar entry according
+     to click events from the mxGraph component, templates is passed to the child
+     component Sidebar, which is a sibling component of mxGraph.
+     @param name: name of template
+     @param count: number of selected components
      */
     templateCallback(name: string, count: any) {
         this.setState({
@@ -53,28 +71,34 @@ class Workspace extends React.Component<any, any> {
         console.log("called callback wiht" + name);
     }
 
+    /**
+     * Callback function invoked when a child component does a callback.
+     * Will toggle the visiblity of error label for adding templates.
+     * @param {boolean} childData: data received from the child
+     */
     setLabel(val: boolean) {
         this.setState({
             errorLabel: val
         });
     }
 
+    /** Render component **/
     render() {
         const {menuVisible} = this.state;
         const {templates} = this.state;
         const {errorLabel} = this.state;
         return (
-            <div id="wrapper" style={{display:'flex', flexDirection:'column', height:'100%'}}>
+            <div id="wrapper" style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
                 <Navbar visible={menuVisible} callback={this.callBackNavBar}/>
-                <Sidebar.Pushable style={{flex:1, height:'100%'}}>
+                <Sidebar.Pushable style={{flex: 1, height: '100%'}}>
                     <SideBar
                         visible={menuVisible}
                         callback={this.idCallback}
                         templates={templates}
                         showLabel={errorLabel}
                     />
-                    <Sidebar.Pusher style={{height:'100%'}}>
-                        <Segment basic={true} style={{height:'100vh', padding:0}}>
+                    <Sidebar.Pusher style={{height: '100%'}}>
+                        <Segment basic={true} style={{height: '100vh', padding: 0}}>
                             <MxGraph callback={this.templateCallback} setLabel={this.setLabel}/>
                         </Segment>
                     </Sidebar.Pusher>
