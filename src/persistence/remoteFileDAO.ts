@@ -134,7 +134,7 @@ export class RemoteFileDAO implements DataAccessObject {
             .then(workspace => {
                 let parser = this.parsers.getValue(ModelComponent.Workspace);
                 if (parser) {
-                    parser.parse(workspace, "application/json", function (result: ModelData) {
+                    parser.parse(workspace.content, "application/json", function (result: ModelData) {
                         self.model.tasks.schedule(new LoadWorkspaceTask(result));
                         self.model.tasks.processAllTasks();
                         self.openedFiles.setValue(module.getIdentifier(), ModelComponent.Workspace);
@@ -274,7 +274,6 @@ class SaveWorkspaceTask extends Task<ModelData, ModelTaskMetadata> {
     public execute(data: ModelData): void {
         let self = this;
         this.parser.serialize(data, "application/json", function (result: string) {
-            console.log(result);
             RequestModule.setWorkspace(self.module.getToken(), result);
         });
     }
