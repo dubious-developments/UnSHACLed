@@ -183,7 +183,6 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
         // Dispatch action to the redux store
         let repoOwner = RequestModule.getRepoOwnerFromRepo(repoName, this.state.repos);
         this.props.appendFile(fileName, repoName, repoOwner, type);
-        this.props.appendLock(fileName);
     }
 
     render() {

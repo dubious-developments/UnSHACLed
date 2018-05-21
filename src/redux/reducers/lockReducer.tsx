@@ -26,7 +26,7 @@ export function lockReducer(state: any = initialState, action: any) {
                 ]
             };
         case FLUSH_LOCK:
-            return [];
+            return {content: []};
         default :
             return state;
     }
