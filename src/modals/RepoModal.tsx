@@ -44,6 +44,7 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
      */
     componentDidMount() {
         RequestModule.getUserRepos(this.props.token).then(repoArray => {
+            console.log(repoArray);
             this.processRepos(repoArray);
         });
     }
@@ -54,6 +55,7 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
      * @param repoArray
      */
     processRepos(repoArray: any) {
+        console.log(RequestModule.processRepos(repoArray));
         /* set state */
         this.setState({
             repos: RequestModule.processRepos(repoArray)
@@ -79,7 +81,10 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
      * @return: none
      */
     setSelected(e: any, {value}: any) {
-        RequestModule.getFilesFromRepo(this.props.user, value, this.props.token).then(files => {
+        // get repoOwner based on current selection value
+        let repoOwner = RequestModule.getRepoOwnerFromRepo(value, this.state.repos);
+        // retrieve files for current selected repoOwner
+        RequestModule.getFilesFromRepo(repoOwner, value, this.props.token).then(files => {
             this.processFile(files);
         });
         this.setState({
@@ -147,12 +152,16 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
         } else if (this.state.type === 'SHACL') {
             target = ModelComponent.SHACLShapesGraph;
         } else {
-            console.log("invalid type");
+            console.error("invalid type selected");
         }
+        // get repoOwner
+        let repoOwner = RequestModule.getRepoOwnerFromRepo(this.state.projectName, this.state.repos);
+        // invoke backend to open file
         let remotefileDAO = DataAccessProvider.getInstance().getRemoteFileDAO();
         remotefileDAO.find(new RemoteFileModule
-        (target, this.props.user, this.state.fileName, this.state.projectName, this.props.token));
-
+        (target, repoOwner, this.state.fileName, this.state.projectName, this.props.token));
+        // start polling service for file
+        remotefileDAO.start(repoOwner, this.state.projectName, this.props.token, this.state.fileName, target);
         // Log opened file into global state (redux store)
         this.appendFile(this.state.fileName, this.state.projectName, this.state.type);
         // set state
@@ -172,9 +181,9 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
      */
     appendFile(fileName: any, repoName: any, type: any) {
         // Dispatch action to the redux store
-        this.props.appendFile(fileName, repoName, type);
+        let repoOwner = RequestModule.getRepoOwnerFromRepo(repoName, this.state.repos);
+        this.props.appendFile(fileName, repoName, repoOwner, type);
         this.props.appendLock(fileName);
-        console.log(this.props);
     }
 
     render() {

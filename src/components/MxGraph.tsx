@@ -235,7 +235,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                     if (repo) {
                         // Check if user has lock
                         RequestModule.hasLock(
-                            instance.props.user,
+                            RequestModule.getRepoOwnerFromFile(filename, instance.props.files.content),
                             repo,
                             instance.props.token,
                             filename
@@ -243,7 +243,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                             // If user does not have a lock yet, send a lock request
                             if (!lockGranted) {
                                 RequestModule.requestLock(
-                                    instance.props.user,
+                                    RequestModule.getRepoOwnerFromFile(filename, instance.props.files.content),
                                     repo,
                                     instance.props.token,
                                     filename
@@ -263,9 +263,9 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                         model.tasks.schedule(
                             new SaveRemoteFileTask(
                                 [ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph],
-                                item.name,
-                                instance.props.user,
-                                item.repo,
+                                filename,
+                                RequestModule.getRepoOwnerFromFile(filename, instance.props.files.content),
+                                instance.getRepoFromFile(filename),
                                 instance.props.token
                             )
                         );
@@ -1610,7 +1610,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                 if (repo) {
                     // Send a lock request
                     RequestModule.releaseLock(
-                        self.props.user,
+                        RequestModule.getRepoOwnerFromFile(filename, self.props.files.content),
                         repo,
                         self.props.token,
                         filename
