@@ -1460,10 +1460,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
         });
     }
 
-    closeLockModal() {
-        console.log("closed");
-    }
-
     render() {
         if (this.state.showLockModal) {
             setTimeout(() => {
@@ -1484,7 +1480,6 @@ class MxGraph extends React.Component<MxGraphProps, any> {
             >
                 <LockModal
                     open={this.state.showLockModal}
-                    onClose={this.closeLockModal()}
                 />
             </div>
         );
