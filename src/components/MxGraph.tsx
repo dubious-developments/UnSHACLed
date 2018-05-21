@@ -263,9 +263,9 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                         model.tasks.schedule(
                             new SaveRemoteFileTask(
                                 [ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph],
-                                filename,
-                                RequestModule.getRepoOwnerFromFile(filename, instance.props.files.content),
-                                instance.getRepoFromFile(filename),
+                                item.name,
+                                RequestModule.getRepoOwnerFromFile(item.name, instance.props.files.content),
+                                instance.getRepoFromFile(item.name),
                                 instance.props.token
                             )
                         );
