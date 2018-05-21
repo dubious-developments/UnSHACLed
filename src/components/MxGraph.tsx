@@ -1179,6 +1179,12 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
             // Enable Panning
             graph.panningHandler.ignoreCell = false;
             graph.setPanning(true);
+            
+            // Edge configurations
+            graph.setCellsDisconnectable(false);
+            graph.setConnectable(true);
+            graph.setAllowDanglingEdges(false);
+            graph.setCellsDisconnectable(false);
 
             this.extendCanvas(graph);
             new mxRubberband(graph); // Enables rubberband selection
@@ -1284,7 +1290,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                     dragLeave: function(evt: any, state: any)
                     {
                         if (state != null) {
-
+                            
                         }
                     }
             });
