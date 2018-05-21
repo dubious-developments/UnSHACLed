@@ -39,7 +39,7 @@ class Section8 extends React.Component<any, any> {
                         <b> Why can't I save a file? </b>
                         If you file is not available under the 'Save graph to account' option, someone else
                         is currently working on that part of the graph. To prevent you from (un)intentionally
-                        overwriting their changes, you need to wait untill their changes arrives before you can
+                        overwriting their changes, you need to wait until their changes arrives before you can
                         store the file remotely.
                     </List.Item>
                 </List>

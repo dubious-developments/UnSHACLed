@@ -10,7 +10,7 @@ class Section1 extends React.Component<any, any> {
                 <p> Welcome to the user manual of our UnSHACLed product! UnSHACLed is a visual IDE for Semantic Web
                     constraint languages where the current release supports the recently introduced constraint language
                     SHACL. If none of this sounds familiar, don't worry. The following sections should help you
-                    understand the goald and meaning of our product and its surrounding topics. Each section is
+                    understand the goals and meaning of our product and its surrounding topics. Each section is
                     written such that it can be read independently of all other sections. If you only wish to read a
                     certain section, you can navigate to your section of choice by using the table of contents.
                 </p>

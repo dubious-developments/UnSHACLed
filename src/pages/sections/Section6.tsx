@@ -9,7 +9,7 @@ class Section6 extends React.Component<any, any> {
                 <Header as="h1" id="6"> Troubleshooting </Header>
                 {/** Known bugs **/}
                 <Header as='h2' color="teal" id="6.1"> Known bugs </Header>
-                <p> If you encoutered a problem which could be a bug, please read our list of known bugs linked below
+                <p> If you encountered a problem which could be a bug, please read our list of known bugs linked below
                 </p>
                 {/** Contact **/}
                 <Header as='h2' color="teal" id="6.2"> Contact </Header>
