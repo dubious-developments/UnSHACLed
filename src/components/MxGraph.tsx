@@ -8,10 +8,11 @@ import {MxGraphProps} from "./interfaces/interfaces";
 import {ModelObserver} from "../entities/model";
 import {Task} from "../entities/task";
 import {ModelData} from "../entities/modelData";
-import {ImmutableGraph, PrefixMap} from "../persistence/graph";
 import IdleUserDetection from "../services/IdleUserDetection";
 import RequestModule from '../requests/RequestModule';
 import {connect} from 'react-redux';
+import {ImmutableGraph, Graph, PrefixMap} from "../persistence/graph";
+import LockModal from "../modals/LockModal";
 
 declare let mxClient, mxUtils, mxGraph, mxDragSource, mxEvent, mxCell, mxGeometry, mxRubberband, mxEditor,
     mxRectangle, mxPoint, mxConstants, mxPerimeter, mxEdgeStyle, mxStackLayout, mxCellOverlay, mxImage,
@@ -52,7 +53,8 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
             preview: null,
             dragElement: null,
             dragElList: ["Shape", "Node Shape", "Property Shape"],
-            templateCount: 0
+            templateCount: 0,
+            showLockModal: false
         };
         this.handleLoad = this.handleLoad.bind(this);
         this.saveGraph = this.saveGraph.bind(this);
@@ -1312,11 +1314,8 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                     dragEnter: function(evt: any, state: any)
                     {
                         if (state != null) {
-                            let triple = instance.cellToTriples.getValue(state.cell);
-                            if (triple) {
-                                if (!instance.grantedLockCellsDict.getValue(evt.getProperty('cell'))) {
-                                    alert("File is locked by another user.");
-                                }
+                            if (!instance.grantedLockCellsDict.getValue(evt.getProperty('cell'))) {
+                                instance.setState({showLockModal: true});
                             }
                         }
                     },
@@ -1598,7 +1597,17 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
         });
     }
 
+    closeLockModal() {
+        console.log("closed");
+    }
+
     render() {
+        if (this.state.showLockModal) {
+            setTimeout(() => {
+                this.setState({ showLockModal: false });
+            }, 2000);
+        }
+
         const grid = require('../img/grid.gif');
         return (
             <div
@@ -1609,7 +1618,12 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                     height: '100%',
                     overflow: 'auto',
                 }}
-            />
+            >
+                <LockModal
+                    open={this.state.showLockModal}
+                    onClose={this.closeLockModal()}
+                />
+            </div>
         );
     }
 }
