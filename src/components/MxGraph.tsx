@@ -75,6 +75,10 @@ class MxGraph extends React.Component<MxGraphProps, any> {
 
         this.timer = new TimingService();
 
+        this.initEditFiles();
+    }
+
+    initEditFiles() {
         let prefixes: PrefixMap = {};
         prefixes.rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
         prefixes.sh = "http://www.w3.org/ns/shacl#";
@@ -615,6 +619,21 @@ class MxGraph extends React.Component<MxGraphProps, any> {
     clearVisualisation() {
         this.blockToCellDict.clear();
         this.cellToTriples.clear();
+        let {graph} = this.state;
+        graph.removeCells(graph.getChildVertices(graph.getDefaultParent()));
+    }
+
+    clear() {
+        this.blockToCellDict.clear();
+        this.subjectToBlockDict.clear();
+        this.triples.clear();
+        this.fileToGraphDict.clear();
+        this.fileToTypeDict.clear();
+        this.fileToPrefixesDict.clear();
+        this.cellToTriples.clear();
+        this.invalidCells.clear();
+        this.initEditFiles();
+
         let {graph} = this.state;
         graph.removeCells(graph.getChildVertices(graph.getDefaultParent()));
     }
