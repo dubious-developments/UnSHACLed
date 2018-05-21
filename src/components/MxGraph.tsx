@@ -202,7 +202,6 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
     /**
      * Handles clicks anywhere on the canvas.
      * If clicked on a node/cell, originating from a GitHub file, then a lock gets requested.
-     * If clicked anywhere outside of a node, then changes get sent.
      * @param graph: graph object.
      */
     handleClick(graph: any) {
@@ -261,23 +260,6 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                     } else {
                         instance.grantedLockCellsDict.setValue(cell, true);
                     }
-                } else {
-                    // Send changes of remote files
-                    let model = DataAccessProvider.getInstance().model;
-                    console.log(instance.props.locks);
-                    for (let item of instance.props.locks) {
-                        model.tasks.schedule(
-                            new SaveRemoteFileTask(
-                                [ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph],
-                                item.name,
-                                RequestModule.getRepoOwnerFromFile(item.name, instance.props.files.content),
-                                instance.getRepoFromFile(item.name),
-                                instance.props.token
-                            )
-                        );
-                    }
-                    model.tasks.processAllTasks();
-
                 }
                 evt.consume();
             }
@@ -1595,42 +1577,22 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
         });
 
         this.timerLocks.userAction(function (this: MxGraph) {
-            console.log("releasing all locks");
+            console.log("saving all changes and releasing all locks");
 
-            let filenames = self.fileToGraphDict.keys();
-            // remove files added by code
-            let index = filenames.indexOf(self.addedDataFile, 0);
-            let index2 = filenames.indexOf(self.addedShapesFile, 0);
-            if (index > -1) {
-                filenames.splice(index, 1);
+            // Send changes of remote files and thus release the locks
+            for (let item of self.props.files.content) {
+                self.props.flushLocks();
+                model.tasks.schedule(
+                    new SaveRemoteFileTask(
+                        [ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph],
+                        item.name,
+                        RequestModule.getRepoOwnerFromFile(item.name, self.props.files.content),
+                        self.getRepoFromFile(item.name),
+                        self.props.token
+                    )
+                );
             }
-            if (index2 > -1) {
-                filenames.splice(index2, 1);
-            }
-
-            for (let filename of filenames) {
-                // Checks if it is a GitHub file
-                let repo = self.getRepoFromFile(filename);
-                console.log("release: " + filename);
-                if (repo) {
-                    // Send a lock request
-                    RequestModule.releaseLock(
-                        RequestModule.getRepoOwnerFromFile(filename, self.props.files.content),
-                        repo,
-                        self.props.token,
-                        filename
-                    ).then(lock => {
-                        // flush locks
-                        self.props.flushLocks();
-                        // empty lock datastructures frontend
-                        self.grantedLockCellsDict.clear();
-                        console.log("released locks");
-                    }, reason => {
-                        console.log("rejected: ", reason);
-                    });
-                }
-            }
-
+            model.tasks.processAllTasks();
         });
     }
 
