@@ -10,6 +10,11 @@ import RequestModule from '../requests/RequestModule';
  */
 class UserModal extends React.Component<UserModalProps, any> {
 
+    /**
+     * Constructor of component
+     * @param props
+     */
+
     constructor(props: any) {
         super(props);
         this.state = {
@@ -31,7 +36,7 @@ class UserModal extends React.Component<UserModalProps, any> {
             });
         });
     }
-
+    /** Render component **/
     render() {
         let {userObject, loaded} = this.state;
         return (

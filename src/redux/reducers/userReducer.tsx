@@ -1,4 +1,4 @@
-import {UPDATE_EMAIL, UPDATE_LOGIN, UPDATE_NAME, UPDATE_TOKEN} from "../actions/userActions";
+import {UPDATE_EMAIL, UPDATE_LOGIN, UPDATE_NAME, UPDATE_TOKEN, UPDATE_AUTH} from "../actions/userActions";
 
 /**
  * Redux reducers that will be dispatch by an event fired through an action.
@@ -63,6 +63,22 @@ export function userTokenReducer(state: any = '', action: any) {
     switch (action.type) {
         case UPDATE_TOKEN:
             return action.payload.token;
+        default :
+            return state;
+    }
+}
+
+/**
+ * Redux reducers that will be dispatch by an event fired through an action.
+ * This reducer will update the 'auth' field in the global store by changing its state to true
+ * @param state: current state of the global store
+ * @param action: the dispatched action
+ * @return {any} new global state
+ */
+export function authReducer(state: any = false, action: any) {
+    switch (action.type) {
+        case UPDATE_AUTH:
+            return action.payload.auth;
         default :
             return state;
     }

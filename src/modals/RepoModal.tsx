@@ -16,6 +16,11 @@ import {appendLock} from "../redux/actions/lockActions";
  */
 class RepoModal extends React.Component<RepoModalProps & any, any> {
 
+    /**
+     * Constructor of component
+     * @param props
+     */
+
     constructor(props: any) {
         super(props);
         this.state = {
@@ -184,7 +189,7 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
         let repoOwner = RequestModule.getRepoOwnerFromRepo(repoName, this.state.repos);
         this.props.appendFile(fileName, repoName, repoOwner, type);
     }
-
+    /** Render component **/
     render() {
         let {selected, files, repos, fileList} = this.state;
         return (

@@ -5,6 +5,10 @@ import { withRouter } from 'react-router-dom';
 
 class Login extends React.Component<any, any> {
 
+    /**
+     * Constructor of component
+     * @param props
+     */
     constructor(props: string) {
         super(props);
         this.state = {

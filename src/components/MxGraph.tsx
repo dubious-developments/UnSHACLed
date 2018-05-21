@@ -231,7 +231,6 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
 
                     // Checks if it is a GitHub file
                     let repo = instance.getRepoFromFile(filename);
-                    console.log(repo);
                     if (repo) {
                         // Check if user has lock
                         RequestModule.hasLock(
@@ -243,13 +242,16 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                             console.log("User has lock: ", lockGranted);
                             // If user does not have a lock yet, send a lock request
                             if (!lockGranted) {
-                                console.log("requesting lock");
+                                console.log("Don't have one, so requesting a lock for" + filename);
                                 RequestModule.requestLock(
                                     RequestModule.getRepoOwnerFromFile(filename, instance.props.files.content),
                                     repo,
                                     instance.props.token,
                                     filename
                                 ).then(lock => {
+                                    // add lock to global store
+
+                                    console.log(instance.props.locks);
                                     instance.processLock(cell, filename, lock);
                                 });
                             }
@@ -1305,6 +1307,59 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                     }
                 }
             });
+
+            let instance = this;
+
+            graph.addMouseListener(
+                {
+                    currentState: null,
+                    previousStyle: null,
+                    mouseDown: function (sender: any, me: any) {
+                        if (this.currentState != null) {
+                            this.dragLeave(me.getEvent(), this.currentState);
+                            this.currentState = null;
+                        }
+                    },
+
+                    mouseMove: function (sender: any, me: any) {
+                        if (this.currentState != null && me.getState() === this.currentState) {
+                            return;
+                        }
+
+                        let tmp = graph.view.getState(me.getCell());
+
+                        // Ignores everything but vertices
+                        if (graph.isMouseDown || (tmp != null && !graph.getModel().isVertex(tmp.cell))) {
+                            tmp = null;
+                        }
+
+                        if (tmp !== this.currentState) {
+                            if (this.currentState != null) {
+                                this.dragLeave(me.getEvent(), this.currentState);
+                            }
+
+                            this.currentState = tmp;
+
+                            if (this.currentState != null) {
+                                this.dragEnter(me.getEvent(), this.currentState);
+                            }
+                        }
+                    },
+                    mouseUp: function (sender: any, me: any) {
+                    },
+                    dragEnter: function (evt: any, state: any) {
+                        if (state != null && state.cell) {
+                            setTimeout(function () {
+                                if (!instance.grantedLockCellsDict.getValue(state.cell)) {
+                                    instance.setState({showLockModal: true});
+                                }
+                            }, 1000);
+                        }
+                    },
+                    dragLeave: function (evt: any, state: any) {
+                        return;
+                    }
+                });
         }
     }
 
@@ -1593,7 +1648,8 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
             console.log("saving all changes and releasing all locks");
 
             // Send changes of remote files and thus release the locks
-            for (let item of self.props.locks) {
+            for (let item of self.props.locks.content) {
+                console.log("Sending changes for " + item);
                 model.tasks.schedule(
                     new SaveRemoteFileTask(
                         [ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph],
@@ -1604,6 +1660,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                     )
                 );
             }
+            self.props.flushLocks();
             model.tasks.processAllTasks();
         });
     }

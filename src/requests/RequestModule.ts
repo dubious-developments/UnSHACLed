@@ -178,6 +178,7 @@ class RequestModule {
      * @returns {Promise<AxiosResponse<any>>}, return true if lock has been released, false otherwise through a Promise.
      */
     static releaseLock(repoOwner: any, repoName: any, token: any, filePath: any) {
+        console.log('Release lock on ' + filePath);
         const target = 'http://193.190.127.184:8042/repo/relinquish-lock/'
             + repoOwner + '/' + repoName + '/' + token + '/' + filePath;
         return axios.post(target)
@@ -327,7 +328,7 @@ class RequestModule {
      * @param: repos: repository list return from processRepos !!!!!
      * @returns {string}, Returns either the name of the repository or '' if none found.
      */
-    static getRepoOwnerFromRepo(repoName: string, repos:any): string {
+    static getRepoOwnerFromRepo(repoName: string, repos: any): string {
         for (let r of repos) {
             if (r.text === repoName) {
                 return r.owner;
@@ -342,7 +343,7 @@ class RequestModule {
      * @param files: list of openend files from the redux store!!!!
      * @returns {string}, Returns either the name of the repository or '' if none found.
      */
-    static getRepoOwnerFromFile(filename: string, files:any): string {
+    static getRepoOwnerFromFile(filename: string, files: any): string {
         for (let file of files) {
             if (file.name === filename) {
                 return file.repoOwner;
