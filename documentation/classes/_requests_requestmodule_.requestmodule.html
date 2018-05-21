@@ -99,6 +99,8 @@
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="_requests_requestmodule_.requestmodule.html#createrepo" class="tsd-kind-icon">create<wbr>Repo</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="_requests_requestmodule_.requestmodule.html#fetchworkspace" class="tsd-kind-icon">fetch<wbr>Workspace</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="_requests_requestmodule_.requestmodule.html#getfilesfromrepo" class="tsd-kind-icon">get<wbr>Files<wbr>From<wbr>Repo</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="_requests_requestmodule_.requestmodule.html#getrepoownerfromfile" class="tsd-kind-icon">get<wbr>Repo<wbr>Owner<wbr>From<wbr>File</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="_requests_requestmodule_.requestmodule.html#getrepoownerfromrepo" class="tsd-kind-icon">get<wbr>Repo<wbr>Owner<wbr>From<wbr>Repo</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="_requests_requestmodule_.requestmodule.html#gettoken" class="tsd-kind-icon">get<wbr>Token</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="_requests_requestmodule_.requestmodule.html#getuserinfo" class="tsd-kind-icon">get<wbr>User<wbr>Info</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="_requests_requestmodule_.requestmodule.html#getuserobject" class="tsd-kind-icon">get<wbr>User<wbr>Object</a></li>
@@ -130,7 +132,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mweyns/UnSHACLed/blob/5ca1a40/src/requests/RequestModule.ts#L30">requests/RequestModule.ts:30</a></li>
+									<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/requests/RequestModule.ts#L34">requests/RequestModule.ts:34</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -160,7 +162,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mweyns/UnSHACLed/blob/5ca1a40/src/requests/RequestModule.ts#L198">requests/RequestModule.ts:198</a></li>
+									<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/requests/RequestModule.ts#L248">requests/RequestModule.ts:248</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -192,7 +194,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mweyns/UnSHACLed/blob/5ca1a40/src/requests/RequestModule.ts#L220">requests/RequestModule.ts:220</a></li>
+									<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/requests/RequestModule.ts#L279">requests/RequestModule.ts:279</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -221,7 +223,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mweyns/UnSHACLed/blob/5ca1a40/src/requests/RequestModule.ts#L84">requests/RequestModule.ts:84</a></li>
+									<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/requests/RequestModule.ts#L104">requests/RequestModule.ts:104</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -247,6 +249,75 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="getrepoownerfromfile" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> get<wbr>Repo<wbr>Owner<wbr>From<wbr>File</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Repo<wbr>Owner<wbr>From<wbr>File<span class="tsd-signature-symbol">(</span>filename<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, files<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/requests/RequestModule.ts#L346">requests/RequestModule.ts:346</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Gets the repoOwner belonging to the file</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>filename: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>files: <span class="tsd-signature-type">any</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+							<p>, Returns either the name of the repository or &#39;&#39; if none found.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="getrepoownerfromrepo" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> get<wbr>Repo<wbr>Owner<wbr>From<wbr>Repo</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Repo<wbr>Owner<wbr>From<wbr>Repo<span class="tsd-signature-symbol">(</span>repoName<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, repos<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/requests/RequestModule.ts#L331">requests/RequestModule.ts:331</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Gets the owner of a repository</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>param:</dt>
+									<dd><p>repos: repository list return from processRepos !!!!!</p>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>repoName: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>repos: <span class="tsd-signature-type">any</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+							<p>, Returns either the name of the repository or &#39;&#39; if none found.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
 					<a name="gettoken" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> get<wbr>Token</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
@@ -256,7 +327,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mweyns/UnSHACLed/blob/5ca1a40/src/requests/RequestModule.ts#L19">requests/RequestModule.ts:19</a></li>
+									<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/requests/RequestModule.ts#L19">requests/RequestModule.ts:19</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -281,7 +352,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mweyns/UnSHACLed/blob/5ca1a40/src/requests/RequestModule.ts#L52">requests/RequestModule.ts:52</a></li>
+									<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/requests/RequestModule.ts#L60">requests/RequestModule.ts:60</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -313,7 +384,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mweyns/UnSHACLed/blob/5ca1a40/src/requests/RequestModule.ts#L62">requests/RequestModule.ts:62</a></li>
+									<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/requests/RequestModule.ts#L74">requests/RequestModule.ts:74</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -342,7 +413,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mweyns/UnSHACLed/blob/5ca1a40/src/requests/RequestModule.ts#L72">requests/RequestModule.ts:72</a></li>
+									<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/requests/RequestModule.ts#L88">requests/RequestModule.ts:88</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -371,7 +442,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mweyns/UnSHACLed/blob/5ca1a40/src/requests/RequestModule.ts#L115">requests/RequestModule.ts:115</a></li>
+									<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/requests/RequestModule.ts#L142">requests/RequestModule.ts:142</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -409,7 +480,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mweyns/UnSHACLed/blob/5ca1a40/src/requests/RequestModule.ts#L41">requests/RequestModule.ts:41</a></li>
+									<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/requests/RequestModule.ts#L45">requests/RequestModule.ts:45</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -439,7 +510,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mweyns/UnSHACLed/blob/5ca1a40/src/requests/RequestModule.ts#L185">requests/RequestModule.ts:185</a></li>
+									<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/requests/RequestModule.ts#L231">requests/RequestModule.ts:231</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -485,7 +556,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mweyns/UnSHACLed/blob/5ca1a40/src/requests/RequestModule.ts#L249">requests/RequestModule.ts:249</a></li>
+									<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/requests/RequestModule.ts#L317">requests/RequestModule.ts:317</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -514,7 +585,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mweyns/UnSHACLed/blob/5ca1a40/src/requests/RequestModule.ts#L231">requests/RequestModule.ts:231</a></li>
+									<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/requests/RequestModule.ts#L297">requests/RequestModule.ts:297</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -545,7 +616,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mweyns/UnSHACLed/blob/5ca1a40/src/requests/RequestModule.ts#L100">requests/RequestModule.ts:100</a></li>
+									<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/requests/RequestModule.ts#L123">requests/RequestModule.ts:123</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -582,7 +653,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mweyns/UnSHACLed/blob/5ca1a40/src/requests/RequestModule.ts#L145">requests/RequestModule.ts:145</a></li>
+									<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/requests/RequestModule.ts#L180">requests/RequestModule.ts:180</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -620,7 +691,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mweyns/UnSHACLed/blob/5ca1a40/src/requests/RequestModule.ts#L130">requests/RequestModule.ts:130</a></li>
+									<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/requests/RequestModule.ts#L161">requests/RequestModule.ts:161</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -658,7 +729,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mweyns/UnSHACLed/blob/5ca1a40/src/requests/RequestModule.ts#L210">requests/RequestModule.ts:210</a></li>
+									<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/requests/RequestModule.ts#L264">requests/RequestModule.ts:264</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -683,13 +754,13 @@
 					<a name="updatefile" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> update<wbr>File</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">update<wbr>File<span class="tsd-signature-symbol">(</span>repoOwner<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, repoName<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, token<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, fileName<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, file<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">update<wbr>File<span class="tsd-signature-symbol">(</span>repoOwner<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, repoName<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, token<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, fileName<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, file<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/mweyns/UnSHACLed/blob/5ca1a40/src/requests/RequestModule.ts#L160">requests/RequestModule.ts:160</a></li>
+									<li>Defined in <a href="https://github.com/fversche/UnSHACLed/blob/0c3de85/src/requests/RequestModule.ts#L200">requests/RequestModule.ts:200</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -715,7 +786,7 @@
 									<h5>file: <span class="tsd-signature-type">any</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -750,6 +821,12 @@
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
 								<a href="_requests_requestmodule_.requestmodule.html#getfilesfromrepo" class="tsd-kind-icon">get<wbr>Files<wbr>From<wbr>Repo</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="_requests_requestmodule_.requestmodule.html#getrepoownerfromfile" class="tsd-kind-icon">get<wbr>Repo<wbr>Owner<wbr>From<wbr>File</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="_requests_requestmodule_.requestmodule.html#getrepoownerfromrepo" class="tsd-kind-icon">get<wbr>Repo<wbr>Owner<wbr>From<wbr>Repo</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
 								<a href="_requests_requestmodule_.requestmodule.html#gettoken" class="tsd-kind-icon">get<wbr>Token</a>
