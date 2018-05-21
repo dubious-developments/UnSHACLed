@@ -261,7 +261,7 @@ class RequestModule {
      * @param content: the content of the current workspace
      */
     static setWorkspace(token: any, content: any) {
-        axios.put('http://193.190.127.184:8042/workspace/' + token, content)
+        axios.put('http://193.190.127.184:8042/workspace/' + token, {content})
             .then(res => res.data)
             .catch(error => {
                 console.log("setWorkspace refused: " + error.message);
