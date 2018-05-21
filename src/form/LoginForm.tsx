@@ -4,7 +4,7 @@ import {withRouter} from 'react-router-dom';
 import {Link} from 'react-router-dom';
 import RequestModule from '../requests/RequestModule';
 import {connect} from 'react-redux';
-import {updateEmail, updateLogin, updateName, updateToken} from "../redux/actions/userActions";
+import {updateEmail, updateLogin, updateName, updateToken, updateAuth} from "../redux/actions/userActions";
 
 /**
  * Component used as the content of the login page.
@@ -114,6 +114,7 @@ class LoginForm extends React.Component<any, any> {
         let {token} = this.state;
         RequestModule.isAuthenticated(token).then(authenticated => {
             if (authenticated) {
+                this.props.onUpdateAuth(true);
                 this.props.history.push("/user");
                 this.storeUserInfo(token);
             } else {
@@ -228,7 +229,8 @@ const mapActionsToProps = {
     onUpdateToken: updateToken,
     onUpdateName: updateName,
     onUpdateLogin: updateLogin,
-    onUpdateEmail: updateEmail
+    onUpdateEmail: updateEmail,
+    onUpdateAuth: updateAuth
 };
 
 const ConLoginForm = connect(mapStateToProps, mapActionsToProps)(LoginForm);

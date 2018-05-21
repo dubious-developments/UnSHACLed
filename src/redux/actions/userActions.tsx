@@ -2,6 +2,7 @@ export const UPDATE_NAME = 'user:updateName';
 export const UPDATE_LOGIN = 'user:updateLogin';
 export const UPDATE_EMAIL = 'user:updateEmail';
 export const UPDATE_TOKEN = 'user:updateToken';
+export const UPDATE_AUTH = 'user:updateAuth';
 
 /**
  * Redux action used to be dispatched to the reducers which will update the store.
@@ -60,6 +61,21 @@ export function updateToken(token: any) {
         type: UPDATE_TOKEN,
         payload: {
             token
+        }
+    };
+}
+
+/**
+ * Redux action used to be dispatched to the reducers which will update the store.
+ * This action will update the token of the authenticated user in the global store.
+ * @param auth: boolean value of authentication state.
+ * @return {{type: string; payload: {auth}}
+ */
+export function updateAuth(auth: any) {
+    return {
+        type: UPDATE_AUTH,
+        payload: {
+            auth
         }
     };
 }

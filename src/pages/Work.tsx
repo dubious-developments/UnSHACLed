@@ -2,7 +2,9 @@ import * as React from 'react';
 import Navbar from '../components/navbarWork';
 import SideBar from '../components/Sidebar';
 import MxGraph from '../components/MxGraph';
+import {connect} from 'react-redux';
 import {Sidebar, Segment, Menu} from 'semantic-ui-react';
+import {withRouter} from "react-router-dom";
 
 /**
  * Component containing the content of the user-manual page.
@@ -26,6 +28,15 @@ class Workspace extends React.Component<any, any> {
         this.idCallback = this.idCallback.bind(this);
         this.templateCallback = this.templateCallback.bind(this);
         this.setLabel = this.setLabel.bind(this);
+    }
+
+    /**
+     * Lifecycle method invoked when component will mount. Will redirect if not correctly authenticated.
+     */
+    componentWillMount() {
+        if (this.props.auth === false) {
+            this.props.history.push("/login");
+        }
     }
 
     /**
@@ -108,4 +119,13 @@ class Workspace extends React.Component<any, any> {
     }
 }
 
-export default Workspace;
+/**
+ * Map global store to props of this component.
+ * @param state: state retrieved from the global redux store.
+ */
+const mapStateToProps = (state) => ({
+    auth: state.auth
+});
+
+const ConWorkspace = connect(mapStateToProps)(Workspace);
+export default withRouter(ConWorkspace);

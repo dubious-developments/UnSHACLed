@@ -1,12 +1,13 @@
 import * as React from 'react';
 import {Dropdown} from 'semantic-ui-react';
-import {Link} from "react-router-dom";
+import {withRouter} from "react-router-dom";
 import {connect} from 'react-redux';
 import UserModal from '../modals/UserModal';
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
+import {updateAuth} from "../redux/actions/userActions";
 
 /**
-    Component used to create a dropdown component for an authenticated user
+ Component used to create a dropdown component for an authenticated user
 
  */
 class DropdownUser extends React.Component<any, any> {
@@ -51,6 +52,11 @@ class DropdownUser extends React.Component<any, any> {
      * @return: none
      */
     stopPollingService() {
+        // log out
+        this.props.history.push("/login");
+        // set global store auth
+        this.props.updateAuth(false);
+        // stop polling sercice
         let remotefileDAO = DataAccessProvider.getInstance().getRemoteFileDAO();
         remotefileDAO.stop();
     }
@@ -67,7 +73,7 @@ class DropdownUser extends React.Component<any, any> {
                             Signed in as <b> {this.props.login} </b>
                         </Dropdown.Item>
                         <Dropdown.Item text='My Profile' onClick={this.showUserModal}/>
-                        <Dropdown.Item as={Link} to="/login" onClick={this.stopPollingService}>
+                        <Dropdown.Item onClick={this.stopPollingService}>
                             Sign out
                         </Dropdown.Item>
                     </Dropdown.Menu>
@@ -88,7 +94,18 @@ class DropdownUser extends React.Component<any, any> {
  */
 const mapStateToProps = (state) => ({
     name: state.name,
-    login: state.login
+    login: state.login,
+    auth: state.auth
 });
 
-export default connect(mapStateToProps)(DropdownUser);
+/**
+ * Map redux actions to props of this component. A method call to the props function
+ * will automatically dispatch the action through redux without an explicit
+ * dispatch call to the global store
+ */
+const mapActionsToProps = {
+    updateAuth: updateAuth,
+};
+
+const ConDropdownUser = connect(mapStateToProps, mapActionsToProps)(DropdownUser);
+export default withRouter(ConDropdownUser);
