@@ -555,13 +555,20 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
         let instance = this;
         // Text label changes will go into the name field of the user object
         graph.model.valueForCellChanged = function(cell: any, value: any) {
+            let reject = false;
             let triple = instance.cellToTriples.getValue(cell);
             if (triple && cell.style === "Row") {
                 let [predicate, object] = 
                     instance.traitRestFromName(value, instance.fileToPrefixesDict.getValue(triple.file));
-                let newTriple = new Triple(triple.subject, predicate, object, triple.file);
-                newTriple.cell = triple.cell;
-                instance.editTriple(cell, triple, newTriple);
+
+                // Reject changes that do not conform to the syntax of a row value
+                if (predicate && object) {
+                    let newTriple = new Triple(triple.subject, predicate, object, triple.file);
+                    newTriple.cell = triple.cell;
+                    instance.editTriple(cell, triple, newTriple);
+                } else {
+                    reject = true;
+                }
             } else {
                 instance.editBlock(cell, value);
             }
@@ -570,7 +577,11 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                 return mxGraphModel.prototype.valueForCellChanged.apply(this, arguments);
             } else {
                 let old = cell.value.name;
-                cell.value.name = value;
+                if (reject) {
+                    cell.value.name = old;
+                } else {
+                    cell.value.name = value;
+                }
                 return old;
             }
         };
@@ -1182,9 +1193,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
             
             // Edge configurations
             graph.setCellsDisconnectable(false);
-            graph.setConnectable(true);
             graph.setAllowDanglingEdges(false);
-            graph.setCellsDisconnectable(false);
 
             this.extendCanvas(graph);
             new mxRubberband(graph); // Enables rubberband selection
