@@ -1487,9 +1487,9 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
     }
 
     public handleConformance(report: ValidationReport) {
-        let invalidCellsToErrorDict = new Collections.DefaultDictionary<any, any>(() => []);
+        let invalidCellsToErrorDict = new Collections.DefaultDictionary<any, any>(() => [], cell => cell.id);
         // The keys function of a dictionary returns an array instead of a set, so keep an extra set aswell
-        let incInvalidCells = new Collections.Set<any>();
+        let incInvalidCells = new Collections.Set<any>(cell => cell.id);
         if (!report.isConforming()) {
             for (let error of report.getValidationErrors()) {
                 let block = this.subjectToBlockDict.getValue(error.getDataElement());
