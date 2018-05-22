@@ -8,6 +8,7 @@ import {ModelComponent} from "../entities/modelTaskMetadata";
 import {DataAccessProvider} from "../persistence/dataAccessProvider";
 import {RemoteFileModule} from "../persistence/remoteFileDAO";
 import RequestModule from "../requests/RequestModule";
+import {LocalFileModule} from "../persistence/localFileDAO";
 
 /**
  Component used to create a dropdown component for the file toolbar option
@@ -38,6 +39,8 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
         this.saveWorkspace = this.saveWorkspace.bind(this);
         this.saveFileToAccount = this.saveFileToAccount.bind(this);
         this.getRepoAndType = this.getRepoAndType.bind(this);
+        this.saveLocalWorkspace = this.saveLocalWorkspace.bind(this);
+        this.loadLocalWorkspace = this.loadLocalWorkspace.bind(this);
     }
 
     /**
@@ -192,6 +195,25 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
      * Method to save the current workspace. The workspace will be downloaded
      * through the users browser in a valid workspace formatted file.
      */
+
+    /**
+     * Method that will invoke the html input to load a workspace.
+     */
+    clickWorkspace(type: any) {
+        let input;
+        if (type === 'load') {
+            input = document.getElementById("loadWorkspace");
+        } else if (type === 'save') {
+            input = document.getElementById("saveWorkspace");
+        }
+
+        if (input) {
+            input.click();
+        } else {
+            console.error("Could not find workspace component!");
+        }
+    }
+
     saveWorkspace() {
         console.log("saving workspace");
         // get remote file DAO
@@ -199,6 +221,30 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
         // save remote workspace
         remotefileDAO.insertWorkspace(new RemoteFileModule
         (ModelComponent.Workspace, this.props.user, this.state.fileName, this.state.projectName, this.props.token));
+    }
+
+    loadLocalWorkspace() {
+        let input = (document.getElementById("loadWorkspace") as HTMLInputElement);
+        if (input) {
+            let files = input.files;
+            let fileDAO = DataAccessProvider.getInstance().getLocalFileDAO();
+            if (files) {
+                if (files[0]) {
+                    fileDAO.findWorkspace(new LocalFileModule(ModelComponent.Workspace, files[0].name, files[0]));
+                    console.log(files[0]);
+                }
+            } else {
+                console.error("error: no files found");
+            }
+        } else {
+            console.error("error: could not find loadWorkspace button");
+        }
+    }
+
+    saveLocalWorkspace() {
+        console.log("saving local workspace");
+        let fileDAO = DataAccessProvider.getInstance().getLocalFileDAO();
+        fileDAO.insertWorkspace(new LocalFileModule(ModelComponent.Workspace, "local_workspace.json", new Blob([])));
     }
 
     /**
@@ -308,9 +354,25 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
                         <Dropdown.Divider/>
                         <Dropdown.Item text='Load workspace' onClick={this.loadWorkspace}/>
                         <Dropdown.Item text='Save workspace' onClick={this.saveWorkspace}/>
+                        <Dropdown.Item text='Load local workspace' onClick={() => this.clickWorkspace('load')}/>
+                        <Dropdown.Item text='Save local workspace' onClick={this.saveLocalWorkspace}/>
 
                     </Dropdown.Menu>
                 </Dropdown>
+
+                <input
+                    onChange={this.loadLocalWorkspace}
+                    type="file"
+                    id="loadWorkspace"
+                    style={{"display": "none"}}
+                />
+
+                <input
+                    onChange={this.saveLocalWorkspace}
+                    type="file"
+                    id="saveWorkspace"
+                    style={{"display": "none"}}
+                />
 
                 {repoVisible ?
                     <RepoModal
