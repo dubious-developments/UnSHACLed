@@ -1307,59 +1307,6 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                     }
                 }
             });
-
-            let instance = this;
-
-            graph.addMouseListener(
-                {
-                    currentState: null,
-                    previousStyle: null,
-                    mouseDown: function (sender: any, me: any) {
-                        if (this.currentState != null) {
-                            this.dragLeave(me.getEvent(), this.currentState);
-                            this.currentState = null;
-                        }
-                    },
-
-                    mouseMove: function (sender: any, me: any) {
-                        if (this.currentState != null && me.getState() === this.currentState) {
-                            return;
-                        }
-
-                        let tmp = graph.view.getState(me.getCell());
-
-                        // Ignores everything but vertices
-                        if (graph.isMouseDown || (tmp != null && !graph.getModel().isVertex(tmp.cell))) {
-                            tmp = null;
-                        }
-
-                        if (tmp !== this.currentState) {
-                            if (this.currentState != null) {
-                                this.dragLeave(me.getEvent(), this.currentState);
-                            }
-
-                            this.currentState = tmp;
-
-                            if (this.currentState != null) {
-                                this.dragEnter(me.getEvent(), this.currentState);
-                            }
-                        }
-                    },
-                    mouseUp: function (sender: any, me: any) {
-                    },
-                    dragEnter: function (evt: any, state: any) {
-                        if (state != null && state.cell) {
-                            setTimeout(function () {
-                                if (!instance.grantedLockCellsDict.getValue(state.cell)) {
-                                    instance.setState({showLockModal: true});
-                                }
-                            }, 1000);
-                        }
-                    },
-                    dragLeave: function (evt: any, state: any) {
-                        return;
-                    }
-                });
         }
     }
 
