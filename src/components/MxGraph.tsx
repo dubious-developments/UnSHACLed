@@ -1527,8 +1527,9 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
             cell.children.forEach(rowCell => {
                 let found = false;
                 for (let error of errors) {
-                    if (rowCell.value.trait &&
-                        rowCell.value.trait.predicate === error.getShapeProperty()) {
+                    let triple = this.cellToTriples.getValue(rowCell);
+                    if (triple &&
+                        triple.predicate === error.getShapeProperty()) {
                         rowCell.setStyle("InvalidRow");
                         rowCell.value.error = error;
 
