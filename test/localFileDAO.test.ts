@@ -1,6 +1,6 @@
 import {Model, ModelObserver} from "../src/entities/model";
 import { ModelComponent } from "../src/entities/modelTaskMetadata";
-import { FileDAO, FileModule, IOFacilitator } from "../src/persistence/fileDAO";
+import { LocalFileDAO, LocalFileModule, IOFacilitator } from "../src/persistence/localFileDAO";
 import { GraphParser } from "../src/persistence/graphParser";
 import { Component } from "../src/persistence/component";
 import { Graph, ImmutableGraph } from "../src/persistence/graph";
@@ -20,7 +20,7 @@ describe("IOFacilitator Class", () => {
             let label = ModelComponent.DataGraph;
             let filename = "read.ttl";
             let file = new Blob([generateTurtle()]);
-            let module = new FileModule(label, filename, file);
+            let module = new LocalFileModule(label, filename, file);
 
             let io = new IOFacilitator();
             io.registerParser(ModelComponent.DataGraph, new GraphParser());
@@ -37,7 +37,7 @@ describe("IOFacilitator Class", () => {
             let label = ModelComponent.DataGraph;
             let filename = "write.ttl";
             let file = new Blob([]);
-            let module = new FileModule(label, filename, file);
+            let module = new LocalFileModule(label, filename, file);
 
             let io = new IOFacilitator();
             io.registerParser(ModelComponent.DataGraph, new GraphParser());
@@ -50,13 +50,13 @@ describe("IOFacilitator Class", () => {
     );
 });
 
-describe("FileDAO Class", () => {
+describe("LocalFileDAO Class", () => {
     it("should create a new file containing a graph.",
        (done) => {
             let label = ModelComponent.DataGraph;
             let filename = "insert.ttl";
             let file = new Blob([]); // blob is unnecessary for saving to file
-            let module = new FileModule(label, filename, file);
+            let module = new LocalFileModule(label, filename, file);
 
             let model = new Model();
             let parser = new GraphParser();
@@ -81,7 +81,7 @@ describe("FileDAO Class", () => {
 
                 // no idea how to automatically check whether the file was actually created,
                 // as this would require rummaging the user's file system
-                let dao = new FileDAO(model);
+                let dao = new LocalFileDAO(model);
                 dao.insert(module);
                 done();
             });
@@ -92,7 +92,7 @@ describe("FileDAO Class", () => {
            let label = ModelComponent.DataGraph;
            let filename = "find.ttl";
            let file = new Blob([generateTurtle()]);
-           let module = new FileModule(label, filename, file);
+           let module = new LocalFileModule(label, filename, file);
 
            let model = new Model();
            model.registerObserver(new ModelObserver((changeBuf) => {
@@ -101,7 +101,7 @@ describe("FileDAO Class", () => {
                return [];
            }));
 
-           let dao = new FileDAO(model);
+           let dao = new LocalFileDAO(model);
            dao.find(module);
        });
 
@@ -110,7 +110,7 @@ describe("FileDAO Class", () => {
             let label = ModelComponent.Workspace;
             let filename = "insert_ws.json";
             let file = new Blob([]); // blob is unnecessary for saving to file
-            let module = new FileModule(label, filename, file);
+            let module = new LocalFileModule(label, filename, file);
 
             let model = new Model();
             let parser = new GraphParser();
@@ -135,7 +135,7 @@ describe("FileDAO Class", () => {
 
                 // no idea how to automatically check whether the file was actually created,
                 // as this would require rummaging the user's file system
-                let dao = new FileDAO(model);
+                let dao = new LocalFileDAO(model);
                 dao.insertWorkspace(module);
                 done();
             });
@@ -147,7 +147,7 @@ describe("FileDAO Class", () => {
             let label = ModelComponent.Workspace;
             let filename = "find_ws.json";
             let file = new Blob([generateJSON()]);
-            let module = new FileModule(label, filename, file);
+            let module = new LocalFileModule(label, filename, file);
 
             let model = new Model();
             model.registerObserver(new ModelObserver((changeBuf) => {
@@ -158,7 +158,7 @@ describe("FileDAO Class", () => {
                 return [];
             }));
 
-            let dao = new FileDAO(model);
+            let dao = new LocalFileDAO(model);
             dao.findWorkspace(module);
         }
     );

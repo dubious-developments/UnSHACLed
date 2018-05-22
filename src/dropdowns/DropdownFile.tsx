@@ -4,6 +4,10 @@ import {DropdownFileProps} from '../components/interfaces/interfaces';
 import RepoModal from '../modals/RepoModal';
 import NewModal from '../modals/NewModal';
 import {connect} from 'react-redux';
+import {ModelComponent} from "../entities/modelTaskMetadata";
+import {DataAccessProvider} from "../persistence/dataAccessProvider";
+import {RemoteFileModule} from "../persistence/remoteFileDAO";
+import RequestModule from "../requests/RequestModule";
 
 /**
  Component used to create a dropdown component for the file toolbar option
@@ -12,6 +16,10 @@ import {connect} from 'react-redux';
  */
 class DropdownFile extends React.Component<DropdownFileProps & any, any> {
 
+    /**
+     * Constructor of component
+     * @param props
+     */
     constructor(props: any) {
         super(props);
         this.state = {
@@ -26,6 +34,10 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
         this.showRepoModal = this.showRepoModal.bind(this);
         this.showNewModal = this.showNewModal.bind(this);
         this.submitCallBack = this.submitCallBack.bind(this);
+        this.loadWorkspace = this.loadWorkspace.bind(this);
+        this.saveWorkspace = this.saveWorkspace.bind(this);
+        this.saveFileToAccount = this.saveFileToAccount.bind(this);
+        this.getRepoAndType = this.getRepoAndType.bind(this);
     }
 
     /**
@@ -71,10 +83,10 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
     getGitHubFiles() {
         console.log(this.props);
         let items: any[] = [];
-        let content = this.props.github_files.content;
+        let content = this.props.save_files.content;
 
         if (content.length === 0) {
-            items.push(<Button key="none" icon="ban" disabled={true} basic={true} content="No files opened"/>);
+            items.push(<Button key="none" icon="ban" disabled={true} basic={true} content="No locks acquired"/>);
         }
 
         for (let i = 0; i < content.length; i++) {
@@ -85,6 +97,7 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
                     icon="save"
                     basic={true}
                     content={cur.name}
+                    onClick={() => this.saveFileToAccount(cur.name)}
                 />
             );
         }
@@ -162,6 +175,96 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
         });
     }
 
+    /**
+     * Method to load a workspace. The user need to provide a valid
+     * workspace formatted file obtained by saving the workspace before hand.
+     */
+    loadWorkspace() {
+        console.log("loggin workspace");
+        // get remote file DAO
+        let remotefileDAO = DataAccessProvider.getInstance().getRemoteFileDAO();
+        // load remote workspace
+        remotefileDAO.findWorkspace(new RemoteFileModule
+        (ModelComponent.Workspace, this.props.user, this.state.fileName, this.state.projectName, this.props.token));
+    }
+
+    /**
+     * Method to save the current workspace. The workspace will be downloaded
+     * through the users browser in a valid workspace formatted file.
+     */
+    saveWorkspace() {
+        console.log("saving workspace");
+        // get remote file DAO
+        let remotefileDAO = DataAccessProvider.getInstance().getRemoteFileDAO();
+        // save remote workspace
+        remotefileDAO.insertWorkspace(new RemoteFileModule
+        (ModelComponent.Workspace, this.props.user, this.state.fileName, this.state.projectName, this.props.token));
+    }
+
+    /**
+     * Method used to search for the repository name and file type associated with a filename.
+     * The method will traverse through the list of openend files in the global state
+     * and return the associated repository and type.
+     * @param fileName: name of file for which the repository is requested.
+     * @return [repo, type ]
+     */
+    getRepoAndType(fileName: any) {
+        // get list of opened files
+        let files = this.props.files.content;
+
+        for (let file of files) {
+            if (file.name === fileName) {
+                return [file.repo, file.type];
+            }
+        }
+        return '';
+    }
+
+    /**
+     * Method that will invoke the backend to save the selected file to the remote account.
+     * @param fileName
+     */
+    saveFileToAccount(fileName: any) {
+        // get type and repo name for file
+        let o = this.getRepoAndType(fileName);
+        let repo = o[0];
+        let type = o[1];
+        // invoke backend method
+        let target;
+        // determine which type of model to target
+        if (type === 'data') {
+            target = ModelComponent.DataGraph;
+        } else if (type === 'SHACL') {
+            target = ModelComponent.SHACLShapesGraph;
+        } else {
+            console.log("invalid type");
+        }
+        // check if lock on file
+        let repoOwner = RequestModule.getRepoOwnerFromFile(fileName, this.props.files.content);
+        // release lock
+        // get remote file DAO
+        let remotefileDAO = DataAccessProvider.getInstance().getRemoteFileDAO();
+        RequestModule.hasLock(repoOwner, repo, this.props.token, fileName).then(bool => {
+            if (!bool) {
+                console.log('dont have a lock so request');
+                RequestModule.requestLock(repoOwner, repo, this.props.token, fileName).then(lock => {
+                    if (lock === true) {
+
+                        // update remote file
+                        remotefileDAO.insert(new RemoteFileModule
+                        (target, repoOwner, fileName, repo, this.props.token));
+                    }
+                });
+            } else {
+                // update remote file
+                remotefileDAO.insert(new RemoteFileModule
+                (target, repoOwner, fileName, repo, this.props.token));
+            }
+        });
+
+    }
+
+    /** Render component **/
     render() {
         let {repoVisible, newVisible, newType} = this.state;
         return (
@@ -204,9 +307,13 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
                         >
                             <Dropdown.Menu content={<this.getGitHubFiles/>}/>
                         </Dropdown>
-                        <Dropdown.Item text='Clear graph' id='tb_clear_graph'/>
+                        <Dropdown.Divider/>
+                        <Dropdown.Item text='Load workspace' onClick={this.loadWorkspace}/>
+                        <Dropdown.Item text='Save workspace' onClick={this.saveWorkspace}/>
+
                     </Dropdown.Menu>
                 </Dropdown>
+
                 {repoVisible ?
                     <RepoModal
                         visible={repoVisible}
@@ -227,13 +334,18 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
     }
 }
 /**
- * Map global store to props of this component.
+ * Map global store to props of this component. Here the locks
+ * in the global state are used. A user can only save files on which
+ * he/she acquired a lock.
  * @param state: state retrieved from the global redux store.
  * @returns {{token}}: sets props.token
  */
 const mapStateToProps = (state, props) => {
     return {
-        github_files: state.files
+        save_files: state.locks,
+        files: state.files,
+        login: state.login,
+        token: state.token
     };
 };
 

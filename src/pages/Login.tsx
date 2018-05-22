@@ -1,10 +1,13 @@
 import * as React from 'react';
 import LoginForm from '../form/LoginForm';
-import { Segment } from 'semantic-ui-react';
+import {Segment} from 'semantic-ui-react';
 import Navbar from '../components/navbarHome';
 
+/**
+ * Component containing the content of the login page.
+ */
 class Login extends React.Component<any, any> {
-
+    /** Render component **/
     render() {
         return (
             <div className="loginPage">
@@ -23,4 +26,5 @@ class Login extends React.Component<any, any> {
             ;
     }
 }
+
 export default Login;

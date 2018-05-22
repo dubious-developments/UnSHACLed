@@ -2,8 +2,12 @@ import * as React from 'react';
 import {Container, Image, Header, Grid, Button} from 'semantic-ui-react';
 import {Link} from 'react-router-dom';
 
+/**
+ * Component which contains the main content of the homepage
+ */
 class HomeContainer extends React.Component {
 
+    /** Render component **/
     render() {
         const logo = require('../img/logo.png');
         return (

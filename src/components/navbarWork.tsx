@@ -1,11 +1,10 @@
 import * as React from 'react';
 import {Menu, Icon, Popup, List, Image} from 'semantic-ui-react';
-import Auth from '../services/Auth';
 import {NavbarWorkProps} from './interfaces/interfaces';
-import {FileModule} from '../persistence/fileDAO';
+import {LocalFileModule} from '../persistence/localFileDAO';
 import {Model} from '../entities/model';
 import {DataAccessProvider} from '../persistence/dataAccessProvider';
-import {LoadFileTask, GetOpenedFilesTask, GetValidationReportNavbar} from '../services/ModelTasks';
+import {SaveLocalFileTask, GetOpenedFilesTask, GetValidationReportNavbar} from '../services/ModelTasks';
 import {ModelComponent} from '../entities/modelTaskMetadata';
 import {ValidationReport, ValidationError} from "../conformance/ValidationReport";
 import ToolbarIcon from './ToolbarIcon';
@@ -15,6 +14,9 @@ import DropdownView from '../dropdowns/DropdownView';
 import DropdownHelp from '../dropdowns/DropdownHelp';
 import DropdownUser from '../dropdowns/DropdownUser';
 
+/**
+ * Component containing the logic and content of top navigation bar in the workspace.
+ */
 export class Navbar extends React.Component<NavbarWorkProps, any> {
 
     allowedExtensions = ".n3,.ttl,.rdf";
@@ -32,6 +34,10 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
         padding: 0
     };
 
+    /**
+     * Constructor of component
+     * @param props
+     */
     constructor(props: NavbarWorkProps) {
         super(props);
 
@@ -51,6 +57,10 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
         this.getFileFromPopupCallback = this.getFileFromPopupCallback.bind(this);
     }
 
+    /**
+     * Method that will set the loaded files variable based on the opened files through the editor.
+     * @param {string[]} files
+     */
     public setLoadedFiles(files: string[]) {
         if (files.length === 0) {
             console.log("no files found");
@@ -62,16 +72,18 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
         });
     }
 
+    /**
+     * Method that will set the  report variable based on the generated conformance reports
+     * @param r: validation report
+     */
     // TODO temp method
     public setReport(r: ValidationReport) {
         this.report = r;
     }
 
-    logoutButton(event: any) {
-        Auth.logout();
-        // this.props.history.push("/login");
-    }
-
+    /**
+     * Method used to invoke the input element associated with uploading a data graph.
+     */
     uploadDataGraphButton() {
         let input = document.getElementById("importDataGraph");
         if (input) {
@@ -81,6 +93,9 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
         }
     }
 
+    /**
+     * Method used to invoke the input element associated with uploading a data graph.
+     */
     uploadSHACLGraphButton() {
         let input = document.getElementById("importSHACLGraph");
         if (input) {
@@ -90,19 +105,27 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
         }
     }
 
+    /**
+     *  Method to handle icon click to collapse the sidebar. Will invoke
+     *  the paren through a callback.
+     */
     iconClick() {
         this.props.callback(!this.props.visible);
     }
 
+    /**
+     * Method used to invoke the backend to open a local data graph file.
+     * @param e: event
+     */
     importDataGraph(e: any) {
         let input = (document.getElementById("importDataGraph") as HTMLInputElement);
 
         if (input) {
             let files = input.files;
-            let fileDAO = DataAccessProvider.getInstance().getFileDAO();
+            let fileDAO = DataAccessProvider.getInstance().getLocalFileDAO();
             if (files) {
                 if (files[0]) {
-                    fileDAO.find(new FileModule(ModelComponent.DataGraph, files[0].name, files[0]));
+                    fileDAO.find(new LocalFileModule(ModelComponent.DataGraph, files[0].name, files[0]));
                 }
             } else {
                 console.log("error: no files found");
@@ -112,15 +135,19 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
         }
     }
 
+    /**
+     * Method used to invoke the backend to open a local shacl graph file.
+     * @param e: event
+     */
     importSHACLGraph(e: any) {
         let input = (document.getElementById("importSHACLGraph") as HTMLInputElement);
 
         if (input) {
             let files = input.files;
-            let fileDAO = DataAccessProvider.getInstance().getFileDAO();
+            let fileDAO = DataAccessProvider.getInstance().getLocalFileDAO();
             if (files) {
                 if (files[0]) {
-                    fileDAO.find(new FileModule(ModelComponent.SHACLShapesGraph, files[0].name, files[0]));
+                    fileDAO.find(new LocalFileModule(ModelComponent.SHACLShapesGraph, files[0].name, files[0]));
                 }
             } else {
                 console.log("error: no files found");
@@ -130,29 +157,44 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
         }
     }
 
+    /**
+     * Method used to invoke the backend to save a local data or shacl graph.
+     * @param e: event
+     */
     saveGraph(e: any) {
         let model: Model = DataAccessProvider.getInstance().model;
         model.tasks.schedule(new GetOpenedFilesTask([ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph], this));
         model.tasks.processAllTasks();
     }
 
-    // TODO temp method
+    /**
+     * Method used to invoke the backend to produce a detailed description of the conformance errors.
+     * Invoked by a click event through the 'Conformance Errors" button.
+     * @param e: event
+     */
     getConformanceErrors(e: any) {
         let model: Model = DataAccessProvider.getInstance().model;
         model.tasks.schedule(new GetValidationReportNavbar(this));
         model.tasks.processAllTasks();
     }
 
+    /**
+     * Method used to determine which file needs to be saved. Invoked by clicking on drop down button.
+     * @param e: event
+     */
     getFileFromPopup(e: any) {
         let fileName = e;
         let model: Model = DataAccessProvider.getInstance().model;
-        model.tasks.schedule(new LoadFileTask([ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph], fileName));
+        model.tasks.schedule(
+            new SaveLocalFileTask([ModelComponent.DataGraph, ModelComponent.SHACLShapesGraph], fileName)
+        );
         model.tasks.processAllTasks();
     }
 
-    /*
-    * Used for dynamically building the list of opened files in the editor
-    */
+    /**
+     * Used for dynamically building the list of opened files in the editor
+     * @param props: props
+     */
     OpenedFiles(props: any) {
         let items: any[] = [];
 
@@ -180,10 +222,10 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
         );
     }
 
-    /*
-    * Temp method for showing conformance errors
-    * TODO later show conformance errors in mxGraph
-    */
+    /**
+     * Temp method for showing conformance errors
+     * TODO later show conformance errors in mxGraph
+     */
     ConformanceErrors(props: any) {
         if (!this.report) {
             return (
@@ -216,7 +258,9 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
         );
     }
 
-    /* Function used as a callback from the child componente for the file dropdown option */
+    /** Function used as a callback from the child componente for the file dropdown option
+     * @param childData: data received from the child.
+     * */
     fileCallback(childData: any) {
         if (childData === "shacl") {
             this.uploadSHACLGraphButton();
@@ -226,20 +270,23 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
         }
     }
 
-    /* Function used as a callback from the child component for the file dropdown option
-       will initiate a call to this.saveGraph in this component as a result from an onClick in the child component
+    /** Function used as a callback from the child component for the file dropdown option
+     will initiate a call to this.saveGraph in this component as a result from an onClick in the child component
+     @param: e : clickevent.
      */
     saveCallback(e: any) {
         this.saveGraph(e);
     }
 
-    /* Function used as a callback from the child component for saving the correct file
-        will initiate a call to this.getFileFromPopup
-    */
+    /** Function used as a callback from the child component for saving the correct file
+     will initiate a call to this.getFileFromPopup
+     @param: fileName: name of file to be saved.
+     */
     getFileFromPopupCallback(fileName: any) {
         this.getFileFromPopup(fileName);
     }
 
+    /** Render component **/
     render() {
         const logo = require('../img/logo.png');
         let {opened_files} = this.state;
@@ -317,7 +364,7 @@ export class Navbar extends React.Component<NavbarWorkProps, any> {
                             target="_blank"
                             href="https://github.com/dubious-developments/UnSHACLed/wiki/Release-notes"
                         >
-                            v0.5
+                            v1.0
                         </Menu.Item>
                     </Menu.Menu>
                 </Menu>

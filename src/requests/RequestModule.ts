@@ -18,7 +18,11 @@ class RequestModule {
      */
     static getToken() {
         return axios.post('http://193.190.127.184:8042/auth/request-token')
-            .then(res => res.data);
+            .then(res => res.data)
+            .catch(error => {
+                console.error("getToken refused: " + error.message);
+                return error.status;
+            });
     }
 
     /**
@@ -40,7 +44,11 @@ class RequestModule {
      */
     static isAuthenticated(token: any) {
         return axios.get('http://193.190.127.184:8042/auth/is-authenticated/' + token)
-            .then(res => res.data);
+            .then(res => res.data)
+            .catch(error => {
+                console.error("isAuthenticated refused: " + error.message);
+                return error.status;
+            });
     }
 
     /**
@@ -51,7 +59,11 @@ class RequestModule {
      */
     static getUserInfo(type: any, token: any) {
         return axios.get('http://193.190.127.184:8042/user/' + type + '/' + token)
-            .then(res => res.data);
+            .then(res => res.data)
+            .catch(error => {
+                console.error("getUserInfo refused: " + error.message);
+                return error.status;
+            });
     }
 
     /**
@@ -61,7 +73,11 @@ class RequestModule {
      */
     static getUserObject(login: any) {
         return axios.get('https://api.github.com/users/' + login)
-            .then(res => res.data);
+            .then(res => res.data)
+            .catch(error => {
+                console.log("getUserObject refused: " + error.message);
+                return error.status;
+            });
     }
 
     /**
@@ -71,7 +87,11 @@ class RequestModule {
      */
     static getUserRepos(token: any) {
         return axios.get('http://193.190.127.184:8042/user/repo-list/' + token)
-            .then(res => res.data);
+            .then(res => res.data)
+            .catch(error => {
+                console.log("getUserRepos refused: " + error.message);
+                return error.status;
+            });
     }
 
     /**
@@ -84,9 +104,12 @@ class RequestModule {
     static getFilesFromRepo(repoOwner: any, repoName: any, token: any) {
         const target =
             'http://193.190.127.184:8042/repo/file-names/' + repoOwner + '/' + repoName + '/' + token;
-        console.log(target);
         return axios.get(target)
-            .then(res => res.data);
+            .then(res => res.data)
+            .catch(error => {
+                console.log("getFilesFromRepo refused: " + error.message);
+                return error.status;
+            });
     }
 
     /**
@@ -101,7 +124,11 @@ class RequestModule {
         const target =
             'http://193.190.127.184:8042/repo/file/' + repoOwner + '/' + repoName + '/' + token + '/' + fileName;
         return axios.get(target)
-            .then(res => res.data);
+            .then(res => res.data)
+            .catch(error => {
+                console.log("readFile refused: " + error.message);
+                return error.status;
+            });
     }
 
     /**
@@ -116,7 +143,11 @@ class RequestModule {
         const target =
             'http://193.190.127.184:8042/repo/has-lock/' + repoOwner + '/' + repoName + '/' + token + '/' + filePath;
         return axios.get(target)
-            .then(res => res.data);
+            .then(res => res.data)
+            .catch(error => {
+                console.log("hasLock refused: " + error.message);
+                return error.status;
+            });
     }
 
     /**
@@ -131,7 +162,11 @@ class RequestModule {
         const target = 'http://193.190.127.184:8042/repo/request-lock/'
             + repoOwner + '/' + repoName + '/' + token + '/' + filePath;
         return axios.post(target)
-            .then(res => res.data);
+            .then(res => res.data)
+            .catch(error => {
+                console.log("requestLock refused: " + error.message);
+                return error.status;
+            });
     }
 
     /**
@@ -143,10 +178,15 @@ class RequestModule {
      * @returns {Promise<AxiosResponse<any>>}, return true if lock has been released, false otherwise through a Promise.
      */
     static releaseLock(repoOwner: any, repoName: any, token: any, filePath: any) {
+        console.log('Release lock on ' + filePath);
         const target = 'http://193.190.127.184:8042/repo/relinquish-lock/'
             + repoOwner + '/' + repoName + '/' + token + '/' + filePath;
         return axios.post(target)
-            .then(res => res.data);
+            .then(res => res)
+            .catch(error => {
+                console.log("releaseLock refused: " + error.message);
+                return error.status;
+            });
     }
 
     /**
@@ -162,8 +202,14 @@ class RequestModule {
             'http://193.190.127.184:8042/repo/file/' + repoOwner + '/' + repoName + '/' + token + '/' + fileName);
         const target =
             'http://193.190.127.184:8042/repo/file/' + repoOwner + '/' + repoName + '/' + token + '/' + fileName;
-        axios.post(target, {file})
-            .then(res => console.log(res));
+        return axios.put(target, file)
+            .then(res => {
+                return res;
+            })
+            .catch(error => {
+                console.error('updateFile refused: ' + error.message);
+                return error.status;
+            });
     }
 
     /**
@@ -186,7 +232,11 @@ class RequestModule {
         const target =
             'http://193.190.127.184:8042/repo/poll-file/' + repoOwner + '/' + repoName + '/' + token + '/' + filePath;
         return axios.get(target)
-            .then(res => res.data);
+            .then(res => res.data)
+            .catch(error => {
+                console.log("pollForChanges refused: " + error.message);
+                return error.status;
+            });
     }
 
     /**
@@ -199,7 +249,11 @@ class RequestModule {
         const target = 'http://193.190.127.184:8042/repo/create-repo/' + repoName + '/' + token;
         console.log(target);
         axios.post(target)
-            .then(res => res.data);
+            .then(res => res.data)
+            .catch(error => {
+                console.log("createRepo refused: " + error.message);
+                return error.status;
+            });
     }
 
     /**
@@ -208,8 +262,13 @@ class RequestModule {
      * @param content: the content of the current workspace
      */
     static setWorkspace(token: any, content: any) {
-        axios.post('http://193.190.127.184:8042/workspace/' + token, {content})
-            .then(res => res.data);
+        axios.put('http://193.190.127.184:8042/workspace/' + token, {content})
+            .then(res => res.data)
+            .catch(error => {
+                console.log("setWorkspace refused: " + error.message);
+                return error.status;
+            });
+
     }
 
     /**
@@ -219,7 +278,14 @@ class RequestModule {
      */
     static fetchWorkspace(token: any) {
         return axios.get('http://193.190.127.184:8042/workspace/' + token)
-            .then(res => res.data);
+            .then(res => {
+                console.log(res.data);
+                return res.data;
+            })
+            .catch(error => {
+                console.log("fetchWorkspace refused: " + error.message);
+                return error.status;
+            });
     }
 
     /* Non-API methods */
@@ -233,8 +299,10 @@ class RequestModule {
         for (let i in repoArray) {
             result.push(
                 {
+                    key: repoArray[i].split("/")[1],
                     text: repoArray[i].split("/")[1],
-                    value: repoArray[i].split("/")[1]
+                    value: repoArray[i].split("/")[1],
+                    owner: repoArray[i].split("/")[0],
                 }
             );
         }
@@ -252,6 +320,36 @@ class RequestModule {
             result.push({text: files[i], value: files[i]});
         }
         return result;
+    }
+
+    /**
+     * Gets the owner of a repository
+     * @param repoName: name of repository
+     * @param: repos: repository list return from processRepos !!!!!
+     * @returns {string}, Returns either the name of the repository or '' if none found.
+     */
+    static getRepoOwnerFromRepo(repoName: string, repos: any): string {
+        for (let r of repos) {
+            if (r.text === repoName) {
+                return r.owner;
+            }
+        }
+        return '';
+    }
+
+    /**
+     * Gets the repoOwner belonging to the file
+     * @param filename: string value.
+     * @param files: list of openend files from the redux store!!!!
+     * @returns {string}, Returns either the name of the repository or '' if none found.
+     */
+    static getRepoOwnerFromFile(filename: string, files: any): string {
+        for (let file of files) {
+            if (file.name === filename) {
+                return file.repoOwner;
+            }
+        }
+        return '';
     }
 }
 

@@ -4,6 +4,10 @@ import {RepoModalProps} from '../components/interfaces/interfaces';
 import RequestModule from '../requests/RequestModule';
 import {connect} from 'react-redux';
 import {appendFile} from "../redux/actions/fileActions";
+import {DataAccessProvider} from '../persistence/dataAccessProvider';
+import {RemoteFileModule} from '../persistence/remoteFileDAO';
+import {ModelComponent} from '../entities/modelTaskMetadata';
+import {appendLock} from "../redux/actions/lockActions";
 
 /**
  Component used to create a modal for opening files from projects
@@ -11,6 +15,11 @@ import {appendFile} from "../redux/actions/fileActions";
 
  */
 class RepoModal extends React.Component<RepoModalProps & any, any> {
+
+    /**
+     * Constructor of component
+     * @param props
+     */
 
     constructor(props: any) {
         super(props);
@@ -40,6 +49,7 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
      */
     componentDidMount() {
         RequestModule.getUserRepos(this.props.token).then(repoArray => {
+            console.log(repoArray);
             this.processRepos(repoArray);
         });
     }
@@ -50,6 +60,7 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
      * @param repoArray
      */
     processRepos(repoArray: any) {
+        console.log(RequestModule.processRepos(repoArray));
         /* set state */
         this.setState({
             repos: RequestModule.processRepos(repoArray)
@@ -75,7 +86,10 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
      * @return: none
      */
     setSelected(e: any, {value}: any) {
-        RequestModule.getFilesFromRepo(this.props.user, value, this.props.token).then(files => {
+        // get repoOwner based on current selection value
+        let repoOwner = RequestModule.getRepoOwnerFromRepo(value, this.state.repos);
+        // retrieve files for current selected repoOwner
+        RequestModule.getFilesFromRepo(repoOwner, value, this.props.token).then(files => {
             this.processFile(files);
         });
         this.setState({
@@ -136,8 +150,24 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
     confirmModal() {
         this.props.confirm_cb("RepoModal", this.state.type);
         // Invoke backend method
-        // TODO
-        // Log openend file into global state (redux store)
+        let target;
+        // determine which type of model to target
+        if (this.state.type === 'data') {
+            target = ModelComponent.DataGraph;
+        } else if (this.state.type === 'SHACL') {
+            target = ModelComponent.SHACLShapesGraph;
+        } else {
+            console.error("invalid type selected");
+        }
+        // get repoOwner
+        let repoOwner = RequestModule.getRepoOwnerFromRepo(this.state.projectName, this.state.repos);
+        // invoke backend to open file
+        let remotefileDAO = DataAccessProvider.getInstance().getRemoteFileDAO();
+        remotefileDAO.find(new RemoteFileModule
+        (target, repoOwner, this.state.fileName, this.state.projectName, this.props.token));
+        // start polling service for file
+        remotefileDAO.start(repoOwner, this.state.projectName, this.props.token, this.state.fileName, target);
+        // Log opened file into global state (redux store)
         this.appendFile(this.state.fileName, this.state.projectName, this.state.type);
         // set state
         this.setState({
@@ -156,10 +186,10 @@ class RepoModal extends React.Component<RepoModalProps & any, any> {
      */
     appendFile(fileName: any, repoName: any, type: any) {
         // Dispatch action to the redux store
-        this.props.appendFile(fileName, repoName, type);
-        console.log(this.props);
+        let repoOwner = RequestModule.getRepoOwnerFromRepo(repoName, this.state.repos);
+        this.props.appendFile(fileName, repoName, repoOwner, type);
     }
-
+    /** Render component **/
     render() {
         let {selected, files, repos, fileList} = this.state;
         return (
@@ -252,7 +282,8 @@ const mapStateToProps = (state, props) => {
  * dispatch call to the global store
  */
 const mapActionsToProps = {
-    appendFile: appendFile
+    appendFile: appendFile,
+    appendLock: appendLock
 
 };
 export default connect(mapStateToProps, mapActionsToProps)(RepoModal);

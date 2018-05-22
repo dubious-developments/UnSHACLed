@@ -1,14 +1,24 @@
 import * as React from 'react';
-import { Menu, Container, Image, Icon } from 'semantic-ui-react';
+import {Menu, Container, Image, Icon} from 'semantic-ui-react';
 import {Link} from 'react-router-dom';
 import {withRouter} from 'react-router-dom';
 
+/**
+ *  Component which contains the top content of the top navigation bar on the homepage.
+ */
 class Navbar extends React.Component<any, any> {
 
+    /**
+     * Method that will handle a click event, and push the path to
+     * the React Router. Here, the method will navigate to the home
+     * page when the logo is clicked
+     * @param event: clickEvent
+     */
     handleClick(event: any) {
         this.props.history.push("/");
     }
 
+    /** Render component **/
     render() {
         const logo = require('../img/logo.png');
         return (
@@ -44,7 +54,6 @@ class Navbar extends React.Component<any, any> {
                                 name="github"
                                 inverted={true}
                             />
-
                         }
                     />
                     <Menu.Item
@@ -52,11 +61,12 @@ class Navbar extends React.Component<any, any> {
                         href="https://github.com/dubious-developments/UnSHACLed/wiki/Release-notes"
                         target="_blank"
                     >
-                        v0.5
+                        v1.0
                     </Menu.Item>
                 </Container>
             </Menu>
         );
     }
 }
+
 export default withRouter(Navbar);
