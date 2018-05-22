@@ -855,7 +855,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
         if (prefixes) {
             name = this.replacePrefixes(name, prefixes);
         }
-        return name.split(' : ');
+        return name.split(' : ').map(i => i.trim());
     }
 
     /**
