@@ -46,16 +46,8 @@ export class WellDefinedSHACLValidator implements Validator {
             ModelComponent.SHACLShapesGraph,
             () => new Component<ImmutableGraph>());
 
-        if (!dataComponent.getRoot()) {
-            dataComponent = dataComponent.withRoot((new Graph()).asImmutable());
-        }
-
-        if (!shapesComponent.getRoot()) {
-            shapesComponent = shapesComponent.withRoot((new Graph()).asImmutable());
-        }
-
-        let dataRoot = dataComponent.getRoot().toMutable();
-        let shapesRoot = shapesComponent.getRoot().toMutable();
+        let dataRoot = new Graph();
+        let shapesRoot = new Graph();
 
         // perform a more intelligent merge, using change sets
         // WARNING: this approach assumes (rightly, at the moment) that no other component
@@ -63,7 +55,8 @@ export class WellDefinedSHACLValidator implements Validator {
         dataComponent.getCompositeParts().forEach(p => {
             let key = p[0];
             let graph = p[1].toMutable();
-            dataRoot.incrementalMerge(graph);
+            dataRoot.addPrefixes(graph.getPrefixes());
+            dataRoot.addTriples(graph.queryN3Store(store => store.getTriples()));
             graph.clearRecentChanges(); // crucial for this to keep working
             dataComponent = dataComponent.withPart(key, graph.asImmutable());
         });
@@ -71,7 +64,8 @@ export class WellDefinedSHACLValidator implements Validator {
         shapesComponent.getCompositeParts().forEach(p => {
             let key = p[0];
             let graph = p[1].toMutable();
-            shapesRoot.incrementalMerge(graph);
+            shapesRoot.addPrefixes(graph.getPrefixes());
+            shapesRoot.addTriples(graph.queryN3Store(store => store.getTriples()));
             graph.clearRecentChanges(); // crucial for this to keep working
             shapesComponent = shapesComponent.withPart(key, graph.asImmutable());
         });
