@@ -766,6 +766,14 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
             return;
         }
 
+        // Use default prefixes map if empty object is given
+        if (Object.keys(prefixes).length === 0 && prefixes.constructor === Object) {
+            let pref = this.fileToPrefixesDict.getValue(this.addedDataFile);
+            if (pref) {
+                prefixes = pref;
+            }
+        }
+
         let blocks = this.parseDataGraphToBlocks(persistenceGraph, file);
 
         this.clearVisualisation();
