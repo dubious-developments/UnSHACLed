@@ -203,10 +203,7 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
         let input;
         if (type === 'load') {
             input = document.getElementById("loadWorkspace");
-        } else if (type === 'save') {
-            input = document.getElementById("saveWorkspace");
         }
-
         if (input) {
             input.click();
         } else {
@@ -364,13 +361,6 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
                     onChange={this.loadLocalWorkspace}
                     type="file"
                     id="loadWorkspace"
-                    style={{"display": "none"}}
-                />
-
-                <input
-                    onChange={this.saveLocalWorkspace}
-                    type="file"
-                    id="saveWorkspace"
                     style={{"display": "none"}}
                 />
 
