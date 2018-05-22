@@ -579,6 +579,8 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                 instance.editBlock(cell, value);
             }
 
+            console.log(this.cellToTriples);
+
             if (value.name != null) {
                 return mxGraphModel.prototype.valueForCellChanged.apply(this, arguments);
             } else {
@@ -1389,7 +1391,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
         let subject: string = value; // This value should get replaced with the full version in the next if block
 
         let storedBlock = this.subjectToBlockDict.getValue(oldSubject);
-        if (storedBlock) {
+        if (storedBlock && storedBlock.traits.length > 0) {
             let filename = storedBlock.traits[0].file;
             let prefixMap = this.fileToPrefixesDict.getValue(filename);
             if (prefixMap) {
@@ -1460,6 +1462,8 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                 graph.refresh();
             }
         }
+
+        console.log(this.cellToTriples);
 
         // Add all cells that have a triple with same predicate as subject
         let edgeCells: any[] = [];
