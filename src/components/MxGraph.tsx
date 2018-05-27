@@ -579,6 +579,8 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                 instance.editBlock(cell, value);
             }
 
+            console.log(this.cellToTriples);
+
             if (value.name != null) {
                 return mxGraphModel.prototype.valueForCellChanged.apply(this, arguments);
             } else {
@@ -764,6 +766,14 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
             return;
         }
 
+        // Use default prefixes map if empty object is given
+        if (Object.keys(prefixes).length === 0 && prefixes.constructor === Object) {
+            let pref = this.fileToPrefixesDict.getValue(this.addedDataFile);
+            if (pref) {
+                prefixes = pref;
+            }
+        }
+
         let blocks = this.parseDataGraphToBlocks(persistenceGraph, file);
 
         this.clearVisualisation();
@@ -855,7 +865,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
         if (prefixes) {
             name = this.replacePrefixes(name, prefixes);
         }
-        return name.split(' : ');
+        return name.split(' : ').map(i => i.trim());
     }
 
     /**
@@ -1307,59 +1317,6 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
                     }
                 }
             });
-
-            let instance = this;
-
-            graph.addMouseListener(
-                {
-                    currentState: null,
-                    previousStyle: null,
-                    mouseDown: function (sender: any, me: any) {
-                        if (this.currentState != null) {
-                            this.dragLeave(me.getEvent(), this.currentState);
-                            this.currentState = null;
-                        }
-                    },
-
-                    mouseMove: function (sender: any, me: any) {
-                        if (this.currentState != null && me.getState() === this.currentState) {
-                            return;
-                        }
-
-                        let tmp = graph.view.getState(me.getCell());
-
-                        // Ignores everything but vertices
-                        if (graph.isMouseDown || (tmp != null && !graph.getModel().isVertex(tmp.cell))) {
-                            tmp = null;
-                        }
-
-                        if (tmp !== this.currentState) {
-                            if (this.currentState != null) {
-                                this.dragLeave(me.getEvent(), this.currentState);
-                            }
-
-                            this.currentState = tmp;
-
-                            if (this.currentState != null) {
-                                this.dragEnter(me.getEvent(), this.currentState);
-                            }
-                        }
-                    },
-                    mouseUp: function (sender: any, me: any) {
-                    },
-                    dragEnter: function (evt: any, state: any) {
-                        if (state != null && state.cell) {
-                            setTimeout(function () {
-                                if (!instance.grantedLockCellsDict.getValue(state.cell)) {
-                                    instance.setState({showLockModal: true});
-                                }
-                            }, 1000);
-                        }
-                    },
-                    dragLeave: function (evt: any, state: any) {
-                        return;
-                    }
-                });
         }
     }
 
@@ -1442,7 +1399,7 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
         let subject: string = value; // This value should get replaced with the full version in the next if block
 
         let storedBlock = this.subjectToBlockDict.getValue(oldSubject);
-        if (storedBlock) {
+        if (storedBlock && storedBlock.traits.length > 0) {
             let filename = storedBlock.traits[0].file;
             let prefixMap = this.fileToPrefixesDict.getValue(filename);
             if (prefixMap) {
@@ -1514,6 +1471,8 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
             }
         }
 
+        console.log(this.cellToTriples);
+
         // Add all cells that have a triple with same predicate as subject
         let edgeCells: any[] = [];
         this.cellToTriples.forEach((c, trip) => {
@@ -1536,9 +1495,9 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
     }
 
     public handleConformance(report: ValidationReport) {
-        let invalidCellsToErrorDict = new Collections.DefaultDictionary<any, any>(() => []);
+        let invalidCellsToErrorDict = new Collections.DefaultDictionary<any, any>(() => [], cell => cell.id);
         // The keys function of a dictionary returns an array instead of a set, so keep an extra set aswell
-        let incInvalidCells = new Collections.Set<any>();
+        let incInvalidCells = new Collections.Set<any>(cell => cell.id);
         if (!report.isConforming()) {
             for (let error of report.getValidationErrors()) {
                 let block = this.subjectToBlockDict.getValue(error.getDataElement());
@@ -1576,8 +1535,9 @@ class MxGraph extends React.Component<MxGraphProps & any, any> {
             cell.children.forEach(rowCell => {
                 let found = false;
                 for (let error of errors) {
-                    if (rowCell.value.trait &&
-                        rowCell.value.trait.predicate === error.getShapeProperty()) {
+                    let triple = this.cellToTriples.getValue(rowCell);
+                    if (triple &&
+                        triple.predicate === error.getShapeProperty()) {
                         rowCell.setStyle("InvalidRow");
                         rowCell.value.error = error;
 
