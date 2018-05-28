@@ -4,7 +4,7 @@ Hi there! UnSHACLed is a visual editor for SHACL, still in its early stages.
 
 ## Trying UnSHACLed live
 
-You can try out UnSHACLed's [latest release](http://193.190.127.184) or its [latest nightly release](http://193.190.127.184:8800) from the comfort of your favorite browser.
+You can try out UnSHACLed's [latest release](http://193.190.127.184:8800) from the comfort of your favorite browser. If you do not have any SHACL or data files yet, you can use these to get started with: [example files](https://github.com/dubious-developments/documents/blob/master/demo_files.zip). 
 
 ## CI
 
