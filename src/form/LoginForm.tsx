@@ -172,6 +172,7 @@ class LoginForm extends React.Component<any, any> {
                         <Segment inverted={true}>
                             <Button.Group size='huge' fluid={true}>
                                 <Button
+                                    id="formLoginButton"
                                     color="teal"
                                     inverted={true}
                                     size="huge"
@@ -194,6 +195,7 @@ class LoginForm extends React.Component<any, any> {
                             </Divider>
 
                             <Button
+                                id="startEditingButton"
                                 fluid={true}
                                 inverted={true}
                                 size="huge"

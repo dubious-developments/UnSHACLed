@@ -29,14 +29,27 @@ namespace SeleniumTests.Tests
                     Assert.IsTrue(driver.Url.EndsWith("#/about"));
                 });
 
+        public static readonly TestCase LoginWorks =
+            new TestCase(
+                "Login page can be accessed",
+                (driver, log) =>
+                {
+                    //Log in
+                    driver.Login();
+                    // Check that we're at '#/user' after logging in.
+                    Assert.IsTrue(driver.Url.EndsWith("#/user"));
+
+                });
+
         /// <summary>
         /// A list of all sanity check tests.
         /// </summary>
-        public static readonly IEnumerable<TestCase> All =
+        public static readonly ICollection<TestCase> All =
             new[]
         {
             CheckTitle,
-            AboutWorks
+            AboutWorks,
+            LoginWorks
         };
     }
 }

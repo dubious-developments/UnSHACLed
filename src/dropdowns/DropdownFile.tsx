@@ -312,19 +312,21 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
         let {repoVisible, newVisible, newType} = this.state;
         return (
             <div>
-                <Dropdown text='File' pointing="top left">
+                <Dropdown id='openFileMenu' text='File' pointing="top left">
                     <Dropdown.Menu>
                         <Dropdown.Item text='New Project' onClick={() => this.showNewModal('project')}/>
                         <Dropdown.Item text='New File' onClick={() => this.showNewModal('file')}/>
                         <Dropdown
+                            id='openLocalGraphButton'
                             text='Open local graph'
                             pointing='left'
                             className='link item'
                         >
                             <Dropdown.Menu>
-                                <Dropdown.Item onClick={() => this.props.import_cb("shacl")}> SHACL
-                                    Graph </Dropdown.Item>
-                                <Dropdown.Item onClick={() => this.props.import_cb("data")}> Data Graph</Dropdown.Item>
+                                <Dropdown.Item id='SHACLGraphButton' onClick={() => this.props.import_cb("shacl")}>
+                                    SHACL Graph </Dropdown.Item>
+                                <Dropdown.Item id='DataGraphButton' onClick={() => this.props.import_cb("data")}> 
+                                    Data Graph</Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown>
 
@@ -383,7 +385,6 @@ class DropdownFile extends React.Component<DropdownFileProps & any, any> {
         );
     }
 }
-
 /**
  * Map global store to props of this component. Here the locks
  * in the global state are used. A user can only save files on which

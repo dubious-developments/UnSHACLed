@@ -55,6 +55,7 @@ class HomeContainer extends React.Component {
                             style={{color: 'white'}}
                         >
                             <Button
+                                id="homeLoginButton"
                                 inverted={true}
                                 color="teal"
                                 size="huge"
@@ -69,6 +70,7 @@ class HomeContainer extends React.Component {
                             style={{color: 'white'}}
                         >
                             <Button
+                                id="homeSignUpButton"
                                 animated="fade"
                                 inverted={true}
                                 size="huge"
