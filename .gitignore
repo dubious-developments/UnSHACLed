@@ -87,7 +87,7 @@ src/**/*.js
 .idea/*
 
 # npm package lock
-package-lock.json
+# package-lock.json
 
 # Python bytecode cache
 __pycache__/
